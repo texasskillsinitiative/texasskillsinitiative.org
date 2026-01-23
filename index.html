@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<!--replace above <html lang="en" data-show-theme-toggle="false"> -->
+<!--replace above to hide toggle <html lang="en" data-show-theme-toggle="false"> -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -48,6 +48,11 @@
   --link:#0f766e;
   --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
 }
+/* define dark mode logo */
+@media (prefers-color-scheme: dark){
+  .logo img { content: url("assets/logo_dark.png"); }
+}
+
 :root[data-theme="dark"]{
   --bg:#0b1220;
   --text:#e5e7eb;
@@ -58,6 +63,10 @@
   --link:#5eead4;
   --shadow:none;
 }
+
+:root[data-theme="dark"] .logo img { content: url("assets/logo_dark.png"); }
+:root[data-theme="light"] .logo img { content: url("assets/logo_light.png"); }
+
 
     *{box-sizing:border-box}
     body{
@@ -70,28 +79,24 @@
     a{color:var(--link); text-decoration:none}
     a:hover{text-decoration:underline}
     .wrap{max-width: 980px; margin: 0 auto; padding: 28px 18px 54px;}
-    header{
-      display:flex; gap:18px; align-items:center;
-      padding: 18px 0 20px;
-      border-bottom:1px solid var(--border);
-    }
+    
     .logo {
-  height: 48px;
+  height: 64px;
   display: flex;
   align-items: center;
 }
 
-.logo img {
+.logo img{
   height: 100%;
   width: auto;
+  max-width: 420px;
   display: block;
 }
 
-    .title p{
-      margin:6px 0 0;
-      color:var(--muted);
-      max-width: 62ch;
-    }
+.site-header{
+  padding: 22px 0 26px;
+  border-bottom: 1px solid var(--border);
+}
 
     main{padding-top: 22px;}
     .grid{
@@ -102,6 +107,9 @@
     }
     @media (max-width: 860px){
       .grid{grid-template-columns: 1fr}
+    }
+    @media (max-width: 640px){
+  .logo{ height: 52px; }
     }
     .card{
       background:var(--card);
@@ -187,21 +195,25 @@
 }
 .toggle-btn:hover{filter:brightness(1.05)}
 
+.tagline{
+  margin: 10px 0 0;
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 14.5px;
+}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="logo">
-  <img src="assets/logo.png" alt="Texas Skills Initiative">
-</div>
+    <header class="site-header">
+  <div class="logo">
+    <img id="siteLogo" src="assets/logo_light.png" alt="Texas Skills Initiative">
+  </div>
+  <p class="tagline">
+    Identifying and advancing practical skill pathways aligned with real labor demand.
+  </p>
+</header>
 
-
-      <div class="title">
-        <h1>Texas Skills Initiative</h1>
-        <p><span class="muted">Purpose:</span> Identifying and advancing practical skill pathways aligned with real labor demand.</p>
-      </div>
-    </header>
 
     <main>
       <div class="card">
