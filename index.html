@@ -1,26 +1,64 @@
 <!doctype html>
 <html lang="en">
+<!--replace above <html lang="en" data-show-theme-toggle="false"> -->
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Texas Skills Initiative</title>
   <meta name="description" content="Texas Skills Initiative is an exploratory initiative focused on workforce skills alignment through employer-informed analysis, pilot design, and cross-border collaboration." />
-
+  <meta name="color-scheme" content="light dark">
   <meta property="og:title" content="Texas Skills Initiative" />
   <meta property="og:description" content="Workforce skills alignment through employer-informed analysis, pilot design, and cross-border collaboration." />
   <meta property="og:type" content="website" />
 
   <style>
     :root{
-      --bg:#ffffff;
-      --text:#111827;
-      --muted:#4b5563;
-      --border:#e5e7eb;
-      --card:#ffffff;
-      --accent:#0f766e;
-      --link:#0f766e;
-      --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
-    }
+  --bg:#ffffff;
+  --text:#111827;
+  --muted:#4b5563;
+  --border:#e5e7eb;
+  --card:#ffffff;
+  --accent:#0f766e;
+  --link:#0f766e;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+}
+
+/* Auto dark mode (system preference) */
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1220;
+    --text:#e5e7eb;
+    --muted:#9ca3af;
+    --border:rgba(255,255,255,.12);
+    --card:#0f172a;
+    --accent:#2dd4bf;
+    --link:#5eead4;
+    --shadow:none;
+  }
+}
+
+/* Manual override via toggle */
+:root[data-theme="light"]{
+  --bg:#ffffff;
+  --text:#111827;
+  --muted:#4b5563;
+  --border:#e5e7eb;
+  --card:#ffffff;
+  --accent:#0f766e;
+  --link:#0f766e;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+}
+:root[data-theme="dark"]{
+  --bg:#0b1220;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --border:rgba(255,255,255,.12);
+  --card:#0f172a;
+  --accent:#2dd4bf;
+  --link:#5eead4;
+  --shadow:none;
+}
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -128,6 +166,27 @@
       font-size: 13px;
     }
     .fine{font-size: 13px; color: var(--muted)}
+
+    .theme-toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  color:var(--muted);
+}
+.theme-toggle[hidden]{display:none !important}
+.toggle-btn{
+  appearance:none;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor:pointer;
+  line-height:1;
+}
+.toggle-btn:hover{filter:brightness(1.05)}
+
   </style>
 </head>
 <body>
@@ -244,12 +303,69 @@
         <div>© <span id="year"></span> Texas Skills Initiative</div>
         <div>texasskillsinitiative.org</div>
         <div>Last updated: January 2026</div>
+        <div class="theme-toggle" id="themeToggle" aria-label="Theme">
+  <span>Theme</span>
+  <button class="toggle-btn" id="themeBtn" type="button">Auto</button>
+</div>
+
       </footer>
     </main>
   </div>
 
-  <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
-  </script>
+<script>
+  // Keep the copyright year current.
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Theme toggle (Auto / Light / Dark) with optional hiding.
+  // To hide later: set data-show-theme-toggle="false" on <html>.
+  (function () {
+    const root = document.documentElement;
+    const toggleWrap = document.getElementById("themeToggle");
+    const btn = document.getElementById("themeBtn");
+
+    // Hide toggle if desired
+    const show = root.getAttribute("data-show-theme-toggle");
+    if (show === "false" && toggleWrap) {
+      toggleWrap.hidden = true;
+      return;
+    }
+
+    const key = "tsi_theme_pref"; // "auto" | "light" | "dark"
+    const order = ["auto", "light", "dark"];
+
+    function apply(mode) {
+      // auto = no override; respect prefers-color-scheme
+      if (mode === "auto") {
+        root.removeAttribute("data-theme");
+      } else {
+        root.setAttribute("data-theme", mode);
+      }
+      if (btn) btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+    }
+
+    function getSaved() {
+      return localStorage.getItem(key) || "auto";
+    }
+
+    function save(mode) {
+      localStorage.setItem(key, mode);
+    }
+
+    // init
+    const current = getSaved();
+    apply(current);
+
+    // cycle on click: Auto -> Light -> Dark -> Auto
+    if (btn) {
+      btn.addEventListener("click", function () {
+        const now = getSaved();
+        const next = order[(order.indexOf(now) + 1) % order.length];
+        save(next);
+        apply(next);
+      });
+    }
+  })();
+</script>
+
 </body>
 </html>
