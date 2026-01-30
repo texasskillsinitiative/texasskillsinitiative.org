@@ -120,6 +120,19 @@
         .slider { background-color: var(--frame-border); cursor: pointer; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transition: .4s; border-radius: 20px; }
         .slider:before { background-color: white; content: ""; height: 14px; width: 14px; left: 4px; bottom: 3px; position: absolute; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--accent); }
+
+        /* --- ACCESS MODAL FORM --- */
+        #accessModal .form-intro { font-size: 0.9rem; line-height: 1.5; color: var(--page-text-dim); margin: 0 0 20px 0; text-align: left; }
+        #accessModal .stakeholder-form { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; text-align: left; }
+        #accessModal .form-field { display: flex; flex-direction: column; gap: 4px; }
+        #accessModal .form-field label { font-size: 0.8rem; font-weight: 700; color: var(--page-text-main); }
+        #accessModal .form-field .form-helper { font-size: 0.75rem; color: var(--page-text-dim); }
+        #accessModal .form-field input, #accessModal .form-field textarea { background: var(--page-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 10px 12px; font-size: 0.9rem; font-family: inherit; }
+        #accessModal .form-field input:focus, #accessModal .form-field textarea:focus { outline: none; border-color: var(--accent); }
+        #accessModal .form-field textarea { min-height: 80px; resize: vertical; }
+        #accessModal .form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; margin-top: 8px; align-self: flex-start; }
+        [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
     </style>
 </head>
 <body>
@@ -161,11 +174,36 @@
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
         <span class="close-modal" onclick="toggleModal('accessModal', false)">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
-        <div class="option-grid">
-            <a href="mailto:provincial@texasskillsinitiative.org" class="option-btn">PROVINCIAL AUTHORITY <span class="nav-num">01-A</span></a>
-            <a href="mailto:fdi@texasskillsinitiative.org" class="option-btn">FDI STRATEGY PARTNER <span class="nav-num">02-B</span></a>
-            <a href="mailto:industrial@texasskillsinitiative.org" class="option-btn">INDUSTRIAL DEVELOPER <span class="nav-num">03-C</span></a>
-        </div>
+        <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
+        <form id="stakeholderForm" class="stakeholder-form" action="#">
+            <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+            <div class="form-field">
+                <label for="name">Name</label>
+                <span class="form-helper">How you'd like us to address you</span>
+                <input type="text" id="name" name="name">
+            </div>
+            <div class="form-field">
+                <label for="email">Email</label>
+                <span class="form-helper">We'll only use this to respond if appropriate</span>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-field">
+                <label for="org">Organization or affiliation</label>
+                <span class="form-helper">Optional</span>
+                <input type="text" id="org" name="org">
+            </div>
+            <div class="form-field">
+                <label for="location">Location</label>
+                <span class="form-helper">City and country (if relevant)</span>
+                <input type="text" id="location" name="location">
+            </div>
+            <div class="form-field">
+                <label for="message">Anything you'd like to share?</label>
+                <span class="form-helper">Optional. Share any context you think may be helpful.</span>
+                <textarea id="message" name="message"></textarea>
+            </div>
+            <button type="submit" class="form-submit">Submit</button>
+        </form>
     </div>
 </div>
 
