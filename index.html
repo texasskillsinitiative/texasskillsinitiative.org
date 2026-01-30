@@ -1,365 +1,350 @@
-<!doctype html>
-<html lang="en">
-<!--replace above to hide toggle <html lang="en" data-show-theme-toggle="false"> -->
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Texas Skills Initiative</title>
-  <meta name="description" content="Texas Skills Initiative is an exploratory initiative focused on workforce skills alignment through employer-informed analysis, pilot design, and cross-border collaboration." />
-  <meta name="color-scheme" content="light dark">
-  <meta property="og:title" content="Texas Skills Initiative" />
-  <meta property="og:description" content="Workforce skills alignment through employer-informed analysis, pilot design, and cross-border collaboration." />
-  <meta property="og:type" content="website" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texas Skills Initiative | Global Hub Strategy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <style>
+        html { scroll-behavior: smooth; }
+        :root {
+            --bg-dark: #0b1220;
+            --bg-light: #f1f5f9;
+            --logo-size: 65px;
+            --frame-bg: var(--bg-dark); 
+            --frame-border: #1d2a3a;
+            --page-bg: var(--bg-dark); 
+            --page-text-main: #e6f1ff;
+            --page-text-dim: #8892b0;
+            --card-bg: #111b2d;
+            --accent: #c5a059;
+            --accent-soft: rgba(197, 160, 89, 0.1);
+            --img-placeholder: #161f30;
+            --status-green: #10b981;
+        }
 
-  <style>
-    :root{
-  --bg:#ffffff;
-  --text:#111827;
-  --muted:#4b5563;
-  --border:#e5e7eb;
-  --card:#ffffff;
-  --accent:#0f766e;
-  --link:#0f766e;
-  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
-}
+        [data-theme="light"] {
+            --frame-bg: #ffffff; 
+            --frame-border: #e2e8f0;
+            --page-bg: var(--bg-light);
+            --page-text-main: #0f172a;
+            --page-text-dim: #334155;
+            --card-bg: #ffffff;
+            --accent: #8b6b23;
+            --accent-soft: rgba(139, 107, 35, 0.1);
+            --img-placeholder: #e2e8f0;
+        }
 
-/* Auto dark mode (system preference) */
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0b1220;
-    --text:#e5e7eb;
-    --muted:#9ca3af;
-    --border:rgba(255,255,255,.12);
-    --card:#0f172a;
-    --accent:#2dd4bf;
-    --link:#5eead4;
-    --shadow:none;
-  }
-}
+        body { background-color: var(--page-bg); color: var(--page-text-dim); font-family: 'Inter', sans-serif; margin: 0; transition: background 0.4s ease; }
 
-/* Manual override via toggle */
-:root[data-theme="light"]{
-  --bg:#ffffff;
-  --text:#111827;
-  --muted:#4b5563;
-  --border:#e5e7eb;
-  --card:#ffffff;
-  --accent:#0f766e;
-  --link:#0f766e;
-  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
-}
-/* define dark mode logo */
-@media (prefers-color-scheme: dark){
-  .logo img { content: url("assets/logo_dark.png"); }
-}
+        /* --- ANIMATIONS --- */
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        @keyframes nodePulse {
+            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.7); }
+            70% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
+            100% { transform: scale(1); opacity: 0; box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
+        }
 
-:root[data-theme="dark"]{
-  --bg:#0b1220;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --border:rgba(255,255,255,.12);
-  --card:#0f172a;
-  --accent:#2dd4bf;
-  --link:#5eead4;
-  --shadow:none;
-}
+        .reveal-text { opacity: 0; }
+        .reveal-active { animation: fadeInUp 1s ease forwards; }
+        .reveal-delay-1 { animation-delay: 0.3s; }
+        .reveal-delay-2 { animation-delay: 0.6s; }
+        
+        /* --- NAVIGATION --- */
+        nav { background-color: var(--frame-bg); border-bottom: 1px solid var(--frame-border); padding: 10px 50px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; height: 95px; }
+        .logo-container { flex: 1; display: flex; align-items: center; }
+        .logo { height: var(--logo-size); width: auto; display: none; }
+        [data-theme="dark"] .logo-dark { display: block; }
+        [data-theme="light"] .logo-light { display: block; }
 
-:root[data-theme="dark"] .logo img { content: url("assets/logo_dark.png"); }
-:root[data-theme="light"] .logo img { content: url("assets/logo_light.png"); }
+        .header-index { display: flex; gap: 30px; justify-content: center; flex: 2; }
+        .header-index a { text-decoration: none; display: flex; align-items: center; gap: 8px; opacity: 0.6; transition: 0.3s; }
+        .header-index a:hover { opacity: 1; }
+        .nav-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; font-weight: 700; }
+        .nav-label { color: var(--page-text-main); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
 
+        .header-actions { flex: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+        .btn-portal { font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 1px; border: 1px solid var(--accent); padding: 6px 12px; cursor: pointer; background: transparent; transition: 0.3s; width: 140px; text-align: center; }
+        .btn-portal:hover { background: var(--accent); color: var(--frame-bg); }
+        .btn-external { border-color: var(--page-text-dim); color: var(--page-text-dim); }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-      color:var(--text);
-      background:var(--bg);
-      line-height:1.5;
-    }
-    a{color:var(--link); text-decoration:none}
-    a:hover{text-decoration:underline}
-    .wrap{max-width: 980px; margin: 0 auto; padding: 28px 18px 54px;}
-    
-    .logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-}
+        /* --- MODALS --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 18, 32, 0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--frame-border); width: 100%; max-width: 450px; padding: 40px; position: relative; text-align: center; }
+        .modal-logo { height: 50px; width: auto; margin: 0 auto 20px auto; }
+        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem; color: var(--page-text-dim); }
+        .option-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
+        .option-btn { background: var(--page-bg); border: 1px solid var(--frame-border); padding: 18px; color: var(--page-text-main); text-align: left; cursor: pointer; transition: 0.3s; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
+        .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }
 
-.logo img{
-  height: 100%;
-  width: auto;
-  max-width: 420px;
-  display: block;
-}
+        /* --- SECTIONS --- */
+        .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }
+        .header-group { display: flex; align-items: baseline; gap: 15px; margin-bottom: 40px; }
+        .section-id { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 1.25rem; font-weight: 700; }
+        .section-title { color: var(--page-text-main); font-size: 3.5rem; font-weight: 300; text-transform: uppercase; letter-spacing: -1px; margin: 0; }
+        .instruction-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 30px; margin-bottom: 40px; text-align: left; }
+        
+        /* --- PIPELINE --- */
+        .pipeline-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        .pipeline-table td { padding: 20px; color: var(--page-text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; background: var(--card-bg); border-top: 1px solid var(--frame-border); border-bottom: 1px solid var(--frame-border); }
+        .sync-track { width: 100%; height: 4px; background: var(--frame-border); border-radius: 2px; margin-top: 10px; position: relative; }
+        .sync-progress { height: 100%; background: var(--accent); border-radius: 2px; position: relative; width: 0%; transition-property: width; transition-timing-function: linear; }
+        .activity-node { position: absolute; right: -4px; top: -3px; height: 10px; width: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: nodePulse 1.5s infinite; }
+        .phase-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; margin-bottom: 4px; }
 
-.site-header{
-  padding: 22px 0 26px;
-  border-bottom: 1px solid var(--border);
-}
+        /* --- RUBRIC & GRID --- */
+        .rubric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-top: 40px; }
+        .rubric-item { border: 1px solid var(--frame-border); background: var(--card-bg); padding: 20px; }
+        .workflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
+        .workflow-step { background: var(--card-bg); padding: 30px; border: 1px solid var(--frame-border); text-align: left; }
+        .step-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 10px; }
 
-    main{padding-top: 22px;}
-    .grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 18px;
-      margin-top: 18px;
-    }
-    @media (max-width: 860px){
-      .grid{grid-template-columns: 1fr}
-    }
-    @media (max-width: 640px){
-  .logo{ height: 52px; }
-    }
-    .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-    h2{
-      margin:0 0 10px;
-      font-size: 15px;
-      letter-spacing:.3px;
-      text-transform: uppercase;
-      color:#111827;
-    }
-    .lead{
-      font-size: 15.5px;
-      color: var(--text);
-      margin: 0;
-    }
-    .muted{color:var(--muted)}
-    .pillars{
-      margin: 10px 0 0;
-      padding:0;
-      list-style:none;
-    }
-    .pillars li{
-      padding: 10px 0;
-      border-top: 1px solid var(--border);
-    }
-    .pillars li:first-child{border-top:none}
-    .pillars b{display:block; margin-bottom: 3px}
-    ul.clean{
-      margin: 10px 0 0;
-      padding-left: 18px;
-      color: var(--text);
-    }
-    .callout{
-      border-left: 3px solid rgba(15,118,110,.55);
-      padding-left: 12px;
-      margin-top: 12px;
-      color: var(--muted);
-    }
-    .contact a{font-weight:600}
-    .kvs{
-      display:grid;
-      grid-template-columns: 140px 1fr;
-      gap: 8px 12px;
-      margin-top: 10px;
-    }
-    .kvs div{padding: 6px 0; border-top:1px solid var(--border)}
-    .kvs div:nth-child(-n+2){border-top:none}
-    footer{
-      margin-top: 22px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-      color: var(--muted);
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px 16px;
-      justify-content: space-between;
-      font-size: 13px;
-    }
-    .fine{font-size: 13px; color: var(--muted)}
+        .asset-image { overflow: hidden; border: 1px solid var(--frame-border); }
+        .asset-image img { width: 100%; height: auto; display: block; opacity: 0; transition: 1.2s; }
+        .asset-image.revealed img { opacity: 1; }
 
-    .theme-toggle{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-size:13px;
-  color:var(--muted);
-}
-.theme-toggle[hidden]{display:none !important}
-.toggle-btn{
-  appearance:none;
-  border:1px solid var(--border);
-  background:transparent;
-  color:var(--text);
-  border-radius: 999px;
-  padding: 6px 10px;
-  cursor:pointer;
-  line-height:1;
-}
-.toggle-btn:hover{filter:brightness(1.05)}
+        .btn-cta { background: var(--accent); color: var(--bg-dark); padding: 18px 40px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; transition: 0.3s; }
+        [data-theme="light"] .btn-cta { color: #ffffff; }
 
-.tagline{
-  margin: 10px 0 0;
-  max-width: 72ch;
-  color: var(--muted);
-  font-size: 14.5px;
-}
-  </style>
+        footer { background-color: var(--frame-bg); border-top: 1px solid var(--frame-border); padding: 40px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
+        .status-pill { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; color: var(--page-text-dim); }
+        .status-dot { height: 6px; width: 6px; background-color: var(--status-green); border-radius: 50%; animation: pulse 2s infinite; }
+
+        .theme-switch { display: inline-block; height: 20px; width: 40px; position: relative; }
+        .theme-switch input { display:none; }
+        .slider { background-color: var(--frame-border); cursor: pointer; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transition: .4s; border-radius: 20px; }
+        .slider:before { background-color: white; content: ""; height: 14px; width: 14px; left: 4px; bottom: 3px; position: absolute; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="site-header">
-  <div class="logo">
-    <img id="siteLogo" src="assets/logo_light.png" alt="Texas Skills Initiative">
-  </div>
-  <p class="tagline">
-    Identifying and advancing practical skill pathways aligned with real labor demand.
-  </p>
-</header>
 
+<nav>
+    <div class="logo-container">
+        <img src="assets/logo/logo_tdark.png" class="logo logo-dark" alt="TSI">
+        <img src="assets/logo/logo_tlight.png" class="logo logo-light" alt="TSI">
+    </div>
+    <div class="header-index">
+        <a href="#overview"><span class="nav-num">00</span><span class="nav-label">Overview</span></a>
+        <a href="#mandate"><span class="nav-num">01</span><span class="nav-label">Mandate</span></a>
+        <a href="#pipeline"><span class="nav-num">02</span><span class="nav-label">Pipeline</span></a>
+        <a href="#rubric"><span class="nav-num">03</span><span class="nav-label">Rubric</span></a>
+        <a href="#engagement"><span class="nav-num">04</span><span class="nav-label">Engagement</span></a>
+    </div>
+    <div class="header-actions">
+        <button class="btn-portal" onclick="toggleModal('portalModal', true)">TSI INTERNAL</button>
+        <button class="btn-portal btn-external" onclick="toggleModal('accessModal', true)">PARTNER INQUIRY</button>
+    </div>
+</nav>
 
-    <main>
-      <div class="card">
-        <h2>Overview</h2>
-        <p class="lead">
-          Texas Skills Initiative is an exploratory initiative focused on workforce skills alignment—linking employer demand to practical training pathways.
-          We support collaboration among employers, training providers, and public stakeholders through applied analysis and pilot design.
-        </p>
-        <p class="callout">
-          Interest includes cross-border collaboration, with particular focus on Southeast Asia, where locally-adaptable skill pathways and credential portability
-          can support employers and communities.
-        </p>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <h2>What We Do</h2>
-          <ul class="pillars">
-            <li>
-              <b>Skills Gap Identification</b>
-              <span class="muted">Labor-market grounded analysis of priority roles, competencies, and training needs.</span>
-            </li>
-            <li>
-              <b>Pilot Design &amp; Validation</b>
-              <span class="muted">Small, testable workforce pilots designed to validate models before scale.</span>
-            </li>
-            <li>
-              <b>Partnership Development</b>
-              <span class="muted">Structured collaboration across employers, institutions, and public stakeholders.</span>
-            </li>
-          </ul>
-        </section>
-
-        <aside class="card">
-          <h2>Where We Can Add Value</h2>
-          <ul class="clean">
-            <li>Translate employer needs into competency-based skill maps</li>
-            <li>Structure pilot briefs that can be launched quickly and evaluated clearly</li>
-            <li>Support train-the-trainer and curriculum alignment approaches</li>
-            <li>Compare options for credential recognition and portability</li>
-            <li>Facilitate employer–institution collaboration with defined outputs</li>
-          </ul>
-        </aside>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <h2>Operating Principles</h2>
-          <ul class="clean">
-            <li>Employer-informed demand signals</li>
-            <li>Competency-based approaches</li>
-            <li>Pilot-first validation before scale</li>
-            <li>Locally adaptable implementation</li>
-            <li>Evidence and outcomes orientation</li>
-          </ul>
-        </section>
-
-        <aside class="card">
-          <h2>Focus Areas</h2>
-          <ul class="clean">
-            <li>Skilled trades and technical pathways</li>
-            <li>Manufacturing, logistics, and industrial roles</li>
-            <li>Energy and infrastructure-related skills</li>
-            <li>Employer-aligned English-for-workforce models</li>
-            <li>Competency frameworks and skills mapping</li>
-            <li>Credential recognition and portability</li>
-          </ul>
-        </aside>
-      </div>
-
-      <div class="grid">
-        <section class="card">
-          <h2>What We Are / What We Are Not</h2>
-          <p class="fine">
-            Texas Skills Initiative is an exploratory initiative. We are not a government agency and not an accredited educational institution.
-            We do not provide job placement services, visa services, or employment sponsorship. We focus on collaboration, applied analysis, and pilot design.
-          </p>
-        </section>
-
-      <footer>
-        <div>© <span id="year"></span> Texas Skills Initiative</div>
-        <div>texasskillsinitiative.org</div>
-        <div>Last updated: January 2026</div>
-        <div class="theme-toggle" id="themeToggle" aria-label="Theme">
-  <span>Theme</span>
-  <button class="toggle-btn" id="themeBtn" type="button">Auto</button>
+<div class="modal-overlay" id="portalModal" onclick="handleOutsideClick(event, 'portalModal')">
+    <div class="modal-content">
+        <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
+        <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
+        <span class="close-modal" onclick="toggleModal('portalModal', false)">×</span>
+        <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Staff Gateway</h3>
+        <div class="option-grid">
+            <div class="option-btn">EMPLOYEE SSO <span class="nav-num">SECURE</span></div>
+            <div class="option-btn">REMOTE NODE ACCESS <span class="nav-num">VPN</span></div>
+        </div>
+    </div>
 </div>
 
-      </footer>
-    </main>
-  </div>
+<div class="modal-overlay" id="accessModal" onclick="handleOutsideClick(event, 'accessModal')">
+    <div class="modal-content">
+        <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
+        <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
+        <span class="close-modal" onclick="toggleModal('accessModal', false)">×</span>
+        <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
+        <div class="option-grid">
+            <a href="mailto:provincial@texasskillsinitiative.org" class="option-btn">PROVINCIAL AUTHORITY <span class="nav-num">01-A</span></a>
+            <a href="mailto:fdi@texasskillsinitiative.org" class="option-btn">FDI STRATEGY PARTNER <span class="nav-num">02-B</span></a>
+            <a href="mailto:industrial@texasskillsinitiative.org" class="option-btn">INDUSTRIAL DEVELOPER <span class="nav-num">03-C</span></a>
+        </div>
+    </div>
+</div>
+
+<section class="section-wrap" id="overview" style="text-align: center; padding: 180px 50px;">
+    <span class="reveal-text" style="font-family:'JetBrains Mono'; font-size:0.6rem; letter-spacing:3px; color:var(--accent);">STRATEGIC SYNCHRONIZATION / 2026</span>
+    <h1 style="font-size: 5.5rem; font-weight: 700; color: var(--page-text-main); line-height: 0.9; letter-spacing: -3px; margin: 20px 0 30px 0;" class="reveal-text reveal-delay-1">SKILLS WITHOUT<br><span style="color:var(--accent)">FRONTIERS.</span></h1>
+    <p class="reveal-text reveal-delay-2" style="max-width: 650px; font-size: 1.25rem; margin: 0 auto;">The Texas Skills Initiative exports the technical excellence of the Texas workforce to high-growth industrial corridors globally.</p>
+</section>
+
+<section class="section-wrap" id="mandate">
+    <div class="header-group"><span class="section-id">01 \</span><h2 class="section-title">Mandate</h2></div>
+    <div style="display:flex; gap:30px; align-items:flex-start; justify-content: center; max-width: 950px; margin: 40px auto 0 auto;">
+        <div class="asset-image" style="width:400px; flex-shrink:0;"><img src="assets/asset_1A.png"></div>
+        <div style="width: 450px; display: flex; flex-direction: column; gap: 40px;">
+            <div class="instruction-box" style="margin-bottom:0;">
+                <p style="font-size: 1.15rem; color: var(--page-text-main); margin: 0; line-height: 1.4; font-weight: 700;">Identifying high-potential economic corridors and synchronizing regional labor with the <strong>Texas Blueprint</strong>.</p>
+            </div>
+            <div style="background: var(--card-bg); border: 1px solid var(--frame-border); padding: 30px;">
+                <p style="margin: 0; line-height: 1.6; font-size: 0.95rem;">Texas industrial standards are global benchmarks. We provide the operational framework for technical literacy and industrial reliability.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-wrap" id="pipeline">
+    <div class="header-group"><span class="section-id">02 \</span><h2 class="section-title">Pipeline</h2></div>
+    
+    <div class="instruction-box">
+        <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Live Synchronization Pipeline</p>
+        <p style="margin:10px 0 0 0; font-size: 0.95rem;">Telemetry tracking 7 active global corridors. Bars fill at a calibrated rate of 4.0s per full corridor (100%).</p>
+    </div>
+
+    <table class="pipeline-table" id="pipeline-metrics">
+        <tbody>
+            <tr>
+                <td style="width: 30%;"><strong>VN: Haiphong</strong><br><small style="opacity:0.6;">Macro + Satellite</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Technical Audit</span><span style="color:var(--accent)">68%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="68"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>PH: Clark</strong><br><small style="opacity:0.6;">Community Hub</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Regulatory Review</span><span style="color:var(--accent)">32%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="32"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>MX: Monterrey</strong><br><small style="opacity:0.6;">Advanced Manufacturing</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Site Evaluation</span><span style="color:var(--accent)">85%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="85"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>MY: Penang</strong><br><small style="opacity:0.6;">Semiconductor Cluster</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Curriculum Alignment</span><span style="color:var(--accent)">51%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="51"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>PL: Wroclaw</strong><br><small style="opacity:0.6;">Logistics Node</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Infrastructure Audit</span><span style="color:var(--accent)">20%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="20"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>MA: Tangier</strong><br><small style="opacity:0.6;">Automotive Hub</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Regulatory Sync</span><span style="color:var(--accent)">44%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="44"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+            <tr>
+                <td><strong>BR: Campinas</strong><br><small style="opacity:0.6;">Tech Corridor</small></td>
+                <td>
+                    <div class="phase-label"><span>Phase: Exploratory</span><span style="color:var(--accent)">12%</span></div>
+                    <div class="sync-track"><div class="sync-progress" data-target="12"><div class="activity-node"></div></div></div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<section class="section-wrap" id="rubric">
+    <div class="header-group"><span class="section-id">03 \</span><h2 class="section-title">Rubric</h2></div>
+    
+    <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 40px;">
+        <div class="instruction-box" style="margin-bottom: 0; flex: 1;">
+            <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Pre-Recommendation Protocol</p>
+            <p style="margin:10px 0 0 0; font-size: 0.95rem;">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+        </div>
+        <div class="asset-image" style="flex: 1.5; border: 1px solid var(--frame-border);">
+            <img src="assets/analysis_banner.png" alt="Analysis Banner" style="height: 100%; width: 100%; object-fit: cover;">
+        </div>
+    </div>
+
+    <div class="rubric-grid">
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3A.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Vocational Literacy</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Regional technical education alignment based on the Texas Blueprint standards.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3B.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Onboarding Velocity</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3C.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Regulatory Coherence</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3D.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Reliability</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-wrap" id="engagement" style="border-bottom:none;">
+    <div class="header-group" style="justify-content:center;"><span class="section-id">04 \</span><h2 class="section-title">Engagement</h2></div>
+    <div class="workflow-grid">
+        <div class="workflow-step"><span class="step-num">01. SUBMISSION</span><p style="font-size:0.8rem; line-height:1.5;">Identify entity type and submit a formal Letter of Intent (LOI) via our secure portal.</p></div>
+        <div class="workflow-step"><span class="step-num">02. TECHNICAL AUDIT</span><p style="font-size:0.8rem; line-height:1.5;">TSI analysts perform a rigorous 30-day review evaluating core Rubric factors.</p></div>
+        <div class="workflow-step"><span class="step-num">03. SYNCHRONIZATION</span><p style="font-size:0.8rem; line-height:1.5;">Upon approval, Texas industrial frameworks and standards are deployed to the node.</p></div>
+    </div>
+    <div style="text-align:center; margin-top:40px;">
+        <button class="btn-cta" onclick="toggleModal('accessModal', true)">INITIATE SECURE REQUEST</button>
+    </div>
+</section>
+
+<footer>
+    <div style="display:flex; align-items:center; gap:30px;">
+        <div>© 2026 TEXAS SKILLS INITIATIVE</div>
+        <div class="status-pill"><div class="status-dot"></div><span>SYSTEM: ACTIVE</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <span style="font-weight:700; text-transform:uppercase;">Visual Mode</span>
+        <label class="theme-switch"><input type="checkbox" id="checkbox"><div class="slider"></div></label>
+    </div>
+</footer>
 
 <script>
-  // Keep the copyright year current.
-  document.getElementById("year").textContent = new Date().getFullYear();
-
-  // Theme toggle (Auto / Light / Dark) with optional hiding.
-  // To hide later: set data-show-theme-toggle="false" on <html>.
-  (function () {
-    const root = document.documentElement;
-    const toggleWrap = document.getElementById("themeToggle");
-    const btn = document.getElementById("themeBtn");
-
-    // Hide toggle if desired
-    const show = root.getAttribute("data-show-theme-toggle");
-    if (show === "false" && toggleWrap) {
-      toggleWrap.hidden = true;
-      return;
+    function toggleModal(id, show) { 
+        const modal = document.getElementById(id);
+        if (modal) modal.style.display = show ? 'flex' : 'none'; 
     }
+    function handleOutsideClick(e, id) { if (e.target.id === id) toggleModal(id, false); }
+    
+    const toggleSwitch = document.querySelector('#checkbox');
+    toggleSwitch.addEventListener('change', (e) => {
+        document.documentElement.setAttribute('data-theme', e.target.checked ? 'light' : 'dark');
+    });
 
-    const key = "tsi_theme_pref"; // "auto" | "light" | "dark"
-    const order = ["auto", "light", "dark"];
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => { 
+            if (entry.isIntersecting) {
+                entry.target.classList.add('reveal-active'); 
+                if (entry.target.classList.contains('asset-image')) entry.target.classList.add('revealed');
+                
+                // BAR ANIMATION TRIGGER
+                if (entry.target.id === 'pipeline-metrics') {
+                    entry.target.querySelectorAll('.sync-progress').forEach(bar => {
+                        const target = parseInt(bar.getAttribute('data-target'));
+                        const duration = (target / 100) * 4; 
+                        bar.style.transitionDuration = duration + 's';
+                        bar.style.width = target + '%';
+                    });
+                }
+            } 
+        });
+    }, { threshold: 0.1 });
 
-    function apply(mode) {
-      // auto = no override; respect prefers-color-scheme
-      if (mode === "auto") {
-        root.removeAttribute("data-theme");
-      } else {
-        root.setAttribute("data-theme", mode);
-      }
-      if (btn) btn.textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
-    }
-
-    function getSaved() {
-      return localStorage.getItem(key) || "auto";
-    }
-
-    function save(mode) {
-      localStorage.setItem(key, mode);
-    }
-
-    // init
-    const current = getSaved();
-    apply(current);
-
-    // cycle on click: Auto -> Light -> Dark -> Auto
-    if (btn) {
-      btn.addEventListener("click", function () {
-        const now = getSaved();
-        const next = order[(order.indexOf(now) + 1) % order.length];
-        save(next);
-        apply(next);
-      });
-    }
-  })();
+    document.querySelectorAll('.reveal-text, .asset-image, #pipeline-metrics').forEach(el => observer.observe(el));
 </script>
-
 </body>
 </html>
