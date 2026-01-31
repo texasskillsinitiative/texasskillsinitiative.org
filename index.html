@@ -133,6 +133,10 @@
         #accessModal .form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
         #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; margin-top: 8px; align-self: flex-start; }
         [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
+        #accessModal .form-error { font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none; }
+        #accessModal .form-error.visible { display: block; }
+        #accessModal .form-noscript { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; }
+        #accessModal .form-noscript p { margin: 0; }
     </style>
 </head>
 <body>
@@ -175,7 +179,7 @@
         <span class="close-modal" onclick="toggleModal('accessModal', false)">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
         <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
-        <form id="stakeholderForm" class="stakeholder-form" action="#">
+        <form id="stakeholderForm" class="stakeholder-form" method="post">
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
             <div class="form-field">
                 <label for="name">Name</label>
@@ -186,6 +190,7 @@
                 <label for="email">Email</label>
                 <span class="form-helper">We'll only use this to respond if appropriate</span>
                 <input type="email" id="email" name="email" required>
+                <span class="form-error" id="emailError" role="alert"></span>
             </div>
             <div class="form-field">
                 <label for="org">Organization or affiliation</label>
@@ -202,6 +207,7 @@
                 <span class="form-helper">Optional. Share any context you think may be helpful.</span>
                 <textarea id="message" name="message"></textarea>
             </div>
+            <noscript class="form-noscript"><p>JavaScript is required to submit this form. Please enable JavaScript and try again.</p></noscript>
             <button type="submit" class="form-submit">Submit</button>
         </form>
     </div>
@@ -357,6 +363,27 @@
         if (modal) modal.style.display = show ? 'flex' : 'none'; 
     }
     function handleOutsideClick(e, id) { if (e.target.id === id) toggleModal(id, false); }
+
+    document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const emailEl = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+        const honeypot = this.querySelector('input[name="website"]');
+        emailError.textContent = '';
+        emailError.classList.remove('visible');
+        if (honeypot.value) return;
+        const email = (emailEl.value || '').trim();
+        if (!email) {
+            emailError.textContent = 'Email is required';
+            emailError.classList.add('visible');
+            return;
+        }
+        if (!/.+@.+\..+/.test(email)) {
+            emailError.textContent = 'Please enter a valid email';
+            emailError.classList.add('visible');
+            return;
+        }
+    });
     
     const toggleSwitch = document.querySelector('#checkbox');
     toggleSwitch.addEventListener('change', (e) => {
