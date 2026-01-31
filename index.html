@@ -137,6 +137,11 @@
         #accessModal .form-error.visible { display: block; }
         #accessModal .form-noscript { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; }
         #accessModal .form-noscript p { margin: 0; }
+        #accessModal .form-success, #accessModal .form-network-error, #accessModal .form-time-error { text-align: left; margin-top: 20px; }
+        #accessModal .form-success p, #accessModal .form-network-error p, #accessModal .form-time-error p { margin: 0 0 8px 0; font-size: 0.95rem; color: var(--page-text-main); line-height: 1.5; }
+        #accessModal .form-success p:last-child { margin-bottom: 0; color: var(--page-text-dim); font-size: 0.85rem; }
+        #accessModal .form-network-error p { color: var(--accent); margin-bottom: 0; }
+        #accessModal .form-time-error p { color: var(--accent); margin-bottom: 0; }
     </style>
 </head>
 <body>
@@ -178,8 +183,8 @@
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
         <span class="close-modal" onclick="toggleModal('accessModal', false)">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
-        <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
         <form id="stakeholderForm" class="stakeholder-form" method="post">
+            <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
             <div class="form-field">
                 <label for="name">Name</label>
@@ -210,6 +215,16 @@
             <noscript class="form-noscript"><p>JavaScript is required to submit this form. Please enable JavaScript and try again.</p></noscript>
             <button type="submit" class="form-submit">Submit</button>
         </form>
+        <div id="formSuccess" class="form-success" hidden>
+            <p>Thank you. We've received your message.</p>
+            <p>If a response is appropriate, someone will be in touch.</p>
+        </div>
+        <div id="formNetworkError" class="form-network-error" hidden>
+            <p>Something didn't go through. Please try again.</p>
+        </div>
+        <div id="formTimeError" class="form-time-error" hidden>
+            <p>Woah, you went faster than the internet. Give it a moment and try again.</p>
+        </div>
     </div>
 </div>
 
@@ -358,19 +373,58 @@
 </footer>
 
 <script>
+    const FORM_ENDPOINT = 'https://httpbin.org/post';
+
     function toggleModal(id, show) { 
         const modal = document.getElementById(id);
-        if (modal) modal.style.display = show ? 'flex' : 'none'; 
+        if (modal) modal.style.display = show ? 'flex' : 'none';
+        if (id === 'accessModal' && show) {
+            const form = document.getElementById('stakeholderForm');
+            const formSuccess = document.getElementById('formSuccess');
+            const formNetworkError = document.getElementById('formNetworkError');
+            const formTimeError = document.getElementById('formTimeError');
+            const submitBtn = form.querySelector('.form-submit');
+            form.hidden = false;
+            formSuccess.hidden = true;
+            formNetworkError.hidden = true;
+            formTimeError.hidden = true;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+            window._formOpenTime = undefined;
+        }
     }
     function handleOutsideClick(e, id) { if (e.target.id === id) toggleModal(id, false); }
 
+    (function() {
+        var form = document.getElementById('stakeholderForm');
+        var fields = form.querySelectorAll('input:not([name="website"]), textarea');
+        function maybeStartTimer() {
+            if (typeof window._formOpenTime !== 'number') window._formOpenTime = Date.now();
+        }
+        fields.forEach(function(f) {
+            f.addEventListener('input', maybeStartTimer);
+            f.addEventListener('focus', maybeStartTimer);
+        });
+    })();
+
     document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        const form = this;
         const emailEl = document.getElementById('email');
         const emailError = document.getElementById('emailError');
-        const honeypot = this.querySelector('input[name="website"]');
+        const formSuccess = document.getElementById('formSuccess');
+        const formNetworkError = document.getElementById('formNetworkError');
+        const formTimeError = document.getElementById('formTimeError');
+        const submitBtn = form.querySelector('.form-submit');
+        const honeypot = form.querySelector('input[name="website"]');
         emailError.textContent = '';
         emailError.classList.remove('visible');
+        formNetworkError.hidden = true;
+        formTimeError.hidden = true;
+        if (typeof window._formOpenTime !== 'number' || (Date.now() - window._formOpenTime) < 3000) {
+            formTimeError.hidden = false;
+            return;
+        }
         if (honeypot.value) return;
         const email = (emailEl.value || '').trim();
         if (!email) {
@@ -383,6 +437,33 @@
             emailError.classList.add('visible');
             return;
         }
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending…';
+        const payload = {
+            form_id: 'stakeholder_inquiry',
+            name: form.querySelector('[name="name"]').value.trim(),
+            email: email,
+            org: form.querySelector('[name="org"]').value.trim(),
+            location: form.querySelector('[name="location"]').value.trim(),
+            message: form.querySelector('[name="message"]').value.trim()
+        };
+        fetch(FORM_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function(res) {
+            if (res.ok) {
+                form.hidden = true;
+                formSuccess.hidden = false;
+            } else {
+                throw new Error('Request failed');
+            }
+        }).catch(function() {
+            formTimeError.hidden = true;
+            formNetworkError.hidden = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+        });
     });
     
     const toggleSwitch = document.querySelector('#checkbox');
