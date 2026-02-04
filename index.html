@@ -49,6 +49,8 @@
             70% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
             100% { transform: scale(1); opacity: 0; box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
         }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .reveal-text { opacity: 0; }
         .reveal-active { animation: fadeInUp 1s ease forwards; }
@@ -131,21 +133,60 @@
         #accessModal .form-field input:focus, #accessModal .form-field textarea:focus { outline: none; border-color: var(--accent); }
         #accessModal .form-field textarea { min-height: 80px; resize: vertical; }
         #accessModal .form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; margin-top: 8px; align-self: flex-start; }
+        #accessModal .form-actions { display: flex; align-items: flex-start; margin-top: 8px; flex-wrap: wrap; gap: 12px; }
+        #accessModal .form-actions > div { display: flex; flex-direction: column; align-items: flex-start; }
+        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; }
         [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
         #accessModal .form-error { font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none; }
         #accessModal .form-error.visible { display: block; }
         #accessModal .form-noscript { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; }
         #accessModal .form-noscript p { margin: 0; }
-        #accessModal .form-success, #accessModal .form-network-error, #accessModal .form-time-error { text-align: left; margin-top: 20px; }
-        #accessModal .form-success p, #accessModal .form-network-error p, #accessModal .form-time-error p { margin: 0 0 8px 0; font-size: 0.95rem; color: var(--page-text-main); line-height: 1.5; }
-        #accessModal .form-success p:last-child { margin-bottom: 0; color: var(--page-text-dim); font-size: 0.85rem; }
-        #accessModal .form-network-error p { color: var(--accent); margin-bottom: 0; }
-        #accessModal .form-time-error p { color: var(--accent); margin-bottom: 0; }
+        #accessModal .form-success { text-align: center; margin-top: 20px; }
+        #accessModal .form-success-headline { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 700; color: var(--page-text-main); line-height: 1.1; letter-spacing: -1px; margin: 0 0 12px 0; text-transform: uppercase; }
+        #accessModal .form-success-headline .accent { color: var(--accent); }
+        #accessModal .form-success-sub { font-size: 0.9rem; color: var(--page-text-dim); margin: 0 0 24px 0; line-height: 1.4; }
+        #accessModal .form-success-buttons { display: flex; flex-direction: column; gap: 10px; }
+        #accessModal .form-success-btn { padding: 12px 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid var(--frame-border); background: var(--page-bg); color: var(--page-text-main); transition: 0.3s; }
+        #accessModal .form-success-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--card-bg); }
+        #accessModal .form-success-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #accessModal .form-success-btn-primary { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
+        [data-theme="light"] #accessModal .form-success-btn-primary { color: #ffffff; }
+        #accessModal .form-success.fade-out { animation: fadeOut 0.4s ease forwards; }
+        #accessModal .form-network-error, #accessModal .form-time-error { text-align: left; margin-top: 20px; }
+        #accessModal .form-network-error p, #accessModal .form-time-error p { margin: 0; font-size: 0.95rem; color: var(--accent); line-height: 1.5; }
+        #accessModal .form-clear { background: transparent; border: 1px solid var(--page-text-dim); color: var(--page-text-dim); padding: 8px 16px; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
+        #accessModal .form-clear:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+        #accessModal .form-clear:disabled { opacity: 0.5; cursor: not-allowed; }
+        #accessModal .form-clear-helper { font-size: 0.7rem; color: var(--page-text-dim); margin-top: 4px; }
+        #accessModal .access-modal-body { position: relative; min-height: 280px; max-height: 65vh; overflow-y: auto; }
+        #accessModal .access-modal-body.success-visible #stakeholderForm { filter: blur(5px); opacity: 0.35; pointer-events: none; transition: filter 0.3s, opacity 0.3s; }
+        #accessModal #formSuccess { 
+                                    position: absolute; 
+                                    top: 0; 
+                                    left: 0; 
+                                    right: 0; 
+                                    bottom: 0; 
+                                    display: flex; 
+                                    flex-direction: column; 
+                                    align-items: center; 
+                                    justify-content: center; 
+                                    padding: 24px; 
+                                    text-align: center; 
+                                    /* NEW: Add scrolling and background to ensure buttons are reachable */
+                                    overflow-y: auto; 
+                                    background: var(--card-bg); 
+                                    z-index: 10;
+                                    }
+        #accessModal #formSuccess[hidden] { display: none; }
+        #accessModal .form-success-headline { margin-bottom: 8px; }
+        #accessModal .form-success-sub { margin-bottom: 20px; }
+        #accessModal .form-success-buttons { width: 100%; max-width: 280px; }
+        #accessModal.modal-fade-out { animation: fadeOut 0.4s ease forwards; }
+        #accessModal #stakeholderForm.form-fade-in { animation: fadeIn 0.4s ease both; }
     </style>
 </head>
 <body>
-
+<!-- Navigation Section Start -->
 <nav>
     <div class="logo-container">
         <img src="assets/logo/logo_tdark.png" class="logo logo-dark" alt="TSI">
@@ -154,8 +195,8 @@
     <div class="header-index">
         <a href="#overview"><span class="nav-num">00</span><span class="nav-label">Overview</span></a>
         <a href="#mandate"><span class="nav-num">01</span><span class="nav-label">Mandate</span></a>
-        <a href="#pipeline"><span class="nav-num">02</span><span class="nav-label">Pipeline</span></a>
-        <a href="#rubric"><span class="nav-num">03</span><span class="nav-label">Rubric</span></a>
+        <a href="#rubric"><span class="nav-num">02</span><span class="nav-label">Rubric</span></a>
+        <a href="#pipeline"><span class="nav-num">03</span><span class="nav-label">Pipeline</span></a>
         <a href="#engagement"><span class="nav-num">04</span><span class="nav-label">Engagement</span></a>
     </div>
     <div class="header-actions">
@@ -163,7 +204,8 @@
         <button class="btn-portal btn-external" onclick="toggleModal('accessModal', true)">PARTNER INQUIRY</button>
     </div>
 </nav>
-
+<!-- Navigation Section End -->
+<!-- Portal Modal Section Start --> 
 <div class="modal-overlay" id="portalModal" onclick="handleOutsideClick(event, 'portalModal')">
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
@@ -176,12 +218,13 @@
         </div>
     </div>
 </div>
-
+<!-- Portal Modal Section End -->
+<!-- Access Modal Section Start -->
 <div class="modal-overlay" id="accessModal" onclick="handleOutsideClick(event, 'accessModal')">
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" onclick="toggleModal('accessModal', false)">×</span>
+        <span class="close-modal" id="accessModalClose" onclick="handleAccessModalClose()">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
         <form id="stakeholderForm" class="stakeholder-form" method="post">
             <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
@@ -213,11 +256,21 @@
                 <textarea id="message" name="message"></textarea>
             </div>
             <noscript class="form-noscript"><p>JavaScript is required to submit this form. Please enable JavaScript and try again.</p></noscript>
-            <button type="submit" class="form-submit">Submit</button>
+            <div class="form-actions">
+                <div>
+                    <button type="button" class="form-clear" id="formClearBtn">Hold to clear</button>
+                    <span class="form-clear-helper" aria-hidden="true">Hold 0.6s to clear</span>
+                </div>
+                <button type="submit" class="form-submit">Submit</button>
+            </div>
         </form>
-        <div id="formSuccess" class="form-success" hidden>
-            <p>Thank you. We've received your message.</p>
-            <p>If a response is appropriate, someone will be in touch.</p>
+        <div id="formSuccess" class="form-success reveal-text" hidden>
+            <p class="form-success-headline">Thank <span class="accent">you.</span></p>
+            <p class="form-success-sub">We've received your message. If a response is appropriate, someone will be in touch.</p>
+            <div class="form-success-buttons">
+                <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn">Click to close</button>
+                <button type="button" class="form-success-btn" id="successAnotherBtn">Submit another response</button>
+            </div>
         </div>
         <div id="formNetworkError" class="form-network-error" hidden>
             <p>Something didn't go through. Please try again.</p>
@@ -225,36 +278,133 @@
         <div id="formTimeError" class="form-time-error" hidden>
             <p>Woah, you went faster than the internet. Give it a moment and try again.</p>
         </div>
+        </div>
     </div>
 </div>
-
+<!-- Access Modal Section End -->
+<!-- Overview Section Start -->
 <section class="section-wrap" id="overview" style="text-align: center; padding: 180px 50px;">
-    <span class="reveal-text" style="font-family:'JetBrains Mono'; font-size:0.6rem; letter-spacing:3px; color:var(--accent);">STRATEGIC SYNCHRONIZATION / 2026</span>
-    <h1 style="font-size: 5.5rem; font-weight: 700; color: var(--page-text-main); line-height: 0.9; letter-spacing: -3px; margin: 20px 0 30px 0;" class="reveal-text reveal-delay-1">SKILLS WITHOUT<br><span style="color:var(--accent)">FRONTIERS.</span></h1>
-    <p class="reveal-text reveal-delay-2" style="max-width: 650px; font-size: 1.25rem; margin: 0 auto;">The Texas Skills Initiative exports the technical excellence of the Texas workforce to high-growth industrial corridors globally.</p>
+    <span class="reveal-text" style="font-family:'JetBrains Mono'; font-size:0.75rem; letter-spacing:4px; color:var(--page-text-dim); text-transform:uppercase;">
+        Skills Without Frontiers
+    </span>
+    
+    <h1 style="font-size: 4.5rem; font-weight: 700; color: var(--page-text-main); line-height: 1.1; letter-spacing: -2px; margin: 25px 0;" class="reveal-text reveal-delay-1">
+        Texas-Tested.<br>
+        Globally Proven.<br>
+        <span style="color:var(--accent)">Locally Crafted.</span>
+    </h1>
+    
+    <p class="reveal-text reveal-delay-2" style="max-width: 700px; font-size: 1.1rem; margin: 0 auto; line-height: 1.6;">
+        The Texas Skills Initiative leverages the industrial power of the Texas economic model to build one-of-a-kind workforce ecosystems. We don't export templates; we engineer original solutions built exclusively for the distinct needs of <span style="color:var(--page-text-main); font-weight:700;">your growth region.</span>
+    </p>
 </section>
-
+<!-- Overview Section End -->
+<!-- Mandate Section Start -->
 <section class="section-wrap" id="mandate">
     <div class="header-group"><span class="section-id">01 \</span><h2 class="section-title">Mandate</h2></div>
     <div style="display:flex; gap:30px; align-items:flex-start; justify-content: center; max-width: 950px; margin: 40px auto 0 auto;">
         <div class="asset-image" style="width:400px; flex-shrink:0;"><img src="assets/asset_1A.png"></div>
-        <div style="width: 450px; display: flex; flex-direction: column; gap: 40px;">
-            <div class="instruction-box" style="margin-bottom:0;">
-                <p style="font-size: 1.15rem; color: var(--page-text-main); margin: 0; line-height: 1.4; font-weight: 700;">Identifying high-potential economic corridors and synchronizing regional labor with the <strong>Texas Blueprint</strong>.</p>
+        <div style="width: 450px; display: flex; flex-direction: column; gap: 30px;">
+            <div class="instruction-box" style="margin-bottom:0; padding: 25px;">
+                <p style="font-size: 1.4rem; color: var(--page-text-main); margin: 0; line-height: 1.2; font-weight: 700; letter-spacing: -0.5px;">
+                    Identifying high-potential economic regions and aligning workforce systems.
+                </p>
             </div>
-            <div style="background: var(--card-bg); border: 1px solid var(--frame-border); padding: 30px;">
-                <p style="margin: 0; line-height: 1.6; font-size: 0.95rem;">Texas industrial standards are global benchmarks. We provide the operational framework for technical literacy and industrial reliability.</p>
+        
+            <div style="background: var(--card-bg); border: 1px solid var(--frame-border); padding: 40px; max-width: 600px;">
+    
+                <p style="margin: 0 0 30px 0; line-height: 1.4; font-size: 1.2rem; color: var(--page-text-main);">
+                    Texas industrial standards guide our methods, but <span style="color: var(--accent);"><strong>local context</strong></span> determines the outcome.
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 28px; border-top: 1px solid var(--frame-border); padding-top: 30px;">
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
+                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                            We prioritize regional intelligence over external templates. We do not and <strong>will not</strong> deploy pre-set plans.
+                        </p>
+                    </div>
+            
+                    <div style="display: flex; gap: 15px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
+                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                            Strategic success is <strong>impossible in a vacuum</strong>.
+                        </p>
+                    </div>
+            
+                    <div style="display: flex; gap: 15px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
+                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                            Local institutional knowledge is the <strong>essential data</strong> that activates our framework.
+                        </p>
+                    </div>
+            
+                    <div style="display: flex; gap: 15px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
+                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                            Collaboration begins at <strong>your table</strong>. We engineer solutions tailored to refine and enrich the local ecosystem.
+                        </p>
+                    </div>
+            
+                    <div style="display: flex; gap: 15px;">
+                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
+                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                            Our audit identifies where your region <strong>already leads the world</strong>. We leverage your existing strengths with the global industrial pipeline.
+                        </p>
+                    </div>
+            
+                </div>
             </div>
         </div>
     </div>
 </section>
+<!-- Mandate Section End -->
+<!-- Rubric Section Start -->
+<section class="section-wrap" id="rubric">
+    <div class="header-group"><span class="section-id">02 \</span><h2 class="section-title">Rubric</h2></div>
+    
+    <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 40px;">
+        <div class="instruction-box" style="margin-bottom: 0; flex: 1;">
+            <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Pre-Recommendation Protocol</p>
+            <p style="margin:10px 0 0 0; font-size: 0.95rem;">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+        </div>
+        <div class="asset-image" style="flex: 1.5; border: 1px solid var(--frame-border);">
+            <img src="assets/analysis_banner.png" alt="Analysis Banner" style="height: 100%; width: 100%; object-fit: cover;">
+        </div>
+    </div>
 
+    <div class="rubric-grid">
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3A.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Vocational Literacy</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Regional technical education alignment based on the Texas Blueprint standards.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3B.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Onboarding Velocity</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3C.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Regulatory Coherence</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
+        </div>
+        <div class="rubric-item">
+            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3D.png"></div>
+            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Reliability</h4>
+            <p style="font-size:0.8rem; line-height:1.4;">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
+        </div>
+    </div>
+</section>
+<!-- Rubric Section End -->
+<!-- Pipeline Section Start -->
 <section class="section-wrap" id="pipeline">
-    <div class="header-group"><span class="section-id">02 \</span><h2 class="section-title">Pipeline</h2></div>
+    <div class="header-group"><span class="section-id">03 \</span><h2 class="section-title">Pipeline</h2></div>
     
     <div class="instruction-box">
         <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Live Synchronization Pipeline</p>
-        <p style="margin:10px 0 0 0; font-size: 0.95rem;">Telemetry tracking 7 active global corridors. Bars fill at a calibrated rate of 4.0s per full corridor (100%).</p>
+        <p style="margin:10px 0 0 0; font-size: 0.95rem;">Telemetry tracking active industrial corridors.</p>
     </div>
 
     <table class="pipeline-table" id="pipeline-metrics">
@@ -311,44 +461,8 @@
         </tbody>
     </table>
 </section>
-
-<section class="section-wrap" id="rubric">
-    <div class="header-group"><span class="section-id">03 \</span><h2 class="section-title">Rubric</h2></div>
-    
-    <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 40px;">
-        <div class="instruction-box" style="margin-bottom: 0; flex: 1;">
-            <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Pre-Recommendation Protocol</p>
-            <p style="margin:10px 0 0 0; font-size: 0.95rem;">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
-        </div>
-        <div class="asset-image" style="flex: 1.5; border: 1px solid var(--frame-border);">
-            <img src="assets/analysis_banner.png" alt="Analysis Banner" style="height: 100%; width: 100%; object-fit: cover;">
-        </div>
-    </div>
-
-    <div class="rubric-grid">
-        <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3A.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Vocational Literacy</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Regional technical education alignment based on the Texas Blueprint standards.</p>
-        </div>
-        <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3B.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Onboarding Velocity</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
-        </div>
-        <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3C.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Regulatory Coherence</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
-        </div>
-        <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3D.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Reliability</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
-        </div>
-    </div>
-</section>
-
+<!-- Pipeline Section End -->
+<!-- Engagement Section Start -->
 <section class="section-wrap" id="engagement" style="border-bottom:none;">
     <div class="header-group" style="justify-content:center;"><span class="section-id">04 \</span><h2 class="section-title">Engagement</h2></div>
     <div class="workflow-grid">
@@ -360,7 +474,8 @@
         <button class="btn-cta" onclick="toggleModal('accessModal', true)">INITIATE SECURE REQUEST</button>
     </div>
 </section>
-
+<!-- Engagement Section End -->
+<!-- Footer Section Start -->
 <footer>
     <div style="display:flex; align-items:center; gap:30px;">
         <div>© 2026 TEXAS SKILLS INITIATIVE</div>
@@ -374,98 +489,119 @@
 
 <script>
     const FORM_ENDPOINT = 'https://httpbin.org/post';
+    window._formLastState = null;
+    window._formOpenTime = 0;
+
+    function resetFormDataOnly() {
+        const form = document.getElementById('stakeholderForm');
+        if (form) form.reset();
+        const submitBtn = document.querySelector('.form-submit');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Request';
+        }
+        window._formOpenTime = undefined;
+        window._formLastState = null;
+    }
 
     function toggleModal(id, show) { 
         const modal = document.getElementById(id);
         if (modal) modal.style.display = show ? 'flex' : 'none';
+        
         if (id === 'accessModal' && show) {
-            const form = document.getElementById('stakeholderForm');
-            const formSuccess = document.getElementById('formSuccess');
-            const formNetworkError = document.getElementById('formNetworkError');
-            const formTimeError = document.getElementById('formTimeError');
-            const submitBtn = form.querySelector('.form-submit');
-            form.hidden = false;
-            formSuccess.hidden = true;
-            formNetworkError.hidden = true;
-            formTimeError.hidden = true;
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-            window._formOpenTime = undefined;
+            modal.classList.remove('modal-fade-out');
+            // Start timer the moment the modal is visible
+            window._formOpenTime = Date.now();
+            
+            if (window._formLastState === 'success') {
+                resetFormToNew();
+            }
         }
     }
-    function handleOutsideClick(e, id) { if (e.target.id === id) toggleModal(id, false); }
 
-    (function() {
-        var form = document.getElementById('stakeholderForm');
-        var fields = form.querySelectorAll('input:not([name="website"]), textarea');
-        function maybeStartTimer() {
-            if (typeof window._formOpenTime !== 'number') window._formOpenTime = Date.now();
-        }
-        fields.forEach(function(f) {
-            f.addEventListener('input', maybeStartTimer);
-            f.addEventListener('focus', maybeStartTimer);
-        });
-    })();
-
-    document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const form = this;
-        const emailEl = document.getElementById('email');
-        const emailError = document.getElementById('emailError');
+    function resetFormToNew() {
+        const form = document.getElementById('stakeholderForm');
         const formSuccess = document.getElementById('formSuccess');
-        const formNetworkError = document.getElementById('formNetworkError');
-        const formTimeError = document.getElementById('formTimeError');
+        const modalBody = document.getElementById('accessModalBody');
+        resetFormDataOnly();
+        if (modalBody) modalBody.classList.remove('success-visible');
+        if (form) form.hidden = false;
+        if (formSuccess) {
+            formSuccess.hidden = true;
+            formSuccess.classList.remove('reveal-active', 'fade-out');
+        }
+    }
+
+    // THE SUBMIT HANDLER
+    document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
+        // PREVENT the page from clearing/refreshing
+        e.preventDefault(); 
+        
+        const form = this;
         const submitBtn = form.querySelector('.form-submit');
-        const honeypot = form.querySelector('input[name="website"]');
-        emailError.textContent = '';
-        emailError.classList.remove('visible');
-        formNetworkError.hidden = true;
-        formTimeError.hidden = true;
-        if (typeof window._formOpenTime !== 'number' || (Date.now() - window._formOpenTime) < 3000) {
-            formTimeError.hidden = false;
+        const timeError = document.getElementById('formTimeError');
+        const networkError = document.getElementById('formNetworkError');
+        const emailError = document.getElementById('emailError');
+        const modalBody = document.getElementById('accessModalBody');
+        const formSuccess = document.getElementById('formSuccess');
+
+        // Reset UI state
+        if (timeError) timeError.hidden = true;
+        if (networkError) networkError.hidden = true;
+        if (emailError) emailError.classList.remove('visible');
+
+        // 1. Check Time Trap (3 seconds)
+        const timeElapsed = Date.now() - (window._formOpenTime || 0);
+        if (timeElapsed < 3000) {
+            if (timeError) timeError.hidden = false;
+            return; // Stops here, text stays in boxes
+        }
+
+        // 2. Simple Email Validation
+        const email = document.getElementById('email').value;
+        if (!email.includes('@')) {
+            if (emailError) {
+                emailError.textContent = "Please enter a valid email address.";
+                emailError.classList.add('visible');
+            }
             return;
         }
-        if (honeypot.value) return;
-        const email = (emailEl.value || '').trim();
-        if (!email) {
-            emailError.textContent = 'Email is required';
-            emailError.classList.add('visible');
-            return;
-        }
-        if (!/.+@.+\..+/.test(email)) {
-            emailError.textContent = 'Please enter a valid email';
-            emailError.classList.add('visible');
-            return;
-        }
+
+        // 3. Start Submission
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending…';
-        const payload = {
-            form_id: 'stakeholder_inquiry',
-            name: form.querySelector('[name="name"]').value.trim(),
-            email: email,
-            org: form.querySelector('[name="org"]').value.trim(),
-            location: form.querySelector('[name="location"]').value.trim(),
-            message: form.querySelector('[name="message"]').value.trim()
-        };
+        submitBtn.textContent = 'Sending...';
+
+        // Prepare data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
         fetch(FORM_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        }).then(function(res) {
+            body: JSON.stringify(data)
+        })
+        .then(res => {
             if (res.ok) {
-                form.hidden = true;
-                formSuccess.hidden = false;
+                window._formLastState = 'success';
+                // Trigger Success UI
+                if (modalBody) modalBody.classList.add('success-visible');
+                if (formSuccess) {
+                    formSuccess.hidden = false;
+                    formSuccess.classList.add('reveal-active');
+                }
+                form.hidden = true; 
             } else {
-                throw new Error('Request failed');
+                throw new Error("Server error");
             }
-        }).catch(function() {
-            formTimeError.hidden = true;
-            formNetworkError.hidden = false;
+        })
+        .catch(err => {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
+            submitBtn.textContent = 'Submit Request';
+            if (networkError) networkError.hidden = false;
         });
     });
-    
+
+    // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
     toggleSwitch.addEventListener('change', (e) => {
         document.documentElement.setAttribute('data-theme', e.target.checked ? 'light' : 'dark');
@@ -476,20 +612,15 @@
             if (entry.isIntersecting) {
                 entry.target.classList.add('reveal-active'); 
                 if (entry.target.classList.contains('asset-image')) entry.target.classList.add('revealed');
-                
-                // BAR ANIMATION TRIGGER
                 if (entry.target.id === 'pipeline-metrics') {
                     entry.target.querySelectorAll('.sync-progress').forEach(bar => {
                         const target = parseInt(bar.getAttribute('data-target'));
-                        const duration = (target / 100) * 4; 
-                        bar.style.transitionDuration = duration + 's';
                         bar.style.width = target + '%';
                     });
                 }
             } 
         });
     }, { threshold: 0.1 });
-
     document.querySelectorAll('.reveal-text, .asset-image, #pipeline-metrics').forEach(el => observer.observe(el));
 </script>
 </body>
