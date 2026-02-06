@@ -1,0 +1,88 @@
+# Set working directory
+Set-Location "C:\zPortable\MultiMonitorTool\"
+$MonitorID = "\\.\DISPLAY2"
+$WindowDataFile = "wlwindows_tab.txt"
+$MonitorConfigFile = "PreResetConfig.cfg"
+
+Clear-Host
+Write-Host "--- texasskillsinitiative.org Workspace Manager ---" -ForegroundColor Cyan
+Write-Host "1. Open WinLister and press Ctrl+A."
+Write-Host "2. File > Save Selected Items as '$WindowDataFile' (Tab-Delimited)."
+Read-Host "When done, press ENTER to backup config and start Reset..."
+
+# --- NEW PRE-CAPTURE LOGIC ---
+Write-Host "Validating Primary Monitor..." -ForegroundColor Gray
+# Check if DISPLAY2 is currently the primary monitor
+$MonitorCheck = & .\MultiMonitorTool.exe /scomma | ConvertFrom-Csv
+$CurrentPrimary = $MonitorCheck | Where-Object { $_."Primary" -eq "Yes" } | Select-Object -ExpandProperty "Name"
+
+if ($CurrentPrimary -ne $MonitorID) {
+    Write-Host "$MonitorID is NOT primary. Fixing now..." -ForegroundColor Yellow
+    & .\MultiMonitorTool.exe /SetPrimary $MonitorID
+    Read-Host "Press ENTER once things settles down."
+    #Start-Sleep -Seconds 2  # Wait for Windows to register the change
+} else {
+    Write-Host "$MonitorID is already primary. Proceeding..." -ForegroundColor Green
+}
+# -----------------------------
+
+# 1. Hardware Backup and Reset
+& .\MultiMonitorTool.exe /SaveConfig $MonitorConfigFile
+Write-Host "Backing up verified configuration..." -ForegroundColor Gray
+Start-Sleep -Seconds 2  # allow time for save
+
+Write-Host "Resetting $MonitorID..." -ForegroundColor Yellow
+& .\MultiMonitorTool.exe /disable $MonitorID
+Start-Sleep -Seconds 2
+& .\MultiMonitorTool.exe /enable $MonitorID
+
+Write-Host "`n[WAITING FOR HARDWARE]" -ForegroundColor Magenta
+Write-Host "Everything calm?" -ForegroundColor Magenta
+Read-Host "Press ENTER to restore layout."
+
+# 2. Restore Monitor Order
+Write-Host "Loading monitor configuration..." -ForegroundColor Cyan
+& .\MultiMonitorTool.exe /LoadConfig $MonitorConfigFile
+# & .\MultiMonitorTool.exe /SetPrimary $MonitorID
+
+Write-Host "`n[CHECK MONITOR ORDER]" -ForegroundColor Magenta
+Write-Host "Order look good?"
+Write-Host "Primary correct?
+Read-Host "Press ENTER to re-home all windows..."
+
+# 3. Restore Window Positions
+if (Test-Path $WindowDataFile) {
+    # Manual headers to handle the leading tab
+    $Headers = "Empty","Title","Visible","Location","Size","ProcessID","Filename","Program Name"
+    $WindowData = Import-Csv $WindowDataFile -Delimiter "`t" -Header $Headers
+    
+    foreach ($row in $WindowData) {
+        # Filter for your specific apps
+        if ($row.Visible -eq "Yes" -and $row.ProcessFilename -match "Signal.exe|chrome.exe|EXCEL.EXE|notepad\+\+.exe") {
+            $procName = Split-Path $row.ProcessFilename -Leaf
+            $loc = "$($row.Location)".Trim() 
+
+            # Handle (X, Y) Coordinates
+            if ($loc.Contains("(") -and $loc.Contains(")")) {
+                $cleanLoc = $loc.Replace("(","").Replace(")","")
+                $coords = $cleanLoc.Split(",")
+                $x = $coords[0].Trim()
+                $y = $coords[1].Trim()
+
+                Write-Host "Moving $procName to ($x, $y)..." -NoNewline
+                Start-Process -FilePath ".\MultiMonitorTool.exe" -ArgumentList "/MoveWindow $MonitorID Process `"$procName`" /WindowLeft $x /WindowTop $y" -Wait
+                Write-Host " Done." -ForegroundColor Green
+            }
+            # Handle Maximized windows
+            elseif ($loc -eq "Maximized") {
+                Write-Host "Maximizing $procName..." -NoNewline
+                Start-Process -FilePath ".\MultiMonitorTool.exe" -ArgumentList "/MoveWindow $MonitorID Process `"$procName`" /Maximize" -Wait
+                Write-Host " Done." -ForegroundColor Green
+            }
+        }
+    }
+}
+
+Write-Host ""
+Write-Host "--- Restore Sequence Finished ---" -ForegroundColor Green
+Read-Host "Press ENTER to close"

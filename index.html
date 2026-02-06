@@ -175,7 +175,8 @@
                                     /* NEW: Add scrolling and background to ensure buttons are reachable */
                                     overflow-y: auto; 
                                     background: var(--card-bg); 
-                                    z-index: 10;
+                                    z-index: 100; /* Higher than the modal overlay */
+                                    pointer-events: all; /* Allow interaction with the content */
                                     }
         #accessModal #formSuccess[hidden] { display: none; }
         #accessModal .form-success-headline { margin-bottom: 8px; }
@@ -224,8 +225,9 @@
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" id="accessModalClose" onclick="handleAccessModalClose()">×</span>
+        <span class="close-modal" id="accessModalClose" onclick="toggleModal('accessModal', false)">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
+        
         <form id="stakeholderForm" class="stakeholder-form" method="post">
             <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
@@ -264,12 +266,13 @@
                 <button type="submit" class="form-submit">Submit</button>
             </div>
         </form>
+        
         <div id="formSuccess" class="form-success reveal-text" hidden>
             <p class="form-success-headline">Thank <span class="accent">you.</span></p>
             <p class="form-success-sub">We've received your message. If a response is appropriate, someone will be in touch.</p>
             <div class="form-success-buttons">
-                <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn">Click to close</button>
-                <button type="button" class="form-success-btn" id="successAnotherBtn">Submit another response</button>
+                <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn" onclick="closeSuccess()">Click to close</button>
+                <button type="button" class="form-success-btn" id="successAnotherBtn" onclick="resetFormToNew()">Submit another response</button>
             </div>
         </div>
         <div id="formNetworkError" class="form-network-error" hidden>
@@ -504,33 +507,114 @@
         window._formLastState = null;
     }
 
-    function toggleModal(id, show) { 
-        const modal = document.getElementById(id);
-        if (modal) modal.style.display = show ? 'flex' : 'none';
-        
-        if (id === 'accessModal' && show) {
-            modal.classList.remove('modal-fade-out');
-            // Start timer the moment the modal is visible
-            window._formOpenTime = Date.now();
-            
-            if (window._formLastState === 'success') {
-                resetFormToNew();
-            }
-        }
+    // This handles the "Soft Close"
+function toggleModal(modalId, show) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+
+    if (show) {
+        modal.style.display = 'flex'; // or 'block' depending on your CSS
+        document.body.style.overflow = 'hidden'; // Prevents background scrolling
+    } else {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
     }
 
-    function resetFormToNew() {
-        const form = document.getElementById('stakeholderForm');
+    function handleOutsideClick(event, modalId) {
+    if (event.target.id === modalId) {
         const formSuccess = document.getElementById('formSuccess');
-        const modalBody = document.getElementById('accessModalBody');
-        resetFormDataOnly();
-        if (modalBody) modalBody.classList.remove('success-visible');
-        if (form) form.hidden = false;
-        if (formSuccess) {
-            formSuccess.hidden = true;
-            formSuccess.classList.remove('reveal-active', 'fade-out');
+        const isSuccessView = formSuccess && !formSuccess.hidden;
+
+        if (modalId === 'accessModal' && isSuccessView) {
+            const now = Date.now();
+            const delay = 750; 
+            
+            // If the timestamp exists AND we are still within the grace period
+            if (window._successShownAt && (now - window._successShownAt < delay)) {
+                return; // Block the click
+            }
+
+            // Otherwise, it's a valid close
+            closeSuccess();
+        } else {
+            toggleModal(modalId, false);
         }
     }
+}
+    
+    function resetFormToNew() {
+    const form = document.getElementById('stakeholderForm');
+    const formSuccess = document.getElementById('formSuccess');
+    const modalBody = document.getElementById('accessModalBody');
+    const submitBtn = form.querySelector('.form-submit');
+
+        // 1. Clear all previous inputs
+        form.reset(); 
+
+        // 2. CRITICAL: Re-enable the submit button 
+        // It was set to .disabled = true in the submit handler
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+        }
+
+        // 3. Swap the visibility
+        form.hidden = false; // Show the form again
+        if (formSuccess) {
+            formSuccess.hidden = true; // Hide the success overlay
+        }
+
+        // 4. Remove the blur from the background
+        if (modalBody) {
+            modalBody.classList.remove('success-visible');
+        }
+
+        // 5. Reset the Time Trap
+        window._formOpenTime = Date.now();
+}
+
+function closeSuccess() {
+    // Check if enough time has passed since success was shown (e.g., 750ms)
+    const now = Date.now();
+    const delay = 750; 
+    if (window._successShownAt && (now - window._successShownAt < delay)) {
+        console.log("Close blocked: too soon after submission");
+        return; // Exit the function early
+    }
+
+    const formSuccess = document.getElementById('formSuccess');
+    const modal = document.getElementById('accessModal');
+    const form = document.getElementById('stakeholderForm');
+
+    if (formSuccess) formSuccess.hidden = true;
+    if (modal) modal.style.display = 'none';
+    
+    document.getElementById('accessModalBody').classList.remove('success-visible');
+    
+    if (form) {
+        form.reset();
+        form.hidden = false; // Prepare form for next time
+    }
+    
+    // Clear the timestamp so it's ready for a fresh start next time
+    window._successShownAt = null;
+    window._formLastState = 'ready';
+    
+    // Important: Ensure the form is visible for the next time it's opened
+    document.getElementById('stakeholderForm').hidden = false;
+    document.getElementById('formSuccess').hidden = true;
+    
+    toggleModal('accessModal', false);
+}
+
+function softCloseModal() {
+    // Just hide the modal container
+    document.getElementById('accessModal').style.display = 'none';
+    
+    // DO NOT call form.reset() here. 
+    // This preserves the text for when they click "Open" again.
+}
 
     // THE SUBMIT HANDLER
     document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
@@ -588,6 +672,7 @@
                 if (formSuccess) {
                     formSuccess.hidden = false;
                     formSuccess.classList.add('reveal-active');
+                    
                 }
                 form.hidden = true; 
             } else {
