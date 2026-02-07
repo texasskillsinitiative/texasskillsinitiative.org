@@ -1,0 +1,22 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "TSI Site Repo"
+        },
+        {
+            "path": "../../../Coding",
+            "name": "Coding (Global)"
+        }
+    ],
+    "settings": {
+        "chatgpt.openOnStartup": true,
+        // REMOVE files.exclude to keep it visible in explorer
+        "search.exclude": {
+            "**/global-ai-invisible": true
+        },
+        "files.watcherExclude": {
+            "**/global-ai-invisible/**": true
+        }
+    }
+}

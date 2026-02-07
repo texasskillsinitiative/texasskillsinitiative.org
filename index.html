@@ -139,6 +139,7 @@
         [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
         #accessModal .form-error { font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none; }
         #accessModal .form-error.visible { display: block; }
+        #accessModal .form-status { font-size: 0.8rem; color: var(--page-text-dim); margin: 6px 0 0 0; min-height: 1.1rem; }
         #accessModal .form-noscript { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; }
         #accessModal .form-noscript p { margin: 0; }
         #accessModal .form-success { text-align: center; margin-top: 20px; }
@@ -225,9 +226,10 @@
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" id="accessModalClose" onclick="toggleModal('accessModal', false)">×</span>
+        <span class="close-modal" id="accessModalClose" onclick="requestCloseAccessModal()">×</span>
         <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
-        
+
+        <div id="accessModalBody" class="access-modal-body">
         <form id="stakeholderForm" class="stakeholder-form" method="post">
             <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
@@ -265,6 +267,7 @@
                 </div>
                 <button type="submit" class="form-submit">Submit</button>
             </div>
+            <p id="formStatus" class="form-status" aria-live="polite" hidden></p>
         </form>
         
         <div id="formSuccess" class="form-success reveal-text" hidden>
@@ -280,6 +283,7 @@
         </div>
         <div id="formTimeError" class="form-time-error" hidden>
             <p>Woah, you went faster than the internet. Give it a moment and try again.</p>
+        </div>
         </div>
         </div>
     </div>
@@ -492,8 +496,15 @@
 
 <script>
     const FORM_ENDPOINT = 'https://httpbin.org/post';
+    const SUBMIT_MIN_MS = 3000;
+    const SUCCESS_GRACE_MS = 2000;
+    const SUBMIT_MAX_MS = 30000;
     window._formLastState = null;
     window._formOpenTime = 0;
+    window._isSubmitting = false;
+    window._submitStartedAt = 0;
+    window._submitStatusTimer = null;
+    window._submitMaxWaitTimer = null;
 
     function resetFormDataOnly() {
         const form = document.getElementById('stakeholderForm');
@@ -501,10 +512,78 @@
         const submitBtn = document.querySelector('.form-submit');
         if (submitBtn) {
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Request';
+            submitBtn.textContent = 'Submit';
         }
         window._formOpenTime = undefined;
         window._formLastState = null;
+        window._isSubmitting = false;
+        stopSubmissionTimers();
+        clearFormStatus();
+    }
+
+    function setFormStatus(message) {
+        const status = document.getElementById('formStatus');
+        if (!status) return;
+        status.textContent = message;
+        status.hidden = false;
+    }
+
+    function clearFormStatus() {
+        const status = document.getElementById('formStatus');
+        if (!status) return;
+        status.textContent = '';
+        status.hidden = true;
+    }
+
+    function startSubmissionTimers() {
+        stopSubmissionTimers();
+        const startedAt = window._submitStartedAt;
+        const updateProgress = () => {
+            const elapsed = Date.now() - startedAt;
+            if (elapsed <= 10000) {
+                setFormStatus('Submitting your form...');
+            } else if (elapsed <= 20000) {
+                setFormStatus('Still sending—thanks for your patience.');
+            } else if (elapsed <= 30000) {
+                setFormStatus('This is taking longer than expected.');
+            }
+        };
+        updateProgress();
+        window._submitStatusTimer = setInterval(updateProgress, 1000);
+        window._submitMaxWaitTimer = setTimeout(() => {
+            const networkError = document.getElementById('formNetworkError');
+            const submitBtn = document.querySelector('.form-submit');
+            if (networkError) {
+                networkError.querySelector('p').textContent = "We couldn't submit your form right now. Please try again.";
+                networkError.hidden = false;
+            }
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+            window._isSubmitting = false;
+            window._successShownAt = null;
+            clearFormStatus();
+            stopSubmissionTimers();
+        }, SUBMIT_MAX_MS);
+    }
+
+    function stopSubmissionTimers() {
+        if (window._submitStatusTimer) {
+            clearInterval(window._submitStatusTimer);
+            window._submitStatusTimer = null;
+        }
+        if (window._submitMaxWaitTimer) {
+            clearTimeout(window._submitMaxWaitTimer);
+            window._submitMaxWaitTimer = null;
+        }
+    }
+
+    function generateSubmissionId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return window.crypto.randomUUID();
+        }
+        return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
 
     // This handles the "Soft Close"
@@ -515,6 +594,9 @@ function toggleModal(modalId, show) {
     if (show) {
         modal.style.display = 'flex'; // or 'block' depending on your CSS
         document.body.style.overflow = 'hidden'; // Prevents background scrolling
+        if (modalId === 'accessModal' && !window._formOpenTime) {
+            window._formOpenTime = Date.now();
+        }
     } else {
         modal.style.display = 'none';
         document.body.style.overflow = '';
@@ -523,27 +605,35 @@ function toggleModal(modalId, show) {
 
     function handleOutsideClick(event, modalId) {
     if (event.target.id === modalId) {
+        if (modalId === 'accessModal') {
+            requestCloseAccessModal();
+            return;
+        }
+        toggleModal(modalId, false);
+    }
+}
+
+    function requestCloseAccessModal() {
         const formSuccess = document.getElementById('formSuccess');
         const isSuccessView = formSuccess && !formSuccess.hidden;
 
-        if (modalId === 'accessModal' && isSuccessView) {
-            const now = Date.now();
-            const delay = 750; 
-            
-            // If the timestamp exists AND we are still within the grace period
-            if (window._successShownAt && (now - window._successShownAt < delay)) {
-                return; // Block the click
-            }
-
-            // Otherwise, it's a valid close
-            closeSuccess();
-        } else {
-            toggleModal(modalId, false);
+        if (window._isSubmitting) {
+            return;
         }
+
+        if (isSuccessView) {
+            const now = Date.now();
+            if (window._successShownAt && (now - window._successShownAt < SUCCESS_GRACE_MS)) {
+                return;
+            }
+            closeSuccess();
+            return;
+        }
+
+        toggleModal('accessModal', false);
     }
-}
     
-    function resetFormToNew() {
+function resetFormToNew() {
     const form = document.getElementById('stakeholderForm');
     const formSuccess = document.getElementById('formSuccess');
     const modalBody = document.getElementById('accessModalBody');
@@ -572,17 +662,13 @@ function toggleModal(modalId, show) {
 
         // 5. Reset the Time Trap
         window._formOpenTime = Date.now();
+        window._successShownAt = null;
+        window._isSubmitting = false;
+        stopSubmissionTimers();
+        clearFormStatus();
 }
 
 function closeSuccess() {
-    // Check if enough time has passed since success was shown (e.g., 750ms)
-    const now = Date.now();
-    const delay = 750; 
-    if (window._successShownAt && (now - window._successShownAt < delay)) {
-        console.log("Close blocked: too soon after submission");
-        return; // Exit the function early
-    }
-
     const formSuccess = document.getElementById('formSuccess');
     const modal = document.getElementById('accessModal');
     const form = document.getElementById('stakeholderForm');
@@ -600,6 +686,9 @@ function closeSuccess() {
     // Clear the timestamp so it's ready for a fresh start next time
     window._successShownAt = null;
     window._formLastState = 'ready';
+    window._isSubmitting = false;
+    stopSubmissionTimers();
+    clearFormStatus();
     
     // Important: Ensure the form is visible for the next time it's opened
     document.getElementById('stakeholderForm').hidden = false;
@@ -620,6 +709,10 @@ function softCloseModal() {
     document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
         // PREVENT the page from clearing/refreshing
         e.preventDefault(); 
+
+        if (window._isSubmitting) {
+            return;
+        }
         
         const form = this;
         const submitBtn = form.querySelector('.form-submit');
@@ -628,15 +721,20 @@ function softCloseModal() {
         const emailError = document.getElementById('emailError');
         const modalBody = document.getElementById('accessModalBody');
         const formSuccess = document.getElementById('formSuccess');
+        const successCloseBtn = document.getElementById('successCloseBtn');
+        const successAnotherBtn = document.getElementById('successAnotherBtn');
 
         // Reset UI state
         if (timeError) timeError.hidden = true;
-        if (networkError) networkError.hidden = true;
+        if (networkError) {
+            networkError.hidden = true;
+            networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
+        }
         if (emailError) emailError.classList.remove('visible');
 
         // 1. Check Time Trap (3 seconds)
         const timeElapsed = Date.now() - (window._formOpenTime || 0);
-        if (timeElapsed < 3000) {
+        if (timeElapsed < SUBMIT_MIN_MS) {
             if (timeError) timeError.hidden = false;
             return; // Stops here, text stays in boxes
         }
@@ -652,12 +750,16 @@ function softCloseModal() {
         }
 
         // 3. Start Submission
+        window._isSubmitting = true;
+        window._submitStartedAt = Date.now();
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
+        startSubmissionTimers();
 
         // Prepare data
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+        data.submission_id = generateSubmissionId();
 
         fetch(FORM_ENDPOINT, {
             method: 'POST',
@@ -665,8 +767,15 @@ function softCloseModal() {
             body: JSON.stringify(data)
         })
         .then(res => {
+            if (!window._isSubmitting) {
+                return;
+            }
             if (res.ok) {
+                window._successShownAt = Date.now();
                 window._formLastState = 'success';
+                window._isSubmitting = false;
+                stopSubmissionTimers();
+                clearFormStatus();
                 // Trigger Success UI
                 if (modalBody) modalBody.classList.add('success-visible');
                 if (formSuccess) {
@@ -674,15 +783,28 @@ function softCloseModal() {
                     formSuccess.classList.add('reveal-active');
                     
                 }
+                if (successCloseBtn) successCloseBtn.disabled = true;
+                if (successAnotherBtn) successAnotherBtn.disabled = true;
+                setTimeout(() => {
+                    if (successCloseBtn) successCloseBtn.disabled = false;
+                    if (successAnotherBtn) successAnotherBtn.disabled = false;
+                }, SUCCESS_GRACE_MS);
                 form.hidden = true; 
             } else {
                 throw new Error("Server error");
             }
         })
         .catch(err => {
+            if (!window._isSubmitting) {
+                return;
+            }
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit Request';
+            submitBtn.textContent = 'Submit';
             if (networkError) networkError.hidden = false;
+            window._isSubmitting = false;
+            window._successShownAt = null;
+            stopSubmissionTimers();
+            clearFormStatus();
         });
     });
 
