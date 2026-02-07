@@ -760,11 +760,29 @@ function softCloseModal() {
         // Prepare data
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
-        data.submission_id = generateSubmissionId();
+
+        const locationRaw = (data.location || '').toString().trim();
+        let locationCity = '';
+        let locationCountry = '';
+        if (locationRaw) {
+            const parts = locationRaw.split(',').map(part => part.trim()).filter(Boolean);
+            if (parts.length > 1) {
+                locationCountry = parts.pop();
+                locationCity = parts.join(', ');
+            } else {
+                locationCity = parts[0];
+            }
+        }
+
+        data.form_id = generateSubmissionId();
+        data.location_city = locationCity;
+        data.location_country = locationCountry;
+        data.page_path = window.location.pathname || '';
+        data.referrer = document.referrer || '';
+        data.user_agent = navigator.userAgent || '';
 
         fetch(FORM_ENDPOINT, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         })
         .then(res => {
