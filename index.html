@@ -22,7 +22,7 @@
             --img-placeholder: #161f30;
             --status-green: #10b981;
         }
-
+        
         [data-theme="light"] {
             --frame-bg: #ffffff; 
             --frame-border: #e2e8f0;
@@ -495,7 +495,7 @@
 </footer>
 
 <script>
-    const FORM_ENDPOINT = 'https://httpbin.org/post';
+    const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec';
     const SUBMIT_MIN_MS = 3000;
     const SUCCESS_GRACE_MS = 2000;
     const SUBMIT_MAX_MS = 30000;
@@ -652,49 +652,50 @@ function resetFormToNew() {
         // 3. Swap the visibility
         form.hidden = false; // Show the form again
         if (formSuccess) {
-            formSuccess.hidden = true; // Hide the success overlay
-        }
-
-        // 4. Remove the blur from the background
-        if (modalBody) {
-            modalBody.classList.remove('success-visible');
-        }
-
-        // 5. Reset the Time Trap
-        window._formOpenTime = Date.now();
-        window._successShownAt = null;
-        window._isSubmitting = false;
-        stopSubmissionTimers();
-        clearFormStatus();
-}
-
-function closeSuccess() {
-    const formSuccess = document.getElementById('formSuccess');
-    const modal = document.getElementById('accessModal');
-    const form = document.getElementById('stakeholderForm');
-
-    if (formSuccess) formSuccess.hidden = true;
-    if (modal) modal.style.display = 'none';
-    
-    document.getElementById('accessModalBody').classList.remove('success-visible');
-    
-    if (form) {
-        form.reset();
-        form.hidden = false; // Prepare form for next time
+        formSuccess.hidden = true; // Hide the success overlay
     }
-    
-    // Clear the timestamp so it's ready for a fresh start next time
+
+    // 4. Remove the blur from the background
+    if (modalBody) {
+        modalBody.classList.remove('success-visible');
+    }
+
+    // 5. Reset the Time Trap
+    window._formOpenTime = Date.now();
     window._successShownAt = null;
-    window._formLastState = 'ready';
     window._isSubmitting = false;
     stopSubmissionTimers();
     clearFormStatus();
+}
+
+function closeSuccess() {
+    const form = document.getElementById('stakeholderForm');
+    const formSuccess = document.getElementById('formSuccess');
+    const submitBtn = form.querySelector('.form-submit');
+
+    // 1. RESET THE UI: This is what was missing
+    if (form) {
+        form.reset();         // Clears the text
+        form.hidden = false;  // Makes form visible for next time
+    }
+    if (formSuccess) formSuccess.hidden = true; // Hides the "Thank You"
     
-    // Important: Ensure the form is visible for the next time it's opened
-    document.getElementById('stakeholderForm').hidden = false;
-    document.getElementById('formSuccess').hidden = true;
-    
+    // 2. RESET THE BUTTON: Unlocks the "Sending..." state
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+    }
+
+    // 3. EXIT
     toggleModal('accessModal', false);
+    document.getElementById('accessModalBody').classList.remove('success-visible');
+    
+    // 4. RESET GLOBALS
+    window._formLastState = 'ready';
+    window._successShownAt = null;
+    window._isSubmitting = false;
+    stopSubmissionTimers();
+    clearFormStatus();
 }
 
 function softCloseModal() {
@@ -767,21 +768,20 @@ function softCloseModal() {
             body: JSON.stringify(data)
         })
         .then(res => {
-            if (!window._isSubmitting) {
-                return;
-            }
-            if (res.ok) {
-                window._successShownAt = Date.now();
-                window._formLastState = 'success';
-                window._isSubmitting = false;
-                stopSubmissionTimers();
-                clearFormStatus();
+                if (!window._isSubmitting) {
+                    return;
+                }
+                if (res.ok) {
+                    window._successShownAt = Date.now();
+                    window._formLastState = 'success';
+                    window._isSubmitting = false;
+                    stopSubmissionTimers();
+                    clearFormStatus();
                 // Trigger Success UI
                 if (modalBody) modalBody.classList.add('success-visible');
                 if (formSuccess) {
                     formSuccess.hidden = false;
                     formSuccess.classList.add('reveal-active');
-                    
                 }
                 if (successCloseBtn) successCloseBtn.disabled = true;
                 if (successAnotherBtn) successAnotherBtn.disabled = true;
