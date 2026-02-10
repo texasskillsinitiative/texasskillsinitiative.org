@@ -5,8 +5,8 @@
             "name": "TSI Site Repo"
         },
         {
-            "path": "../../../Coding",
-            "name": "Coding (Global)"
+            "path": "C:\\dev\\global-access",
+            "name": "Global Access"
         }
     ],
     "settings": {

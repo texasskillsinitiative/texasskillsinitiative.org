@@ -82,7 +82,3 @@ if (Test-Path $WindowDataFile) {
         }
     }
 }
-
-Write-Host ""
-Write-Host "--- Restore Sequence Finished ---" -ForegroundColor Green
-Read-Host "Press ENTER to close"
