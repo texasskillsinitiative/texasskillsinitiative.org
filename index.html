@@ -5,187 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Texas Skills Initiative | Global Hub Strategy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-    <style>
-        html { scroll-behavior: smooth; }
-        :root {
-            --bg-dark: #0b1220;
-            --bg-light: #f1f5f9;
-            --logo-size: 65px;
-            --frame-bg: var(--bg-dark); 
-            --frame-border: #1d2a3a;
-            --page-bg: var(--bg-dark); 
-            --page-text-main: #e6f1ff;
-            --page-text-dim: #8892b0;
-            --card-bg: #111b2d;
-            --accent: #c5a059;
-            --accent-soft: rgba(197, 160, 89, 0.1);
-            --img-placeholder: #161f30;
-            --status-green: #10b981;
-        }
-        
-        [data-theme="light"] {
-            --frame-bg: #ffffff; 
-            --frame-border: #e2e8f0;
-            --page-bg: var(--bg-light);
-            --page-text-main: #0f172a;
-            --page-text-dim: #334155;
-            --card-bg: #ffffff;
-            --accent: #8b6b23;
-            --accent-soft: rgba(139, 107, 35, 0.1);
-            --img-placeholder: #e2e8f0;
-        }
-
-        body { background-color: var(--page-bg); color: var(--page-text-dim); font-family: 'Inter', sans-serif; margin: 0; transition: background 0.4s ease; }
-
-        /* --- ANIMATIONS --- */
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        @keyframes nodePulse {
-            0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.7); }
-            70% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 10px rgba(197, 160, 89, 0); }
-            100% { transform: scale(1); opacity: 0; box-shadow: 0 0 0 0 rgba(197, 160, 89, 0); }
-        }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .reveal-text { opacity: 0; }
-        .reveal-active { animation: fadeInUp 1s ease forwards; }
-        .reveal-delay-1 { animation-delay: 0.3s; }
-        .reveal-delay-2 { animation-delay: 0.6s; }
-        
-        /* --- NAVIGATION --- */
-        nav { background-color: var(--frame-bg); border-bottom: 1px solid var(--frame-border); padding: 10px 50px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; height: 95px; }
-        .logo-container { flex: 1; display: flex; align-items: center; }
-        .logo { height: var(--logo-size); width: auto; display: none; }
-        [data-theme="dark"] .logo-dark { display: block; }
-        [data-theme="light"] .logo-light { display: block; }
-
-        .header-index { display: flex; gap: 30px; justify-content: center; flex: 2; }
-        .header-index a { text-decoration: none; display: flex; align-items: center; gap: 8px; opacity: 0.6; transition: 0.3s; }
-        .header-index a:hover { opacity: 1; }
-        .nav-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.75rem; font-weight: 700; }
-        .nav-label { color: var(--page-text-main); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
-
-        .header-actions { flex: 1; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
-        .btn-portal { font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 1px; border: 1px solid var(--accent); padding: 6px 12px; cursor: pointer; background: transparent; transition: 0.3s; width: 140px; text-align: center; }
-        .btn-portal:hover { background: var(--accent); color: var(--frame-bg); }
-        .btn-external { border-color: var(--page-text-dim); color: var(--page-text-dim); }
-
-        /* --- MODALS --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 18, 32, 0.95); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--frame-border); width: 100%; max-width: 450px; padding: 40px; position: relative; text-align: center; }
-        .modal-logo { height: 50px; width: auto; margin: 0 auto 20px auto; }
-        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem; color: var(--page-text-dim); }
-        .option-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
-        .option-btn { background: var(--page-bg); border: 1px solid var(--frame-border); padding: 18px; color: var(--page-text-main); text-align: left; cursor: pointer; transition: 0.3s; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
-        .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }
-
-        /* --- SECTIONS --- */
-        .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }
-        .header-group { display: flex; align-items: baseline; gap: 15px; margin-bottom: 40px; }
-        .section-id { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 1.25rem; font-weight: 700; }
-        .section-title { color: var(--page-text-main); font-size: 3.5rem; font-weight: 300; text-transform: uppercase; letter-spacing: -1px; margin: 0; }
-        .instruction-box { background: var(--accent-soft); border-left: 4px solid var(--accent); padding: 30px; margin-bottom: 40px; text-align: left; }
-        
-        /* --- PIPELINE --- */
-        .pipeline-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
-        .pipeline-table td { padding: 20px; color: var(--page-text-main); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; background: var(--card-bg); border-top: 1px solid var(--frame-border); border-bottom: 1px solid var(--frame-border); }
-        .sync-track { width: 100%; height: 4px; background: var(--frame-border); border-radius: 2px; margin-top: 10px; position: relative; }
-        .sync-progress { height: 100%; background: var(--accent); border-radius: 2px; position: relative; width: 0%; transition-property: width; transition-timing-function: linear; }
-        .activity-node { position: absolute; right: -4px; top: -3px; height: 10px; width: 10px; background: var(--accent); border-radius: 50%; box-shadow: 0 0 10px var(--accent); animation: nodePulse 1.5s infinite; }
-        .phase-label { font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; margin-bottom: 4px; }
-
-        /* --- RUBRIC & GRID --- */
-        .rubric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; margin-top: 40px; }
-        .rubric-item { border: 1px solid var(--frame-border); background: var(--card-bg); padding: 20px; }
-        .workflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
-        .workflow-step { background: var(--card-bg); padding: 30px; border: 1px solid var(--frame-border); text-align: left; }
-        .step-num { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.7rem; font-weight: 700; display: block; margin-bottom: 10px; }
-
-        .asset-image { overflow: hidden; border: 1px solid var(--frame-border); }
-        .asset-image img { width: 100%; height: auto; display: block; opacity: 0; transition: 1.2s; }
-        .asset-image.revealed img { opacity: 1; }
-
-        .btn-cta { background: var(--accent); color: var(--bg-dark); padding: 18px 40px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; transition: 0.3s; }
-        [data-theme="light"] .btn-cta { color: #ffffff; }
-
-        footer { background-color: var(--frame-bg); border-top: 1px solid var(--frame-border); padding: 40px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
-        .status-pill { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; color: var(--page-text-dim); }
-        .status-dot { height: 6px; width: 6px; background-color: var(--status-green); border-radius: 50%; animation: pulse 2s infinite; }
-
-        .theme-switch { display: inline-block; height: 20px; width: 40px; position: relative; }
-        .theme-switch input { display:none; }
-        .slider { background-color: var(--frame-border); cursor: pointer; position: absolute; top: 0; left: 0; right: 0; bottom: 0; transition: .4s; border-radius: 20px; }
-        .slider:before { background-color: white; content: ""; height: 14px; width: 14px; left: 4px; bottom: 3px; position: absolute; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-
-        /* --- ACCESS MODAL FORM --- */
-        #accessModal .form-intro { font-size: 0.9rem; line-height: 1.5; color: var(--page-text-dim); margin: 0 0 20px 0; text-align: left; }
-        #accessModal .stakeholder-form { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; text-align: left; }
-        #accessModal .form-field { display: flex; flex-direction: column; gap: 4px; }
-        #accessModal .form-field label { font-size: 0.8rem; font-weight: 700; color: var(--page-text-main); }
-        #accessModal .form-field .form-helper { font-size: 0.75rem; color: var(--page-text-dim); }
-        #accessModal .form-field input, #accessModal .form-field textarea { background: var(--page-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 10px 12px; font-size: 0.9rem; font-family: inherit; }
-        #accessModal .form-field input:focus, #accessModal .form-field textarea:focus { outline: none; border-color: var(--accent); }
-        #accessModal .form-field textarea { min-height: 80px; resize: vertical; }
-        #accessModal .form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-        #accessModal .form-actions { display: flex; align-items: flex-start; margin-top: 8px; flex-wrap: wrap; gap: 12px; }
-        #accessModal .form-actions > div { display: flex; flex-direction: column; align-items: flex-start; }
-        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; }
-        [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
-        #accessModal .form-error { font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none; }
-        #accessModal .form-error.visible { display: block; }
-        #accessModal .form-status { font-size: 0.8rem; color: var(--page-text-dim); margin: 6px 0 0 0; min-height: 1.1rem; }
-        #accessModal .form-noscript { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 12px; }
-        #accessModal .form-noscript p { margin: 0; }
-        #accessModal .form-success { text-align: center; margin-top: 20px; }
-        #accessModal .form-success-headline { font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 700; color: var(--page-text-main); line-height: 1.1; letter-spacing: -1px; margin: 0 0 12px 0; text-transform: uppercase; }
-        #accessModal .form-success-headline .accent { color: var(--accent); }
-        #accessModal .form-success-sub { font-size: 0.9rem; color: var(--page-text-dim); margin: 0 0 24px 0; line-height: 1.4; }
-        #accessModal .form-success-buttons { display: flex; flex-direction: column; gap: 10px; }
-        #accessModal .form-success-btn { padding: 12px 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid var(--frame-border); background: var(--page-bg); color: var(--page-text-main); transition: 0.3s; }
-        #accessModal .form-success-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--card-bg); }
-        #accessModal .form-success-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        #accessModal .form-success-btn-primary { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
-        [data-theme="light"] #accessModal .form-success-btn-primary { color: #ffffff; }
-        #accessModal .form-success.fade-out { animation: fadeOut 0.4s ease forwards; }
-        #accessModal .form-network-error, #accessModal .form-time-error { text-align: left; margin-top: 20px; }
-        #accessModal .form-network-error p, #accessModal .form-time-error p { margin: 0; font-size: 0.95rem; color: var(--accent); line-height: 1.5; }
-        #accessModal .form-clear { background: transparent; border: 1px solid var(--page-text-dim); color: var(--page-text-dim); padding: 8px 16px; font-size: 0.75rem; cursor: pointer; transition: 0.3s; }
-        #accessModal .form-clear:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-        #accessModal .form-clear:disabled { opacity: 0.5; cursor: not-allowed; }
-        #accessModal .form-clear-helper { font-size: 0.7rem; color: var(--page-text-dim); margin-top: 4px; }
-        #accessModal .access-modal-body { position: relative; min-height: 280px; max-height: 65vh; overflow-y: auto; }
-        #accessModal .access-modal-body.success-visible #stakeholderForm { filter: blur(5px); opacity: 0.35; pointer-events: none; transition: filter 0.3s, opacity 0.3s; }
-        #accessModal #formSuccess { 
-                                    position: absolute; 
-                                    top: 0; 
-                                    left: 0; 
-                                    right: 0; 
-                                    bottom: 0; 
-                                    display: flex; 
-                                    flex-direction: column; 
-                                    align-items: center; 
-                                    justify-content: center; 
-                                    padding: 24px; 
-                                    text-align: center; 
-                                    /* NEW: Add scrolling and background to ensure buttons are reachable */
-                                    overflow-y: auto; 
-                                    background: var(--card-bg); 
-                                    z-index: 100; /* Higher than the modal overlay */
-                                    pointer-events: all; /* Allow interaction with the content */
-                                    }
-        #accessModal #formSuccess[hidden] { display: none; }
-        #accessModal .form-success-headline { margin-bottom: 8px; }
-        #accessModal .form-success-sub { margin-bottom: 20px; }
-        #accessModal .form-success-buttons { width: 100%; max-width: 280px; }
-        #accessModal.modal-fade-out { animation: fadeOut 0.4s ease forwards; }
-        #accessModal #stakeholderForm.form-fade-in { animation: fadeIn 0.4s ease both; }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 <!-- Navigation Section Start -->
@@ -194,26 +14,26 @@
         <img src="assets/logo/logo_tdark.png" class="logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="logo logo-light" alt="TSI">
     </div>
-    <div class="header-index">
-        <a href="#overview"><span class="nav-num">00</span><span class="nav-label">Overview</span></a>
-        <a href="#mandate"><span class="nav-num">01</span><span class="nav-label">Mandate</span></a>
-        <a href="#rubric"><span class="nav-num">02</span><span class="nav-label">Rubric</span></a>
-        <a href="#pipeline"><span class="nav-num">03</span><span class="nav-label">Pipeline</span></a>
-        <a href="#engagement"><span class="nav-num">04</span><span class="nav-label">Engagement</span></a>
+    <div class="header-index" role="tablist" aria-label="Primary">
+        <a href="#overview" role="tab" id="tab-overview" aria-controls="overview"><span class="nav-num">00</span><span class="nav-label">Overview</span></a>
+        <a href="#mandate" role="tab" id="tab-mandate" aria-controls="mandate"><span class="nav-num">01</span><span class="nav-label">Mandate</span></a>
+        <a href="#rubric" role="tab" id="tab-rubric" aria-controls="rubric"><span class="nav-num">02</span><span class="nav-label">Rubric</span></a>
+        <a href="#pipeline" role="tab" id="tab-pipeline" aria-controls="pipeline"><span class="nav-num">03</span><span class="nav-label">Pipeline</span></a>
+        <a href="#engagement" role="tab" id="tab-engagement" aria-controls="engagement"><span class="nav-num">04</span><span class="nav-label">Engagement</span></a>
     </div>
     <div class="header-actions">
-        <button class="btn-portal" onclick="toggleModal('portalModal', true)">TSI INTERNAL</button>
-        <button class="btn-portal btn-external" onclick="toggleModal('accessModal', true)">PARTNER INQUIRY</button>
+        <button class="btn-portal" data-modal-open="portalModal">TSI INTERNAL</button>
+        <button class="btn-portal btn-external" data-modal-open="accessModal">PARTNER INQUIRY</button>
     </div>
 </nav>
 <!-- Navigation Section End -->
 <!-- Portal Modal Section Start --> 
-<div class="modal-overlay" id="portalModal" onclick="handleOutsideClick(event, 'portalModal')">
+<div class="modal-overlay" id="portalModal" data-modal-overlay>
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" onclick="toggleModal('portalModal', false)">×</span>
-        <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Staff Gateway</h3>
+        <span class="close-modal" data-modal-close="portalModal">×</span>
+        <h3>Staff Gateway</h3>
         <div class="option-grid">
             <div class="option-btn">EMPLOYEE SSO <span class="nav-num">SECURE</span></div>
             <div class="option-btn">REMOTE NODE ACCESS <span class="nav-num">VPN</span></div>
@@ -222,12 +42,12 @@
 </div>
 <!-- Portal Modal Section End -->
 <!-- Access Modal Section Start -->
-<div class="modal-overlay" id="accessModal" onclick="handleOutsideClick(event, 'accessModal')">
+<div class="modal-overlay" id="accessModal" data-modal-overlay>
     <div class="modal-content">
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" id="accessModalClose" onclick="requestCloseAccessModal()">×</span>
-        <h3 style="color:var(--page-text-main); text-transform:uppercase; letter-spacing:2px; font-size:0.9rem; margin:0;">Stakeholder Inquiry</h3>
+        <span class="close-modal" id="accessModalClose" data-modal-close="accessModal">×</span>
+        <h3>Stakeholder Inquiry</h3>
 
         <div id="accessModalBody" class="access-modal-body">
         <form id="stakeholderForm" class="stakeholder-form" method="post">
@@ -274,8 +94,8 @@
             <p class="form-success-headline">Thank <span class="accent">you.</span></p>
             <p class="form-success-sub">We've received your message. If a response is appropriate, someone will be in touch.</p>
             <div class="form-success-buttons">
-                <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn" onclick="closeSuccess()">Click to close</button>
-                <button type="button" class="form-success-btn" id="successAnotherBtn" onclick="resetFormToNew()">Submit another response</button>
+                <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn" data-action="success-close">Click to close</button>
+                <button type="button" class="form-success-btn" id="successAnotherBtn" data-action="success-another">Submit another response</button>
             </div>
         </div>
         <div id="formNetworkError" class="form-network-error" hidden>
@@ -289,74 +109,58 @@
     </div>
 </div>
 <!-- Access Modal Section End -->
-<!-- Overview Section Start -->
-<section class="section-wrap" id="overview" style="text-align: center; padding: 180px 50px;">
-    <span class="reveal-text" style="font-family:'JetBrains Mono'; font-size:0.75rem; letter-spacing:4px; color:var(--page-text-dim); text-transform:uppercase;">
-        Skills Without Frontiers
-    </span>
-    
-    <h1 style="font-size: 4.5rem; font-weight: 700; color: var(--page-text-main); line-height: 1.1; letter-spacing: -2px; margin: 25px 0;" class="reveal-text reveal-delay-1">
-        Texas-Tested.<br>
-        Globally Proven.<br>
-        <span style="color:var(--accent)">Locally Crafted.</span>
-    </h1>
-    
-    <p class="reveal-text reveal-delay-2" style="max-width: 700px; font-size: 1.1rem; margin: 0 auto; line-height: 1.6;">
-        The Texas Skills Initiative leverages the industrial power of the Texas economic model to build one-of-a-kind workforce ecosystems. We don't export templates; we engineer original solutions built exclusively for the distinct needs of <span style="color:var(--page-text-main); font-weight:700;">your growth region.</span>
-    </p>
-</section>
-<!-- Overview Section End -->
+<main class="tab-panels">
 <!-- Mandate Section Start -->
-<section class="section-wrap" id="mandate">
+<section class="section-wrap" id="mandate" role="tabpanel" aria-labelledby="tab-mandate" tabindex="-1">
     <div class="header-group"><span class="section-id">01 \</span><h2 class="section-title">Mandate</h2></div>
-    <div style="display:flex; gap:30px; align-items:flex-start; justify-content: center; max-width: 950px; margin: 40px auto 0 auto;">
-        <div class="asset-image" style="width:400px; flex-shrink:0;"><img src="assets/asset_1A.png"></div>
-        <div style="width: 450px; display: flex; flex-direction: column; gap: 30px;">
-            <div class="instruction-box" style="margin-bottom:0; padding: 25px;">
-                <p style="font-size: 1.4rem; color: var(--page-text-main); margin: 0; line-height: 1.2; font-weight: 700; letter-spacing: -0.5px;">
+    <div class="mandate-layout">
+        <div class="asset-image mandate-asset"><img src="assets/asset_1A.png"></div>
+        <div class="mandate-column">
+            <div class="instruction-box instruction-box--compact">
+                <p class="mandate-intro-text">
                     Identifying high-potential economic regions and aligning workforce systems.
                 </p>
             </div>
         
-            <div style="background: var(--card-bg); border: 1px solid var(--frame-border); padding: 40px; max-width: 600px;">
+            <div class="mandate-card">
     
-                <p style="margin: 0 0 30px 0; line-height: 1.4; font-size: 1.2rem; color: var(--page-text-main);">
-                    Texas industrial standards guide our methods, but <span style="color: var(--accent);"><strong>local context</strong></span> determines the outcome.
+                <p class="mandate-card-lead">
+                    Texas industrial standards guide our methods, but <span class="text-accent"><strong>local context</strong></span> determines the outcome.
                 </p>
                 
-                <div style="display: flex; flex-direction: column; gap: 28px; border-top: 1px solid var(--frame-border); padding-top: 30px;">
+                <div class="mandate-points">
                     
-                    <div style="display: flex; gap: 15px;">
-                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
-                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                    <div class="mandate-point">
+                        <span class="mandate-point-marker">[]</span>
+                        <p class="mandate-point-text">
                             We prioritize regional intelligence over external templates. We do not and <strong>will not</strong> deploy pre-set plans.
                         </p>
                     </div>
             
-                    <div style="display: flex; gap: 15px;">
-                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
-                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                    <div class="mandate-point">
+                        <span class="mandate-point-marker">[]</span>
+                        <p class="mandate-point-text">
                             Strategic success is <strong>impossible in a vacuum</strong>.
                         </p>
                     </div>
             
-                    <div style="display: flex; gap: 15px;">
-                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
-                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                    <div class="mandate-point">
+                        <span class="mandate-point-marker">[]</span>
+                        <p class="mandate-point-text">
                             Local institutional knowledge is the <strong>essential data</strong> that activates our framework.
                         </p>
                     </div>
             
-                    <div style="display: flex; gap: 15px;">
-                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
-                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                    <div class="mandate-point">
+                        <span class="mandate-point-marker">[]</span>
+                        <p class="mandate-point-text">
                             Collaboration begins at <strong>your table</strong>. We engineer solutions tailored to refine and enrich the local ecosystem.
                         </p>
                     </div>
             
-                    <div style="display: flex; gap: 15px;">
-                        <span style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 0.85rem; margin-top: 4px;">[]</span>
-                        <p style="margin:0; font-size: 1rem; line-height: 1.5; color: var(--page-text-main);">
+                    <div class="mandate-point">
+                        <span class="mandate-point-marker">[]</span>
+                        <p class="mandate-point-text">
                             Our audit identifies where your region <strong>already leads the world</strong>. We leverage your existing strengths with the global industrial pipeline.
                         </p>
                     </div>
@@ -368,100 +172,100 @@
 </section>
 <!-- Mandate Section End -->
 <!-- Rubric Section Start -->
-<section class="section-wrap" id="rubric">
+<section class="section-wrap" id="rubric" role="tabpanel" aria-labelledby="tab-rubric" tabindex="-1">
     <div class="header-group"><span class="section-id">02 \</span><h2 class="section-title">Rubric</h2></div>
     
-    <div style="display: flex; gap: 20px; align-items: stretch; margin-bottom: 40px;">
-        <div class="instruction-box" style="margin-bottom: 0; flex: 1;">
-            <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Pre-Recommendation Protocol</p>
-            <p style="margin:10px 0 0 0; font-size: 0.95rem;">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+    <div class="rubric-intro">
+        <div class="instruction-box rubric-intro-box">
+            <p class="rubric-intro-title">Pre-Recommendation Protocol</p>
+            <p class="rubric-intro-copy">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
         </div>
-        <div class="asset-image" style="flex: 1.5; border: 1px solid var(--frame-border);">
-            <img src="assets/analysis_banner.png" alt="Analysis Banner" style="height: 100%; width: 100%; object-fit: cover;">
+        <div class="asset-image rubric-banner">
+            <img src="assets/analysis_banner.png" alt="Analysis Banner" class="rubric-banner-img">
         </div>
     </div>
 
     <div class="rubric-grid">
         <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3A.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Vocational Literacy</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Regional technical education alignment based on the Texas Blueprint standards.</p>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3A.png"></div>
+            <h4 class="rubric-item-title">Vocational Literacy</h4>
+            <p class="rubric-item-copy">Regional technical education alignment based on the Texas Blueprint standards.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3B.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Onboarding Velocity</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3B.png"></div>
+            <h4 class="rubric-item-title">Onboarding Velocity</h4>
+            <p class="rubric-item-copy">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3C.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Regulatory Coherence</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3C.png"></div>
+            <h4 class="rubric-item-title">Regulatory Coherence</h4>
+            <p class="rubric-item-copy">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image" style="height:140px; margin-bottom:15px;"><img src="assets/asset_3D.png"></div>
-            <h4 style="color:var(--page-text-main); margin:0 0 10px 0;">Reliability</h4>
-            <p style="font-size:0.8rem; line-height:1.4;">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3D.png"></div>
+            <h4 class="rubric-item-title">Reliability</h4>
+            <p class="rubric-item-copy">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
         </div>
     </div>
 </section>
 <!-- Rubric Section End -->
 <!-- Pipeline Section Start -->
-<section class="section-wrap" id="pipeline">
+<section class="section-wrap" id="pipeline" role="tabpanel" aria-labelledby="tab-pipeline" tabindex="-1">
     <div class="header-group"><span class="section-id">03 \</span><h2 class="section-title">Pipeline</h2></div>
     
     <div class="instruction-box">
-        <p style="margin:0; color: var(--page-text-main); font-size: 1.1rem; font-weight: 700;">Live Synchronization Pipeline</p>
-        <p style="margin:10px 0 0 0; font-size: 0.95rem;">Telemetry tracking active industrial corridors.</p>
+        <p class="pipeline-title">Live Synchronization Pipeline</p>
+        <p class="pipeline-subtitle">Telemetry tracking active industrial corridors.</p>
     </div>
 
     <table class="pipeline-table" id="pipeline-metrics">
         <tbody>
             <tr>
-                <td style="width: 30%;"><strong>VN: Haiphong</strong><br><small style="opacity:0.6;">Macro + Satellite</small></td>
+                <td class="pipeline-location"><strong>VN: Haiphong</strong><br><small class="text-muted">Macro + Satellite</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Technical Audit</span><span style="color:var(--accent)">68%</span></div>
+                    <div class="phase-label"><span>Phase: Technical Audit</span><span class="text-accent">68%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="68"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>PH: Clark</strong><br><small style="opacity:0.6;">Community Hub</small></td>
+                <td><strong>PH: Clark</strong><br><small class="text-muted">Community Hub</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Regulatory Review</span><span style="color:var(--accent)">32%</span></div>
+                    <div class="phase-label"><span>Phase: Regulatory Review</span><span class="text-accent">32%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="32"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>MX: Monterrey</strong><br><small style="opacity:0.6;">Advanced Manufacturing</small></td>
+                <td><strong>MX: Monterrey</strong><br><small class="text-muted">Advanced Manufacturing</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Site Evaluation</span><span style="color:var(--accent)">85%</span></div>
+                    <div class="phase-label"><span>Phase: Site Evaluation</span><span class="text-accent">85%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="85"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>MY: Penang</strong><br><small style="opacity:0.6;">Semiconductor Cluster</small></td>
+                <td><strong>MY: Penang</strong><br><small class="text-muted">Semiconductor Cluster</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Curriculum Alignment</span><span style="color:var(--accent)">51%</span></div>
+                    <div class="phase-label"><span>Phase: Curriculum Alignment</span><span class="text-accent">51%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="51"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>PL: Wroclaw</strong><br><small style="opacity:0.6;">Logistics Node</small></td>
+                <td><strong>PL: Wroclaw</strong><br><small class="text-muted">Logistics Node</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Infrastructure Audit</span><span style="color:var(--accent)">20%</span></div>
+                    <div class="phase-label"><span>Phase: Infrastructure Audit</span><span class="text-accent">20%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="20"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>MA: Tangier</strong><br><small style="opacity:0.6;">Automotive Hub</small></td>
+                <td><strong>MA: Tangier</strong><br><small class="text-muted">Automotive Hub</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Regulatory Sync</span><span style="color:var(--accent)">44%</span></div>
+                    <div class="phase-label"><span>Phase: Regulatory Sync</span><span class="text-accent">44%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="44"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
             <tr>
-                <td><strong>BR: Campinas</strong><br><small style="opacity:0.6;">Tech Corridor</small></td>
+                <td><strong>BR: Campinas</strong><br><small class="text-muted">Tech Corridor</small></td>
                 <td>
-                    <div class="phase-label"><span>Phase: Exploratory</span><span style="color:var(--accent)">12%</span></div>
+                    <div class="phase-label"><span>Phase: Exploratory</span><span class="text-accent">12%</span></div>
                     <div class="sync-track"><div class="sync-progress" data-target="12"><div class="activity-node"></div></div></div>
                 </td>
             </tr>
@@ -470,383 +274,47 @@
 </section>
 <!-- Pipeline Section End -->
 <!-- Engagement Section Start -->
-<section class="section-wrap" id="engagement" style="border-bottom:none;">
-    <div class="header-group" style="justify-content:center;"><span class="section-id">04 \</span><h2 class="section-title">Engagement</h2></div>
+<section class="section-wrap section-wrap--no-border" id="engagement" role="tabpanel" aria-labelledby="tab-engagement" tabindex="-1">
+    <div class="header-group header-group--center"><span class="section-id">04 \</span><h2 class="section-title">Engagement</h2></div>
     <div class="workflow-grid">
-        <div class="workflow-step"><span class="step-num">01. SUBMISSION</span><p style="font-size:0.8rem; line-height:1.5;">Identify entity type and submit a formal Letter of Intent (LOI) via our secure portal.</p></div>
-        <div class="workflow-step"><span class="step-num">02. TECHNICAL AUDIT</span><p style="font-size:0.8rem; line-height:1.5;">TSI analysts perform a rigorous 30-day review evaluating core Rubric factors.</p></div>
-        <div class="workflow-step"><span class="step-num">03. SYNCHRONIZATION</span><p style="font-size:0.8rem; line-height:1.5;">Upon approval, Texas industrial frameworks and standards are deployed to the node.</p></div>
+        <div class="workflow-step"><span class="step-num">01. SUBMISSION</span><p class="workflow-copy">Identify entity type and submit a formal Letter of Intent (LOI) via our secure portal.</p></div>
+        <div class="workflow-step"><span class="step-num">02. TECHNICAL AUDIT</span><p class="workflow-copy">TSI analysts perform a rigorous 30-day review evaluating core Rubric factors.</p></div>
+        <div class="workflow-step"><span class="step-num">03. SYNCHRONIZATION</span><p class="workflow-copy">Upon approval, Texas industrial frameworks and standards are deployed to the node.</p></div>
     </div>
-    <div style="text-align:center; margin-top:40px;">
-        <button class="btn-cta" onclick="toggleModal('accessModal', true)">INITIATE SECURE REQUEST</button>
+    <div class="engagement-cta">
+        <button class="btn-cta" data-modal-open="accessModal">INITIATE SECURE REQUEST</button>
     </div>
 </section>
 <!-- Engagement Section End -->
+<!-- Overview Section Start -->
+<section class="section-wrap overview-hero" id="overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="-1">
+    <span class="reveal-text overview-tagline">
+        Skills Without Frontiers
+    </span>
+    
+    <h1 class="reveal-text reveal-delay-1 overview-title">
+        Texas-Tested.<br>
+        Globally Proven.<br>
+        <span class="text-accent">Locally Crafted.</span>
+    </h1>
+    
+    <p class="reveal-text reveal-delay-2 overview-copy">
+        The Texas Skills Initiative leverages the industrial power of the Texas economic model to build one-of-a-kind workforce ecosystems. We don't export templates; we engineer original solutions built exclusively for the distinct needs of <span class="text-main-strong">your growth region.</span>
+    </p>
+</section>
+<!-- Overview Section End -->
+</main>
 <!-- Footer Section Start -->
 <footer>
-    <div style="display:flex; align-items:center; gap:30px;">
+    <div class="footer-left">
         <div>© 2026 TEXAS SKILLS INITIATIVE</div>
         <div class="status-pill"><div class="status-dot"></div><span>SYSTEM: ACTIVE</span></div>
     </div>
-    <div style="display:flex; align-items:center; gap:15px;">
-        <span style="font-weight:700; text-transform:uppercase;">Visual Mode</span>
+    <div class="footer-right">
+        <span class="footer-label">Visual Mode</span>
         <label class="theme-switch"><input type="checkbox" id="checkbox"><div class="slider"></div></label>
     </div>
 </footer>
-
-<script>
-    const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec';
-    const SUBMIT_MIN_MS = 3000;
-    const SUCCESS_GRACE_MS = 2000;
-    const SUBMIT_MAX_MS = 30000;
-    window._formLastState = null;
-    window._formOpenTime = 0;
-    window._isSubmitting = false;
-    window._submitStartedAt = 0;
-    window._submitStatusTimer = null;
-    window._submitMaxWaitTimer = null;
-
-    function resetFormDataOnly() {
-        const form = document.getElementById('stakeholderForm');
-        if (form) form.reset();
-        const submitBtn = document.querySelector('.form-submit');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-        }
-        window._formOpenTime = undefined;
-        window._formLastState = null;
-        window._isSubmitting = false;
-        stopSubmissionTimers();
-        clearFormStatus();
-    }
-
-    function setFormStatus(message) {
-        const status = document.getElementById('formStatus');
-        if (!status) return;
-        status.textContent = message;
-        status.hidden = false;
-    }
-
-    function clearFormStatus() {
-        const status = document.getElementById('formStatus');
-        if (!status) return;
-        status.textContent = '';
-        status.hidden = true;
-    }
-
-    function startSubmissionTimers() {
-        stopSubmissionTimers();
-        const startedAt = window._submitStartedAt;
-        const updateProgress = () => {
-            const elapsed = Date.now() - startedAt;
-            if (elapsed <= 10000) {
-                setFormStatus('Submitting your form...');
-            } else if (elapsed <= 20000) {
-                setFormStatus('Still sending—thanks for your patience.');
-            } else if (elapsed <= 30000) {
-                setFormStatus('This is taking longer than expected.');
-            }
-        };
-        updateProgress();
-        window._submitStatusTimer = setInterval(updateProgress, 1000);
-        window._submitMaxWaitTimer = setTimeout(() => {
-            const networkError = document.getElementById('formNetworkError');
-            const submitBtn = document.querySelector('.form-submit');
-            if (networkError) {
-                networkError.querySelector('p').textContent = "We couldn't submit your form right now. Please try again.";
-                networkError.hidden = false;
-            }
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Submit';
-            }
-            window._isSubmitting = false;
-            window._successShownAt = null;
-            clearFormStatus();
-            stopSubmissionTimers();
-        }, SUBMIT_MAX_MS);
-    }
-
-    function stopSubmissionTimers() {
-        if (window._submitStatusTimer) {
-            clearInterval(window._submitStatusTimer);
-            window._submitStatusTimer = null;
-        }
-        if (window._submitMaxWaitTimer) {
-            clearTimeout(window._submitMaxWaitTimer);
-            window._submitMaxWaitTimer = null;
-        }
-    }
-
-    function generateSubmissionId() {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-            return window.crypto.randomUUID();
-        }
-        return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    }
-
-    // This handles the "Soft Close"
-function toggleModal(modalId, show) {
-    const modal = document.getElementById(modalId);
-    if (!modal) return;
-
-    if (show) {
-        modal.style.display = 'flex'; // or 'block' depending on your CSS
-        document.body.style.overflow = 'hidden'; // Prevents background scrolling
-        if (modalId === 'accessModal' && !window._formOpenTime) {
-            window._formOpenTime = Date.now();
-        }
-    } else {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-    }
-    }
-
-    function handleOutsideClick(event, modalId) {
-    if (event.target.id === modalId) {
-        if (modalId === 'accessModal') {
-            requestCloseAccessModal();
-            return;
-        }
-        toggleModal(modalId, false);
-    }
-}
-
-    function requestCloseAccessModal() {
-        const formSuccess = document.getElementById('formSuccess');
-        const isSuccessView = formSuccess && !formSuccess.hidden;
-
-        if (window._isSubmitting) {
-            return;
-        }
-
-        if (isSuccessView) {
-            const now = Date.now();
-            if (window._successShownAt && (now - window._successShownAt < SUCCESS_GRACE_MS)) {
-                return;
-            }
-            closeSuccess();
-            return;
-        }
-
-        toggleModal('accessModal', false);
-    }
-    
-function resetFormToNew() {
-    const form = document.getElementById('stakeholderForm');
-    const formSuccess = document.getElementById('formSuccess');
-    const modalBody = document.getElementById('accessModalBody');
-    const submitBtn = form.querySelector('.form-submit');
-
-        // 1. Clear all previous inputs
-        form.reset(); 
-
-        // 2. CRITICAL: Re-enable the submit button 
-        // It was set to .disabled = true in the submit handler
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-        }
-
-        // 3. Swap the visibility
-        form.hidden = false; // Show the form again
-        if (formSuccess) {
-        formSuccess.hidden = true; // Hide the success overlay
-    }
-
-    // 4. Remove the blur from the background
-    if (modalBody) {
-        modalBody.classList.remove('success-visible');
-    }
-
-    // 5. Reset the Time Trap
-    window._formOpenTime = Date.now();
-    window._successShownAt = null;
-    window._isSubmitting = false;
-    stopSubmissionTimers();
-    clearFormStatus();
-}
-
-function closeSuccess() {
-    const form = document.getElementById('stakeholderForm');
-    const formSuccess = document.getElementById('formSuccess');
-    const submitBtn = form.querySelector('.form-submit');
-
-    // 1. RESET THE UI: This is what was missing
-    if (form) {
-        form.reset();         // Clears the text
-        form.hidden = false;  // Makes form visible for next time
-    }
-    if (formSuccess) formSuccess.hidden = true; // Hides the "Thank You"
-    
-    // 2. RESET THE BUTTON: Unlocks the "Sending..." state
-    if (submitBtn) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit';
-    }
-
-    // 3. EXIT
-    toggleModal('accessModal', false);
-    document.getElementById('accessModalBody').classList.remove('success-visible');
-    
-    // 4. RESET GLOBALS
-    window._formLastState = 'ready';
-    window._successShownAt = null;
-    window._isSubmitting = false;
-    stopSubmissionTimers();
-    clearFormStatus();
-}
-
-function softCloseModal() {
-    // Just hide the modal container
-    document.getElementById('accessModal').style.display = 'none';
-    
-    // DO NOT call form.reset() here. 
-    // This preserves the text for when they click "Open" again.
-}
-
-    // THE SUBMIT HANDLER
-    document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
-        // PREVENT the page from clearing/refreshing
-        e.preventDefault(); 
-
-        if (window._isSubmitting) {
-            return;
-        }
-        
-        const form = this;
-        const submitBtn = form.querySelector('.form-submit');
-        const timeError = document.getElementById('formTimeError');
-        const networkError = document.getElementById('formNetworkError');
-        const emailError = document.getElementById('emailError');
-        const modalBody = document.getElementById('accessModalBody');
-        const formSuccess = document.getElementById('formSuccess');
-        const successCloseBtn = document.getElementById('successCloseBtn');
-        const successAnotherBtn = document.getElementById('successAnotherBtn');
-
-        // Reset UI state
-        if (timeError) timeError.hidden = true;
-        if (networkError) {
-            networkError.hidden = true;
-            networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
-        }
-        if (emailError) emailError.classList.remove('visible');
-
-        // 1. Check Time Trap (3 seconds)
-        const timeElapsed = Date.now() - (window._formOpenTime || 0);
-        if (timeElapsed < SUBMIT_MIN_MS) {
-            if (timeError) timeError.hidden = false;
-            return; // Stops here, text stays in boxes
-        }
-
-        // 2. Simple Email Validation
-        const email = document.getElementById('email').value;
-        if (!email.includes('@')) {
-            if (emailError) {
-                emailError.textContent = "Please enter a valid email address.";
-                emailError.classList.add('visible');
-            }
-            return;
-        }
-
-        // 3. Start Submission
-        window._isSubmitting = true;
-        window._submitStartedAt = Date.now();
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Sending...';
-        startSubmissionTimers();
-
-        // Prepare data
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-
-        const locationRaw = (data.location || '').toString().trim();
-        let locationCity = '';
-        let locationCountry = '';
-        if (locationRaw) {
-            const parts = locationRaw.split(',').map(part => part.trim()).filter(Boolean);
-            if (parts.length > 1) {
-                locationCountry = parts.pop();
-                locationCity = parts.join(', ');
-            } else {
-                locationCity = parts[0];
-            }
-        }
-
-        data.form_id = generateSubmissionId();
-        data.location_city = locationCity;
-        data.location_country = locationCountry;
-        data.page_path = window.location.pathname || '';
-        data.referrer = document.referrer || '';
-        data.user_agent = navigator.userAgent || '';
-
-        fetch(FORM_ENDPOINT, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-        .then(res => {
-                if (!window._isSubmitting) {
-                    return;
-                }
-                if (res.ok) {
-                    window._successShownAt = Date.now();
-                    window._formLastState = 'success';
-                    window._isSubmitting = false;
-                    stopSubmissionTimers();
-                    clearFormStatus();
-                // Trigger Success UI
-                if (modalBody) modalBody.classList.add('success-visible');
-                if (formSuccess) {
-                    formSuccess.hidden = false;
-                    formSuccess.classList.add('reveal-active');
-                }
-                if (successCloseBtn) successCloseBtn.disabled = true;
-                if (successAnotherBtn) successAnotherBtn.disabled = true;
-                setTimeout(() => {
-                    if (successCloseBtn) successCloseBtn.disabled = false;
-                    if (successAnotherBtn) successAnotherBtn.disabled = false;
-                }, SUCCESS_GRACE_MS);
-                form.hidden = true; 
-            } else {
-                throw new Error("Server error");
-            }
-        })
-        .catch(err => {
-            if (!window._isSubmitting) {
-                return;
-            }
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-            if (networkError) networkError.hidden = false;
-            window._isSubmitting = false;
-            window._successShownAt = null;
-            stopSubmissionTimers();
-            clearFormStatus();
-        });
-    });
-
-    // Theme Toggle & Animations (Keep your existing code here)
-    const toggleSwitch = document.querySelector('#checkbox');
-    toggleSwitch.addEventListener('change', (e) => {
-        document.documentElement.setAttribute('data-theme', e.target.checked ? 'light' : 'dark');
-    });
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { 
-            if (entry.isIntersecting) {
-                entry.target.classList.add('reveal-active'); 
-                if (entry.target.classList.contains('asset-image')) entry.target.classList.add('revealed');
-                if (entry.target.id === 'pipeline-metrics') {
-                    entry.target.querySelectorAll('.sync-progress').forEach(bar => {
-                        const target = parseInt(bar.getAttribute('data-target'));
-                        bar.style.width = target + '%';
-                    });
-                }
-            } 
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal-text, .asset-image, #pipeline-metrics').forEach(el => observer.observe(el));
-</script>
+    <script src="js/main.js" defer></script>
 </body>
 </html>
