@@ -75,6 +75,8 @@
         .option-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
         .option-btn { background: var(--page-bg); border: 1px solid var(--frame-border); padding: 18px; color: var(--page-text-main); text-align: left; cursor: pointer; transition: 0.3s; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
         .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }
+        .option-btn--secondary { border-color: var(--page-text-dim); color: var(--page-text-dim); }
+        .option-btn--secondary:hover { color: var(--page-text-main); }
 
         /* --- SECTIONS --- */
         .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }
@@ -105,7 +107,7 @@
         .btn-cta { background: var(--accent); color: var(--bg-dark); padding: 18px 40px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; transition: 0.3s; }
         [data-theme="light"] .btn-cta { color: #ffffff; }
 
-        footer { background-color: var(--frame-bg); border-top: 1px solid var(--frame-border); padding: 40px 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; }
+        footer { background-color: var(--frame-bg); border-top: 1px solid var(--frame-border); padding: 0 50px; display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; height: 40px; }
         .status-pill { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; letter-spacing: 1px; color: var(--page-text-dim); }
         .status-dot { height: 6px; width: 6px; background-color: var(--status-green); border-radius: 50%; animation: pulse 2s infinite; }
 
@@ -151,7 +153,10 @@
         #accessModal .form-clear:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
         #accessModal .form-clear:disabled { opacity: 0.5; cursor: not-allowed; }
         #accessModal .form-clear-helper { font-size: 0.7rem; color: var(--page-text-dim); margin-top: 4px; }
-        #accessModal .access-modal-body { position: relative; min-height: 280px; max-height: 65vh; overflow-y: auto; }
+        #accessModal .access-modal-body { position: relative; min-height: 280px; max-height: 65vh; overflow-y: auto; scrollbar-gutter: stable; padding-right: 6px; scrollbar-width: thin; scrollbar-color: #1d2a3a #0b1220; }
+        #accessModal .access-modal-body::-webkit-scrollbar { width: 10px; }
+        #accessModal .access-modal-body::-webkit-scrollbar-track { background: #0b1220; }
+        #accessModal .access-modal-body::-webkit-scrollbar-thumb { background: #1d2a3a; border-radius: 10px; border: 2px solid #0b1220; }
         #accessModal .access-modal-body.success-visible #stakeholderForm { filter: blur(5px); opacity: 0.35; pointer-events: none; transition: filter 0.3s, opacity 0.3s; }
         #accessModal #formSuccess { 
                                     position: absolute; 
@@ -221,11 +226,44 @@
         .workflow-copy { font-size: 0.8rem; line-height: 1.5; }
         .engagement-cta { text-align: center; margin-top: 40px; }
 
+        /* --- 021026 STAFF GATEWAY --- */
+        .staff-gateway-021026 .staff-gateway-layout-021026 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 30px; align-items: start; }
+        .staff-gateway-label-021026 { margin: 0 0 12px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
+        .staff-gateway-copy-021026 { margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--page-text-main); }
+        .staff-gateway-profiles-021026 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        .staff-profile-card-021026 { background: var(--card-bg); border: 1px solid var(--frame-border); padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+        .staff-profile-image-021026 { width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); background: var(--img-placeholder); display: flex; align-items: center; justify-content: center; }
+        .staff-profile-image-021026 img { width: 100%; height: 100%; object-fit: cover; }
+        .staff-profile-name-021026 { margin: 0; color: var(--page-text-main); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
+        .staff-profile-role-021026 { margin: 4px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); }
+        .staff-gateway-disclaimer-021026 { margin: 30px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); max-width: 700px; }
+
         /* --- OVERVIEW LAYOUT --- */
         .overview-hero { text-align: center; padding: 180px 50px; }
         .overview-tagline { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 4px; color: var(--page-text-dim); text-transform: uppercase; }
         .overview-title { font-size: 4.5rem; font-weight: 700; color: var(--page-text-main); line-height: 1.1; letter-spacing: -2px; margin: 25px 0; }
         .overview-copy { max-width: 700px; font-size: 1.1rem; margin: 0 auto; line-height: 1.6; }
+
+        /* --- 021026 VPN GATE --- */
+        .vpn-gate-021026 { min-height: 100vh; display: flex; flex-direction: column; }
+        .vpn-nav-021026 { display: flex; align-items: center; justify-content: space-between; padding: 16px 50px; border-bottom: 1px solid var(--frame-border); background: var(--frame-bg); }
+        .vpn-nav-logo-021026 { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; }
+        .vpn-nav-logo-021026 img { height: 42px; width: auto; }
+        .vpn-nav-link-021026 { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase; color: var(--page-text-dim); text-decoration: none; border: 1px solid var(--frame-border); padding: 8px 14px; transition: 0.3s; }
+        .vpn-nav-link-021026:hover { border-color: var(--accent); color: var(--accent); }
+        .vpn-gate-main-021026 { flex: 1; display: flex; align-items: center; justify-content: center; padding: 80px 20px; }
+        .vpn-box-021026 { width: min(460px, 90vw); background: var(--card-bg); border: 1px solid var(--frame-border); padding: 32px; text-align: left; }
+        .vpn-status-021026 { display: flex; flex-direction: column; gap: 4px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px; font-size: 0.65rem; color: var(--accent); margin-bottom: 20px; }
+        .vpn-status-sub-021026 { color: var(--page-text-dim); font-size: 0.6rem; }
+        .vpn-title-021026 { margin: 0 0 8px 0; color: var(--page-text-main); text-transform: uppercase; letter-spacing: 2px; font-size: 1.1rem; }
+        .vpn-subtitle-021026 { margin: 0 0 24px 0; color: var(--page-text-dim); font-size: 0.85rem; }
+        .vpn-form-021026 { display: flex; flex-direction: column; gap: 14px; }
+        .vpn-form-021026 label { font-size: 0.75rem; color: var(--page-text-main); font-weight: 700; }
+        .vpn-form-021026 input { background: var(--page-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 10px 12px; font-size: 0.9rem; font-family: inherit; }
+        .vpn-form-021026 input:focus { outline: none; border-color: var(--accent); }
+        .vpn-submit-021026 { background: var(--accent); color: var(--bg-dark); padding: 12px 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; text-transform: uppercase; }
+        [data-theme="light"] .vpn-submit-021026 { color: #ffffff; }
+        .vpn-error-021026 { margin: 8px 0 0 0; font-size: 0.85rem; color: var(--accent); }
 
         /* --- FOOTER LAYOUT --- */
         .footer-left { display: flex; align-items: center; gap: 30px; }
@@ -251,7 +289,8 @@
         body[data-active-tab="mandate"] .header-index a[href="#mandate"],
         body[data-active-tab="rubric"] .header-index a[href="#rubric"],
         body[data-active-tab="pipeline"] .header-index a[href="#pipeline"],
-        body[data-active-tab="engagement"] .header-index a[href="#engagement"] {
+        body[data-active-tab="engagement"] .header-index a[href="#engagement"],
+        body[data-active-tab="staff-gateway-021026"] .header-index a[href="#staff-gateway-021026"] {
             background: var(--card-bg);
             border-color: var(--accent);
             opacity: 1;
@@ -263,7 +302,8 @@
             body:has(#mandate:target) .header-index a[href="#mandate"],
             body:has(#rubric:target) .header-index a[href="#rubric"],
             body:has(#pipeline:target) .header-index a[href="#pipeline"],
-            body:has(#engagement:target) .header-index a[href="#engagement"] {
+            body:has(#engagement:target) .header-index a[href="#engagement"],
+            body:has(#staff-gateway-021026:target) .header-index a[href="#staff-gateway-021026"] {
                 background: var(--card-bg);
                 border-color: var(--accent);
                 opacity: 1;
@@ -282,4 +322,10 @@
             .header-index { flex-wrap: wrap; justify-content: center; gap: 10px; }
             .header-index a { padding: 10px 12px; }
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+            .staff-gateway-021026 .staff-gateway-layout-021026 { grid-template-columns: 1fr; }
+            .vpn-nav-021026 { padding: 16px 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .staff-gateway-profiles-021026 { grid-template-columns: 1fr; }
         }
