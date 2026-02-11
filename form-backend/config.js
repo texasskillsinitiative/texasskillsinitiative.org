@@ -14,18 +14,20 @@ var CONFIG = {
 // Column schema used when appending rows. Keep stable and ordered.
 var SHEET_COLUMNS = [
   'timestamp_utc',
+  'timestamp_local',
   'handler_tier',
+  'concierge_track',
   'name',
   'email',
+  'role',
+  'focus',
   'org',
-  'location_city',
-  'location_country',
+  'loc_city',
+  'loc_state',
+  'loc_country',
   'message',
   'source',
   'page_path',
   'referrer',
-  'concierge_track',
-  'role',
-  'focus',
   'submission_id'
 ];

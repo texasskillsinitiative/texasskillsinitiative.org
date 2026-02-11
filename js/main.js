@@ -10,15 +10,15 @@
     window._submitMaxWaitTimer = null;
     // 021026_DigitalConcierge
     const _021026_TIER_MESSAGES = {
-        'Tier 1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
-        'Tier 2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
+        '1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+        '2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
     };
 
     function _021026_setConciergeVisibility(form, tier) {
         const groups = form.querySelectorAll('[data-concierge-group]');
         groups.forEach(group => {
             const groupName = group.getAttribute('data-concierge-group');
-            const shouldShow = tier && (groupName === 'common' || groupName === 'shared' || groupName === (tier === 'Tier 1' ? 'tier-1' : 'tier-2'));
+            const shouldShow = tier && (groupName === 'common' || groupName === 'shared' || groupName === (tier === '1' ? 'tier-1' : 'tier-2'));
             group.hidden = !shouldShow;
             group.classList.toggle('is-visible', shouldShow);
         });
@@ -126,6 +126,21 @@
             return window.crypto.randomUUID();
         }
         return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function formatLocalTimestamp(date) {
+        const pad = (value) => String(value).padStart(2, '0');
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        const seconds = pad(date.getSeconds());
+        const tzOffsetMinutes = -date.getTimezoneOffset();
+        const sign = tzOffsetMinutes >= 0 ? '+' : '-';
+        const offsetHours = pad(Math.floor(Math.abs(tzOffsetMinutes) / 60));
+        const offsetMinutes = pad(Math.abs(tzOffsetMinutes) % 60);
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${sign}${offsetHours}:${offsetMinutes}`;
     }
 
     // This handles the "Soft Close"
@@ -320,24 +335,10 @@ function softCloseModal() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        const locationRaw = (data.location || '').toString().trim();
-        let locationCity = '';
-        let locationCountry = '';
-        if (locationRaw) {
-            const parts = locationRaw.split(',').map(part => part.trim()).filter(Boolean);
-            if (parts.length > 1) {
-                locationCountry = parts.pop();
-                locationCity = parts.join(', ');
-            } else {
-                locationCity = parts[0];
-            }
-        }
-
-        data.location_city = locationCity;
-        data.location_country = locationCountry;
         data.page_path = window.location.pathname || '';
         data.referrer = document.referrer || '';
         data.submission_id = generateSubmissionId();
+        data.timestamp_local = formatLocalTimestamp(new Date());
 
         fetch(FORM_ENDPOINT, {
             method: 'POST',
@@ -362,7 +363,7 @@ function softCloseModal() {
                 clearFormStatus();
                 // Trigger Success UI
                 if (successSub) {
-                    successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['Tier 2'];
+                    successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['2'];
                 }
                 if (modalBody) {
                     modalBody.scrollTop = 0;

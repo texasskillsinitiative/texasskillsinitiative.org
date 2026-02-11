@@ -47,8 +47,8 @@ function doPost(e) {
       try {
         var hpValue = escapeCellValue(payload[CONFIG.HONEYPOT_KEY]);
         var hpSheet = CONFIG.HONEYPOT_SHEET_NAME || (CONFIG.SHEET_NAME + '_honeypot');
-        var hpHeader = ['timestamp_utc','handler_tier','submission_id','hp_field','hp_value','payload','source','page_path','referrer'];
-        var hpRow = [nowUtcIso(), escapeCellValue(payload.handler_tier || 'unknown'), escapeCellValue(payload.submission_id || payload.form_id || Utilities.getUuid()), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || '')];
+        var hpHeader = ['timestamp_utc','timestamp_local','handler_tier','submission_id','hp_field','hp_value','payload','source','page_path','referrer'];
+        var hpRow = [nowUtcIso(), escapeCellValue(payload.timestamp_local || ''), escapeCellValue(payload.handler_tier || 'unknown'), escapeCellValue(payload.submission_id || payload.form_id || Utilities.getUuid()), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || '')];
         appendToNamedSheet(hpSheet, hpHeader, hpRow);
       } catch (e) {
         console.error('honeypot write failed: ' + e);
@@ -61,7 +61,12 @@ function doPost(e) {
       return jsonResponse({ ok: false, error: 'invalid_input' });
     }
     var handlerTier = escapeCellValue(payload.handler_tier || '').trim();
-    if (!handlerTier || (handlerTier !== 'Tier 1' && handlerTier !== 'Tier 2')) {
+    if (!handlerTier || (handlerTier !== '1' && handlerTier !== '2')) {
+      return jsonResponse({ ok: false, error: 'invalid_input' });
+    }
+
+    var conciergeTrack = escapeCellValue(payload.concierge_track || '').trim();
+    if (!conciergeTrack) {
       return jsonResponse({ ok: false, error: 'invalid_input' });
     }
 
@@ -86,20 +91,28 @@ function doPost(e) {
     }
 
     // Enforce size limits
-    var message = escapeCellValue(payload.message || '', CONFIG.MESSAGE_MAX_LENGTH);
-    var locationCityRaw = payload.location_city || '';
-    var locationCountryRaw = payload.location_country || '';
-    if ((!locationCityRaw && !locationCountryRaw) && payload.location) {
-      var parts = String(payload.location).split(',').map(function(p) { return p.trim(); }).filter(function(p) { return p; });
-      if (parts.length > 1) {
-        locationCountryRaw = parts.pop();
-        locationCityRaw = parts.join(', ');
-      } else if (parts.length === 1) {
-        locationCityRaw = parts[0];
-      }
+    var messageRaw = escapeCellValue(payload.message || '', CONFIG.MESSAGE_MAX_LENGTH);
+    var locCityRaw = escapeCellValue(payload.loc_city || '');
+    var locStateRaw = escapeCellValue(payload.loc_state || '');
+    var locCountryRaw = escapeCellValue(payload.loc_country || '');
+
+    function normalizeField(value, isVisible) {
+      var trimmed = String(value || '').trim();
+      if (trimmed) return escapeCellValue(trimmed, CONFIG.MESSAGE_MAX_LENGTH);
+      return isVisible ? 'blank_user' : 'blank_concierge';
     }
-    var locationCity = escapeCellValue(locationCityRaw);
-    var locationCountry = escapeCellValue(locationCountryRaw);
+
+    var isTierOne = handlerTier === '1';
+    var isTierTwo = handlerTier === '2';
+
+    var nameValue = normalizeField(payload.name || '', true);
+    var roleValue = normalizeField(payload.role || '', isTierOne);
+    var focusValue = normalizeField(payload.focus || '', isTierTwo);
+    var orgValue = normalizeField(payload.org || '', isTierOne);
+    var locCityValue = normalizeField(locCityRaw, true);
+    var locStateValue = normalizeField(locStateRaw, true);
+    var locCountryValue = normalizeField(locCountryRaw, true);
+    var messageValue = normalizeField(messageRaw, true);
 
     var submissionId = escapeCellValue(payload.submission_id || payload.form_id || '');
     if (!submissionId) {
@@ -108,19 +121,21 @@ function doPost(e) {
 
     var row = [
       nowUtcIso(),
+      escapeCellValue(payload.timestamp_local || ''),
       handlerTier,
-      escapeCellValue(payload.name || ''),
+      conciergeTrack,
+      nameValue,
       email,
-      escapeCellValue(payload.org || ''),
-      locationCity,
-      locationCountry,
-      message,
+      roleValue,
+      focusValue,
+      orgValue,
+      locCityValue,
+      locStateValue,
+      locCountryValue,
+      messageValue,
       CONFIG.SOURCE,
       escapeCellValue(payload.page_path || ''),
       escapeCellValue(payload.referrer || ''),
-      escapeCellValue(payload.concierge_track || ''),
-      escapeCellValue(payload.role || ''),
-      escapeCellValue(payload.focus || ''),
       submissionId
     ];
 
@@ -135,11 +150,34 @@ function doPost(e) {
 
     // Optional admin notification (minimal, no sensitive content)
     if (CONFIG.ADMIN_EMAIL) {
-      var subj = 'TSI form submission: ' + handlerTier;
-      var body = 'Received a submission (Tier: ' + handlerTier + ')\n' +
-        'Email: ' + email + '\n' +
-        'Name: ' + escapeCellValue(payload.name || '') + '\n' +
-        'Received: ' + nowUtcIso();
+      var trackAcronymMap = {
+        'Regional & Government Authority': 'RG',
+        'Educational Leadership & Instruction': 'EL',
+        'Private Sector & Industry Leadership': 'PI',
+        'Small Business & Local Commerce': 'SB',
+        'Professional & Technical Perspective': 'PT',
+        'Student & Community Perspective': 'SC'
+      };
+      var trackAcronym = trackAcronymMap[conciergeTrack] || 'NA';
+      var subj = 'TSIForm: ' + handlerTier + ' - ' + trackAcronym + ' - ' + email;
+      var body = [
+        'timestamp_utc: ' + nowUtcIso(),
+        'timestamp_local: ' + escapeCellValue(payload.timestamp_local || ''),
+        'handler_tier: ' + handlerTier,
+        'concierge_track: ' + conciergeTrack,
+        'name: ' + nameValue,
+        'email: ' + email,
+        'role: ' + roleValue,
+        'focus: ' + focusValue,
+        'org: ' + orgValue,
+        'loc_city: ' + locCityValue,
+        'loc_state: ' + locStateValue,
+        'loc_country: ' + locCountryValue,
+        'message: ' + messageValue,
+        'source: ' + CONFIG.SOURCE,
+        'page_path: ' + escapeCellValue(payload.page_path || ''),
+        'referrer: ' + escapeCellValue(payload.referrer || '')
+      ].join('\n');
       notifyAdmin(subj, body);
     }
 

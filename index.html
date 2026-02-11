@@ -57,12 +57,12 @@
             <div class="concierge-block">
                 <span class="form-helper concierge-helper">Select the perspective that best matches you.</span>
                 <div class="concierge-grid" role="group" aria-label="Digital Concierge">
-                    <button type="button" class="concierge-btn" data-concierge-track="government" data-concierge-tier="Tier 1">Regional & Government Authority</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="education" data-concierge-tier="Tier 1">Educational Leadership & Instruction</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="private-sector" data-concierge-tier="Tier 1">Private Sector & Industry Leadership</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="small-business" data-concierge-tier="Tier 1">Small Business & Local Commerce</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="professional" data-concierge-tier="Tier 2">Professional & Technical Perspective</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="student" data-concierge-tier="Tier 2">Student & Community Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="government" data-concierge-tier="1">Regional & Government Authority</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="education" data-concierge-tier="1">Educational Leadership & Instruction</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="private-sector" data-concierge-tier="1">Private Sector & Industry Leadership</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="small-business" data-concierge-tier="1">Small Business & Local Commerce</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="professional" data-concierge-tier="2">Professional & Technical Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="student" data-concierge-tier="2">Student & Community Perspective</button>
                 </div>
                 <span class="form-error concierge-error" id="conciergeError" role="alert"></span>
             </div>
@@ -102,9 +102,19 @@
             </div>
             <div class="concierge-fields" data-concierge-group="shared" hidden>
                 <div class="form-field">
-                    <label for="location">Location</label>
-                    <span class="form-helper">City and country (if relevant)</span>
-                    <input type="text" id="location" name="location">
+                    <label for="locCity">City</label>
+                    <span class="form-helper">Optional</span>
+                    <input type="text" id="locCity" name="loc_city">
+                </div>
+                <div class="form-field">
+                    <label for="locState">State / Province / Region</label>
+                    <span class="form-helper">Optional</span>
+                    <input type="text" id="locState" name="loc_state">
+                </div>
+                <div class="form-field">
+                    <label for="locCountry">Country</label>
+                    <span class="form-helper">Optional</span>
+                    <input type="text" id="locCountry" name="loc_country">
                 </div>
                 <div class="form-field">
                     <label for="message">Anything you'd like to share?</label>
