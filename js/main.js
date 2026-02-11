@@ -345,15 +345,22 @@ function softCloseModal() {
             body: JSON.stringify(data)
         })
         .then(res => {
-                if (!window._isSubmitting) {
-                    return;
-                }
-                if (res.ok) {
-                    window._successShownAt = Date.now();
-                    window._formLastState = 'success';
-                    window._isSubmitting = false;
-                    stopSubmissionTimers();
-                    clearFormStatus();
+            return res
+                .json()
+                .catch(() => null)
+                .then(body => ({ res, body }));
+        })
+        .then(({ res, body }) => {
+            if (!window._isSubmitting) {
+                return;
+            }
+            const isOk = res.ok && body && body.ok === true;
+            if (isOk) {
+                window._successShownAt = Date.now();
+                window._formLastState = 'success';
+                window._isSubmitting = false;
+                stopSubmissionTimers();
+                clearFormStatus();
                 // Trigger Success UI
                 if (successSub) {
                     successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['Tier 2'];
@@ -369,9 +376,9 @@ function softCloseModal() {
                     if (successCloseBtn) successCloseBtn.disabled = false;
                     if (successAnotherBtn) successAnotherBtn.disabled = false;
                 }, SUCCESS_GRACE_MS);
-                form.hidden = true; 
+                form.hidden = true;
             } else {
-                throw new Error("Server error");
+                throw new Error((body && body.error) ? body.error : 'Server error');
             }
         })
         .catch(err => {
