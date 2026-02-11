@@ -53,31 +53,63 @@
         <form id="stakeholderForm" class="stakeholder-form" method="post">
             <p class="form-intro">We're gathering perspectives and interest from individuals and organizations who want to share context or stay in touch. This does not create any obligation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
-            <div class="form-field">
-                <label for="name">Name</label>
-                <span class="form-helper">How you'd like us to address you</span>
-                <input type="text" id="name" name="name">
+            <div class="concierge-block">
+                <span class="form-helper concierge-helper">Select the perspective that best matches you.</span>
+                <div class="concierge-grid" role="group" aria-label="Digital Concierge">
+                    <button type="button" class="concierge-btn" data-concierge-track="government" data-concierge-tier="Tier 1">Regional & Government Authority</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="education" data-concierge-tier="Tier 1">Educational Leadership & Instruction</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="private-sector" data-concierge-tier="Tier 1">Private Sector & Industry Leadership</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="small-business" data-concierge-tier="Tier 1">Small Business & Local Commerce</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="professional" data-concierge-tier="Tier 2">Professional & Technical Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="student" data-concierge-tier="Tier 2">Student & Community Perspective</button>
+                </div>
+                <span class="form-error concierge-error" id="conciergeError" role="alert"></span>
             </div>
-            <div class="form-field">
-                <label for="email">Email</label>
-                <span class="form-helper">We'll only use this to respond if appropriate</span>
-                <input type="email" id="email" name="email" required>
-                <span class="form-error" id="emailError" role="alert"></span>
+            <input type="hidden" id="handlerTier" name="handler_tier" value="">
+            <input type="hidden" id="conciergeTrack" name="concierge_track" value="">
+            <div class="concierge-fields" data-concierge-group="common" hidden>
+                <div class="form-field">
+                    <label for="name">Name</label>
+                    <span class="form-helper">How you'd like us to address you</span>
+                    <input type="text" id="name" name="name">
+                </div>
+                <div class="form-field">
+                    <label for="email">Email</label>
+                    <span class="form-helper">We'll only use this to respond if appropriate</span>
+                    <input type="email" id="email" name="email" required>
+                    <span class="form-error" id="emailError" role="alert"></span>
+                </div>
             </div>
-            <div class="form-field">
-                <label for="org">Organization or affiliation</label>
-                <span class="form-helper">Optional</span>
-                <input type="text" id="org" name="org">
+            <div class="concierge-fields" data-concierge-group="tier-1" hidden>
+                <div class="form-field">
+                    <label for="org">Organization or affiliation</label>
+                    <span class="form-helper">Optional</span>
+                    <input type="text" id="org" name="org">
+                </div>
+                <div class="form-field">
+                    <label for="role">Role or title</label>
+                    <span class="form-helper">Optional</span>
+                    <input type="text" id="role" name="role">
+                </div>
             </div>
-            <div class="form-field">
-                <label for="location">Location</label>
-                <span class="form-helper">City and country (if relevant)</span>
-                <input type="text" id="location" name="location">
+            <div class="concierge-fields" data-concierge-group="tier-2" hidden>
+                <div class="form-field">
+                    <label for="focus">Area of focus</label>
+                    <span class="form-helper">Discipline, program, or technical specialty</span>
+                    <input type="text" id="focus" name="focus">
+                </div>
             </div>
-            <div class="form-field">
-                <label for="message">Anything you'd like to share?</label>
-                <span class="form-helper">Optional. Share any context you think may be helpful.</span>
-                <textarea id="message" name="message"></textarea>
+            <div class="concierge-fields" data-concierge-group="shared" hidden>
+                <div class="form-field">
+                    <label for="location">Location</label>
+                    <span class="form-helper">City and country (if relevant)</span>
+                    <input type="text" id="location" name="location">
+                </div>
+                <div class="form-field">
+                    <label for="message">Anything you'd like to share?</label>
+                    <span class="form-helper">Optional. Share any context you think may be helpful.</span>
+                    <textarea id="message" name="message"></textarea>
+                </div>
             </div>
             <noscript class="form-noscript"><p>JavaScript is required to submit this form. Please enable JavaScript and try again.</p></noscript>
             <div class="form-actions">
@@ -92,7 +124,7 @@
         
         <div id="formSuccess" class="form-success reveal-text" hidden>
             <p class="form-success-headline">Thank <span class="accent">you.</span></p>
-            <p class="form-success-sub">We've received your message. If a response is appropriate, someone will be in touch.</p>
+            <p class="form-success-sub" id="formSuccessSub">We've received your message. If a response is appropriate, someone will be in touch.</p>
             <div class="form-success-buttons">
                 <button type="button" class="form-success-btn form-success-btn-primary" id="successCloseBtn" data-action="success-close">Click to close</button>
                 <button type="button" class="form-success-btn" id="successAnotherBtn" data-action="success-another">Submit another response</button>

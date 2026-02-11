@@ -118,6 +118,16 @@
         /* --- ACCESS MODAL FORM --- */
         #accessModal .form-intro { font-size: 0.9rem; line-height: 1.5; color: var(--page-text-dim); margin: 0 0 20px 0; text-align: left; }
         #accessModal .stakeholder-form { display: flex; flex-direction: column; gap: 16px; margin-top: 20px; text-align: left; }
+        /* 021026_DigitalConcierge */
+        #accessModal .concierge-block { display: flex; flex-direction: column; gap: 10px; }
+        #accessModal .concierge-helper { font-size: 0.8rem; color: var(--page-text-dim); }
+        #accessModal .concierge-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        #accessModal .concierge-btn { background: var(--page-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 14px 16px; min-height: 54px; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.6px; cursor: pointer; transition: 0.3s; font-weight: 700; }
+        #accessModal .concierge-btn:hover { border-color: var(--accent); }
+        #accessModal .concierge-btn.is-active { border-color: var(--accent); background: var(--card-bg); box-shadow: 0 0 0 1px var(--accent) inset; }
+        #accessModal .concierge-error { min-height: 1rem; }
+        #accessModal .concierge-fields { display: none; flex-direction: column; gap: 16px; }
+        #accessModal .concierge-fields.is-visible { display: flex; }
         #accessModal .form-field { display: flex; flex-direction: column; gap: 4px; }
         #accessModal .form-field label { font-size: 0.8rem; font-weight: 700; color: var(--page-text-main); }
         #accessModal .form-field .form-helper { font-size: 0.75rem; color: var(--page-text-dim); }
@@ -282,4 +292,8 @@
             .header-index { flex-wrap: wrap; justify-content: center; gap: 10px; }
             .header-index a { padding: 10px 12px; }
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+        }
+
+        @media (max-width: 600px) {
+            #accessModal .concierge-grid { grid-template-columns: 1fr; }
         }

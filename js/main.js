@@ -8,10 +8,49 @@
     window._submitStartedAt = 0;
     window._submitStatusTimer = null;
     window._submitMaxWaitTimer = null;
+    // 021026_DigitalConcierge
+    const _021026_TIER_MESSAGES = {
+        'Tier 1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+        'Tier 2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
+    };
+
+    function _021026_setConciergeVisibility(form, tier) {
+        const groups = form.querySelectorAll('[data-concierge-group]');
+        groups.forEach(group => {
+            const groupName = group.getAttribute('data-concierge-group');
+            const shouldShow = tier && (groupName === 'common' || groupName === 'shared' || groupName === (tier === 'Tier 1' ? 'tier-1' : 'tier-2'));
+            group.hidden = !shouldShow;
+            group.classList.toggle('is-visible', shouldShow);
+        });
+    }
+
+    function _021026_resetConcierge(form) {
+        const buttons = form.querySelectorAll('[data-concierge-track]');
+        const error = form.querySelector('#conciergeError');
+        const handlerTierInput = form.querySelector('#handlerTier');
+        const trackInput = form.querySelector('#conciergeTrack');
+
+        buttons.forEach(button => {
+            button.classList.remove('is-active');
+            button.setAttribute('aria-pressed', 'false');
+        });
+
+        if (handlerTierInput) handlerTierInput.value = '';
+        if (trackInput) trackInput.value = '';
+        if (error) {
+            error.textContent = '';
+            error.classList.remove('visible');
+        }
+
+        _021026_setConciergeVisibility(form, '');
+    }
 
     function resetFormDataOnly() {
         const form = document.getElementById('stakeholderForm');
-        if (form) form.reset();
+        if (form) {
+            form.reset();
+            _021026_resetConcierge(form);
+        }
         const submitBtn = document.querySelector('.form-submit');
         if (submitBtn) {
             submitBtn.disabled = false;
@@ -143,7 +182,8 @@ function resetFormToNew() {
     const submitBtn = form.querySelector('.form-submit');
 
         // 1. Clear all previous inputs
-        form.reset(); 
+        form.reset();
+        _021026_resetConcierge(form);
 
         // 2. CRITICAL: Re-enable the submit button 
         // It was set to .disabled = true in the submit handler
@@ -180,6 +220,7 @@ function closeSuccess() {
     if (form) {
         form.reset();         // Clears the text
         form.hidden = false;  // Makes form visible for next time
+        _021026_resetConcierge(form);
     }
     if (formSuccess) formSuccess.hidden = true; // Hides the "Thank You"
     
@@ -223,6 +264,9 @@ function softCloseModal() {
         const timeError = document.getElementById('formTimeError');
         const networkError = document.getElementById('formNetworkError');
         const emailError = document.getElementById('emailError');
+        const conciergeError = document.getElementById('conciergeError');
+        const handlerTierInput = document.getElementById('handlerTier');
+        const successSub = document.getElementById('formSuccessSub');
         const modalBody = document.getElementById('accessModalBody');
         const formSuccess = document.getElementById('formSuccess');
         const successCloseBtn = document.getElementById('successCloseBtn');
@@ -235,6 +279,18 @@ function softCloseModal() {
             networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
         }
         if (emailError) emailError.classList.remove('visible');
+        if (conciergeError) {
+            conciergeError.textContent = '';
+            conciergeError.classList.remove('visible');
+        }
+
+        if (!handlerTierInput || !handlerTierInput.value) {
+            if (conciergeError) {
+                conciergeError.textContent = 'Select a perspective to continue.';
+                conciergeError.classList.add('visible');
+            }
+            return;
+        }
 
         // 1. Check Time Trap (3 seconds)
         const timeElapsed = Date.now() - (window._formOpenTime || 0);
@@ -299,6 +355,9 @@ function softCloseModal() {
                     stopSubmissionTimers();
                     clearFormStatus();
                 // Trigger Success UI
+                if (successSub) {
+                    successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['Tier 2'];
+                }
                 if (modalBody) modalBody.classList.add('success-visible');
                 if (formSuccess) {
                     formSuccess.hidden = false;
@@ -328,6 +387,39 @@ function softCloseModal() {
             clearFormStatus();
         });
     });
+
+    function _021026_initConciergeForm() {
+        const form = document.getElementById('stakeholderForm');
+        if (!form) return;
+
+        const buttons = form.querySelectorAll('[data-concierge-track]');
+        const handlerTierInput = form.querySelector('#handlerTier');
+        const trackInput = form.querySelector('#conciergeTrack');
+        const error = form.querySelector('#conciergeError');
+
+        buttons.forEach(button => {
+            button.setAttribute('aria-pressed', 'false');
+            button.addEventListener('click', () => {
+                const tier = button.getAttribute('data-concierge-tier') || '';
+                const label = button.textContent.trim();
+                buttons.forEach(btn => {
+                    btn.classList.remove('is-active');
+                    btn.setAttribute('aria-pressed', 'false');
+                });
+                button.classList.add('is-active');
+                button.setAttribute('aria-pressed', 'true');
+                if (handlerTierInput) handlerTierInput.value = tier;
+                if (trackInput) trackInput.value = label;
+                if (error) {
+                    error.textContent = '';
+                    error.classList.remove('visible');
+                }
+                _021026_setConciergeVisibility(form, tier);
+            });
+        });
+
+        _021026_setConciergeVisibility(form, handlerTierInput ? handlerTierInput.value : '');
+    }
 
     function initModalTriggers() {
         document.querySelectorAll('[data-modal-open]').forEach(button => {
@@ -363,6 +455,7 @@ function softCloseModal() {
     }
 
     initModalTriggers();
+    _021026_initConciergeForm();
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
