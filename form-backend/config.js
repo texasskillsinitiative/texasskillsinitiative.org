@@ -26,5 +26,6 @@ var SHEET_COLUMNS = [
   'referrer',
   'concierge_track',
   'role',
-  'focus'
+  'focus',
+  'submission_id'
 ];

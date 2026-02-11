@@ -121,6 +121,13 @@
         }
     }
 
+    function generateSubmissionId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+            return window.crypto.randomUUID();
+        }
+        return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
     // This handles the "Soft Close"
 function toggleModal(modalId, show) {
     const modal = document.getElementById(modalId);
@@ -330,6 +337,7 @@ function softCloseModal() {
         data.location_country = locationCountry;
         data.page_path = window.location.pathname || '';
         data.referrer = document.referrer || '';
+        data.submission_id = generateSubmissionId();
 
         fetch(FORM_ENDPOINT, {
             method: 'POST',

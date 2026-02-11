@@ -47,8 +47,8 @@ function doPost(e) {
       try {
         var hpValue = escapeCellValue(payload[CONFIG.HONEYPOT_KEY]);
         var hpSheet = CONFIG.HONEYPOT_SHEET_NAME || (CONFIG.SHEET_NAME + '_honeypot');
-        var hpHeader = ['timestamp_utc','handler_tier','hp_field','hp_value','payload','source','page_path','referrer'];
-        var hpRow = [nowUtcIso(), escapeCellValue(payload.handler_tier || 'unknown'), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || '')];
+        var hpHeader = ['timestamp_utc','handler_tier','submission_id','hp_field','hp_value','payload','source','page_path','referrer'];
+        var hpRow = [nowUtcIso(), escapeCellValue(payload.handler_tier || 'unknown'), escapeCellValue(payload.submission_id || payload.form_id || Utilities.getUuid()), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || '')];
         appendToNamedSheet(hpSheet, hpHeader, hpRow);
       } catch (e) {
         console.error('honeypot write failed: ' + e);
@@ -101,6 +101,11 @@ function doPost(e) {
     var locationCity = escapeCellValue(locationCityRaw);
     var locationCountry = escapeCellValue(locationCountryRaw);
 
+    var submissionId = escapeCellValue(payload.submission_id || payload.form_id || '');
+    if (!submissionId) {
+      submissionId = Utilities.getUuid();
+    }
+
     var row = [
       nowUtcIso(),
       handlerTier,
@@ -115,7 +120,8 @@ function doPost(e) {
       escapeCellValue(payload.referrer || ''),
       escapeCellValue(payload.concierge_track || ''),
       escapeCellValue(payload.role || ''),
-      escapeCellValue(payload.focus || '')
+      escapeCellValue(payload.focus || ''),
+      submissionId
     ];
 
     // Append row with lock for atomicity
