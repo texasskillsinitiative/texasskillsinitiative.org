@@ -330,7 +330,6 @@ function softCloseModal() {
         data.location_country = locationCountry;
         data.page_path = window.location.pathname || '';
         data.referrer = document.referrer || '';
-        data.user_agent = navigator.userAgent || '';
 
         fetch(FORM_ENDPOINT, {
             method: 'POST',

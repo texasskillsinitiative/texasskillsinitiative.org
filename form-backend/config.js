@@ -24,7 +24,6 @@ var SHEET_COLUMNS = [
   'source',
   'page_path',
   'referrer',
-  'user_agent',
   'concierge_track',
   'role',
   'focus'
