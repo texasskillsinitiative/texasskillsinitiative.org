@@ -121,13 +121,6 @@
         }
     }
 
-    function generateSubmissionId() {
-        if (window.crypto && typeof window.crypto.randomUUID === 'function') {
-            return window.crypto.randomUUID();
-        }
-        return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-    }
-
     // This handles the "Soft Close"
 function toggleModal(modalId, show) {
     const modal = document.getElementById(modalId);
@@ -333,7 +326,6 @@ function softCloseModal() {
             }
         }
 
-        data.form_id = generateSubmissionId();
         data.location_city = locationCity;
         data.location_country = locationCountry;
         data.page_path = window.location.pathname || '';
@@ -365,7 +357,10 @@ function softCloseModal() {
                 if (successSub) {
                     successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['Tier 2'];
                 }
-                if (modalBody) modalBody.classList.add('success-visible');
+                if (modalBody) {
+                    modalBody.scrollTop = 0;
+                    modalBody.classList.add('success-visible');
+                }
                 if (formSuccess) {
                     formSuccess.hidden = false;
                     formSuccess.classList.add('reveal-active');

@@ -47,8 +47,8 @@ function doPost(e) {
       try {
         var hpValue = escapeCellValue(payload[CONFIG.HONEYPOT_KEY]);
         var hpSheet = CONFIG.HONEYPOT_SHEET_NAME || (CONFIG.SHEET_NAME + '_honeypot');
-        var hpHeader = ['timestamp_utc','form_id','hp_field','hp_value','payload','source','page_path','referrer','user_agent'];
-        var hpRow = [nowUtcIso(), escapeCellValue(payload.form_id || payload.submission_id || 'unknown'), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || ''), escapeCellValue(payload.user_agent || '')];
+        var hpHeader = ['timestamp_utc','handler_tier','hp_field','hp_value','payload','source','page_path','referrer','user_agent'];
+        var hpRow = [nowUtcIso(), escapeCellValue(payload.handler_tier || 'unknown'), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || ''), escapeCellValue(payload.user_agent || '')];
         appendToNamedSheet(hpSheet, hpHeader, hpRow);
       } catch (e) {
         console.error('honeypot write failed: ' + e);
@@ -56,7 +56,6 @@ function doPost(e) {
       return jsonResponse({ ok: true });
     }
 
-    var formId = escapeCellValue(payload.form_id || payload.submission_id || 'unknown');
     var email = escapeCellValue(payload.email || '').trim();
     if (!isValidEmail(email)) {
       return jsonResponse({ ok: false, error: 'invalid_input' });
@@ -104,7 +103,7 @@ function doPost(e) {
 
     var row = [
       nowUtcIso(),
-      formId,
+      handlerTier,
       escapeCellValue(payload.name || ''),
       email,
       escapeCellValue(payload.org || ''),
@@ -132,8 +131,8 @@ function doPost(e) {
 
     // Optional admin notification (minimal, no sensitive content)
     if (CONFIG.ADMIN_EMAIL) {
-      var subj = 'TSI form submission: ' + formId;
-      var body = 'Received a submission for ' + formId + '\n' +
+      var subj = 'TSI form submission: ' + handlerTier;
+      var body = 'Received a submission (Tier: ' + handlerTier + ')\n' +
         'Email: ' + email + '\n' +
         'Name: ' + escapeCellValue(payload.name || '') + '\n' +
         'Received: ' + nowUtcIso();

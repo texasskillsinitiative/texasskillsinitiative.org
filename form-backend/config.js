@@ -14,7 +14,7 @@ var CONFIG = {
 // Column schema used when appending rows. Keep stable and ordered.
 var SHEET_COLUMNS = [
   'timestamp_utc',
-  'form_id',
+  'handler_tier',
   'name',
   'email',
   'org',
@@ -25,7 +25,6 @@ var SHEET_COLUMNS = [
   'page_path',
   'referrer',
   'user_agent',
-  'handler_tier',
   'concierge_track',
   'role',
   'focus'
