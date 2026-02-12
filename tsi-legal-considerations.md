@@ -14,6 +14,8 @@
 - These files do not exist yet. Provide the drafted content and we will add them to the site.
 - Current data flow uses Google Apps Script + Google Sheets for form submissions. This should be disclosed as a third-party processor in the Privacy Policy.
 - The form already includes a short legal notice (Privacy + Terms). Once the legal pages exist, mark "Form Consent Notice" as complete.
+- Privacy contact email to include in policies (not public site contact): `data@texasskillsinitiative.org` (alias to be configured).
+- Direct outreach is planned; include a clear opt-out line in Privacy Policy and Terms.
 
 
 
