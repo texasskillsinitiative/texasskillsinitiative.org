@@ -279,6 +279,8 @@ function softCloseModal() {
         const timeError = document.getElementById('formTimeError');
         const networkError = document.getElementById('formNetworkError');
         const nameError = document.getElementById('nameError');
+        const locCountryError = document.getElementById('locCountryError');
+        const messageError = document.getElementById('messageError');
         const emailError = document.getElementById('emailError');
         const conciergeError = document.getElementById('conciergeError');
         const handlerTierInput = document.getElementById('handlerTier');
@@ -295,6 +297,8 @@ function softCloseModal() {
             networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
         }
         if (nameError) nameError.classList.remove('visible');
+        if (locCountryError) locCountryError.classList.remove('visible');
+        if (messageError) messageError.classList.remove('visible');
         if (emailError) emailError.classList.remove('visible');
         if (conciergeError) {
             conciergeError.textContent = '';
@@ -314,6 +318,24 @@ function softCloseModal() {
             if (nameError) {
                 nameError.textContent = 'Please enter your name.';
                 nameError.classList.add('visible');
+            }
+            return;
+        }
+
+        const locCountryValue = document.getElementById('locCountry').value.trim();
+        if (!locCountryValue) {
+            if (locCountryError) {
+                locCountryError.textContent = 'Country is required.';
+                locCountryError.classList.add('visible');
+            }
+            return;
+        }
+
+        const messageValue = document.getElementById('message').value.trim();
+        if (!messageValue) {
+            if (messageError) {
+                messageError.textContent = 'Please add a short message.';
+                messageError.classList.add('visible');
             }
             return;
         }

@@ -127,13 +127,15 @@
                 </div>
                 <div class="form-field">
                     <label for="locCountry">Country</label>
-                    <span class="form-helper">Optional</span>
-                    <input type="text" id="locCountry" name="loc_country">
+                    <span class="form-helper">Required</span>
+                    <input type="text" id="locCountry" name="loc_country" required>
+                    <span class="form-error" id="locCountryError" role="alert"></span>
                 </div>
                 <div class="form-field">
                     <label for="message">Anything you'd like to share?</label>
-                    <span class="form-helper">Optional. Share any context you think may be helpful.</span>
-                    <textarea id="message" name="message"></textarea>
+                    <span class="form-helper">Required. Share key context or needs in a few sentences.</span>
+                    <textarea id="message" name="message" required></textarea>
+                    <span class="form-error" id="messageError" role="alert"></span>
                 </div>
             </div>
             <noscript class="form-noscript"><p>JavaScript is required to submit this form. Please enable JavaScript and try again.</p></noscript>

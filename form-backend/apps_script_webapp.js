@@ -91,10 +91,17 @@ function doPost(e) {
     }
 
     // Enforce size limits
-    var messageRaw = escapeCellValue(payload.message || '', CONFIG.MESSAGE_MAX_LENGTH);
+    var messageRaw = String(payload.message || '').trim();
     var locCityRaw = escapeCellValue(payload.loc_city || '');
     var locStateRaw = escapeCellValue(payload.loc_state || '');
-    var locCountryRaw = escapeCellValue(payload.loc_country || '');
+    var locCountryRaw = String(payload.loc_country || '').trim();
+
+    if (!locCountryRaw) {
+      return jsonResponse({ ok: false, error: 'invalid_input' });
+    }
+    if (!messageRaw) {
+      return jsonResponse({ ok: false, error: 'invalid_input' });
+    }
 
     function normalizeField(value, isVisible) {
       var trimmed = String(value || '').trim();
@@ -115,8 +122,8 @@ function doPost(e) {
     var orgValue = normalizeField(payload.org || '', isTierOne);
     var locCityValue = normalizeField(locCityRaw, true);
     var locStateValue = normalizeField(locStateRaw, true);
-    var locCountryValue = normalizeField(locCountryRaw, true);
-    var messageValue = normalizeField(messageRaw, true);
+    var locCountryValue = escapeCellValue(locCountryRaw);
+    var messageValue = escapeCellValue(messageRaw, CONFIG.MESSAGE_MAX_LENGTH);
 
     var submissionId = escapeCellValue(payload.submission_id || payload.form_id || '');
     if (!submissionId) {
