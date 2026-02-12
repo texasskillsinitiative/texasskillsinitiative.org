@@ -48,7 +48,7 @@ function doPost(e) {
         var hpValue = escapeCellValue(payload[CONFIG.HONEYPOT_KEY]);
         var hpSheet = CONFIG.HONEYPOT_SHEET_NAME || (CONFIG.SHEET_NAME + '_honeypot');
         var hpHeader = ['timestamp_utc','timestamp_local','handler_tier','submission_id','hp_field','hp_value','payload','source','page_path','referrer'];
-        var hpRow = [nowUtcIso(), escapeCellValue(payload.timestamp_local || ''), escapeCellValue(payload.handler_tier || 'unknown'), escapeCellValue(payload.submission_id || payload.form_id || Utilities.getUuid()), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || ''), escapeCellValue(payload.referrer || '')];
+        var hpRow = [nowUtcIso(), escapeCellValue(payload.timestamp_local || ''), escapeCellValue(payload.handler_tier || 'unknown'), escapeCellValue(payload.submission_id || payload.form_id || Utilities.getUuid()), CONFIG.HONEYPOT_KEY, hpValue, escapeCellValue(JSON.stringify(payload)), CONFIG.SOURCE, escapeCellValue(payload.page_path || '/'), escapeCellValue(payload.referrer || 'direct')];
         appendToNamedSheet(hpSheet, hpHeader, hpRow);
       } catch (e) {
         console.error('honeypot write failed: ' + e);
@@ -119,6 +119,9 @@ function doPost(e) {
       submissionId = Utilities.getUuid();
     }
 
+    var pagePathValue = escapeCellValue(payload.page_path || '/');
+    var referrerValue = escapeCellValue(payload.referrer || 'direct');
+
     var row = [
       nowUtcIso(),
       escapeCellValue(payload.timestamp_local || ''),
@@ -134,8 +137,8 @@ function doPost(e) {
       locCountryValue,
       messageValue,
       CONFIG.SOURCE,
-      escapeCellValue(payload.page_path || ''),
-      escapeCellValue(payload.referrer || ''),
+      pagePathValue,
+      referrerValue,
       submissionId
     ];
 
@@ -175,8 +178,8 @@ function doPost(e) {
         'loc_country: ' + locCountryValue,
         'message: ' + messageValue,
         'source: ' + CONFIG.SOURCE,
-        'page_path: ' + escapeCellValue(payload.page_path || ''),
-        'referrer: ' + escapeCellValue(payload.referrer || '')
+        'page_path: ' + pagePathValue,
+        'referrer: ' + referrerValue
       ].join('\n');
       notifyAdmin(subj, body);
     }

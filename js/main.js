@@ -335,8 +335,8 @@ function softCloseModal() {
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
 
-        data.page_path = window.location.pathname || '';
-        data.referrer = document.referrer || '';
+        data.page_path = window.location.pathname || '/';
+        data.referrer = document.referrer || 'direct';
         data.submission_id = generateSubmissionId();
         data.timestamp_local = formatLocalTimestamp(new Date());
 
