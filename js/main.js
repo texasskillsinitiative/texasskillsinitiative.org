@@ -470,6 +470,7 @@ function softCloseModal() {
         const submitBtn = document.getElementById('portalSubmit');
         const status = document.getElementById('portalStatus');
         const failure = document.getElementById('portalFailure');
+        const usernameInput = document.getElementById('portalUsername');
 
         if (status) status.hidden = true;
         if (failure) failure.hidden = true;
@@ -477,6 +478,28 @@ function softCloseModal() {
         form.addEventListener('submit', (event) => {
             event.preventDefault();
             if (!submitBtn) return;
+
+            const rawUsername = usernameInput ? usernameInput.value.trim() : '';
+            const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rawUsername);
+            const domainOk = rawUsername.toLowerCase().endsWith('@texasskillsinitiative.org');
+
+            if (!emailOk) {
+                if (failure) {
+                    failure.textContent = 'Please enter a valid email address.';
+                    failure.hidden = false;
+                }
+                if (status) status.hidden = true;
+                return;
+            }
+
+            if (!domainOk) {
+                if (failure) {
+                    failure.textContent = 'External emails are not permitted.';
+                    failure.hidden = false;
+                }
+                if (status) status.hidden = true;
+                return;
+            }
 
             submitBtn.disabled = true;
             submitBtn.classList.add('is-loading');
@@ -489,7 +512,10 @@ function softCloseModal() {
             const delay = 1500 + Math.floor(Math.random() * 500);
             window.setTimeout(() => {
                 if (status) status.hidden = true;
-                if (failure) failure.hidden = false;
+                if (failure) {
+                    failure.textContent = 'Authentication unavailable.\nPlease contact system administration for access updates.';
+                    failure.hidden = false;
+                }
                 submitBtn.disabled = false;
                 submitBtn.classList.remove('is-loading');
             }, delay);

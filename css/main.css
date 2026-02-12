@@ -92,7 +92,7 @@
         .portal-submit.is-loading span:first-child { opacity: 0.6; }
         .portal-status { margin: 6px 0 0 0; font-size: 0.8rem; color: var(--page-text-dim); }
         .portal-restricted { margin: 6px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); }
-        .portal-error { margin: 8px 0 0 0; font-size: 0.85rem; color: var(--accent); text-align: left; line-height: 1.4; }
+        .portal-error { margin: 8px 0 0 0; font-size: 0.85rem; color: var(--accent); text-align: left; line-height: 1.4; white-space: pre-line; }
         .portal-footer { margin-top: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem; color: var(--page-text-dim); text-align: left; }
 
         /* --- SECTIONS --- */
