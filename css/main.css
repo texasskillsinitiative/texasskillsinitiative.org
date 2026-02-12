@@ -77,7 +77,15 @@
         .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }
         .option-btn--secondary { border-color: var(--page-text-dim); color: var(--page-text-dim); }
         .option-btn--secondary:hover { color: var(--page-text-main); }
-        .portal-error { margin: 16px 0 0 0; font-size: 0.8rem; color: var(--accent); text-align: left; }
+        .portal-grid { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+        .portal-login { background: var(--page-bg); border: 1px solid var(--frame-border); padding: 18px; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+        .portal-login-head { display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--page-text-main); }
+        .portal-login label { font-size: 0.7rem; font-weight: 700; color: var(--page-text-main); }
+        .portal-login input { background: var(--card-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 8px 10px; font-size: 0.85rem; font-family: inherit; }
+        .portal-login input:focus { outline: none; border-color: var(--accent); }
+        .portal-submit { background: var(--accent); color: var(--bg-dark); padding: 10px 16px; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; text-transform: uppercase; }
+        [data-theme="light"] .portal-submit { color: #ffffff; }
+        .portal-error { margin: 4px 0 0 0; font-size: 0.8rem; color: var(--accent); text-align: left; }
 
         /* --- SECTIONS --- */
         .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }

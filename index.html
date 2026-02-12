@@ -35,11 +35,32 @@
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
         <span class="close-modal" data-modal-close="portalModal">×</span>
         <h3>Internal Access</h3>
-        <div class="option-grid">
-            <button type="button" class="option-btn" data-portal-action="sso">EMPLOYEE SSO <span class="nav-num">SECURE</span></button>
-            <button type="button" class="option-btn option-btn--secondary" data-portal-action="vpn">REMOTE NODE ACCESS <span class="nav-num">VPN</span></button>
+        <div class="portal-grid">
+            <form class="portal-login" data-portal-form="sso">
+                <div class="portal-login-head">
+                    <span>Employee SSO</span>
+                    <span class="nav-num">SECURE</span>
+                </div>
+                <label for="portalSsoId">Staff ID</label>
+                <input type="text" id="portalSsoId" name="staff_id" autocomplete="username">
+                <label for="portalSsoKey">Access Key</label>
+                <input type="password" id="portalSsoKey" name="access_key" autocomplete="current-password">
+                <button type="submit" class="portal-submit">Authenticate</button>
+                <p class="portal-error" data-portal-error role="alert" hidden>Invalid credentials.</p>
+            </form>
+            <form class="portal-login" data-portal-form="vpn">
+                <div class="portal-login-head">
+                    <span>Remote Node Access</span>
+                    <span class="nav-num">VPN</span>
+                </div>
+                <label for="portalVpnId">Staff ID</label>
+                <input type="text" id="portalVpnId" name="staff_id" autocomplete="username">
+                <label for="portalVpnKey">Access Key</label>
+                <input type="password" id="portalVpnKey" name="access_key" autocomplete="current-password">
+                <button type="submit" class="portal-submit">Authenticate</button>
+                <p class="portal-error" data-portal-error role="alert" hidden>Unauthorized Node.</p>
+            </form>
         </div>
-        <p class="portal-error" id="portalError" role="alert" hidden>Unauthorized Node</p>
     </div>
 </div>
 <!-- Portal Modal Section End -->

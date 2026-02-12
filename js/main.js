@@ -465,21 +465,21 @@ function softCloseModal() {
     }
 
     function initPortalOptions() {
-        const portalError = document.getElementById('portalError');
-        if (portalError) {
-            portalError.hidden = true;
-        }
-
-        document.querySelectorAll('[data-portal-action]').forEach(button => {
-            button.addEventListener('click', () => {
-                if (!portalError) return;
-                const action = button.getAttribute('data-portal-action');
+        document.querySelectorAll('[data-portal-form]').forEach(form => {
+            const error = form.querySelector('[data-portal-error]');
+            const action = form.getAttribute('data-portal-form');
+            if (error) {
+                error.hidden = true;
+            }
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                if (!error) return;
                 if (action === 'sso') {
-                    portalError.textContent = 'Invalid credentials.';
+                    error.textContent = 'Invalid credentials.';
                 } else {
-                    portalError.textContent = 'Unauthorized Node.';
+                    error.textContent = 'Unauthorized Node.';
                 }
-                portalError.hidden = false;
+                error.hidden = false;
             });
         });
     }
