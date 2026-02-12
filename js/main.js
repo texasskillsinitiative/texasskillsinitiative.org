@@ -464,8 +464,29 @@ function softCloseModal() {
         });
     }
 
+    function initPortalOptions() {
+        const portalError = document.getElementById('portalError');
+        if (portalError) {
+            portalError.hidden = true;
+        }
+
+        document.querySelectorAll('[data-portal-action]').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!portalError) return;
+                const action = button.getAttribute('data-portal-action');
+                if (action === 'sso') {
+                    portalError.textContent = 'Invalid credentials.';
+                } else {
+                    portalError.textContent = 'Unauthorized Node.';
+                }
+                portalError.hidden = false;
+            });
+        });
+    }
+
     initModalTriggers();
     _021026_initConciergeForm();
+    initPortalOptions();
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');

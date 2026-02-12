@@ -77,6 +77,7 @@
         .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }
         .option-btn--secondary { border-color: var(--page-text-dim); color: var(--page-text-dim); }
         .option-btn--secondary:hover { color: var(--page-text-main); }
+        .portal-error { margin: 16px 0 0 0; font-size: 0.8rem; color: var(--accent); text-align: left; }
 
         /* --- SECTIONS --- */
         .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }

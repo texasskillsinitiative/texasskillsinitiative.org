@@ -34,11 +34,12 @@
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
         <span class="close-modal" data-modal-close="portalModal">×</span>
-        <h3>Team Directory</h3>
+        <h3>Internal Access</h3>
         <div class="option-grid">
-            <a class="option-btn" href="#team" data-modal-close="portalModal">TEAM DIRECTORY <span class="nav-num">VIEW</span></a>
-            <a class="option-btn option-btn--secondary" href="021026_vpn_gate.html" data-modal-close="portalModal">REMOTE NODE ACCESS <span class="nav-num">VPN</span></a>
+            <button type="button" class="option-btn" data-portal-action="sso">EMPLOYEE SSO <span class="nav-num">SECURE</span></button>
+            <button type="button" class="option-btn option-btn--secondary" data-portal-action="vpn">REMOTE NODE ACCESS <span class="nav-num">VPN</span></button>
         </div>
+        <p class="portal-error" id="portalError" role="alert" hidden>Unauthorized Node</p>
     </div>
 </div>
 <!-- Portal Modal Section End -->
