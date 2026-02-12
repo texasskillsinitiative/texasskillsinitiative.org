@@ -16,6 +16,7 @@
 - The form already includes a short legal notice (Privacy + Terms). Once the legal pages exist, mark "Form Consent Notice" as complete.
 - Privacy contact email to include in policies (not public site contact): `data@texasskillsinitiative.org` (alias to be configured).
 - Direct outreach is planned; include a clear opt-out line in Privacy Policy and Terms.
+- Analytics are in-house only; avoid third-party tracking or marketing cookies to keep cookie consent optional.
 
 
 
