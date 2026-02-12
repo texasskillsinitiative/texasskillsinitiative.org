@@ -278,6 +278,7 @@ function softCloseModal() {
         const submitBtn = form.querySelector('.form-submit');
         const timeError = document.getElementById('formTimeError');
         const networkError = document.getElementById('formNetworkError');
+        const nameError = document.getElementById('nameError');
         const emailError = document.getElementById('emailError');
         const conciergeError = document.getElementById('conciergeError');
         const handlerTierInput = document.getElementById('handlerTier');
@@ -293,6 +294,7 @@ function softCloseModal() {
             networkError.hidden = true;
             networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
         }
+        if (nameError) nameError.classList.remove('visible');
         if (emailError) emailError.classList.remove('visible');
         if (conciergeError) {
             conciergeError.textContent = '';
@@ -303,6 +305,15 @@ function softCloseModal() {
             if (conciergeError) {
                 conciergeError.textContent = 'Select a perspective to continue.';
                 conciergeError.classList.add('visible');
+            }
+            return;
+        }
+
+        const nameValue = document.getElementById('name').value.trim();
+        if (!nameValue) {
+            if (nameError) {
+                nameError.textContent = 'Please enter your name.';
+                nameError.classList.add('visible');
             }
             return;
         }

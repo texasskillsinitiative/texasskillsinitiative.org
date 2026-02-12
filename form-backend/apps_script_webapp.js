@@ -105,7 +105,11 @@ function doPost(e) {
     var isTierOne = handlerTier === '1';
     var isTierTwo = handlerTier === '2';
 
-    var nameValue = normalizeField(payload.name || '', true);
+    var rawName = String(payload.name || '').trim();
+    if (!rawName) {
+      return jsonResponse({ ok: false, error: 'invalid_input' });
+    }
+    var nameValue = escapeCellValue(rawName);
     var roleValue = normalizeField(payload.role || '', isTierOne);
     var focusValue = normalizeField(payload.focus || '', isTierTwo);
     var orgValue = normalizeField(payload.org || '', isTierOne);
