@@ -237,7 +237,7 @@
         .engagement-cta { text-align: center; margin-top: 40px; }
 
         /* --- 021026 STAFF GATEWAY --- */
-        .staff-gateway-021026 .staff-gateway-layout-021026 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 30px; align-items: start; }
+        .staff-gateway-021026 .staff-gateway-layout-021026 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr); gap: 30px; align-items: start; }
         .staff-gateway-label-021026 { margin: 0 0 12px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
         .staff-gateway-copy-021026 { margin: 0; font-size: 0.95rem; line-height: 1.6; color: var(--page-text-main); }
         .staff-gateway-profiles-021026 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -246,6 +246,16 @@
         .staff-profile-image-021026 img { width: 100%; height: 100%; object-fit: cover; }
         .staff-profile-name-021026 { margin: 0; color: var(--page-text-main); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
         .staff-profile-role-021026 { margin: 4px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); }
+        .staff-founder-card-021026 { background: var(--card-bg); border: 1px solid var(--frame-border); padding: 28px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
+        .staff-founder-image-021026 { width: 180px; height: 180px; border-radius: 50%; overflow: hidden; border: 2px solid var(--accent); background: var(--img-placeholder); display: flex; align-items: center; justify-content: center; }
+        .staff-founder-image-021026 img { width: 100%; height: 100%; object-fit: cover; }
+        .staff-grid-block-021026 { margin-top: 30px; }
+        .staff-grid-title-021026 { margin: 0 0 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--page-text-dim); }
+        .staff-photo-grid-021026 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+        .staff-photo-card-021026 { background: var(--card-bg); border: 1px solid var(--frame-border); padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .staff-photo-image-021026 { width: 100%; aspect-ratio: 1 / 1; border-radius: 18px; overflow: hidden; background: var(--img-placeholder); }
+        .staff-photo-image-021026 img { width: 100%; height: 100%; object-fit: cover; }
+        .staff-photo-label-021026 { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--page-text-dim); text-align: center; }
         .staff-gateway-disclaimer-021026 { margin: 30px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); max-width: 700px; }
 
         /* --- OVERVIEW LAYOUT --- */
@@ -300,7 +310,7 @@
         body[data-active-tab="rubric"] .header-index a[href="#rubric"],
         body[data-active-tab="pipeline"] .header-index a[href="#pipeline"],
         body[data-active-tab="engagement"] .header-index a[href="#engagement"],
-        body[data-active-tab="staff-gateway-021026"] .header-index a[href="#staff-gateway-021026"] {
+        body[data-active-tab="team"] .header-index a[href="#team"] {
             background: var(--card-bg);
             border-color: var(--accent);
             opacity: 1;
@@ -313,7 +323,7 @@
             body:has(#rubric:target) .header-index a[href="#rubric"],
             body:has(#pipeline:target) .header-index a[href="#pipeline"],
             body:has(#engagement:target) .header-index a[href="#engagement"],
-            body:has(#staff-gateway-021026:target) .header-index a[href="#staff-gateway-021026"] {
+            body:has(#team:target) .header-index a[href="#team"] {
                 background: var(--card-bg);
                 border-color: var(--accent);
                 opacity: 1;
@@ -334,10 +344,12 @@
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
             .staff-gateway-021026 .staff-gateway-layout-021026 { grid-template-columns: 1fr; }
             .vpn-nav-021026 { padding: 16px 20px; }
+            .staff-photo-grid-021026 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 600px) {
             .staff-gateway-profiles-021026 { grid-template-columns: 1fr; }
+            .staff-photo-grid-021026 { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 600px) {
