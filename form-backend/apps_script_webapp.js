@@ -151,12 +151,12 @@ function doPost(e) {
     // Optional admin notification (minimal, no sensitive content)
     if (CONFIG.ADMIN_EMAIL) {
       var trackAcronymMap = {
-        'Regional & Government Authority': 'RG',
-        'Educational Leadership & Instruction': 'EL',
-        'Private Sector & Industry Leadership': 'PI',
-        'Small Business & Local Commerce': 'SB',
-        'Professional & Technical Perspective': 'PT',
-        'Student & Community Perspective': 'SC'
+        'Regional & Government Authority': 'GOV',
+        'Educational Leadership & Instruction': 'EDU',
+        'Private Sector & Industry Leadership': 'PSI',
+        'Small Business & Local Commerce': 'SBL',
+        'Professional & Technical Perspective': 'PTI',
+        'Student & Community Perspective': 'SCP'
       };
       var trackAcronym = trackAcronymMap[conciergeTrack] || 'NA';
       var subj = 'TSIForm: ' + handlerTier + ' - ' + trackAcronym + ' - ' + email;
