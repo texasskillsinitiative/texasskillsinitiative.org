@@ -158,6 +158,9 @@
         #accessModal .form-actions > div { display: flex; flex-direction: column; align-items: flex-start; }
         #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; }
         [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
+        #accessModal .form-legal { margin: 6px 0 0 0; font-size: 0.7rem; color: var(--page-text-dim); line-height: 1.4; }
+        #accessModal .form-legal a { color: var(--page-text-main); text-decoration: none; border-bottom: 1px solid transparent; }
+        #accessModal .form-legal a:hover { border-bottom-color: var(--accent); }
         #accessModal .form-error { font-size: 0.75rem; color: var(--accent); margin-top: 4px; display: none; }
         #accessModal .form-error.visible { display: block; }
         #accessModal .form-status { font-size: 0.8rem; color: var(--page-text-dim); margin: 6px 0 0 0; min-height: 1.1rem; }
@@ -305,6 +308,9 @@
         /* --- FOOTER LAYOUT --- */
         .footer-left { display: flex; align-items: center; gap: 30px; }
         .footer-right { display: flex; align-items: center; gap: 15px; }
+        .footer-legal { display: flex; align-items: center; gap: 14px; font-size: 0.65rem; color: var(--page-text-dim); }
+        .footer-legal a { color: var(--page-text-dim); text-decoration: none; border-bottom: 1px solid transparent; }
+        .footer-legal a:hover { color: var(--page-text-main); border-bottom-color: var(--accent); }
         .footer-label { font-weight: 700; text-transform: uppercase; }
 
 
@@ -362,6 +368,8 @@
             .staff-gateway-021026 .staff-gateway-layout-021026 { grid-template-columns: 1fr; }
             .vpn-nav-021026 { padding: 16px 20px; }
             .staff-photo-grid-021026 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            footer { flex-wrap: wrap; height: auto; padding: 12px 20px; gap: 10px; }
+            .footer-legal { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
         }
 
         @media (max-width: 600px) {
