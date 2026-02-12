@@ -34,32 +34,23 @@
         <img src="assets/logo/logo_tdark.png" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/logo_tlight.png" class="modal-logo logo logo-light" alt="TSI">
         <span class="close-modal" data-modal-close="portalModal">×</span>
-        <h3>Internal Access</h3>
-        <div class="portal-grid">
-            <form class="portal-login" data-portal-form="sso">
-                <div class="portal-login-head">
-                    <span>Employee SSO</span>
-                    <span class="nav-num">SECURE</span>
-                </div>
-                <label for="portalSsoId">Staff ID</label>
-                <input type="text" id="portalSsoId" name="staff_id" autocomplete="username">
-                <label for="portalSsoKey">Access Key</label>
-                <input type="password" id="portalSsoKey" name="access_key" autocomplete="current-password">
-                <button type="submit" class="portal-submit">Authenticate</button>
-                <p class="portal-error" data-portal-error role="alert" hidden>Invalid credentials.</p>
-            </form>
-            <form class="portal-login" data-portal-form="vpn">
-                <div class="portal-login-head">
-                    <span>Remote Node Access</span>
-                    <span class="nav-num">VPN</span>
-                </div>
-                <label for="portalVpnId">Staff ID</label>
-                <input type="text" id="portalVpnId" name="staff_id" autocomplete="username">
-                <label for="portalVpnKey">Access Key</label>
-                <input type="password" id="portalVpnKey" name="access_key" autocomplete="current-password">
-                <button type="submit" class="portal-submit">Authenticate</button>
-                <p class="portal-error" data-portal-error role="alert" hidden>Unauthorized Node.</p>
-            </form>
+        <h3>TSI Internal</h3>
+        <p class="portal-helper">Enter your TSI username to begin authentication.</p>
+        <form class="portal-login" id="portalLoginForm">
+            <label for="portalUsername">TSI Username</label>
+            <input type="text" id="portalUsername" name="tsi_username" placeholder="name@texasskillsinitiative.org" autocomplete="username">
+            <p class="portal-error" id="portalFailure" role="alert" hidden>Authentication unavailable.<br>Please contact system administration for access updates.</p>
+            <button type="submit" class="portal-submit" id="portalSubmit">
+                <span>Continue</span>
+                <span class="portal-spinner" aria-hidden="true"></span>
+            </button>
+            <p class="portal-restricted">Access restricted to authorized personnel.</p>
+            <p class="portal-status" id="portalStatus" aria-live="polite" hidden>Verifying identity...</p>
+        </form>
+        <div class="portal-footer">
+            <span>© 2026 Texas Skills Initiative</span>
+            <span>Unauthorized access is prohibited.</span>
+            <span>Preview Environment.</span>
         </div>
     </div>
 </div>

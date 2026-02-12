@@ -465,22 +465,34 @@ function softCloseModal() {
     }
 
     function initPortalOptions() {
-        document.querySelectorAll('[data-portal-form]').forEach(form => {
-            const error = form.querySelector('[data-portal-error]');
-            const action = form.getAttribute('data-portal-form');
-            if (error) {
-                error.hidden = true;
+        const form = document.getElementById('portalLoginForm');
+        if (!form) return;
+        const submitBtn = document.getElementById('portalSubmit');
+        const status = document.getElementById('portalStatus');
+        const failure = document.getElementById('portalFailure');
+
+        if (status) status.hidden = true;
+        if (failure) failure.hidden = true;
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (!submitBtn) return;
+
+            submitBtn.disabled = true;
+            submitBtn.classList.add('is-loading');
+            if (status) {
+                status.textContent = 'Verifying identity...';
+                status.hidden = false;
             }
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                if (!error) return;
-                if (action === 'sso') {
-                    error.textContent = 'Invalid credentials.';
-                } else {
-                    error.textContent = 'Unauthorized Node.';
-                }
-                error.hidden = false;
-            });
+            if (failure) failure.hidden = true;
+
+            const delay = 1500 + Math.floor(Math.random() * 500);
+            window.setTimeout(() => {
+                if (status) status.hidden = true;
+                if (failure) failure.hidden = false;
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('is-loading');
+            }, delay);
         });
     }
 
