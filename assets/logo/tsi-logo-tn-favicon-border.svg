@@ -1,0 +1,35 @@
+<svg id="Navy_Blackground_darker_copy" data-name="Navy Blackground darker copy" xmlns="http://www.w3.org/2000/svg" width="31.95" height="31.95" viewBox="0 0 1500 1500">
+  <defs>
+    <style>
+      .cls-1, .cls-4 {
+        fill: #9c7a3c;
+      }
+
+      .cls-2 {
+        fill: #c3a46b;
+      }
+
+      .cls-2, .cls-4 {
+        fill-rule: evenodd;
+      }
+
+      .cls-3 {
+        fill: #0b1220;
+      }
+
+      .cls-5 {
+        font-size: 195.098px;
+        fill: #fff;
+        text-anchor: end;
+        font-family: Montserrat;
+        font-weight: 700;
+      }
+    </style>
+  </defs>
+  <rect id="Blue_dark_gold" data-name="Blue / dark gold" class="cls-1" width="1500" height="1500" rx="250" ry="250"/>
+  <path id="blue_with_light_gold" data-name="blue with light gold" class="cls-2" d="M1448.22,402.133A83.844,83.844,0,0,0,1434,414c0,10.829-5.9,19.5-8,30-5.8,28.994-7.52,62.247-10,92-7.22,86.658-14.78,174.057-28,260-9.01,58.58-36.42,114.087-48,172q-7.005,43-14,86c-22.61,90.44-72.37,218.98-154,270-46.73,29.2-154.33,26-206,26-164.583,0-328.153-21.76-492-32-52.006-3.25-103.119-15.82-154-26q-24-4.005-48-8-25-7.005-50-14-27-10.005-54-20c-7.146-14.29-74.022-70-90-70l-4-16c-20.493,24.59-51.55,43.55-74,66V250C0,111.929,111.929,0,250,0H1250c138.07,0,250,111.929,250,250V386.4q-25.71,6.616-51.44,13.235C1448.45,400.467,1448.33,401.3,1448.22,402.133ZM53.741,1185.4L0,1212.13v21.19s49.425-4.12,59.885-8.6c5.833-4.86,13.823-11.74,13.823-20.27"/>
+  <rect id="blue_only" data-name="blue only" class="cls-3" x="50" y="50" width="1400" height="1400" rx="233" ry="233"/>
+  <path id="Star_Lighter" data-name="Star Lighter" class="cls-2" d="M1330.04,436.767c-734.322,136.144-380.958,157.555-994.224,594.6l-57.691,34.28,193.13-318.863L163,574.717l444.206-53.255,257-427.476,21.813,393.6,453.54-55.831Q1334.79,434.261,1330.04,436.767Z"/>
+  <path id="Star_Shading_Dark" data-name="Star Shading Dark" class="cls-4" d="M900.191,696.632L916.74,998.6,649.2,845.859c-201.489,119.768-368.07,218.731-368.07,218.731C972.06,588.153,565.782,573.279,1347.58,429.978,1348.82,429.706,1136,556.394,900.191,696.632Z"/>
+  <text id="TSI_copy_2" data-name="TSI copy 2" class="cls-5" transform="translate(1156.659 1425.221) scale(2.563)">TSI</text>
+</svg>

@@ -2,6 +2,7 @@
     const SUBMIT_MIN_MS = 3000;
     const SUCCESS_GRACE_MS = 2000;
     const SUBMIT_MAX_MS = 30000;
+    const HOLD_CLEAR_MS = 2000;
     window._formLastState = null;
     window._formOpenTime = 0;
     window._isSubmitting = false;
@@ -21,19 +22,28 @@
             const shouldShow = tier && (groupName === 'common' || groupName === 'shared' || groupName === (tier === '1' ? 'tier-1' : 'tier-2'));
             group.hidden = !shouldShow;
             group.classList.toggle('is-visible', shouldShow);
+            group.querySelectorAll('input, textarea, select').forEach(field => {
+                field.disabled = !shouldShow;
+            });
         });
     }
 
     function _021026_resetConcierge(form) {
         const buttons = form.querySelectorAll('[data-concierge-track]');
+        const grid = form.querySelector('.concierge-grid');
+        const backBtn = form.querySelector('#conciergeBackBtn');
         const error = form.querySelector('#conciergeError');
         const handlerTierInput = form.querySelector('#handlerTier');
         const trackInput = form.querySelector('#conciergeTrack');
 
         buttons.forEach(button => {
             button.classList.remove('is-active');
+            button.classList.remove('is-hidden');
             button.setAttribute('aria-pressed', 'false');
         });
+        if (grid) grid.classList.remove('is-collapsed');
+        if (backBtn) backBtn.classList.remove('is-visible');
+        form.classList.remove('has-concierge');
 
         if (handlerTierInput) handlerTierInput.value = '';
         if (trackInput) trackInput.value = '';
@@ -436,6 +446,8 @@ function softCloseModal() {
         if (!form) return;
 
         const buttons = form.querySelectorAll('[data-concierge-track]');
+        const grid = form.querySelector('.concierge-grid');
+        const backBtn = form.querySelector('#conciergeBackBtn');
         const handlerTierInput = form.querySelector('#handlerTier');
         const trackInput = form.querySelector('#conciergeTrack');
         const error = form.querySelector('#conciergeError');
@@ -447,10 +459,19 @@ function softCloseModal() {
                 const label = button.textContent.trim();
                 buttons.forEach(btn => {
                     btn.classList.remove('is-active');
+                    btn.classList.remove('is-hidden');
                     btn.setAttribute('aria-pressed', 'false');
                 });
                 button.classList.add('is-active');
                 button.setAttribute('aria-pressed', 'true');
+                buttons.forEach(btn => {
+                    if (btn !== button) {
+                        btn.classList.add('is-hidden');
+                    }
+                });
+                if (grid) grid.classList.add('is-collapsed');
+                if (backBtn) backBtn.classList.add('is-visible');
+                form.classList.add('has-concierge');
                 if (handlerTierInput) handlerTierInput.value = tier;
                 if (trackInput) trackInput.value = label;
                 if (error) {
@@ -461,7 +482,17 @@ function softCloseModal() {
             });
         });
 
-        _021026_setConciergeVisibility(form, handlerTierInput ? handlerTierInput.value : '');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                _021026_resetConcierge(form);
+            });
+        }
+
+        const initialTier = handlerTierInput ? handlerTierInput.value : '';
+        if (initialTier) {
+            form.classList.add('has-concierge');
+        }
+        _021026_setConciergeVisibility(form, initialTier);
     }
 
     function initModalTriggers() {
@@ -558,6 +589,8 @@ function softCloseModal() {
     initModalTriggers();
     _021026_initConciergeForm();
     initPortalOptions();
+    initHoldToClear();
+    initTeamTabs();
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
@@ -582,6 +615,98 @@ function softCloseModal() {
         });
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal-text, .asset-image, #pipeline-metrics').forEach(el => observer.observe(el));
+    const overview = document.querySelector('.overview-hero');
+    if (overview) {
+        const tagline = overview.querySelector('.overview-tagline');
+        const lines = overview.querySelectorAll('.overview-line');
+        const overviewCopy = overview.querySelector('.overview-copy');
+        const overviewPhrases = overview.querySelectorAll('.overview-phrase');
+        const overviewContinue = overview.querySelector('.overview-continue');
+        const lineGap = 1.5;
+        const wordGap = 0.7;
+        const overviewTimers = [];
+
+        const clearOverviewTimers = () => {
+            overviewTimers.forEach(timer => window.clearTimeout(timer));
+            overviewTimers.length = 0;
+        };
+
+        const schedule = (fn, delaySeconds) => {
+            const timer = window.setTimeout(fn, Math.max(delaySeconds, 0) * 1000);
+            overviewTimers.push(timer);
+        };
+
+        const runOverviewSequence = () => {
+            clearOverviewTimers();
+
+            const revealItems = overview.querySelectorAll('.reveal-text');
+            revealItems.forEach(item => item.classList.remove('reveal-active'));
+            overviewPhrases.forEach(phrase => phrase.classList.remove('is-phrase-visible'));
+            if (overviewCopy) {
+                overviewCopy.classList.remove('is-body-visible');
+            }
+            if (overviewContinue) {
+                overviewContinue.classList.remove('is-visible');
+            }
+
+            void overview.offsetWidth;
+
+            let delay = 0.2;
+            let maxWordDelay = 0;
+
+            if (tagline) {
+                tagline.style.setProperty('--reveal-delay', `${delay}s`);
+                delay += lineGap;
+            }
+
+            lines.forEach(line => {
+                const words = line.querySelectorAll('.reveal-word');
+                words.forEach((word, idx) => {
+                    const wordDelay = delay + idx * wordGap;
+                    word.style.setProperty('--reveal-delay', `${wordDelay}s`);
+                    if (wordDelay > maxWordDelay) {
+                        maxWordDelay = wordDelay;
+                    }
+                });
+                delay += lineGap;
+            });
+
+            requestAnimationFrame(() => {
+                revealItems.forEach(item => item.classList.add('reveal-active'));
+            });
+
+            if (overviewCopy) {
+                const phraseStartDelay = maxWordDelay + 0.6;
+                const phraseGap = 1.6;
+                overviewPhrases.forEach((phrase, idx) => {
+                    const phraseDelay = phraseStartDelay + idx * phraseGap;
+                    schedule(() => {
+                        phrase.classList.add('is-phrase-visible');
+                    }, phraseDelay);
+                });
+
+                const bodyDelay = phraseStartDelay + (overviewPhrases.length * phraseGap) + 0.3;
+                schedule(() => {
+                    overviewCopy.classList.add('is-body-visible');
+                }, bodyDelay);
+
+                if (overviewContinue) {
+                    const continueDelay = bodyDelay + 1.0;
+                    schedule(() => {
+                        overviewContinue.classList.add('is-visible');
+                    }, continueDelay);
+                }
+            }
+        };
+
+        window._runOverviewSequence = runOverviewSequence;
+
+        if (overviewContinue) {
+            overviewContinue.addEventListener('click', () => {
+                window.location.hash = '#mandate';
+            });
+        }
+    }
 
     function setActiveTabFromHash() {
         const hash = window.location.hash || '#overview';
@@ -601,7 +726,108 @@ function softCloseModal() {
             }
             link.setAttribute('aria-selected', isActive ? 'true' : 'false');
         });
+
+        if (resolvedId === 'overview' && typeof window._runOverviewSequence === 'function') {
+            window._runOverviewSequence();
+        }
     }
 
     window.addEventListener('hashchange', setActiveTabFromHash);
     setActiveTabFromHash();
+
+    function initTeamTabs() {
+        const tabs = document.querySelectorAll('.team-tab');
+        if (!tabs.length) return;
+
+        const panels = document.querySelectorAll('.team-panel');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-team-target');
+                const targetPanel = target ? document.querySelector(`.team-panel[data-team-panel=\"${target}\"]`) : null;
+                panels.forEach(panel => {
+                    const isActive = panel === targetPanel;
+                    panel.classList.toggle('is-active', isActive);
+                    panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                });
+                tabs.forEach(btn => btn.classList.toggle('is-active', btn === tab));
+                tabs.forEach(btn => btn.setAttribute('aria-selected', btn === tab ? 'true' : 'false'));
+            });
+        });
+
+        tabs[0].click();
+    }
+
+    function initHoldToClear() {
+        const clearBtn = document.getElementById('formClearBtn');
+        if (!clearBtn) return;
+
+        const helper = document.querySelector('.form-clear-helper');
+        const holdSeconds = (HOLD_CLEAR_MS / 1000).toFixed(1).replace(/\.0$/, '');
+        clearBtn.style.setProperty('--hold-duration', `${HOLD_CLEAR_MS}ms`);
+        if (helper) {
+            helper.textContent = `Hold ${holdSeconds}s to clear`;
+        }
+
+        let holdTimer = null;
+        let isHolding = false;
+
+        const cancelHold = () => {
+            if (!isHolding) return;
+            isHolding = false;
+            if (holdTimer) {
+                clearTimeout(holdTimer);
+                holdTimer = null;
+            }
+            clearBtn.classList.remove('is-holding');
+        };
+
+        const startHold = () => {
+            if (clearBtn.disabled || window._isSubmitting) return;
+            if (isHolding) return;
+            isHolding = true;
+            clearBtn.classList.remove('is-holding');
+            void clearBtn.offsetWidth;
+            clearBtn.classList.add('is-holding');
+            holdTimer = window.setTimeout(() => {
+                holdTimer = null;
+                isHolding = false;
+                clearBtn.classList.remove('is-holding');
+                resetFormDataOnly();
+            }, HOLD_CLEAR_MS);
+        };
+
+        clearBtn.addEventListener('pointerdown', (event) => {
+            if (event.button !== 0) return;
+            clearBtn.setPointerCapture(event.pointerId);
+            startHold();
+        });
+        clearBtn.addEventListener('pointerup', (event) => {
+            if (clearBtn.hasPointerCapture(event.pointerId)) {
+                clearBtn.releasePointerCapture(event.pointerId);
+            }
+            cancelHold();
+        });
+        clearBtn.addEventListener('pointerleave', cancelHold);
+        clearBtn.addEventListener('pointercancel', (event) => {
+            if (clearBtn.hasPointerCapture(event.pointerId)) {
+                clearBtn.releasePointerCapture(event.pointerId);
+            }
+            cancelHold();
+        });
+
+        clearBtn.addEventListener('keydown', (event) => {
+            if (event.repeat) return;
+            if (event.key === ' ' || event.key === 'Enter') {
+                event.preventDefault();
+                startHold();
+            }
+        });
+        clearBtn.addEventListener('keyup', (event) => {
+            if (event.key === ' ' || event.key === 'Enter') {
+                event.preventDefault();
+                cancelHold();
+            }
+        });
+        clearBtn.addEventListener('blur', cancelHold);
+    }

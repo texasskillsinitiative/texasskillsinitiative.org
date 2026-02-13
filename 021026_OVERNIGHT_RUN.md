@@ -52,7 +52,7 @@
 
 ### 2. Remote Node Access (VPN Gate)
 - **Gate UI:** Add a secondary button within the "TSI Internal" ecosystem for "Remote Node Access."
-- **Page Name:** `021026_vpn_gate.html`
+- **Page Name:** `tsi_internal.html`
 - **Visuals:** A professional, dark-themed SSO login box. Include status text like "Node Status: Encrypted" or "Secure Connection Established."
 - **Behavior:** Any credential attempt must return a "Standard Failure" message (e.g., "Unauthorized Node" or "Invalid Credentials").
 

@@ -1,0 +1,19 @@
+<svg id="Navy_Blackground_darker_copy" data-name="Navy Blackground darker copy" xmlns="http://www.w3.org/2000/svg" width="78.262" height="64.226" viewBox="0 0 1184 971.656">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #c3a46b;
+      }
+
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: #9c7a3c;
+      }
+    </style>
+  </defs>
+  <path id="Star_Lighter" data-name="Star Lighter" class="cls-1" d="M1167.04,342.767c-734.322,136.144-380.958,157.555-994.224,594.6l-57.691,34.289,193.13-318.868L0,480.717l444.206-53.255,257-427.476,21.813,393.6,453.54-55.831Q1171.79,340.261,1167.04,342.767Z"/>
+  <path id="Star_Shading_Dark" data-name="Star Shading Dark" class="cls-2" d="M737.191,602.632L753.74,904.6,486.2,751.859c-201.489,119.768-368.07,218.733-368.07,218.733C809.06,494.153,402.782,479.279,1184.58,335.978,1185.82,335.706,973,462.394,737.191,602.632Z"/>
+</svg>
