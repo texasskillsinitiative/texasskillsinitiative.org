@@ -38,3 +38,11 @@
   - `js/main.js` (`initPipelineMap`)
   - `css/main.css` (pipeline/map styles)
   - `assets/world-map.md` and map assets
+
+## Live Session Entries
+### 2026-02-14 11:24:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added governance/coordination docs (`AGENTS.md`, `STATUS.md`, `PACKETS.md`), renamed session log to `AGENTS-LOG.md`, deleted legacy launch/overnight docs, and pushed commit `34f5a95` to `021026_master`.
+- Troubleshooting suggestions: If a push is rejected with remote ref lock/expected-hash mismatch, run `git fetch`, verify local/remote heads, then retry push once refs converge.
+- Resolutions/outcomes: Repo tracking docs are now centralized and committed; session-close protocol and packet boundaries are documented.
+
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

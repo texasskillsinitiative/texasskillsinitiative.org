@@ -73,7 +73,7 @@ This file defines recommended autonomous behavior for this repository.
 7. Continue to next requested packet without expanding scope.
 
 ## 10) Agent Log Requirements (`AGENTS-LOG.md`)
-1. Keep a brief running log during the session and update it periodically.
+1. Keep a brief running log during the session and update it periodically (start, major action/change, troubleshooting event, and before close).
 2. Each log entry must include:
    - time
    - agent name
@@ -85,4 +85,49 @@ This file defines recommended autonomous behavior for this repository.
    - do not delete prior entries
    - do not remove content from other agents
    - only revise your own current live entry while it is still in progress
-4. After a work packet completes, append a short final entry for that packet.
+4. Use this required tail marker as the final line of the file while a session is active:
+   - `[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`
+5. Normal log edits must be written above the tail marker line.
+6. After a work packet completes, append a short final entry for that packet above the tail marker.
+
+## 11) Session Close Protocol
+If the user requests to close/end the session, perform this sequence before exiting:
+1. Append a final entry to `AGENTS-LOG.md` with:
+   - time
+   - agent name
+   - agent version
+   - actions taken
+   - troubleshooting suggestions
+   - resolutions/outcomes
+   - commit hash(es) if any
+2. Update `STATUS.md` to reflect final `Done`/`Planned`/`Blocked` state for affected items.
+3. Update `PACKETS.md` only if packet boundaries/ownership logic changed in this session.
+4. Run a final repository check:
+   - `git status`
+   - `git log --oneline -n 3`
+5. If commit/push was requested, ensure it is complete and report:
+   - changed files
+   - final commit hash
+   - push result
+6. Provide a short handoff summary:
+   - completed work
+   - remaining work
+   - risks/blockers
+   - recommended next step
+7. Replace the active tail marker line with planned exit log entries and closure details (do not leave active marker at EOF after clean close).
+
+## 12) Unexpected Exit Detection + Clean Restart
+1. On session start, check the last line of `AGENTS-LOG.md`.
+2. If the last line is:
+   - `[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`
+   then treat prior session as unexpectedly closed.
+3. In that case, append a recovery note above the marker including:
+   - detection time
+   - agent name
+   - agent version
+   - observed unclean-exit condition
+4. Suggest clean restart options to the user:
+   - Option 1: Continue from current working tree and resume from latest `STATUS.md` item.
+   - Option 2: Review `git status` + recent commits first, then resume.
+   - Option 3: Reset to a known-good commit and restart the packet.
+5. Keep exactly one active tail marker line at EOF during an active session.
