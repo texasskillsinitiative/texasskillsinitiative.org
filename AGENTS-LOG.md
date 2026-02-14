@@ -45,4 +45,11 @@
 - Troubleshooting suggestions: If a push is rejected with remote ref lock/expected-hash mismatch, run `git fetch`, verify local/remote heads, then retry push once refs converge.
 - Resolutions/outcomes: Repo tracking docs are now centralized and committed; session-close protocol and packet boundaries are documented.
 
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-14 11:28:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Committed and pushed unclean-exit detection/tail-marker protocol updates in `AGENTS.md` and `AGENTS-LOG.md`.
+- Troubleshooting suggestions: If a future session starts and the active tail marker is still present at EOF, treat it as unclean shutdown, append recovery note, and choose one of the documented restart paths.
+- Resolutions/outcomes: Commit `588a5e6` pushed to `origin/021026_master`; clean close protocol executed and active-session tail marker cleared.
+- Commit hash(es): `588a5e6` (this packet), prior related docs baseline `34f5a95`.
+- Push result: `origin/021026_master` updated successfully.
+
+[AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-02-14 11:28:23 -06:00
