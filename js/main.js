@@ -591,6 +591,7 @@ function softCloseModal() {
     initPortalOptions();
     initHoldToClear();
     initTeamTabs();
+    initPipelineMap();
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
@@ -756,6 +757,245 @@ function softCloseModal() {
         });
 
         tabs[0].click();
+    }
+
+    function initPipelineMap() {
+        const mapControls = document.querySelectorAll('.map-control');
+        if (!mapControls.length) return;
+
+        const primaryControls = document.querySelector('.pipeline-map-controls');
+        const primaryMap = document.querySelector('.pipeline-map svg[data-map-src]');
+        const primaryOverlays = primaryMap ? primaryMap.querySelectorAll('.map-overlay') : [];
+
+        if (primaryControls && primaryMap) {
+            const primaryButtons = primaryControls.querySelectorAll('.map-control');
+            primaryButtons.forEach(control => {
+                control.addEventListener('click', () => {
+                    const target = control.getAttribute('data-map-target');
+                    primaryOverlays.forEach(overlay => overlay.classList.toggle('is-active', overlay.classList.contains(target)));
+                    primaryButtons.forEach(btn => btn.classList.toggle('is-active', btn === control));
+                });
+            });
+        }
+
+        const maps = Array.from(document.querySelectorAll('.pipeline-map svg'));
+        if (!maps.length) return;
+
+        const createDot = (x, y, isLand, radius) => {
+            const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            dot.setAttribute('cx', x);
+            dot.setAttribute('cy', y);
+            dot.setAttribute('r', radius);
+            dot.setAttribute('class', isLand ? 'map-dot is-land' : 'map-dot');
+            return dot;
+        };
+
+        const renderDots = (map, width, height, isLandAt) => {
+            const dotGroup = map.querySelector('[data-dot-grid]');
+            if (!dotGroup) return;
+
+            map.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            const ocean = map.querySelector('.map-ocean');
+            if (ocean) {
+                ocean.setAttribute('width', width);
+                ocean.setAttribute('height', height);
+            }
+
+            dotGroup.innerHTML = '';
+            const radius = 0.42;
+            for (let y = 0; y < height; y += 1) {
+                for (let x = 0; x < width; x += 1) {
+                    const isLand = isLandAt(x, y);
+                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius));
+                }
+            }
+        };
+
+        const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+        const applyToggleData = (toggles, map, controls) => {
+            if (!map || !controls) return;
+            controls.innerHTML = '';
+            toggles.forEach((toggle, index) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `map-control${index === 0 ? ' is-active' : ''}`;
+                btn.setAttribute('data-map-target', toggle.targetClass);
+                btn.textContent = toggle.title;
+                controls.appendChild(btn);
+            });
+
+            map.querySelectorAll('.map-overlay').forEach(node => node.remove());
+            toggles.forEach((toggle, index) => {
+                const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                group.setAttribute('class', `map-overlay ${toggle.targetClass}${index === 0 ? ' is-active' : ''}`);
+
+                const blinkClass = toggle.blink ? `map-marker--blink-${toggle.blink}` : '';
+                if (toggle.shape === 'square') {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', toggle.x - toggle.size);
+                    rect.setAttribute('y', toggle.y - toggle.size);
+                    rect.setAttribute('width', toggle.size * 2);
+                    rect.setAttribute('height', toggle.size * 2);
+                    rect.setAttribute('rx', Math.max(1, toggle.size * 0.35));
+                    rect.setAttribute('fill', toggle.color);
+                    if (blinkClass) rect.setAttribute('class', blinkClass);
+                    group.appendChild(rect);
+                } else {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', toggle.x);
+                    circle.setAttribute('cy', toggle.y);
+                    circle.setAttribute('r', toggle.size);
+                    circle.setAttribute('fill', toggle.color);
+                    if (blinkClass) circle.setAttribute('class', blinkClass);
+                    group.appendChild(circle);
+                }
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', toggle.x + (toggle.size * 2));
+                label.setAttribute('y', toggle.y + (toggle.size * 1.8));
+                label.textContent = toggle.title;
+                group.appendChild(label);
+                map.appendChild(group);
+            });
+
+            const mapControls = controls.querySelectorAll('.map-control');
+            const overlays = map.querySelectorAll('.map-overlay');
+            mapControls.forEach(control => {
+                control.addEventListener('click', () => {
+                    const target = control.getAttribute('data-map-target');
+                    overlays.forEach(overlay => overlay.classList.toggle('is-active', overlay.classList.contains(target)));
+                    mapControls.forEach(btn => btn.classList.toggle('is-active', btn === control));
+                });
+            });
+        };
+
+        const renderFromText = (map, text, label) => {
+            const t0 = performance.now();
+            const lines = text.trim().split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            if (!lines.length) return false;
+
+            let width = null;
+            let height = null;
+            const rows = [];
+            const toggleLines = [];
+            let inToggles = false;
+
+            lines.forEach(line => {
+                if (line.startsWith('#')) {
+                    if (/^#\\s*toggles/i.test(line)) {
+                        inToggles = true;
+                        return;
+                    }
+                    const metaMatch = line.match(/width\\s*=\\s*(\\d+)\\s+height\\s*=\\s*(\\d+)/i);
+                    if (metaMatch) {
+                        width = Number(metaMatch[1]);
+                        height = Number(metaMatch[2]);
+                    }
+                    return;
+                }
+                if (inToggles) {
+                    toggleLines.push(line);
+                } else {
+                    rows.push(line);
+                }
+            });
+            if (!rows.length) return false;
+            const inferredWidth = rows[0].length;
+            const inferredHeight = rows.length;
+            width = width ?? inferredWidth;
+            height = height ?? inferredHeight;
+
+            if (rows.some(row => row.length !== width)) return false;
+            if (inferredHeight !== height) return false;
+
+            renderDots(map, width, height, (x, y) => rows[y] && rows[y][x] === '0');
+
+            if (toggleLines.length) {
+                const toggles = toggleLines.map(line => {
+                    const parts = line.split('|').map(part => part.trim());
+                    const title = parts[0] || 'Toggle';
+                    const x = Number(parts[1]);
+                    const y = Number(parts[2]);
+                    const shape = (parts[3] || 'circle').toLowerCase();
+                    const colorToken = (parts[4] || 'accent').toLowerCase();
+                    const size = Number(parts[5]) || 4;
+                    const blink = (parts[6] || '').toLowerCase();
+                    const color = colorToken === 'accent' ? 'var(--accent)' : colorToken;
+                    return {
+                        title,
+                        x,
+                        y,
+                        shape: shape === 'square' ? 'square' : 'circle',
+                        size,
+                        color,
+                        blink,
+                        targetClass: `overlay-${slugify(title)}`
+                    };
+                }).filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
+
+                const controls = document.querySelector('[data-map-controls=\"md\"]');
+                if (toggles.length) {
+                    applyToggleData(toggles, map, controls);
+                } else if (controls) {
+                    controls.innerHTML = '<span class="map-controls-empty">No MD toggles loaded</span>';
+                    console.warn('[map] no valid MD toggles found.');
+                }
+            }
+            const t1 = performance.now();
+            console.info(`[map] ${label} md render: ${(t1 - t0).toFixed(2)}ms`);
+            return true;
+        };
+
+        const renderFromImage = (map, src, label) => {
+            const img = new Image();
+            img.onload = () => {
+                const t0 = performance.now();
+                const canvas = document.createElement('canvas');
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+                renderDots(map, canvas.width, canvas.height, (x, y) => {
+                    const idx = (y * canvas.width + x) * 4;
+                    const r = imageData[idx];
+                    const g = imageData[idx + 1];
+                    const b = imageData[idx + 2];
+                    const a = imageData[idx + 3];
+                    if (a < 10) return false;
+                    return (r + g + b) < 384;
+                });
+                const t1 = performance.now();
+                console.info(`[map] ${label} png render: ${(t1 - t0).toFixed(2)}ms`);
+            };
+            img.src = src;
+        };
+
+        maps.forEach(map => {
+            const mapMdPath = map.getAttribute('data-map-md');
+            const mapSrc = map.getAttribute('data-map-src');
+            const mapFallback = map.getAttribute('data-map-fallback');
+            if (mapMdPath) {
+                fetch(mapMdPath, { cache: 'no-store' })
+                    .then(response => response.text())
+                    .then(text => {
+                        const ok = renderFromText(map, text, mapMdPath);
+                        if (!ok && mapFallback) {
+                            renderFromImage(map, mapFallback, mapFallback);
+                        }
+                    })
+                    .catch(() => {
+                        if (mapFallback) {
+                            renderFromImage(map, mapFallback, mapFallback);
+                        }
+                    });
+                return;
+            }
+            if (mapSrc) {
+                renderFromImage(map, mapSrc, mapSrc);
+            }
+        });
     }
 
     function initHoldToClear() {
