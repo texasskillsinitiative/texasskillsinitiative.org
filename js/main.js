@@ -760,37 +760,82 @@ function softCloseModal() {
     }
 
     function initPipelineMap() {
-        const mapControls = document.querySelectorAll('.map-control');
-        if (!mapControls.length) return;
+        const bindLegacyToggleControls = () => {
+            const legacyMap = document.querySelector('.pipeline-map svg[data-map-src]');
+            const legacyFrame = legacyMap ? legacyMap.closest('.pipeline-map-frame') : null;
+            const siblingControls = legacyFrame ? legacyFrame.previousElementSibling : null;
+            const legacyControls = (siblingControls && siblingControls.classList.contains('pipeline-map-controls'))
+                ? siblingControls
+                : document.querySelector('[data-map-controls="legacy"]');
+            const legacyOverlays = legacyMap ? legacyMap.querySelectorAll('.map-overlay') : [];
+            if (!legacyControls || !legacyMap) return;
 
-        const primaryControls = document.querySelector('.pipeline-map-controls');
-        const primaryMap = document.querySelector('.pipeline-map svg[data-map-src]');
-        const primaryOverlays = primaryMap ? primaryMap.querySelectorAll('.map-overlay') : [];
-
-        if (primaryControls && primaryMap) {
-            const primaryButtons = primaryControls.querySelectorAll('.map-control');
-            primaryButtons.forEach(control => {
+            const legacyButtons = legacyControls.querySelectorAll('.map-control');
+            legacyButtons.forEach(control => {
+                const target = control.getAttribute('data-map-target');
+                const overlay = Array.from(legacyOverlays).find(node => node.classList.contains(target));
+                const isActive = overlay ? overlay.classList.contains('is-active') : control.classList.contains('is-active');
+                control.classList.toggle('is-active', isActive);
+                control.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+            legacyButtons.forEach(control => {
                 control.addEventListener('click', () => {
                     const target = control.getAttribute('data-map-target');
-                    primaryOverlays.forEach(overlay => overlay.classList.toggle('is-active', overlay.classList.contains(target)));
-                    primaryButtons.forEach(btn => btn.classList.toggle('is-active', btn === control));
+                    const overlay = Array.from(legacyOverlays).find(node => node.classList.contains(target));
+                    if (!overlay) return;
+                    const nextState = !overlay.classList.contains('is-active');
+                    overlay.classList.toggle('is-active', nextState);
+                    control.classList.toggle('is-active', nextState);
+                    control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
                 });
             });
-        }
+        };
+        bindLegacyToggleControls();
 
         const maps = Array.from(document.querySelectorAll('.pipeline-map svg'));
         if (!maps.length) return;
 
-        const createDot = (x, y, isLand, radius) => {
+        const applyMapSizeClass = (map) => {
+            const width = map.getBoundingClientRect().width;
+            map.classList.toggle('map--compact', width < 900);
+            map.classList.toggle('map--tiny', width < 600);
+        };
+
+        if (typeof ResizeObserver === 'function') {
+            const mapResizeObserver = new ResizeObserver(entries => {
+                entries.forEach(entry => applyMapSizeClass(entry.target));
+            });
+            maps.forEach(map => {
+                applyMapSizeClass(map);
+                mapResizeObserver.observe(map);
+            });
+        } else {
+            const onResize = () => maps.forEach(applyMapSizeClass);
+            onResize();
+            window.addEventListener('resize', onResize);
+        }
+
+        const createDot = (x, y, isLand, radius, overrideStyle) => {
             const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             dot.setAttribute('cx', x);
             dot.setAttribute('cy', y);
             dot.setAttribute('r', radius);
-            dot.setAttribute('class', isLand ? 'map-dot is-land' : 'map-dot');
+            const classes = ['map-dot'];
+            if (isLand) classes.push('is-land');
+            if (overrideStyle) {
+                classes.push('map-dot--override');
+                if (overrideStyle.blink) {
+                    classes.push(`map-dot--blink-${overrideStyle.blink}`);
+                }
+                if (overrideStyle.color) {
+                    dot.setAttribute('fill', overrideStyle.color);
+                }
+            }
+            dot.setAttribute('class', classes.join(' '));
             return dot;
         };
 
-        const renderDots = (map, width, height, isLandAt) => {
+        const renderDots = (map, width, height, resolveDotState) => {
             const dotGroup = map.querySelector('[data-dot-grid]');
             if (!dotGroup) return;
 
@@ -805,57 +850,71 @@ function softCloseModal() {
             const radius = 0.42;
             for (let y = 0; y < height; y += 1) {
                 for (let x = 0; x < width; x += 1) {
-                    const isLand = isLandAt(x, y);
-                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius));
+                    const dotState = resolveDotState(x, y);
+                    const isLand = typeof dotState === 'object' ? !!dotState.isLand : !!dotState;
+                    const overrideStyle = typeof dotState === 'object' ? (dotState.overrideStyle || null) : null;
+                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle));
                 }
             }
         };
 
         const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const resolveMdControls = (map) => {
+            const frame = map.closest('.pipeline-map-frame');
+            const sibling = frame ? frame.previousElementSibling : null;
+            if (sibling && sibling.getAttribute('data-map-controls') === 'md') return sibling;
+            return document.querySelector('[data-map-controls="md"]');
+        };
 
-        const applyToggleData = (toggles, map, controls) => {
+        const applyMdToggleData = (toggleGroups, map, controls) => {
             if (!map || !controls) return;
             controls.innerHTML = '';
-            toggles.forEach((toggle, index) => {
+            toggleGroups.forEach((toggleGroup, index) => {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = `map-control${index === 0 ? ' is-active' : ''}`;
-                btn.setAttribute('data-map-target', toggle.targetClass);
-                btn.textContent = toggle.title;
+                btn.setAttribute('data-map-target', toggleGroup.targetClass);
+                btn.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
+                btn.textContent = toggleGroup.buttonLabel;
                 controls.appendChild(btn);
             });
 
             map.querySelectorAll('.map-overlay').forEach(node => node.remove());
-            toggles.forEach((toggle, index) => {
+            toggleGroups.forEach((toggleGroup, index) => {
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                group.setAttribute('class', `map-overlay ${toggle.targetClass}${index === 0 ? ' is-active' : ''}`);
+                group.setAttribute('class', `map-overlay ${toggleGroup.targetClass}${index === 0 ? ' is-active' : ''}`);
 
-                const blinkClass = toggle.blink ? `map-marker--blink-${toggle.blink}` : '';
-                if (toggle.shape === 'square') {
-                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    rect.setAttribute('x', toggle.x - toggle.size);
-                    rect.setAttribute('y', toggle.y - toggle.size);
-                    rect.setAttribute('width', toggle.size * 2);
-                    rect.setAttribute('height', toggle.size * 2);
-                    rect.setAttribute('rx', Math.max(1, toggle.size * 0.35));
-                    rect.setAttribute('fill', toggle.color);
-                    if (blinkClass) rect.setAttribute('class', blinkClass);
-                    group.appendChild(rect);
-                } else {
-                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                    circle.setAttribute('cx', toggle.x);
-                    circle.setAttribute('cy', toggle.y);
-                    circle.setAttribute('r', toggle.size);
-                    circle.setAttribute('fill', toggle.color);
-                    if (blinkClass) circle.setAttribute('class', blinkClass);
-                    group.appendChild(circle);
-                }
+                toggleGroup.markers.forEach(marker => {
+                    const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    markerGroup.setAttribute('class', 'map-marker');
+                    const blinkClass = marker.blink ? `map-marker--blink-${marker.blink}` : '';
+                    if (marker.shape === 'square') {
+                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        rect.setAttribute('x', marker.x - marker.size);
+                        rect.setAttribute('y', marker.y - marker.size);
+                        rect.setAttribute('width', marker.size * 2);
+                        rect.setAttribute('height', marker.size * 2);
+                        rect.setAttribute('rx', Math.max(1, marker.size * 0.35));
+                        rect.setAttribute('fill', marker.color);
+                        if (blinkClass) rect.setAttribute('class', blinkClass);
+                        markerGroup.appendChild(rect);
+                    } else {
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', marker.x);
+                        circle.setAttribute('cy', marker.y);
+                        circle.setAttribute('r', marker.size);
+                        circle.setAttribute('fill', marker.color);
+                        if (blinkClass) circle.setAttribute('class', blinkClass);
+                        markerGroup.appendChild(circle);
+                    }
 
-                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                label.setAttribute('x', toggle.x + (toggle.size * 2));
-                label.setAttribute('y', toggle.y + (toggle.size * 1.8));
-                label.textContent = toggle.title;
-                group.appendChild(label);
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', marker.x + (marker.size * 2));
+                    label.setAttribute('y', marker.y + (marker.size * 1.8));
+                    label.textContent = marker.label;
+                    markerGroup.appendChild(label);
+                    group.appendChild(markerGroup);
+                });
                 map.appendChild(group);
             });
 
@@ -864,8 +923,12 @@ function softCloseModal() {
             mapControls.forEach(control => {
                 control.addEventListener('click', () => {
                     const target = control.getAttribute('data-map-target');
-                    overlays.forEach(overlay => overlay.classList.toggle('is-active', overlay.classList.contains(target)));
-                    mapControls.forEach(btn => btn.classList.toggle('is-active', btn === control));
+                    const overlay = Array.from(overlays).find(node => node.classList.contains(target));
+                    if (!overlay) return;
+                    const nextState = !overlay.classList.contains('is-active');
+                    overlay.classList.toggle('is-active', nextState);
+                    control.classList.toggle('is-active', nextState);
+                    control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
                 });
             });
         };
@@ -878,27 +941,73 @@ function softCloseModal() {
             let width = null;
             let height = null;
             const rows = [];
+            const overrides = [];
             const toggleLines = [];
-            let inToggles = false;
+            let mode = 'rows';
+            const isBinaryRow = (value) => /^[01]+$/.test(value);
+            const isToggleRow = (value) => value.includes('|');
+            const resolveOverrideColor = (rawColor) => {
+                const colorToken = rawColor.toLowerCase();
+                if (!colorToken) return '';
+                return colorToken === 'accent' ? 'var(--accent)' : rawColor;
+            };
+            const resolveOverrideBlink = (rawBlink) => {
+                const blinkToken = rawBlink.toLowerCase();
+                return ['rapid', 'slow', 'fade'].includes(blinkToken) ? blinkToken : '';
+            };
 
             lines.forEach(line => {
                 if (line.startsWith('#')) {
-                    if (/^#\\s*toggles/i.test(line)) {
-                        inToggles = true;
+                    if (/^#\s*overrides\s*$/i.test(line)) {
+                        mode = 'overrides';
                         return;
                     }
-                    const metaMatch = line.match(/width\\s*=\\s*(\\d+)\\s+height\\s*=\\s*(\\d+)/i);
+                    if (/^#\s*toggles\s*$/i.test(line)) {
+                        mode = 'toggles';
+                        return;
+                    }
+                    const metaMatch = line.match(/width\s*=\s*(\d+)\s+height\s*=\s*(\d+)/i);
                     if (metaMatch) {
                         width = Number(metaMatch[1]);
                         height = Number(metaMatch[2]);
                     }
                     return;
                 }
-                if (inToggles) {
-                    toggleLines.push(line);
-                } else {
+                if (mode === 'rows' && isBinaryRow(line)) {
                     rows.push(line);
+                    return;
                 }
+                if (isToggleRow(line)) {
+                    if (mode === 'overrides') {
+                        const parts = line.split('|').map(part => part.trim());
+                        const x = Number(parts[0]);
+                        const y = Number(parts[1]);
+                        const value = parts[2];
+                        let rawColor = parts[3] || '';
+                        let rawBlink = parts[4] || '';
+                        const shorthandBlink = ['rapid', 'slow', 'fade'];
+                        if (parts.length === 4 && shorthandBlink.includes(rawColor.toLowerCase())) {
+                            rawBlink = rawColor;
+                            rawColor = '';
+                        }
+                        const color = resolveOverrideColor(rawColor);
+                        const blink = resolveOverrideBlink(rawBlink);
+                        const hasSupportedLength = parts.length >= 3 && parts.length <= 5;
+                        if (hasSupportedLength && Number.isFinite(x) && Number.isFinite(y) && /^[01]$/.test(value)) {
+                            if (rawBlink && !blink) {
+                                console.warn(`[map] invalid override blink in ${label}: "${line}"`);
+                            }
+                            overrides.push({ x, y, value, color, blink });
+                            return;
+                        }
+                        console.warn(`[map] invalid override in ${label}: "${line}"`);
+                        return;
+                    }
+                    mode = 'toggles';
+                    toggleLines.push(line);
+                    return;
+                }
+                console.warn(`[map] skipped unrecognized line in ${label}: "${line}"`);
             });
             if (!rows.length) return false;
             const inferredWidth = rows[0].length;
@@ -909,34 +1018,73 @@ function softCloseModal() {
             if (rows.some(row => row.length !== width)) return false;
             if (inferredHeight !== height) return false;
 
-            renderDots(map, width, height, (x, y) => rows[y] && rows[y][x] === '0');
+            const resolvedRows = rows.map(row => row.split(''));
+            const overrideStyleByCell = new Map();
+            overrides.forEach(({ x, y, value, color, blink }) => {
+                if (!Number.isInteger(x) || !Number.isInteger(y)) return;
+                if (x < 0 || y < 0 || x >= width || y >= height) {
+                    console.warn(`[map] override out of bounds in ${label}: ${x}|${y}|${value}`);
+                    return;
+                }
+                resolvedRows[y][x] = value;
+                overrideStyleByCell.set(`${x}|${y}`, {
+                    color,
+                    blink
+                });
+            });
 
+            renderDots(map, width, height, (x, y) => {
+                const overrideStyle = overrideStyleByCell.get(`${x}|${y}`) || null;
+                return {
+                    isLand: resolvedRows[y] && resolvedRows[y][x] === '0',
+                    overrideStyle
+                };
+            });
             if (toggleLines.length) {
-                const toggles = toggleLines.map(line => {
+                const toggleMarkers = toggleLines.map(line => {
                     const parts = line.split('|').map(part => part.trim());
-                    const title = parts[0] || 'Toggle';
-                    const x = Number(parts[1]);
-                    const y = Number(parts[2]);
-                    const shape = (parts[3] || 'circle').toLowerCase();
-                    const colorToken = (parts[4] || 'accent').toLowerCase();
-                    const size = Number(parts[5]) || 4;
-                    const blink = (parts[6] || '').toLowerCase();
+                    const hasCategoryAndTitle = parts.length >= 8;
+                    const buttonLabel = parts[0] || 'Toggle';
+                    const label = hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel;
+                    const x = Number(hasCategoryAndTitle ? parts[2] : parts[1]);
+                    const y = Number(hasCategoryAndTitle ? parts[3] : parts[2]);
+                    const shape = (hasCategoryAndTitle ? parts[4] : parts[3] || 'circle').toLowerCase();
+                    const colorToken = (hasCategoryAndTitle ? parts[5] : parts[4] || 'accent').toLowerCase();
+                    const size = Number(hasCategoryAndTitle ? parts[6] : parts[5]) || 4;
+                    const blink = (hasCategoryAndTitle ? parts[7] : parts[6] || '').toLowerCase();
                     const color = colorToken === 'accent' ? 'var(--accent)' : colorToken;
                     return {
-                        title,
+                        buttonLabel,
+                        label,
                         x,
                         y,
                         shape: shape === 'square' ? 'square' : 'circle',
                         size,
                         color,
                         blink,
-                        targetClass: `overlay-${slugify(title)}`
+                        targetClass: `overlay-${slugify(buttonLabel)}`
                     };
                 }).filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
 
-                const controls = document.querySelector('[data-map-controls=\"md\"]');
-                if (toggles.length) {
-                    applyToggleData(toggles, map, controls);
+                const toggleGroupsMap = new Map();
+                const toggleGroups = [];
+                toggleMarkers.forEach(marker => {
+                    let group = toggleGroupsMap.get(marker.targetClass);
+                    if (!group) {
+                        group = {
+                            targetClass: marker.targetClass,
+                            buttonLabel: marker.buttonLabel,
+                            markers: []
+                        };
+                        toggleGroupsMap.set(marker.targetClass, group);
+                        toggleGroups.push(group);
+                    }
+                    group.markers.push(marker);
+                });
+
+                const controls = resolveMdControls(map);
+                if (toggleGroups.length) {
+                    applyMdToggleData(toggleGroups, map, controls);
                 } else if (controls) {
                     controls.innerHTML = '<span class="map-controls-empty">No MD toggles loaded</span>';
                     console.warn('[map] no valid MD toggles found.');

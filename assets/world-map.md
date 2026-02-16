@@ -1,8 +1,5 @@
 # format: 0=land 1=water
 # rows: 181 columns x 89 rows
-# toggles: Title|x|y|shape|color|size|blink
-# blink: rapid | slow | fade
-# shape: circle or square, color: accent or CSS color
 # width=181 height=89
 1111111111111111111111111111111111111111111111111111111101111111111111001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111111110011111000110000000000000000001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
@@ -94,10 +91,28 @@
 1111111111111111111111111111111111111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111111001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
-# toggles
+# overrides
+# overrides: x|y|value|color|blink
+# required fields: x|y|value (0=land, 1=water). color/blink are optional.
+# no-color blink forms:
+# - explicit empty color: x|y|value||blink
+# - shorthand (blink in color slot): x|y|value|blink
+# coordinate system: origin is top-left of the map grid, x increases right, y increases down.
+# bounds: x must be 0-180 and y must be 0-88.
+# priority: overrides are applied in file order; later entries win for duplicate coordinates.
+# color: "accent" or any CSS color token (for example #44d4ff).
+# blink: rapid | slow | fade.
+# examples below are active and convert those cells from water (1) to land (0).
+5|1|0||slow
+6|2|0|#44d4ff|rapid
+7|3|0|#f18d2f|fade
 
-Circ|40|22|circle|accent|4|slow
-Circ|48|26|circle|accent|4|slow
-Circ|56|30|circle|accent|4|slow
-squa|120|40|square|accent|4|rapid
-squa|130|45|square|accent|4|rapid
+# toggles
+# toggles: Toggle Category|Title|x|y|shape|color|size|blink
+# blink: rapid | slow | fade
+# shape: circle or square, color: accent or CSS color
+
+Established|Rome|56|28|circle|accent|4|slow
+Established|Temple|44|28|circle|accent|4|slow
+Latin America Regions|Belton|62|58|circle|accent|4|slow
+Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
