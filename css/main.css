@@ -204,9 +204,11 @@
         .map-dot { fill: #1a2234; opacity: 0.95; }
         .map-dot.is-land { fill: #6b7385; }
         .map-dot.map-dot--override { opacity: 1; }
-        .map-dot.map-dot--override.map-dot--blink-slow { animation: mapDotPulseSlow 2.8s infinite; }
-        .map-dot.map-dot--override.map-dot--blink-rapid { animation: mapDotPulseRapid 1.2s infinite; }
-        .map-dot.map-dot--override.map-dot--blink-fade { animation: mapDotPulseFade 3.4s infinite; }
+        .map-dot.map-dot--blink-slow { animation: mapDotPulseSlow 2.8s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
+        .map-dot.map-dot--blink-rapid { animation: mapDotPulseRapid 1.2s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
+        .map-dot.map-dot--blink-fade { animation: mapDotPulseFade 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
+        .map-dot.map-dot--blink-glow { animation: mapDotPulseGlow 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
+        .map-dot.map-dot--blink-blend { animation: mapDotPulseBlend 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-overlay { opacity: 0; transition: opacity 0.3s ease; }
         .map-overlay.is-active { opacity: 1; }
         .map-overlay circle { fill: var(--accent); }
@@ -248,6 +250,17 @@
             35% { opacity: 0.95; filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.75)); }
             70% { opacity: 0.35; filter: drop-shadow(0 0 0.8px rgba(255, 255, 255, 0.45)); }
             100% { opacity: 0.1; filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
+        }
+        @keyframes mapDotPulseGlow {
+            0% { opacity: 0.08; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
+            35% { opacity: 0.95; fill: var(--map-dot-glow-to, var(--map-dot-glow-from, var(--map-dot-base-fill))); filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.75)); }
+            70% { opacity: 0.35; fill: var(--map-dot-glow-to, var(--map-dot-glow-from, var(--map-dot-base-fill))); filter: drop-shadow(0 0 0.8px rgba(255, 255, 255, 0.45)); }
+            100% { opacity: 0.1; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
+        }
+        @keyframes mapDotPulseBlend {
+            0% { opacity: 1; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: none; }
+            50% { opacity: 1; fill: var(--map-dot-glow-to, var(--map-dot-glow-from, var(--map-dot-base-fill))); filter: none; }
+            100% { opacity: 1; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: none; }
         }
         .sync-track { width: 100%; height: 4px; background: var(--frame-border); border-radius: 2px; margin-top: 10px; position: relative; }
         .sync-progress { height: 100%; background: var(--accent); border-radius: 2px; position: relative; width: 0%; transition-property: width; transition-timing-function: linear; }

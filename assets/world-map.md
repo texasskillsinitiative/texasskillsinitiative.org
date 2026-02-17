@@ -1,6 +1,10 @@
 # format: 0=land 1=water
 # rows: 181 columns x 89 rows
 # width=181 height=89
+# Ocean background: #0b1220 (css/main.css:203)
+# Water dots: #1a2234 (css/main.css:204)
+# Land dots: #6b7385 (css/main.css:205)
+
 1111111111111111111111111111111111111111111111111111111101111111111111001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111111110011111000110000000000000000001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111111111100001100000000000000000000111111111111000010011111111111111111111111111100111111111111111111111111111111111111111111111111111111111111
@@ -92,20 +96,92 @@
 1111111111111111111111111111111111111111111001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 
 # overrides
-# overrides: x|y|value|color|blink
-# required fields: x|y|value (0=land, 1=water). color/blink are optional.
-# no-color blink forms:
-# - explicit empty color: x|y|value||blink
-# - shorthand (blink in color slot): x|y|value|blink
+# overrides formats:
+# - terrain + style: x|y|value|color1|blink|phase
+# - terrain + style (two colors): x|y|value|color1|color2|blink|phase
+# - style only: x|y|color1|blink|phase
+# - style only (two colors): x|y|color1|color2|blink|phase
+# - blink only: x|y||blink|phase or x|y|blink|phase
+# value is optional: 0=land, 1=water. When omitted, the existing terrain cell is unchanged.
+# color1 is optional. When empty, the dot keeps its default built color.
+# color2 is optional and used by "glow" as the second transition color.
+# fade + color behavior:
+# - "fade" keeps standard pulse behavior.
+# - "glow" with one color transitions base terrain color -> color1 -> base.
+# - "glow" with two colors transitions color1 -> color2 -> color1.
+# - "blend" transitions color1 <-> color2 at full opacity (no dim glow floor).
 # coordinate system: origin is top-left of the map grid, x increases right, y increases down.
 # bounds: x must be 0-180 and y must be 0-88.
 # priority: overrides are applied in file order; later entries win for duplicate coordinates.
 # color: "accent" or any CSS color token (for example #44d4ff).
-# blink: rapid | slow | fade.
-# examples below are active and convert those cells from water (1) to land (0).
-5|1|0||slow
-6|2|0|#44d4ff|rapid
-7|3|0|#f18d2f|fade
+# hex tokens may be written with or without "#": #6b7385 or 6b7385.
+# blink: rapid | slow | fade | glow | blend | random.
+# random chooses one of: rapid, slow, fade.
+# phase: sync | async (default sync when omitted).
+# coordinate set variables:
+# - define set (inline): $set_name=x1,y1;x2,y2;x3,y3
+# - define set (block):
+#   $set_name={
+#   x1|y1|
+#   x2|y2|
+#   }
+# - apply set (pipe): @set_name|value|color|blink|phase
+# - apply set (equals): @set_name=|value|color|blink|phase
+# - apply style-only (pipe): @set_name|color|blink|phase
+# - apply style-only (equals): @set_name=|color|blink|phase
+
+$texas={
+20|26|
+21|26|
+22|26|
+20|27|
+21|27|
+19|28|
+20|28|
+21|28|
+22|28|
+23|28|
+19|29|
+20|29|
+21|29|
+22|29|
+23|29|
+24|29|
+25|29|
+16|30|
+17|30|
+18|30|
+19|30|
+20|30|
+21|30|
+22|30|
+23|30|
+24|30|
+17|31|
+18|31|
+19|31|
+20|31|
+21|31|
+22|31|
+23|31|
+24|31|
+17|32|
+19|32|
+20|32|
+21|32|
+22|32|
+23|32|
+19|33|
+20|33|
+21|33|
+20|34|
+20|35|
+}
+
+#@texas|6b7385|accent|blend
+#@texas=|22d3ee|67e8f9|blend|sync
+#@texas=|22d3ee|67e8f9|blend|async
+@texas=|7df9ff|0d98ba|blend|async
 
 # toggles
 # toggles: Toggle Category|Title|x|y|shape|color|size|blink

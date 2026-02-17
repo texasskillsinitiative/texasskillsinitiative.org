@@ -815,20 +815,72 @@ function softCloseModal() {
             window.addEventListener('resize', onResize);
         }
 
-        const createDot = (x, y, isLand, radius, overrideStyle) => {
+        const createDot = (x, y, isLand, radius, overrideStyle, gridX, gridY) => {
+            const overrideBlinkModes = ['rapid', 'slow', 'fade'];
+            const blinkDurationByMode = {
+                rapid: 1.2,
+                slow: 2.8,
+                fade: 3.4,
+                glow: 3.4,
+                blend: 3.4
+            };
+            const baseFill = isLand ? '#6b7385' : '#1a2234';
+            const resolveBlinkMode = (blinkValue) => {
+                if (!blinkValue) return '';
+                if (blinkValue === 'random') {
+                    const idx = Math.floor(Math.random() * overrideBlinkModes.length);
+                    return overrideBlinkModes[idx];
+                }
+                return blinkValue;
+            };
+            const resolveAsyncBlinkDelay = (blinkMode, xIdx, yIdx) => {
+                const duration = blinkDurationByMode[blinkMode];
+                if (!duration) return 0;
+                const seed = ((xIdx + 1) * 73856093) ^ ((yIdx + 1) * 19349663);
+                const normalized = Math.abs(Math.sin(seed * 0.0001) * 10000) % 1;
+                return normalized * duration;
+            };
             const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
             dot.setAttribute('cx', x);
             dot.setAttribute('cy', y);
             dot.setAttribute('r', radius);
+            dot.style.setProperty('--map-dot-base-fill', baseFill);
             const classes = ['map-dot'];
             if (isLand) classes.push('is-land');
             if (overrideStyle) {
-                classes.push('map-dot--override');
-                if (overrideStyle.blink) {
-                    classes.push(`map-dot--blink-${overrideStyle.blink}`);
+                const hasColor = Boolean(overrideStyle.color);
+                const hasColor2 = Boolean(overrideStyle.color2);
+                const hasBlink = Boolean(overrideStyle.blink);
+                if (hasColor) {
+                    classes.push('map-dot--override');
+                    dot.style.fill = overrideStyle.color;
                 }
-                if (overrideStyle.color) {
-                    dot.setAttribute('fill', overrideStyle.color);
+                if (hasBlink) {
+                    const resolvedBlinkMode = resolveBlinkMode(overrideStyle.blink);
+                    if (resolvedBlinkMode) {
+                        if ((resolvedBlinkMode === 'glow' || resolvedBlinkMode === 'blend') && hasColor) {
+                            const glowFrom = hasColor2 ? overrideStyle.color : baseFill;
+                            const glowTo = hasColor2 ? overrideStyle.color2 : overrideStyle.color;
+                            dot.style.setProperty('--map-dot-glow-from', glowFrom);
+                            dot.style.setProperty('--map-dot-glow-to', glowTo);
+                            classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                        } else if (resolvedBlinkMode === 'glow' || resolvedBlinkMode === 'blend') {
+                            if (hasColor2) {
+                                dot.style.setProperty('--map-dot-glow-from', baseFill);
+                                dot.style.setProperty('--map-dot-glow-to', overrideStyle.color2);
+                                classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                            } else {
+                                classes.push('map-dot--blink-fade');
+                            }
+                        } else {
+                            classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                        }
+                        const phaseMode = overrideStyle.phase || 'sync';
+                        if (phaseMode === 'async') {
+                            const delaySec = resolveAsyncBlinkDelay(resolvedBlinkMode, gridX, gridY);
+                            dot.style.setProperty('--map-dot-blink-delay', `-${delaySec.toFixed(3)}s`);
+                        }
+                    }
                 }
             }
             dot.setAttribute('class', classes.join(' '));
@@ -853,7 +905,7 @@ function softCloseModal() {
                     const dotState = resolveDotState(x, y);
                     const isLand = typeof dotState === 'object' ? !!dotState.isLand : !!dotState;
                     const overrideStyle = typeof dotState === 'object' ? (dotState.overrideStyle || null) : null;
-                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle));
+                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle, x, y));
                 }
             }
         };
@@ -895,7 +947,7 @@ function softCloseModal() {
                         rect.setAttribute('width', marker.size * 2);
                         rect.setAttribute('height', marker.size * 2);
                         rect.setAttribute('rx', Math.max(1, marker.size * 0.35));
-                        rect.setAttribute('fill', marker.color);
+                        rect.style.fill = marker.color;
                         if (blinkClass) rect.setAttribute('class', blinkClass);
                         markerGroup.appendChild(rect);
                     } else {
@@ -903,7 +955,7 @@ function softCloseModal() {
                         circle.setAttribute('cx', marker.x);
                         circle.setAttribute('cy', marker.y);
                         circle.setAttribute('r', marker.size);
-                        circle.setAttribute('fill', marker.color);
+                        circle.style.fill = marker.color;
                         if (blinkClass) circle.setAttribute('class', blinkClass);
                         markerGroup.appendChild(circle);
                     }
@@ -942,73 +994,281 @@ function softCloseModal() {
             let height = null;
             const rows = [];
             const overrides = [];
+            const overrideCoordinateSets = new Map();
             const toggleLines = [];
             let mode = 'rows';
             const isBinaryRow = (value) => /^[01]+$/.test(value);
             const isToggleRow = (value) => value.includes('|');
             const resolveOverrideColor = (rawColor) => {
-                const colorToken = rawColor.toLowerCase();
+                const trimmed = (rawColor || '').trim();
+                const colorToken = trimmed.toLowerCase();
                 if (!colorToken) return '';
-                return colorToken === 'accent' ? 'var(--accent)' : rawColor;
+                if (colorToken === 'accent') return 'var(--accent)';
+                // Accept bare hex tokens (e.g. "6b7385") in addition to "#6b7385".
+                if (/^[0-9a-f]{3}$/i.test(trimmed) || /^[0-9a-f]{4}$/i.test(trimmed) || /^[0-9a-f]{6}$/i.test(trimmed) || /^[0-9a-f]{8}$/i.test(trimmed)) {
+                    return `#${trimmed}`;
+                }
+                return trimmed;
             };
             const resolveOverrideBlink = (rawBlink) => {
                 const blinkToken = rawBlink.toLowerCase();
-                return ['rapid', 'slow', 'fade'].includes(blinkToken) ? blinkToken : '';
+                return ['rapid', 'slow', 'fade', 'glow', 'blend', 'random'].includes(blinkToken) ? blinkToken : '';
+            };
+            const resolveOverridePhase = (rawPhase) => {
+                const phaseToken = rawPhase.toLowerCase();
+                if (!phaseToken) return 'sync';
+                return ['sync', 'async'].includes(phaseToken) ? phaseToken : '';
+            };
+            const parseOverridePayload = (payload, line) => {
+                const supportedBlink = ['rapid', 'slow', 'fade', 'glow', 'blend', 'random'];
+                const supportedPhase = ['sync', 'async'];
+                let hasValue = false;
+                let value = '';
+                let rawColor = '';
+                let rawColor2 = '';
+                let rawBlink = '';
+                let rawPhase = '';
+                const workingPayload = payload.map(part => part || '');
+                if (workingPayload.length >= 1 && /^[01]$/.test(workingPayload[0])) {
+                    hasValue = true;
+                    value = workingPayload[0];
+                    workingPayload.shift();
+                }
+
+                if (workingPayload.length >= 1) {
+                    const lastToken = workingPayload[workingPayload.length - 1] || '';
+                    if (supportedPhase.includes(lastToken.toLowerCase())) {
+                        rawPhase = lastToken;
+                        workingPayload.pop();
+                    }
+                }
+                if (workingPayload.length >= 1) {
+                    const lastToken = workingPayload[workingPayload.length - 1] || '';
+                    if (supportedBlink.includes(lastToken.toLowerCase())) {
+                        rawBlink = lastToken;
+                        workingPayload.pop();
+                    }
+                }
+                if (workingPayload.length > 2) {
+                    return null;
+                }
+                rawColor = workingPayload[0] || '';
+                rawColor2 = workingPayload[1] || '';
+                const color = resolveOverrideColor(rawColor);
+                const color2 = resolveOverrideColor(rawColor2);
+                const blink = resolveOverrideBlink(rawBlink);
+                const phase = resolveOverridePhase(rawPhase);
+                const hasStyleOverride = Boolean(color || color2 || blink);
+                if (!(hasValue || hasStyleOverride)) {
+                    return null;
+                }
+                if (rawBlink && !blink) {
+                    console.warn(`[map] invalid override blink in ${label}: "${line}"`);
+                }
+                if (rawPhase && !phase) {
+                    console.warn(`[map] invalid override phase in ${label}: "${line}"`);
+                }
+                return {
+                    hasValue,
+                    value,
+                    color,
+                    color2,
+                    blink,
+                    phase: phase || 'sync'
+                };
+            };
+            const parseCoordinateToken = (token) => {
+                if (!token) return null;
+                const trimmed = token.trim();
+                if (!trimmed) return null;
+
+                const commaMatch = trimmed.match(/^(-?\d+)\s*,\s*(-?\d+)$/);
+                if (commaMatch) {
+                    const x = Number(commaMatch[1]);
+                    const y = Number(commaMatch[2]);
+                    if (Number.isFinite(x) && Number.isFinite(y)) {
+                        return { x, y };
+                    }
+                    return null;
+                }
+
+                if (!trimmed.includes('|')) return null;
+                const parts = trimmed.split('|').map(part => part.trim());
+                if (parts.length < 2) return null;
+                if (!/^-?\d+$/.test(parts[0]) || !/^-?\d+$/.test(parts[1])) return null;
+                if (parts.slice(2).some(part => part !== '')) return null;
+                return {
+                    x: Number(parts[0]),
+                    y: Number(parts[1])
+                };
+            };
+            const setCoordinateSet = (setName, coordinates, line) => {
+                if (!coordinates.length) {
+                    console.warn(`[map] empty override coordinate set in ${label}: "${line}"`);
+                    return;
+                }
+                const dedupedCoordinates = [];
+                const seen = new Set();
+                coordinates.forEach(({ x, y }) => {
+                    const key = `${x}|${y}`;
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        dedupedCoordinates.push({ x, y });
+                    }
+                });
+                overrideCoordinateSets.set(setName, dedupedCoordinates);
+            };
+            const parseCoordinateSetDefinition = (line, lineIndex) => {
+                const setMatch = line.match(/^\$([a-zA-Z][\w-]*)\s*=\s*(.+)$/);
+                if (!setMatch) {
+                    console.warn(`[map] invalid override coordinate set in ${label}: "${line}"`);
+                    return 0;
+                }
+                const setName = setMatch[1].toLowerCase();
+                const setValue = setMatch[2].trim();
+                if (setValue === '{') {
+                    const coordinates = [];
+                    let blockEndIndex = -1;
+                    for (let idx = lineIndex + 1; idx < lines.length; idx += 1) {
+                        const blockLine = lines[idx];
+                        if (blockLine === '}') {
+                            blockEndIndex = idx;
+                            break;
+                        }
+                        if (blockLine.startsWith('#')) continue;
+                        const coordinate = parseCoordinateToken(blockLine);
+                        if (!coordinate) {
+                            console.warn(`[map] invalid coordinate token in ${label}: "${blockLine}"`);
+                            return Math.max(idx - lineIndex, 0);
+                        }
+                        coordinates.push(coordinate);
+                    }
+                    if (blockEndIndex < 0) {
+                        console.warn(`[map] unterminated override coordinate set in ${label}: "${line}"`);
+                        return Math.max(lines.length - 1 - lineIndex, 0);
+                    }
+                    setCoordinateSet(setName, coordinates, line);
+                    return blockEndIndex - lineIndex;
+                }
+
+                const coordTokens = setValue.split(';').map(token => token.trim()).filter(Boolean);
+                if (!coordTokens.length) {
+                    console.warn(`[map] empty override coordinate set in ${label}: "${line}"`);
+                    return 0;
+                }
+                const coordinates = [];
+                let hasInvalidToken = false;
+                coordTokens.forEach(token => {
+                    const coordinate = parseCoordinateToken(token);
+                    if (!coordinate) {
+                        hasInvalidToken = true;
+                        return;
+                    }
+                    coordinates.push(coordinate);
+                });
+                if (hasInvalidToken || !coordinates.length) {
+                    console.warn(`[map] invalid coordinate token in ${label}: "${line}"`);
+                    return 0;
+                }
+                setCoordinateSet(setName, coordinates, line);
+                return 0;
+            };
+            const parseCoordinateSetUsage = (line) => {
+                const eqMatch = line.match(/^@([a-zA-Z][\w-]*)\s*=(.*)$/);
+                let setName = '';
+                let payload = [];
+                if (eqMatch) {
+                    setName = eqMatch[1].toLowerCase();
+                    let payloadText = (eqMatch[2] || '').trim();
+                    if (payloadText.startsWith('|')) {
+                        payloadText = payloadText.slice(1);
+                    }
+                    payload = payloadText ? payloadText.split('|').map(part => part.trim()) : [];
+                } else {
+                    const parts = line.split('|').map(part => part.trim());
+                    const setRef = parts[0];
+                    const refMatch = setRef.match(/^@([a-zA-Z][\w-]*)$/);
+                    if (!refMatch) {
+                        console.warn(`[map] invalid override coordinate set usage in ${label}: "${line}"`);
+                        return;
+                    }
+                    setName = refMatch[1].toLowerCase();
+                    payload = parts.slice(1);
+                }
+                if (!setName) {
+                    console.warn(`[map] invalid override coordinate set usage in ${label}: "${line}"`);
+                    return;
+                }
+                const coordinates = overrideCoordinateSets.get(setName);
+                if (!coordinates || !coordinates.length) {
+                    console.warn(`[map] unknown override coordinate set in ${label}: "${line}"`);
+                    return;
+                }
+                const parsedPayload = parseOverridePayload(payload, line);
+                if (!parsedPayload) {
+                    console.warn(`[map] invalid override payload in ${label}: "${line}"`);
+                    return;
+                }
+                coordinates.forEach(({ x, y }) => {
+                    overrides.push({
+                        x,
+                        y,
+                        ...parsedPayload
+                    });
+                });
             };
 
-            lines.forEach(line => {
+            for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
+                const line = lines[lineIndex];
                 if (line.startsWith('#')) {
                     if (/^#\s*overrides\s*$/i.test(line)) {
                         mode = 'overrides';
-                        return;
+                        continue;
                     }
                     if (/^#\s*toggles\s*$/i.test(line)) {
                         mode = 'toggles';
-                        return;
+                        continue;
                     }
                     const metaMatch = line.match(/width\s*=\s*(\d+)\s+height\s*=\s*(\d+)/i);
                     if (metaMatch) {
                         width = Number(metaMatch[1]);
                         height = Number(metaMatch[2]);
                     }
-                    return;
+                    continue;
                 }
                 if (mode === 'rows' && isBinaryRow(line)) {
                     rows.push(line);
-                    return;
+                    continue;
+                }
+                if (mode === 'overrides' && line.startsWith('$')) {
+                    const consumedLines = parseCoordinateSetDefinition(line, lineIndex);
+                    lineIndex += consumedLines;
+                    continue;
+                }
+                if (mode === 'overrides' && line.startsWith('@')) {
+                    parseCoordinateSetUsage(line);
+                    continue;
                 }
                 if (isToggleRow(line)) {
                     if (mode === 'overrides') {
                         const parts = line.split('|').map(part => part.trim());
                         const x = Number(parts[0]);
                         const y = Number(parts[1]);
-                        const value = parts[2];
-                        let rawColor = parts[3] || '';
-                        let rawBlink = parts[4] || '';
-                        const shorthandBlink = ['rapid', 'slow', 'fade'];
-                        if (parts.length === 4 && shorthandBlink.includes(rawColor.toLowerCase())) {
-                            rawBlink = rawColor;
-                            rawColor = '';
-                        }
-                        const color = resolveOverrideColor(rawColor);
-                        const blink = resolveOverrideBlink(rawBlink);
-                        const hasSupportedLength = parts.length >= 3 && parts.length <= 5;
-                        if (hasSupportedLength && Number.isFinite(x) && Number.isFinite(y) && /^[01]$/.test(value)) {
-                            if (rawBlink && !blink) {
-                                console.warn(`[map] invalid override blink in ${label}: "${line}"`);
-                            }
-                            overrides.push({ x, y, value, color, blink });
-                            return;
+                        const payload = parts.slice(2);
+                        const parsedPayload = parseOverridePayload(payload, line);
+                        if (Number.isFinite(x) && Number.isFinite(y) && parsedPayload) {
+                            overrides.push({ x, y, ...parsedPayload });
+                            continue;
                         }
                         console.warn(`[map] invalid override in ${label}: "${line}"`);
-                        return;
+                        continue;
                     }
                     mode = 'toggles';
                     toggleLines.push(line);
-                    return;
+                    continue;
                 }
                 console.warn(`[map] skipped unrecognized line in ${label}: "${line}"`);
-            });
+            }
             if (!rows.length) return false;
             const inferredWidth = rows[0].length;
             const inferredHeight = rows.length;
@@ -1020,17 +1280,22 @@ function softCloseModal() {
 
             const resolvedRows = rows.map(row => row.split(''));
             const overrideStyleByCell = new Map();
-            overrides.forEach(({ x, y, value, color, blink }) => {
+            overrides.forEach(({ x, y, hasValue, value, color, color2, blink, phase }) => {
                 if (!Number.isInteger(x) || !Number.isInteger(y)) return;
                 if (x < 0 || y < 0 || x >= width || y >= height) {
-                    console.warn(`[map] override out of bounds in ${label}: ${x}|${y}|${value}`);
+                    const valueLabel = hasValue ? value : '-';
+                    console.warn(`[map] override out of bounds in ${label}: ${x}|${y}|${valueLabel}`);
                     return;
                 }
-                resolvedRows[y][x] = value;
-                overrideStyleByCell.set(`${x}|${y}`, {
-                    color,
-                    blink
-                });
+                const key = `${x}|${y}`;
+                if (hasValue) {
+                    resolvedRows[y][x] = value;
+                }
+                if (color || color2 || blink) {
+                    overrideStyleByCell.set(key, { color, color2, blink, phase: phase || 'sync' });
+                } else {
+                    overrideStyleByCell.delete(key);
+                }
             });
 
             renderDots(map, width, height, (x, y) => {
