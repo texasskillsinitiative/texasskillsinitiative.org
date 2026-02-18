@@ -115,6 +115,7 @@
 # priority: overrides are applied in file order; later entries win for duplicate coordinates.
 # color: "accent" or any CSS color token (for example #44d4ff).
 # hex tokens may be written with or without "#": #6b7385 or 6b7385.
+# theme variables are supported in color fields (for example var(--map-texas-color-1)).
 # blink: rapid | slow | fade | glow | blend | random.
 # random chooses one of: rapid, slow, fade.
 # phase: sync | async (default sync when omitted).
@@ -129,6 +130,12 @@
 # - apply set (equals): @set_name=|value|color|blink|phase
 # - apply style-only (pipe): @set_name|color|blink|phase
 # - apply style-only (equals): @set_name=|color|blink|phase
+
+#Single Points
+#0|0|0|pink|rapid
+#1|1|yellow|slow
+#10|10|0|red|rapid
+#15|15|yellow|slow
 
 $texas={
 20|26|
@@ -178,17 +185,48 @@ $texas={
 20|35|
 }
 
+#texas numbers off by one? 20|35| printing to 21|36|
 #@texas|6b7385|accent|blend
 #@texas=|22d3ee|67e8f9|blend|sync
 #@texas=|22d3ee|67e8f9|blend|async
-@texas=|7df9ff|0d98ba|blend|async
+@texas=|var(--map-texas-color-1)|var(--map-texas-color-2)|blend|async
 
 # toggles
 # toggles: Toggle Category|Title|x|y|shape|color|size|blink
 # blink: rapid | slow | fade
 # shape: circle or square, color: accent or CSS color
+# x/y integer coordinates are centered on the target grid cell.
 
-Established|Rome|56|28|circle|accent|4|slow
-Established|Temple|44|28|circle|accent|4|slow
-Latin America Regions|Belton|62|58|circle|accent|4|slow
-Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
+#Established|Rome|56|28|circle|accent|4|slow
+#Established|Temple|44|28|circle|accent|4|slow
+#Latin America Regions|Belton|62|58|circle|accent|4|slow
+#Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
+
+Initial Evaluation|1x1|0|0|circle|accent|1|slow
+Initial Evaluation|Ho Chi Minh CityVietnam|143|45|circle|accent|1|slow
+Initial Evaluation|Hai PhongVietnam|142|38|circle|accent|1|slow
+Initial Evaluation|Da NangVietnam|143|41|circle|accent|1|slow
+Initial Evaluation|ManilaPhilippines|152|42|circle|accent|1|slow
+Initial Evaluation|Clark (Angeles)Philippines|152|41|circle|accent|1|slow
+Initial Evaluation|Cebu CityPhilippines|154|45|circle|accent|1|slow
+Initial Evaluation|DavaoPhilippines|154|48|circle|accent|1|slow
+Initial Evaluation|DumaguetePhilippines|153|45|circle|accent|1|slow
+Initial Evaluation|BangkokThailand|140|43|circle|accent|1|slow
+Initial Evaluation|Laem ChabangThailand|141|44|circle|accent|1|slow
+Initial Evaluation|ChennaiIndia|128|41|circle|accent|1|slow
+Initial Evaluation|WroclawPoland|88|18|circle|accent|1|slow
+Initial Evaluation|TangierMorocco|75|29|circle|accent|1|slow
+Initial Evaluation|DubaiUAE|112|35|circle|accent|1|slow
+Structured Intake|Guatemala CityGuatemala|23|42|circle|accent|1|slow
+Structured Intake|San SalvadorEl Salvador|24|42|circle|accent|1|slow
+Structured Intake|San JoséCosta Rica|28|46|circle|accent|1|slow
+Structured Intake|Panama CityPanama|30|46|circle|accent|1|slow
+Structured Intake|MonterreyMexico|18|34|circle|accent|1|slow
+Technical Review|NassauBahamas|32|34|circle|accent|1|slow
+Technical Review|San JuanPuerto Rico|35|39|circle|accent|1|slow
+Technical Review|KingstonJamaica|32|34|circle|accent|1|slow
+Technical Review|MedellínColombia|32|47|circle|accent|1|slow
+Reference Model|HoustonUnited States (Texas)|23|32|circle|accent|1|slow
+Reference Model|Dallas–Fort WorthUnited States (Texas)|23|29|circle|accent|1|slow
+Reference Model|San AntonioUnited States (Texas)|21|31|circle|accent|1|slow
+

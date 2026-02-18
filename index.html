@@ -8,6 +8,10 @@
         document.documentElement.classList.remove('no-js');
     </script>
     <link rel="icon" href="assets/logo/tsi-logo-tn-favicon-noborder.svg" type="image/svg+xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/logo/tsi-logo-tn-favicon-noborder.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/logo/tsi-logo-tn-icon-border-android.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/tsi-logo-tn-icon-border-crapple.png">
+    <link rel="manifest" href="site.webmanifest">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css">
 </head>
@@ -188,7 +192,7 @@
 <section class="section-wrap" id="mandate" role="tabpanel" aria-labelledby="tab-mandate" tabindex="-1">
     <div class="header-group"><span class="section-id">01 \</span><h2 class="section-title">Mandate</h2></div>
     <div class="mandate-layout">
-        <div class="asset-image mandate-asset"><img src="assets/asset_1A.png"></div>
+        <div class="asset-image mandate-asset"><img src="assets/asset_1a.png"></div>
         <div class="mandate-column">
             <div class="instruction-box instruction-box--compact">
                 <p class="mandate-intro-text">
@@ -255,28 +259,28 @@
             <p class="rubric-intro-copy">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
         </div>
         <div class="asset-image rubric-banner">
-            <img src="assets/analysis_banner.png" alt="Analysis Banner" class="rubric-banner-img">
+            <img src="assets/Analysis_banner.png" alt="Analysis Banner" class="rubric-banner-img">
         </div>
     </div>
 
     <div class="rubric-grid">
         <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3A.png"></div>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3a.png"></div>
             <h4 class="rubric-item-title">Vocational Literacy</h4>
             <p class="rubric-item-copy">Regional technical education alignment based on Texas standards.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3B.png"></div>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3b.png"></div>
             <h4 class="rubric-item-title">Onboarding Velocity</h4>
             <p class="rubric-item-copy">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3C.png"></div>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3c.png"></div>
             <h4 class="rubric-item-title">Regulatory Coherence</h4>
             <p class="rubric-item-copy">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
         </div>
         <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3D.png"></div>
+            <div class="asset-image rubric-icon"><img src="assets/asset_3d.png"></div>
             <h4 class="rubric-item-title">Reliability</h4>
             <p class="rubric-item-copy">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
         </div>
@@ -292,53 +296,7 @@
     </div>
 
     <div class="pipeline-option">
-        <p class="pipeline-option-label">Option 5</p>
-        <div class="pipeline-rings" aria-label="Industrial ring diagram">
-            <div class="ring-card ring-card--reference">
-                <div class="ring" data-stage="5">
-                    <span class="ring-label">Texas — Gulf Coast</span>
-                    <span class="ring-stage">Stage 5</span>
-                </div>
-                <div class="ring-tags">
-                    <span class="pipeline-tag">Energy-Linked Corridor</span>
-                    <span class="pipeline-tag">Port Infrastructure</span>
-                </div>
-            </div>
-            <div class="ring-card ring-card--reference">
-                <div class="ring" data-stage="5">
-                    <span class="ring-label">Texas — North Texas</span>
-                    <span class="ring-stage">Stage 5</span>
-                </div>
-                <div class="ring-tags">
-                    <span class="pipeline-tag">Advanced Manufacturing</span>
-                    <span class="pipeline-tag">Aerospace &amp; Security</span>
-                </div>
-            </div>
-            <div class="ring-card">
-                <div class="ring" data-stage="3">
-                    <span class="ring-label">Latin America — Industrial</span>
-                    <span class="ring-stage">Stage 3</span>
-                </div>
-                <div class="ring-tags">
-                    <span class="pipeline-tag">Industrial Expansion</span>
-                    <span class="pipeline-tag">Regulatory Review</span>
-                </div>
-            </div>
-            <div class="ring-card">
-                <div class="ring" data-stage="1">
-                    <span class="ring-label">Southeast Asia — Port &amp; Energy</span>
-                    <span class="ring-stage">Stage 1</span>
-                </div>
-                <div class="ring-tags">
-                    <span class="pipeline-tag">Emerging Port Hub</span>
-                    <span class="pipeline-tag">Port &amp; Energy Systems</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="pipeline-option">
-        <p class="pipeline-option-label">Option 6</p>
+        <p class="pipeline-option-label">Map</p>
         <div class="pipeline-map">
             <p class="pipeline-map-label">MD Map (world-map.md)</p>
             <div class="pipeline-map-controls pipeline-map-controls--md" role="group" aria-label="Map overlay controls (MD toggles)" data-map-controls="md"></div>
@@ -349,28 +307,37 @@
                 </svg>
             </div>
 
-            <p class="pipeline-map-label">PNG Map (legacy toggles)</p>
-            <div class="pipeline-map-controls" role="group" aria-label="Map overlay controls">
+            <p class="pipeline-map-label" hidden>PNG Map (legacy toggles)</p>
+            <div class="pipeline-map-controls pipeline-map-controls--legacy" role="group" aria-label="Map overlay controls" data-map-controls="legacy" hidden>
                 <button type="button" class="map-control is-active" data-map-target="overlay-us">U.S. Reference Corridors</button>
                 <button type="button" class="map-control" data-map-target="overlay-latam">Latin America Regions</button>
                 <button type="button" class="map-control" data-map-target="overlay-sea">Southeast Asia Regions</button>
             </div>
-            <div class="pipeline-map-frame" aria-label="Vector world map">
-                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-src="assets/world-map.png">
+            <div class="pipeline-map-frame" aria-label="Vector world map" hidden>
+                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-src="assets/world-map.png" data-map-disabled="true">
                     <rect width="181" height="89" class="map-ocean" />
                     <g class="map-dots" data-dot-grid></g>
                     <g class="map-overlay overlay-us is-active">
-                        <circle cx="56" cy="28" r="4" />
-                        <circle cx="68" cy="24" r="3" />
-                        <text x="46" y="40">U.S. Reference</text>
+                        <g class="map-marker">
+                            <circle cx="56" cy="28" r="4" />
+                            <text x="46" y="40">U.S. Reference</text>
+                        </g>
+                        <g class="map-marker">
+                            <circle cx="68" cy="24" r="3" />
+                            <text x="58" y="36">U.S. Reference</text>
+                        </g>
                     </g>
                     <g class="map-overlay overlay-latam">
-                        <circle cx="62" cy="58" r="4" />
-                        <text x="50" y="70">Latin America</text>
+                        <g class="map-marker">
+                            <circle cx="62" cy="58" r="4" />
+                            <text x="50" y="70">Latin America</text>
+                        </g>
                     </g>
                     <g class="map-overlay overlay-sea">
-                        <circle cx="132" cy="38" r="4" />
-                        <text x="116" y="50">Southeast Asia</text>
+                        <g class="map-marker">
+                            <circle cx="132" cy="38" r="4" />
+                            <text x="116" y="50">Southeast Asia</text>
+                        </g>
                     </g>
                 </svg>
             </div>

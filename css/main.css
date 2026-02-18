@@ -13,6 +13,13 @@
             --accent-soft: rgba(197, 160, 89, 0.1);
             --img-placeholder: #161f30;
             --status-green: #10b981;
+            --map-accent: var(--accent);
+            --map-texas-color-1: #7df9ff;
+            --map-texas-color-2: #0d98ba;
+            --map-ocean-fill: #0b1220;
+            --map-dot-water: #1a2234;
+            --map-dot-land: #6b7385;
+            --tab-active-bg: #2a3348;
         }
         
         [data-theme="light"] {
@@ -25,6 +32,13 @@
             --accent: #8b6b23;
             --accent-soft: rgba(139, 107, 35, 0.1);
             --img-placeholder: #e2e8f0;
+            --map-accent: #2f66ff;
+            --map-texas-color-1: #0ea5e9;
+            --map-texas-color-2: #0284c7;
+            --map-ocean-fill: #233247;
+            --map-dot-water: #3a4a61;
+            --map-dot-land: #7f8ea3;
+            --tab-active-bg: #eef3f9;
         }
 
         body { background-color: var(--page-bg); color: var(--page-text-dim); font-family: 'Inter', sans-serif; margin: 0; transition: background 0.4s ease; }
@@ -174,35 +188,19 @@
         .pipeline-option { margin: 26px 0 34px; }
         .pipeline-option-label { font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem; color: var(--page-text-dim); margin: 0 0 12px 0; }
 
-        /* Option 5: Ring diagram */
-        .pipeline-rings { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
-        .ring-card { border: 1px solid var(--frame-border); padding: 18px; background: rgba(11, 18, 32, 0.6); text-align: center; }
-        .ring-card--reference { border-color: var(--accent); }
-        .ring { position: relative; width: 160px; height: 160px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; color: var(--page-text-main); font-family: 'JetBrains Mono', monospace; }
-        .ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from -90deg, var(--frame-border) 0deg 300deg, var(--accent) 300deg 360deg); mask: radial-gradient(circle, transparent 58%, black 60%); }
-        .ring[data-stage="1"]::before { background: conic-gradient(from -90deg, var(--accent) 0deg 60deg, var(--frame-border) 60deg 360deg); }
-        .ring[data-stage="2"]::before { background: conic-gradient(from -90deg, var(--frame-border) 0deg 60deg, var(--accent) 60deg 120deg, var(--frame-border) 120deg 360deg); }
-        .ring[data-stage="3"]::before { background: conic-gradient(from -90deg, var(--frame-border) 0deg 120deg, var(--accent) 120deg 180deg, var(--frame-border) 180deg 360deg); }
-        .ring[data-stage="4"]::before { background: conic-gradient(from -90deg, var(--frame-border) 0deg 180deg, var(--accent) 180deg 240deg, var(--frame-border) 240deg 360deg); }
-        .ring[data-stage="5"]::before { background: conic-gradient(from -90deg, var(--frame-border) 0deg 240deg, var(--accent) 240deg 300deg, var(--frame-border) 300deg 360deg); }
-        .ring[data-stage="6"]::before { background: conic-gradient(from -90deg, var(--frame-border) 0deg 300deg, var(--accent) 300deg 360deg); }
-        .ring-label { position: relative; z-index: 1; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
-        .ring-stage { position: relative; z-index: 1; font-size: 0.65rem; color: var(--page-text-dim); margin-top: 6px; }
-        .ring-tags { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
-        .pipeline-tag { font-size: 0.6rem; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; border: 1px solid var(--frame-border); color: var(--page-text-dim); }
-
         /* Option 6: Map */
         .pipeline-map { display: grid; gap: 16px; }
         .pipeline-map-label { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--page-text-dim); }
         .map-controls-empty { font-size: 0.7rem; color: var(--page-text-dim); text-transform: uppercase; letter-spacing: 1px; }
         .pipeline-map-controls { display: flex; flex-wrap: wrap; gap: 10px; }
         .map-control { background: transparent; border: 1px solid var(--frame-border); color: var(--page-text-main); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; cursor: pointer; transition: 0.3s; }
-        .map-control.is-active { border-color: var(--accent); color: var(--accent); }
-        .pipeline-map-frame { border: 1px solid var(--frame-border); background: rgba(11, 18, 32, 0.6); padding: 16px; aspect-ratio: 181 / 89; }
+        .map-control.is-active { border-color: var(--map-accent); color: var(--map-accent); }
+        .pipeline-map-frame { border: 0.5px solid color-mix(in srgb, var(--frame-border) 55%, transparent); background: rgba(11, 18, 32, 0.6); padding: 16px; aspect-ratio: 181 / 89; }
+        [data-theme="light"] .pipeline-map-frame { border: 0; background: #e7edf5; }
         .pipeline-map-frame svg { width: 100%; height: auto; display: block; }
-        .map-ocean { fill: #0b1220; }
-        .map-dot { fill: #1a2234; opacity: 0.95; }
-        .map-dot.is-land { fill: #6b7385; }
+        .map-ocean { fill: var(--map-ocean-fill); }
+        .map-dot { fill: var(--map-dot-water); opacity: 0.95; }
+        .map-dot.is-land { fill: var(--map-dot-land); }
         .map-dot.map-dot--override { opacity: 1; }
         .map-dot.map-dot--blink-slow { animation: mapDotPulseSlow 2.8s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-dot.map-dot--blink-rapid { animation: mapDotPulseRapid 1.2s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
@@ -211,7 +209,7 @@
         .map-dot.map-dot--blink-blend { animation: mapDotPulseBlend 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-overlay { opacity: 0; transition: opacity 0.3s ease; }
         .map-overlay.is-active { opacity: 1; }
-        .map-overlay circle { fill: var(--accent); }
+        .map-overlay circle { fill: var(--map-accent); }
         .map-overlay .map-marker--blink-slow { animation: mapPulseSlow 2.8s infinite; }
         .map-overlay .map-marker--blink-rapid { animation: mapPulseRapid 1.2s infinite; }
         .map-overlay .map-marker--blink-fade { animation: mapPulseFade 3.4s infinite; }
@@ -609,7 +607,7 @@
         body[data-active-tab="pipeline"] .header-index a[href="#pipeline"],
         body[data-active-tab="engagement"] .header-index a[href="#engagement"],
         body[data-active-tab="team"] .header-index a[href="#team"] {
-            background: #2a3348;
+            background: var(--tab-active-bg);
             border-color: var(--accent);
             opacity: 1;
             box-shadow: 0 -2px 0 var(--accent) inset;
@@ -625,7 +623,7 @@
             body:has(#pipeline:target) .header-index a[href="#pipeline"],
             body:has(#engagement:target) .header-index a[href="#engagement"],
             body:has(#team:target) .header-index a[href="#team"] {
-                background: #2a3348;
+                background: var(--tab-active-bg);
                 border-color: var(--accent);
                 opacity: 1;
                 box-shadow: 0 -2px 0 var(--accent) inset;
@@ -634,7 +632,7 @@
                 transform: none;
             }
             body:not(:has(.section-wrap:target)) .header-index a[href="#overview"] {
-                background: #2a3348;
+                background: var(--tab-active-bg);
                 border-color: var(--accent);
                 opacity: 1;
                 box-shadow: 0 -2px 0 var(--accent) inset;

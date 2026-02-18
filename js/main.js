@@ -762,6 +762,7 @@ function softCloseModal() {
     function initPipelineMap() {
         const bindLegacyToggleControls = () => {
             const legacyMap = document.querySelector('.pipeline-map svg[data-map-src]');
+            if (legacyMap && legacyMap.getAttribute('data-map-disabled') === 'true') return;
             const legacyFrame = legacyMap ? legacyMap.closest('.pipeline-map-frame') : null;
             const siblingControls = legacyFrame ? legacyFrame.previousElementSibling : null;
             const legacyControls = (siblingControls && siblingControls.classList.contains('pipeline-map-controls'))
@@ -792,7 +793,8 @@ function softCloseModal() {
         };
         bindLegacyToggleControls();
 
-        const maps = Array.from(document.querySelectorAll('.pipeline-map svg'));
+        const maps = Array.from(document.querySelectorAll('.pipeline-map svg'))
+            .filter(map => map.getAttribute('data-map-disabled') !== 'true');
         if (!maps.length) return;
 
         const applyMapSizeClass = (map) => {
@@ -824,7 +826,7 @@ function softCloseModal() {
                 glow: 3.4,
                 blend: 3.4
             };
-            const baseFill = isLand ? '#6b7385' : '#1a2234';
+            const baseFill = isLand ? 'var(--map-dot-land)' : 'var(--map-dot-water)';
             const resolveBlinkMode = (blinkValue) => {
                 if (!blinkValue) return '';
                 if (blinkValue === 'random') {
@@ -1003,7 +1005,7 @@ function softCloseModal() {
                 const trimmed = (rawColor || '').trim();
                 const colorToken = trimmed.toLowerCase();
                 if (!colorToken) return '';
-                if (colorToken === 'accent') return 'var(--accent)';
+                if (colorToken === 'accent') return 'var(--map-accent)';
                 // Accept bare hex tokens (e.g. "6b7385") in addition to "#6b7385".
                 if (/^[0-9a-f]{3}$/i.test(trimmed) || /^[0-9a-f]{4}$/i.test(trimmed) || /^[0-9a-f]{6}$/i.test(trimmed) || /^[0-9a-f]{8}$/i.test(trimmed)) {
                     return `#${trimmed}`;
@@ -1306,18 +1308,22 @@ function softCloseModal() {
                 };
             });
             if (toggleLines.length) {
+                // Toggle markers authored with integer grid coordinates should center on cells.
+                const resolveToggleCoordinate = (value) => (Number.isInteger(value) ? value + 0.5 : value);
                 const toggleMarkers = toggleLines.map(line => {
                     const parts = line.split('|').map(part => part.trim());
                     const hasCategoryAndTitle = parts.length >= 8;
                     const buttonLabel = parts[0] || 'Toggle';
                     const label = hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel;
-                    const x = Number(hasCategoryAndTitle ? parts[2] : parts[1]);
-                    const y = Number(hasCategoryAndTitle ? parts[3] : parts[2]);
+                    const rawX = Number(hasCategoryAndTitle ? parts[2] : parts[1]);
+                    const rawY = Number(hasCategoryAndTitle ? parts[3] : parts[2]);
+                    const x = resolveToggleCoordinate(rawX);
+                    const y = resolveToggleCoordinate(rawY);
                     const shape = (hasCategoryAndTitle ? parts[4] : parts[3] || 'circle').toLowerCase();
                     const colorToken = (hasCategoryAndTitle ? parts[5] : parts[4] || 'accent').toLowerCase();
                     const size = Number(hasCategoryAndTitle ? parts[6] : parts[5]) || 4;
                     const blink = (hasCategoryAndTitle ? parts[7] : parts[6] || '').toLowerCase();
-                    const color = colorToken === 'accent' ? 'var(--accent)' : colorToken;
+                    const color = colorToken === 'accent' ? 'var(--map-accent)' : colorToken;
                     return {
                         buttonLabel,
                         label,
