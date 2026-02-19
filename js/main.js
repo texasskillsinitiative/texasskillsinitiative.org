@@ -760,47 +760,116 @@ function softCloseModal() {
     }
 
     function initPipelineMap() {
-        const bindLegacyToggleControls = () => {
-            const legacyMap = document.querySelector('.pipeline-map svg[data-map-src]');
-            if (legacyMap && legacyMap.getAttribute('data-map-disabled') === 'true') return;
-            const legacyFrame = legacyMap ? legacyMap.closest('.pipeline-map-frame') : null;
-            const siblingControls = legacyFrame ? legacyFrame.previousElementSibling : null;
-            const legacyControls = (siblingControls && siblingControls.classList.contains('pipeline-map-controls'))
-                ? siblingControls
-                : document.querySelector('[data-map-controls="legacy"]');
-            const legacyOverlays = legacyMap ? legacyMap.querySelectorAll('.map-overlay') : [];
-            if (!legacyControls || !legacyMap) return;
-
-            const legacyButtons = legacyControls.querySelectorAll('.map-control');
-            legacyButtons.forEach(control => {
-                const target = control.getAttribute('data-map-target');
-                const overlay = Array.from(legacyOverlays).find(node => node.classList.contains(target));
-                const isActive = overlay ? overlay.classList.contains('is-active') : control.classList.contains('is-active');
-                control.classList.toggle('is-active', isActive);
-                control.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-            });
-            legacyButtons.forEach(control => {
-                control.addEventListener('click', () => {
-                    const target = control.getAttribute('data-map-target');
-                    const overlay = Array.from(legacyOverlays).find(node => node.classList.contains(target));
-                    if (!overlay) return;
-                    const nextState = !overlay.classList.contains('is-active');
-                    overlay.classList.toggle('is-active', nextState);
-                    control.classList.toggle('is-active', nextState);
-                    control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
-                });
-            });
-        };
-        bindLegacyToggleControls();
-
         const maps = Array.from(document.querySelectorAll('.pipeline-map svg'))
             .filter(map => map.getAttribute('data-map-disabled') !== 'true');
         if (!maps.length) return;
+        const frameToMap = new WeakMap();
+        const pointerModeSetters = new WeakMap();
+        const mapDotGrid = new WeakMap();
+        const mapGlowTuningDefaults = {
+            dotSize: 7,
+            falloffPx: 0.5,
+            activeOpacity: 1,
+            easing: 0.24,
+            lingerMs: 160
+        };
+        const mapFlashTuningDefaults = {
+            radiusCells: 1.4,
+            durationMs: 210,
+            intensity: 1,
+            gridStep: 0.65,
+            throttleMs: 10
+        };
+        const mapFlashPresetDefaults = {
+            presetId: 'balanced',
+            presets: {
+                compact: {
+                    label: 'Flash Compact',
+                    radiusCells: 1.0,
+                    durationMs: 190,
+                    intensity: 0.88,
+                    gridStep: 0.72,
+                    throttleMs: 12
+                },
+                balanced: {
+                    label: 'Flash Balanced',
+                    radiusCells: 1.4,
+                    durationMs: 210,
+                    intensity: 1,
+                    gridStep: 0.65,
+                    throttleMs: 10
+                },
+                wide: {
+                    label: 'Flash Wide',
+                    radiusCells: 1.8,
+                    durationMs: 190,
+                    intensity: 1.12,
+                    gridStep: 0.58,
+                    throttleMs: 8
+                },
+                lingering: {
+                    label: 'Flash Lingering',
+                    radiusCells: 1.4,
+                    durationMs: 280,
+                    intensity: 0.94,
+                    gridStep: 0.74,
+                    throttleMs: 12
+                }
+            }
+        };
+        const applyFlashPresetToFrame = (frame, presetId) => {
+            if (!frame) return mapFlashPresetDefaults.presetId;
+            const preset = mapFlashPresetDefaults.presets[presetId] || mapFlashPresetDefaults.presets[mapFlashPresetDefaults.presetId];
+            const resolvedPresetId = mapFlashPresetDefaults.presets[presetId] ? presetId : mapFlashPresetDefaults.presetId;
+            frame.dataset.mapFlashPreset = resolvedPresetId;
+            frame.dataset.mapFlashRadiusCells = String(preset.radiusCells);
+            frame.dataset.mapFlashDurationMs = String(preset.durationMs);
+            frame.dataset.mapFlashIntensity = String(preset.intensity);
+            frame.dataset.mapFlashGridStep = String(preset.gridStep);
+            frame.dataset.mapFlashThrottleMs = String(preset.throttleMs);
+            return resolvedPresetId;
+        };
+        maps.forEach(map => {
+            const frame = map.closest('.pipeline-map-frame');
+            if (frame && !frameToMap.has(frame)) {
+                frameToMap.set(frame, map);
+            }
+        });
+        const clampNumber = (value, min, max, fallback) => {
+            const numericValue = Number(value);
+            if (!Number.isFinite(numericValue)) return fallback;
+            return Math.min(max, Math.max(min, numericValue));
+        };
+        const ensureFrameTuningDefaults = (frame) => {
+            if (!frame) return;
+            if (!frame.dataset.mapPointerDotSize) frame.dataset.mapPointerDotSize = String(mapGlowTuningDefaults.dotSize);
+            if (!frame.dataset.mapPointerEase) frame.dataset.mapPointerEase = String(mapGlowTuningDefaults.easing);
+            if (!frame.dataset.mapPointerLinger) frame.dataset.mapPointerLinger = String(mapGlowTuningDefaults.lingerMs);
+            if (!frame.dataset.mapPointerMode) frame.dataset.mapPointerMode = 'trail';
+            applyFlashPresetToFrame(frame, frame.dataset.mapFlashPreset || mapFlashPresetDefaults.presetId);
+            if (!frame.style.getPropertyValue('--map-pointer-falloff-px')) {
+                frame.style.setProperty('--map-pointer-falloff-px', `${mapGlowTuningDefaults.falloffPx}px`);
+            }
+            if (!frame.style.getPropertyValue('--map-pointer-active-opacity')) {
+                frame.style.setProperty('--map-pointer-active-opacity', String(mapGlowTuningDefaults.activeOpacity));
+            }
+        };
 
         const applyMapSizeClass = (map) => {
             const width = map.getBoundingClientRect().width;
             map.classList.toggle('map--compact', width < 900);
             map.classList.toggle('map--tiny', width < 600);
+            const frame = map.closest('.pipeline-map-frame');
+            if (frame && width > 0) {
+                ensureFrameTuningDefaults(frame);
+                const rawViewBox = map.getAttribute('viewBox') || '0 0 181 89';
+                const viewBoxParts = rawViewBox.trim().split(/\s+/);
+                const viewWidth = Number(viewBoxParts[2]) || 181;
+                const dotStepPx = width / viewWidth;
+                const dotSize = clampNumber(frame.dataset.mapPointerDotSize, 3, 20, mapGlowTuningDefaults.dotSize);
+                const pointerSizePx = Math.max(24, Math.min(64, dotStepPx * dotSize));
+                frame.style.setProperty('--map-pointer-size', `${pointerSizePx.toFixed(1)}px`);
+            }
         };
 
         if (typeof ResizeObserver === 'function') {
@@ -815,6 +884,290 @@ function softCloseModal() {
             const onResize = () => maps.forEach(applyMapSizeClass);
             onResize();
             window.addEventListener('resize', onResize);
+        }
+
+        // Premium pointer highlight modes: trail prints or per-dot hover flash, RAF-throttled.
+        const canUsePointerGlow = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (canUsePointerGlow) {
+            const mapFrames = Array.from(
+                new Set(
+                    maps
+                        .map(map => map.closest('.pipeline-map-frame'))
+                        .filter(Boolean)
+                )
+            );
+            mapFrames.forEach(frame => {
+                ensureFrameTuningDefaults(frame);
+                let trailLayer = frame.querySelector('.map-pointer-trail-layer');
+                if (!trailLayer) {
+                    trailLayer = document.createElement('span');
+                    trailLayer.className = 'map-pointer-trail-layer';
+                    trailLayer.setAttribute('aria-hidden', 'true');
+                    frame.appendChild(trailLayer);
+                }
+                if (trailLayer.childElementCount === 0) {
+                    for (let i = 0; i < 24; i += 1) {
+                        const print = document.createElement('span');
+                        print.className = 'map-pointer-print';
+                        trailLayer.appendChild(print);
+                    }
+                }
+                const trailPrints = Array.from(trailLayer.querySelectorAll('.map-pointer-print'));
+                const trailPrintAnims = new Array(trailPrints.length).fill(null);
+                let trailPrintCursor = 0;
+                let rafId = 0;
+                let targetX = 0;
+                let targetY = 0;
+                let lastPrintX = 0;
+                let lastPrintY = 0;
+                let lastPrintAt = 0;
+                let lastFlashCellX = -999;
+                let lastFlashCellY = -999;
+                let lastFlashAt = 0;
+                let isPointerInside = false;
+                let hideTimer = 0;
+                const dotFlashAnims = new WeakMap();
+                const getPointerMode = () => (frame.dataset.mapPointerMode === 'flash' ? 'flash' : 'trail');
+                const applyPointerMode = (mode) => {
+                    const normalizedMode = mode === 'flash' ? 'flash' : 'trail';
+                    frame.dataset.mapPointerMode = normalizedMode;
+                    const isFlash = normalizedMode === 'flash';
+                    frame.classList.toggle('map-pointer-mode-flash', isFlash);
+                    if (isFlash) {
+                        if (hideTimer) {
+                            window.clearTimeout(hideTimer);
+                            hideTimer = 0;
+                        }
+                        frame.classList.remove('has-pointer-glow');
+                    }
+                };
+                pointerModeSetters.set(frame, applyPointerMode);
+                applyPointerMode(frame.dataset.mapPointerMode);
+                const renderPointerGlow = () => {
+                    rafId = 0;
+                    frame.style.setProperty('--map-pointer-x', `${targetX.toFixed(1)}px`);
+                    frame.style.setProperty('--map-pointer-y', `${targetY.toFixed(1)}px`);
+                };
+                const emitTrailPrint = (x, y, force = false) => {
+                    if (!trailPrints.length) return;
+                    const now = performance.now();
+                    const trailEase = clampNumber(frame.dataset.mapPointerEase, 0.05, 0.6, mapGlowTuningDefaults.easing);
+                    const easeRatio = (trailEase - 0.05) / 0.55;
+                    const pointerSizePx = clampNumber(
+                        parseFloat(frame.style.getPropertyValue('--map-pointer-size')),
+                        24,
+                        64,
+                        42
+                    );
+                    const minIntervalMs = Math.round(30 - (easeRatio * 14));
+                    const minDistancePx = pointerSizePx * (0.18 + ((1 - easeRatio) * 0.16));
+                    const movedDistance = Math.hypot(x - lastPrintX, y - lastPrintY);
+                    if (!force && (now - lastPrintAt) < minIntervalMs && movedDistance < minDistancePx) return;
+
+                    const activeOpacity = clampNumber(
+                        parseFloat(frame.style.getPropertyValue('--map-pointer-active-opacity')),
+                        0,
+                        1,
+                        mapGlowTuningDefaults.activeOpacity
+                    );
+                    const lingerMs = clampNumber(frame.dataset.mapPointerLinger, 0, 1500, mapGlowTuningDefaults.lingerMs);
+                    const printDurationMs = Math.round(clampNumber(lingerMs * 2.4, 220, 2600, 560));
+                    const printOpacity = (activeOpacity * (0.2 + (easeRatio * 0.18))).toFixed(3);
+                    const printScaleFrom = (0.76 + (easeRatio * 0.14)).toFixed(3);
+                    const printScaleMid = (0.93 + (easeRatio * 0.08)).toFixed(3);
+                    const printScaleTo = (1.03 + (easeRatio * 0.06)).toFixed(3);
+                    const baseTransform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0) translate(-50%, -50%)`;
+
+                    const idx = trailPrintCursor;
+                    const printNode = trailPrints[idx];
+                    trailPrintCursor = (trailPrintCursor + 1) % trailPrints.length;
+
+                    if (trailPrintAnims[idx]) {
+                        trailPrintAnims[idx].cancel();
+                        trailPrintAnims[idx] = null;
+                    }
+
+                    printNode.style.transform = `${baseTransform} scale(${printScaleFrom})`;
+                    printNode.style.opacity = printOpacity;
+
+                    if (typeof printNode.animate === 'function') {
+                        const numericOpacity = Number(printOpacity);
+                        const anim = printNode.animate(
+                            [
+                                { transform: `${baseTransform} scale(${printScaleFrom})`, opacity: numericOpacity },
+                                { transform: `${baseTransform} scale(${printScaleMid})`, opacity: numericOpacity * 0.48, offset: 0.58 },
+                                { transform: `${baseTransform} scale(${printScaleTo})`, opacity: 0 }
+                            ],
+                            {
+                                duration: printDurationMs,
+                                easing: 'cubic-bezier(0.18, 0.72, 0.24, 1)',
+                                fill: 'forwards'
+                            }
+                        );
+                        trailPrintAnims[idx] = anim;
+                        anim.onfinish = () => {
+                            if (trailPrintAnims[idx] === anim) {
+                                trailPrintAnims[idx] = null;
+                                printNode.style.opacity = '0';
+                            }
+                        };
+                    } else {
+                        window.requestAnimationFrame(() => {
+                            printNode.style.opacity = '0';
+                        });
+                    }
+
+                    lastPrintX = x;
+                    lastPrintY = y;
+                    lastPrintAt = now;
+                };
+                const flashDot = (dot, strength = 1, durationMsOverride = null) => {
+                    if (!dot) return;
+                    const existingAnim = dotFlashAnims.get(dot);
+                    if (existingAnim) {
+                        existingAnim.cancel();
+                        dotFlashAnims.delete(dot);
+                    }
+                    const cappedStrength = clampNumber(strength, 0.2, 1, 1);
+                    if (typeof dot.animate === 'function') {
+                        const startInvert = clampNumber(0.55 + (cappedStrength * 0.45), 0, 1, 1);
+                        const midInvert = clampNumber(0.16 + (cappedStrength * 0.2), 0, 1, 0.32);
+                        const startBrightness = (1.05 + (cappedStrength * 0.24)).toFixed(3);
+                        const midBrightness = (1.01 + (cappedStrength * 0.08)).toFixed(3);
+                        const durationMs = Math.round(
+                            Number.isFinite(Number(durationMsOverride))
+                                ? clampNumber(durationMsOverride, 80, 700, mapFlashTuningDefaults.durationMs)
+                                : (130 + ((1 - cappedStrength) * 110))
+                        );
+                        const flashAnim = dot.animate(
+                            [
+                                { filter: `invert(${startInvert.toFixed(3)}) brightness(${startBrightness}) saturate(1.12)` },
+                                { filter: `invert(${midInvert.toFixed(3)}) brightness(${midBrightness}) saturate(1.05)`, offset: 0.46 },
+                                { filter: 'none' }
+                            ],
+                            {
+                                duration: durationMs,
+                                easing: 'cubic-bezier(0.2, 0.62, 0.3, 1)',
+                                fill: 'none'
+                            }
+                        );
+                        dotFlashAnims.set(dot, flashAnim);
+                        flashAnim.onfinish = () => {
+                            if (dotFlashAnims.get(dot) === flashAnim) {
+                                dotFlashAnims.delete(dot);
+                            }
+                        };
+                        flashAnim.oncancel = () => {
+                            if (dotFlashAnims.get(dot) === flashAnim) {
+                                dotFlashAnims.delete(dot);
+                            }
+                        };
+                        return;
+                    }
+
+                    const fallbackDurationMs = Math.round(
+                        Number.isFinite(Number(durationMsOverride))
+                            ? clampNumber(durationMsOverride, 80, 700, mapFlashTuningDefaults.durationMs)
+                            : (130 + ((1 - cappedStrength) * 110))
+                    );
+                    dot.style.setProperty('--map-dot-hover-flash-duration', `${fallbackDurationMs}ms`);
+                    dot.classList.remove('map-dot--hover-flash');
+                    // Force keyframe restart only for non-WAAPI fallback engines.
+                    void dot.getBoundingClientRect();
+                    dot.classList.add('map-dot--hover-flash');
+                };
+                const emitHoverFlash = (event, force = false) => {
+                    const map = frameToMap.get(frame);
+                    if (!map) return;
+                    const grid = mapDotGrid.get(map);
+                    if (!grid || !grid.width || !grid.height || !Array.isArray(grid.dots) || !grid.dots.length) return;
+
+                    const rect = map.getBoundingClientRect();
+                    if (rect.width <= 0 || rect.height <= 0) return;
+                    const localX = event.clientX - rect.left;
+                    const localY = event.clientY - rect.top;
+                    if (localX < 0 || localY < 0 || localX > rect.width || localY > rect.height) return;
+
+                    const gridX = Math.floor((localX / rect.width) * grid.width);
+                    const gridY = Math.floor((localY / rect.height) * grid.height);
+                    if (!Number.isFinite(gridX) || !Number.isFinite(gridY)) return;
+
+                    const now = performance.now();
+                    const movedCells = Math.hypot(gridX - lastFlashCellX, gridY - lastFlashCellY);
+                    const flashRadiusCells = clampNumber(frame.dataset.mapFlashRadiusCells, 0.5, 4, mapFlashTuningDefaults.radiusCells);
+                    const flashDurationMs = clampNumber(frame.dataset.mapFlashDurationMs, 80, 700, mapFlashTuningDefaults.durationMs);
+                    const flashIntensity = clampNumber(frame.dataset.mapFlashIntensity, 0.2, 1.6, mapFlashTuningDefaults.intensity);
+                    const flashGridStep = clampNumber(frame.dataset.mapFlashGridStep, 0, 2, mapFlashTuningDefaults.gridStep);
+                    const flashThrottleMs = clampNumber(frame.dataset.mapFlashThrottleMs, 0, 40, mapFlashTuningDefaults.throttleMs);
+                    if (!force && movedCells < flashGridStep && (now - lastFlashAt) < flashThrottleMs) return;
+
+                    const radiusInt = Math.max(1, Math.ceil(flashRadiusCells));
+                    for (let offsetY = -radiusInt; offsetY <= radiusInt; offsetY += 1) {
+                        for (let offsetX = -radiusInt; offsetX <= radiusInt; offsetX += 1) {
+                            const distance = Math.hypot(offsetX, offsetY);
+                            if (distance > flashRadiusCells) continue;
+                            const x = gridX + offsetX;
+                            const y = gridY + offsetY;
+                            if (x < 0 || y < 0 || x >= grid.width || y >= grid.height) continue;
+                            const ringFalloff = Math.max(0, 1 - (distance / (flashRadiusCells + 0.001)));
+                            const strength = clampNumber((0.22 + (ringFalloff * 0.78)) * flashIntensity, 0.15, 1.4, 1);
+                            const dot = grid.dots[(y * grid.width) + x];
+                            flashDot(dot, strength, flashDurationMs);
+                        }
+                    }
+                    lastFlashCellX = gridX;
+                    lastFlashCellY = gridY;
+                    lastFlashAt = now;
+                };
+                const queuePointerGlow = (event) => {
+                    const frameRect = frame.getBoundingClientRect();
+                    targetX = event.clientX - frameRect.left;
+                    targetY = event.clientY - frameRect.top;
+                    if (getPointerMode() === 'flash') {
+                        emitHoverFlash(event);
+                        frame.classList.remove('has-pointer-glow');
+                        return;
+                    }
+                    emitTrailPrint(targetX, targetY);
+                    if (!rafId) rafId = window.requestAnimationFrame(renderPointerGlow);
+                };
+                frame.addEventListener('pointerenter', (event) => {
+                    if (hideTimer) {
+                        window.clearTimeout(hideTimer);
+                        hideTimer = 0;
+                    }
+                    isPointerInside = true;
+                    const frameRect = frame.getBoundingClientRect();
+                    targetX = event.clientX - frameRect.left;
+                    targetY = event.clientY - frameRect.top;
+                    if (getPointerMode() === 'flash') {
+                        frame.classList.remove('has-pointer-glow');
+                        emitHoverFlash(event, true);
+                        return;
+                    }
+                    frame.classList.add('has-pointer-glow');
+                    lastPrintX = targetX;
+                    lastPrintY = targetY;
+                    lastPrintAt = performance.now();
+                    emitTrailPrint(targetX, targetY, true);
+                    queuePointerGlow(event);
+                });
+                frame.addEventListener('pointermove', queuePointerGlow);
+                frame.addEventListener('pointerleave', () => {
+                    isPointerInside = false;
+                    if (hideTimer) window.clearTimeout(hideTimer);
+                    if (getPointerMode() === 'flash') {
+                        frame.classList.remove('has-pointer-glow');
+                        return;
+                    }
+                    const lingerMs = clampNumber(frame.dataset.mapPointerLinger, 0, 1500, mapGlowTuningDefaults.lingerMs);
+                    hideTimer = window.setTimeout(() => {
+                        frame.classList.remove('has-pointer-glow');
+                    }, lingerMs);
+                    if (!rafId) rafId = window.requestAnimationFrame(renderPointerGlow);
+                });
+            });
         }
 
         const createDot = (x, y, isLand, radius, overrideStyle, gridX, gridY) => {
@@ -902,14 +1255,18 @@ function softCloseModal() {
 
             dotGroup.innerHTML = '';
             const radius = 0.42;
+            const dots = new Array(width * height);
             for (let y = 0; y < height; y += 1) {
                 for (let x = 0; x < width; x += 1) {
                     const dotState = resolveDotState(x, y);
                     const isLand = typeof dotState === 'object' ? !!dotState.isLand : !!dotState;
                     const overrideStyle = typeof dotState === 'object' ? (dotState.overrideStyle || null) : null;
-                    dotGroup.appendChild(createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle, x, y));
+                    const dot = createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle, x, y);
+                    dotGroup.appendChild(dot);
+                    dots[(y * width) + x] = dot;
                 }
             }
+            mapDotGrid.set(map, { width, height, dots });
         };
 
         const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -919,29 +1276,30 @@ function softCloseModal() {
             if (sibling && sibling.getAttribute('data-map-controls') === 'md') return sibling;
             return document.querySelector('[data-map-controls="md"]');
         };
-
         const applyMdToggleData = (toggleGroups, map, controls) => {
             if (!map || !controls) return;
             controls.innerHTML = '';
-            toggleGroups.forEach((toggleGroup, index) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = `map-control${index === 0 ? ' is-active' : ''}`;
-                btn.setAttribute('data-map-target', toggleGroup.targetClass);
-                btn.setAttribute('aria-pressed', index === 0 ? 'true' : 'false');
-                btn.textContent = toggleGroup.buttonLabel;
-                controls.appendChild(btn);
-            });
 
             map.querySelectorAll('.map-overlay').forEach(node => node.remove());
-            toggleGroups.forEach((toggleGroup, index) => {
+            const frame = map.closest('.pipeline-map-frame');
+            const overlayFragment = document.createDocumentFragment();
+            toggleGroups.forEach(toggleGroup => {
+                const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'map-control is-active';
+                btn.setAttribute('data-map-target', toggleGroup.targetClass);
+                btn.setAttribute('aria-pressed', 'true');
+                btn.style.setProperty('--map-control-color', representativeColor);
+                btn.textContent = toggleGroup.buttonLabel;
+                controls.appendChild(btn);
+
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                group.setAttribute('class', `map-overlay ${toggleGroup.targetClass}${index === 0 ? ' is-active' : ''}`);
+                group.setAttribute('class', `map-overlay ${toggleGroup.targetClass} is-active`);
 
                 toggleGroup.markers.forEach(marker => {
                     const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     markerGroup.setAttribute('class', 'map-marker');
-                    const blinkClass = marker.blink ? `map-marker--blink-${marker.blink}` : '';
                     if (marker.shape === 'square') {
                         const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                         rect.setAttribute('x', marker.x - marker.size);
@@ -950,7 +1308,6 @@ function softCloseModal() {
                         rect.setAttribute('height', marker.size * 2);
                         rect.setAttribute('rx', Math.max(1, marker.size * 0.35));
                         rect.style.fill = marker.color;
-                        if (blinkClass) rect.setAttribute('class', blinkClass);
                         markerGroup.appendChild(rect);
                     } else {
                         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -958,7 +1315,6 @@ function softCloseModal() {
                         circle.setAttribute('cy', marker.y);
                         circle.setAttribute('r', marker.size);
                         circle.style.fill = marker.color;
-                        if (blinkClass) circle.setAttribute('class', blinkClass);
                         markerGroup.appendChild(circle);
                     }
 
@@ -969,10 +1325,249 @@ function softCloseModal() {
                     markerGroup.appendChild(label);
                     group.appendChild(markerGroup);
                 });
-                map.appendChild(group);
+                overlayFragment.appendChild(group);
             });
+            map.appendChild(overlayFragment);
 
-            const mapControls = controls.querySelectorAll('.map-control');
+            const layerPreviewButtons = [];
+            if (frame) {
+                ensureFrameTuningDefaults(frame);
+                let syncModeScopedTuning = () => {};
+                const setPointerMode = pointerModeSetters.get(frame);
+                if (typeof setPointerMode === 'function') {
+                    const pointerModeBtn = document.createElement('button');
+                    pointerModeBtn.type = 'button';
+                    pointerModeBtn.className = 'map-control map-control--pointer-mode';
+                    pointerModeBtn.setAttribute('aria-pressed', 'false');
+                    pointerModeBtn.textContent = 'Hover Flash';
+                    const syncPointerModeButton = () => {
+                        const isFlashMode = frame.dataset.mapPointerMode === 'flash';
+                        pointerModeBtn.classList.toggle('is-active', isFlashMode);
+                        pointerModeBtn.setAttribute('aria-pressed', isFlashMode ? 'true' : 'false');
+                    };
+                    pointerModeBtn.addEventListener('click', () => {
+                        const isFlashMode = frame.dataset.mapPointerMode === 'flash';
+                        setPointerMode(isFlashMode ? 'trail' : 'flash');
+                        syncPointerModeButton();
+                        syncModeScopedTuning();
+                    });
+                    syncPointerModeButton();
+                    controls.appendChild(pointerModeBtn);
+                }
+                const divider = document.createElement('span');
+                divider.className = 'map-controls-divider';
+                divider.setAttribute('aria-hidden', 'true');
+                controls.appendChild(divider);
+
+                const previewModes = ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10'];
+                const setLayerPreviewMode = (mode) => {
+                    const normalizedMode = previewModes.includes(mode) ? mode : '';
+                    frame.classList.toggle('map-layer-preview-active', Boolean(normalizedMode));
+                    if (normalizedMode) {
+                        frame.style.setProperty('--map-layer-preview-opacity', `${(Number(normalizedMode) / 100).toFixed(2)}`);
+                    } else {
+                        frame.style.removeProperty('--map-layer-preview-opacity');
+                    }
+                    layerPreviewButtons.forEach(button => {
+                        const isActive = button.getAttribute('data-map-layer-preview') === normalizedMode;
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                };
+                previewModes.forEach((mode) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'map-control map-control--layer-preview';
+                    btn.setAttribute('data-map-layer-preview', mode);
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.textContent = `Full Layer ${mode}%`;
+                    btn.addEventListener('click', () => {
+                        const isActive = btn.classList.contains('is-active');
+                        setLayerPreviewMode(isActive ? '' : mode);
+                    });
+                    controls.appendChild(btn);
+                    layerPreviewButtons.push(btn);
+                });
+
+                const tuningStrip = document.createElement('div');
+                tuningStrip.className = 'map-tuning-strip';
+                tuningStrip.setAttribute('role', 'group');
+                tuningStrip.setAttribute('aria-label', 'Map glow tuning');
+                const tuningInputs = {};
+                const trailTuningGroup = document.createElement('div');
+                trailTuningGroup.className = 'map-tuning-group map-tuning-group--trail';
+                const flashTuningGroup = document.createElement('div');
+                flashTuningGroup.className = 'map-tuning-group map-tuning-group--flash';
+                tuningStrip.appendChild(trailTuningGroup);
+                tuningStrip.appendChild(flashTuningGroup);
+                const createTuningField = (id, labelText, inputValue, onInput, groupNode, step = 'any') => {
+                    const field = document.createElement('div');
+                    field.className = 'map-tuning-field';
+                    const label = document.createElement('label');
+                    label.className = 'map-tuning-label';
+                    label.setAttribute('for', id);
+                    label.textContent = labelText;
+                    const input = document.createElement('input');
+                    input.className = 'map-tuning-input';
+                    input.id = id;
+                    input.type = 'text';
+                    input.inputMode = 'decimal';
+                    input.autocomplete = 'off';
+                    input.spellcheck = false;
+                    input.value = inputValue;
+                    input.setAttribute('data-step', step);
+                    input.addEventListener('change', () => onInput(input.value, input));
+                    input.addEventListener('blur', () => onInput(input.value, input));
+                    field.appendChild(label);
+                    field.appendChild(input);
+                    groupNode.appendChild(field);
+                    tuningInputs[id] = input;
+                    return input;
+                };
+                createTuningField(
+                    'mapTuneDots',
+                    'Size Dots',
+                    frame.dataset.mapPointerDotSize || String(mapGlowTuningDefaults.dotSize),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 3, 20, mapGlowTuningDefaults.dotSize);
+                        frame.dataset.mapPointerDotSize = String(nextValue);
+                        input.value = String(nextValue);
+                        applyMapSizeClass(map);
+                    },
+                    trailTuningGroup
+                );
+                createTuningField(
+                    'mapTuneFalloff',
+                    'Falloff Px',
+                    String(clampNumber(
+                        parseFloat(frame.style.getPropertyValue('--map-pointer-falloff-px')) || mapGlowTuningDefaults.falloffPx,
+                        0,
+                        6,
+                        mapGlowTuningDefaults.falloffPx
+                    )),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0, 6, mapGlowTuningDefaults.falloffPx);
+                        frame.style.setProperty('--map-pointer-falloff-px', `${nextValue}px`);
+                        input.value = String(nextValue);
+                    },
+                    trailTuningGroup
+                );
+                createTuningField(
+                    'mapTuneOpacity',
+                    'Opacity',
+                    String(clampNumber(
+                        parseFloat(frame.style.getPropertyValue('--map-pointer-active-opacity')) || mapGlowTuningDefaults.activeOpacity,
+                        0,
+                        1,
+                        mapGlowTuningDefaults.activeOpacity
+                    )),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0, 1, mapGlowTuningDefaults.activeOpacity);
+                        frame.style.setProperty('--map-pointer-active-opacity', String(nextValue));
+                        input.value = String(nextValue);
+                    },
+                    trailTuningGroup
+                );
+                createTuningField(
+                    'mapTuneEase',
+                    'Trail Ease',
+                    frame.dataset.mapPointerEase || String(mapGlowTuningDefaults.easing),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0.05, 0.6, mapGlowTuningDefaults.easing);
+                        frame.dataset.mapPointerEase = String(nextValue);
+                        input.value = String(nextValue);
+                    },
+                    trailTuningGroup
+                );
+                createTuningField(
+                    'mapTuneLinger',
+                    'Linger Ms',
+                    frame.dataset.mapPointerLinger || String(mapGlowTuningDefaults.lingerMs),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0, 1500, mapGlowTuningDefaults.lingerMs);
+                        frame.dataset.mapPointerLinger = String(Math.round(nextValue));
+                        input.value = String(Math.round(nextValue));
+                    },
+                    trailTuningGroup
+                );
+                const flashPresetButtons = [];
+                const flashPresetRow = document.createElement('div');
+                flashPresetRow.className = 'map-flash-presets';
+                const syncFlashPresetButtons = () => {
+                    const activePreset = frame.dataset.mapFlashPreset || mapFlashPresetDefaults.presetId;
+                    flashPresetButtons.forEach(({ id, button }) => {
+                        const isActive = id === activePreset;
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                };
+                Object.entries(mapFlashPresetDefaults.presets).forEach(([presetId, preset]) => {
+                    const presetBtn = document.createElement('button');
+                    presetBtn.type = 'button';
+                    presetBtn.className = 'map-control map-control--flash-preset';
+                    presetBtn.setAttribute('aria-pressed', 'false');
+                    presetBtn.textContent = preset.label;
+                    presetBtn.addEventListener('click', () => {
+                        applyFlashPresetToFrame(frame, presetId);
+                        syncFlashPresetButtons();
+                    });
+                    flashPresetRow.appendChild(presetBtn);
+                    flashPresetButtons.push({ id: presetId, button: presetBtn });
+                });
+                syncFlashPresetButtons();
+                flashTuningGroup.appendChild(flashPresetRow);
+                const trailHelp = document.createElement('p');
+                trailHelp.className = 'map-tuning-help map-tuning-help--trail';
+                trailHelp.textContent = 'Trail mode: Size Dots = reveal diameter; Falloff Px = edge softness; Opacity = trail strength; Trail Ease = trail density/tightness; Linger Ms = fade length.';
+                tuningStrip.appendChild(trailHelp);
+                const flashHelp = document.createElement('p');
+                flashHelp.className = 'map-tuning-help map-tuning-help--flash';
+                flashHelp.textContent = 'Hover Flash mode presets: Compact = 1 step smaller radius, Balanced = baseline, Wide = 1 step larger radius, Lingering = longer fade. Intensity and grid timing are preset-matched.';
+                tuningStrip.appendChild(flashHelp);
+                const resetField = document.createElement('div');
+                resetField.className = 'map-tuning-field map-tuning-field--reset';
+                const resetBtn = document.createElement('button');
+                resetBtn.type = 'button';
+                resetBtn.className = 'map-control map-control--tuning-reset';
+                const applyTrailDefaults = () => {
+                    frame.dataset.mapPointerDotSize = String(mapGlowTuningDefaults.dotSize);
+                    frame.dataset.mapPointerEase = String(mapGlowTuningDefaults.easing);
+                    frame.dataset.mapPointerLinger = String(mapGlowTuningDefaults.lingerMs);
+                    frame.style.setProperty('--map-pointer-falloff-px', `${mapGlowTuningDefaults.falloffPx}px`);
+                    frame.style.setProperty('--map-pointer-active-opacity', String(mapGlowTuningDefaults.activeOpacity));
+                    if (tuningInputs.mapTuneDots) tuningInputs.mapTuneDots.value = String(mapGlowTuningDefaults.dotSize);
+                    if (tuningInputs.mapTuneFalloff) tuningInputs.mapTuneFalloff.value = String(mapGlowTuningDefaults.falloffPx);
+                    if (tuningInputs.mapTuneOpacity) tuningInputs.mapTuneOpacity.value = String(mapGlowTuningDefaults.activeOpacity);
+                    if (tuningInputs.mapTuneEase) tuningInputs.mapTuneEase.value = String(mapGlowTuningDefaults.easing);
+                    if (tuningInputs.mapTuneLinger) tuningInputs.mapTuneLinger.value = String(mapGlowTuningDefaults.lingerMs);
+                    applyMapSizeClass(map);
+                };
+                const applyFlashDefaults = () => {
+                    applyFlashPresetToFrame(frame, mapFlashPresetDefaults.presetId);
+                    syncFlashPresetButtons();
+                };
+                resetBtn.addEventListener('click', () => {
+                    if (frame.dataset.mapPointerMode === 'flash') {
+                        applyFlashDefaults();
+                        return;
+                    }
+                    applyTrailDefaults();
+                });
+                resetField.appendChild(resetBtn);
+                tuningStrip.appendChild(resetField);
+                syncModeScopedTuning = () => {
+                    const isFlashMode = frame.dataset.mapPointerMode === 'flash';
+                    trailTuningGroup.classList.toggle('is-hidden', isFlashMode);
+                    flashTuningGroup.classList.toggle('is-hidden', !isFlashMode);
+                    trailHelp.classList.toggle('is-hidden', isFlashMode);
+                    flashHelp.classList.toggle('is-hidden', !isFlashMode);
+                    resetBtn.textContent = isFlashMode ? 'Reset Flash Defaults' : 'Reset Trail Defaults';
+                };
+                syncModeScopedTuning();
+                controls.appendChild(tuningStrip);
+            }
+
+            const mapControls = controls.querySelectorAll('.map-control[data-map-target]');
             const overlays = map.querySelectorAll('.map-overlay');
             mapControls.forEach(control => {
                 control.addEventListener('click', () => {
@@ -1312,7 +1907,9 @@ function softCloseModal() {
                 const resolveToggleCoordinate = (value) => (Number.isInteger(value) ? value + 0.5 : value);
                 const toggleMarkers = toggleLines.map(line => {
                     const parts = line.split('|').map(part => part.trim());
-                    const hasCategoryAndTitle = parts.length >= 8;
+                    const hasCategoryAndTitle = parts.length >= 7
+                        && Number.isFinite(Number(parts[2]))
+                        && Number.isFinite(Number(parts[3]));
                     const buttonLabel = parts[0] || 'Toggle';
                     const label = hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel;
                     const rawX = Number(hasCategoryAndTitle ? parts[2] : parts[1]);
@@ -1322,8 +1919,10 @@ function softCloseModal() {
                     const shape = (hasCategoryAndTitle ? parts[4] : parts[3] || 'circle').toLowerCase();
                     const colorToken = (hasCategoryAndTitle ? parts[5] : parts[4] || 'accent').toLowerCase();
                     const size = Number(hasCategoryAndTitle ? parts[6] : parts[5]) || 4;
-                    const blink = (hasCategoryAndTitle ? parts[7] : parts[6] || '').toLowerCase();
-                    const color = colorToken === 'accent' ? 'var(--map-accent)' : colorToken;
+                    const categoryColorToken = `--map-toggle-${slugify(buttonLabel)}`;
+                    const color = colorToken === 'accent'
+                        ? `var(${categoryColorToken}, var(--map-accent))`
+                        : colorToken;
                     return {
                         buttonLabel,
                         label,
@@ -1332,7 +1931,6 @@ function softCloseModal() {
                         shape: shape === 'square' ? 'square' : 'circle',
                         size,
                         color,
-                        blink,
                         targetClass: `overlay-${slugify(buttonLabel)}`
                     };
                 }).filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
@@ -1358,6 +1956,7 @@ function softCloseModal() {
                     applyMdToggleData(toggleGroups, map, controls);
                 } else if (controls) {
                     controls.innerHTML = '<span class="map-controls-empty">No MD toggles loaded</span>';
+                    map.querySelectorAll('.map-overlay').forEach(node => node.remove());
                     console.warn('[map] no valid MD toggles found.');
                 }
             }

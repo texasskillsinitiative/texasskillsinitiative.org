@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-02-16
+Last updated: 2026-02-19
 Latest verification: targeted Playwright pipeline/map smoke check on 2026-02-16 (local static server + browser run): section presence (`#overview`, `#pipeline`, `#engagement`, `#team`), MD map dot render, MD/legacy toggle behavior, override-dot presence, responsive checks at `900px` and `600px`, and browser console error capture.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
@@ -51,6 +51,31 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Retuned light-theme map palette to reduce washed-out brightness (darker ocean/water/land tones plus subtle tinted frame background).
 - [Done] Re-aligned light-theme map colors to dark-theme logic (ocean darkest, water mid, land lightest) using a dark-adjacent palette for visual consistency.
 - [Done] Added map-specific accent token and brightened light-theme map accent to improve toggle/marker visibility against the updated light map palette.
+- [Done] Removed MD toggle-point blink animation wiring so toggle markers render as static points (legacy trailing blink column is now ignored).
+- [Done] Improved map-toggle overlay switching smoothness by gating inactive overlays with `visibility`/`pointer-events` and tightening opacity transition timing.
+- [Done] Added category-scoped default toggle marker colors (Initial/Structured/Technical/Reference) with theme-specific token values and `accent` fallback behavior in MD toggle parsing.
+- [Done] Removed map control buttons from the pipeline UI (MD + legacy blocks) and retired control-generation/runtime toggle handlers; MD-authored category markers now render together by default.
+- [Done] Restored MD category toggle controls (legacy controls remain removed) and wired button accent/border colors to each category marker color for visual parity.
+- [Done] Added Phase 1 premium map polish: low-cost frame sheen sweep (`transform` animation on pseudo-element) plus reduced-motion fallbacks for sheen and map control/overlay transitions.
+- [Done] Added Phase 2 premium map polish: active-toggle pulse ring and hover micro-lift/label easing for map markers (desktop hover), with reduced-motion-safe fallbacks.
+- [Done] Implemented one-layer pointer-reactive map highlight (single frame overlay moved via RAF-throttled `transform`) gated to fine-pointer + non-reduced-motion contexts.
+- [Done] Upgraded pointer layer from white glow to blend-mode inversion reveal (`mix-blend-mode: difference`) so the single overlay flips underlying map tones in-place without per-dot redraw.
+- [Done] Reduced pointer inversion layer footprint to a dot-scale target (~7 dots across) by sizing the overlay from current map grid pitch per breakpoint.
+- [Done] Added temporary layer-inspection switches in map controls (`Full Layer 100%`, `Full Layer 50%`) to force full-frame blend-layer previews for visual tuning/testing.
+- [Done] Tuned pointer reveal edge profile to a near-binary mask: full-opacity interior with ~0.5px fade at the perimeter.
+- [Done] Expanded temporary layer-inspection switches to `100/90/80/70/60` and changed preview logic to variable-opacity full-frame mode.
+- [Done] Added pointer-reveal persistence via RAF smoothing (position easing) plus short leave linger before fade-out.
+- [Done] Added temporary live tuning strip (text boxes) for pointer layer values: size-in-dots, falloff px, active opacity, easing, and leave linger ms.
+- [Done] Added `Reset Defaults` control for the temporary tuning strip to restore all pointer-layer tuning values in one click.
+- [Done] Expanded temporary full-layer opacity preview buttons to all 10% increments (`100` through `10`).
+- [Done] Added temporary on-page modifier guidance and integrated reset behavior into live tuning workflow for faster local iteration.
+- [Done] Reworked pointer persistence from eased head-follow to immediate head + decaying trail ghost so motion reads as a trail instead of cursor lag.
+- [Done] Updated tuning-strip modifier copy to plain-language guidance for each text box (diameter, edge, strength, trail catch-up, fade duration).
+- [Done] Replaced the chasing-ghost persistence with stamped fade-trail prints so cursor movement leaves gentle fading footprints instead of delayed tracking.
+- [Done] Added optional `Hover Flash` mode toggle that inverts nearby map dots on mouse move and quickly fades them back, while disabling trail rendering when active (mutually exclusive modes).
+- [Done] Retuned trail mode into a softer ghost profile (higher stamp density, lower opacity, blur, and longer fade) for a smoother lingering afterimage.
+- [Done] Split map tuning controls by active pointer mode: trail-only controls are hidden in `Hover Flash` mode and flash-only controls are hidden in trail mode.
+- [Done] Replaced manual `Hover Flash` tuners with varied presets (`Compact`, `Balanced`, `Wide`, `Lingering`) and mode-scoped reset behavior.
 - [Done] Map assets added: `assets/world-map.md`, `assets/world-map.png`, `assets/world-map.svg`.
 - [Done] Map source artifact retained: `World_map_without_Antarctica.svg`.
 
@@ -142,10 +167,36 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-18: Adjusted light-theme map token values (`--map-ocean-fill`, `--map-dot-water`, `--map-dot-land`) and set a muted light frame background to improve contrast and reduce glare.
 - [Done] 2026-02-18: Updated light-theme map tokens again to mirror dark-theme tonal ordering more closely while preserving theme differentiation.
 - [Done] 2026-02-18: Introduced `--map-accent` and mapped map control active state, overlay accent markers, and `accent` parser token resolution to `var(--map-accent)`; set light-mode value to a higher-contrast blue.
+- [Done] 2026-02-19: Removed toggle marker blink-class rendering and retired marker blink keyframes so MD toggle points render without animation.
+- [Done] 2026-02-19: Updated map overlay visibility model (`opacity + visibility + pointer-events`) to reduce unnecessary interaction/paint work on inactive toggle groups.
+- [Done] 2026-02-19: Added map toggle category color tokens for both themes and wired `accent` toggle colors to resolve category token first, then fallback to `var(--map-accent)`.
+- [Done] 2026-02-19: Removed below-map overlay toggle controls from `index.html`, removed legacy/MD control runtime handlers in `js/main.js`, and simplified map overlay rendering to always-on category marker display.
+- [Done] 2026-02-19: Reintroduced MD-driven category toggles only (legacy toggle UI remains retired) and set toggle button color to match the associated category marker color.
+- [Done] 2026-02-19: Added map-frame sheen animation and `prefers-reduced-motion` handling to keep visual polish while minimizing runtime overhead.
+- [Done] 2026-02-19: Added active map-toggle pulse-ring animation and marker hover micro-lift/text easing (hover-capable pointers only), with reduced-motion fallback disabling new motion.
+- [Done] 2026-02-19: Added one-layer pointer glow overlay on map frame with `requestAnimationFrame` pointer updates and media-query gating (`hover/pointer` + reduced-motion) to preserve performance.
+- [Done] 2026-02-19: Replaced pointer white-glow styling with blend-mode inversion spotlight (theme-tuned opacity), producing an opposite-tone reveal effect aligned to existing map content.
+- [Done] 2026-02-19: Tuned pointer inversion radius from fixed large spotlight to grid-relative size (`~7` dot cells, clamped) for tighter map-detail reveal.
+- [Done] 2026-02-19: Added temporary full-layer preview switches in controls and frame-level debug classes to inspect blend-layer output at 100% and 50% opacity.
+- [Done] 2026-02-19: Changed pointer spotlight profile to 100% interior opacity with abrupt edge cutoff (`~0.5px` falloff) and raised active spotlight opacity to full for direct edge inspection.
+- [Done] 2026-02-19: Updated layer preview controls to five levels (`100/90/80/70/60`) using `--map-layer-preview-opacity` and unified `map-layer-preview-active` frame class.
+- [Done] 2026-02-19: Updated pointer glow runtime to eased RAF tracking with trailing persistence and delayed class clear (`~160ms`) on pointer leave.
+- [Done] 2026-02-19: Added map-control-adjacent tuning inputs that write directly to frame CSS vars/datasets for live visual testing of pointer glow behavior.
+- [Done] 2026-02-19: Added tuning-strip reset action (`Reset Defaults`) and extended full-layer preview button set from partial steps to full 10% increments (`100..10`).
+- [Done] 2026-02-19: Added explanatory helper text for tuning modifiers in map controls and preserved one-click reset to baseline defaults for all editable fields.
+- [Done] 2026-02-19: Converted pointer linger behavior to trail-style rendering (snap-to-cursor head + decaying ghost pass) and relabeled `Ease` as `Trail Ease` to match runtime behavior.
+- [Done] 2026-02-19: Replaced the decaying ghost follower with pooled print-stamp trail rendering (density tied to `Trail Ease`, fade tied to `Linger Ms`) for a cleaner non-lag trail feel.
+- [Done] 2026-02-19: Added mutually exclusive `Hover Flash` pointer mode in map controls to run per-dot invert/fade pulses on hover (center + near neighbors), with trail/head glow suppressed while flash mode is active.
+- [Done] 2026-02-19: Softened trail rendering profile by increasing print pool size and overlap, reducing per-print opacity, extending fade duration, and adding blur/soft radial print styling for a true ghost-trail look.
+- [Done] 2026-02-19: Added mode-scoped tuning UI visibility and reset behavior so only active-mode controls are shown (trail vs flash), preventing cross-mode control clutter.
+- [Done] 2026-02-19: Replaced hover-flash live controls with curated presets (including +/- one-step size variants) and mapped runtime radius/duration/intensity/grid timing to selected preset values.
 
 ## Active Focus
-- Keep scope tight to requested workstream.
-- For map tasks, confine edits to:
+- Delivery target: Friday, February 20, 2026 (end of day, local).
+- Priority 1: finish pipeline/map completion and validation first (`Milestone 0.6` map implementation/readiness items + `R-001` checks).
+- Priority 2: complete remaining `Milestone 0.6` launch-readiness QA (form, modal, navigation, theme, responsive, accessibility, links).
+- Priority 3: proceed to `Milestone 0.7` content/compliance sign-off only after `0.6` is stable.
+- Keep map work edits confined to:
   - `index.html` (pipeline section)
   - `css/main.css` (pipeline/map styles)
   - `js/main.js` (`initPipelineMap` and related map handlers)

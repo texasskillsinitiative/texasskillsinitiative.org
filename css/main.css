@@ -14,6 +14,10 @@
             --img-placeholder: #161f30;
             --status-green: #10b981;
             --map-accent: var(--accent);
+            --map-toggle-initial-evaluation: #38bdf8;
+            --map-toggle-structured-intake: #f59e0b;
+            --map-toggle-technical-review: #22c55e;
+            --map-toggle-reference-model: #f472b6;
             --map-texas-color-1: #7df9ff;
             --map-texas-color-2: #0d98ba;
             --map-ocean-fill: #0b1220;
@@ -33,6 +37,10 @@
             --accent-soft: rgba(139, 107, 35, 0.1);
             --img-placeholder: #e2e8f0;
             --map-accent: #2f66ff;
+            --map-toggle-initial-evaluation: #1d4ed8;
+            --map-toggle-structured-intake: #b45309;
+            --map-toggle-technical-review: #15803d;
+            --map-toggle-reference-model: #be185d;
             --map-texas-color-1: #0ea5e9;
             --map-texas-color-2: #0284c7;
             --map-ocean-fill: #233247;
@@ -193,11 +201,211 @@
         .pipeline-map-label { margin: 0; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--page-text-dim); }
         .map-controls-empty { font-size: 0.7rem; color: var(--page-text-dim); text-transform: uppercase; letter-spacing: 1px; }
         .pipeline-map-controls { display: flex; flex-wrap: wrap; gap: 10px; }
-        .map-control { background: transparent; border: 1px solid var(--frame-border); color: var(--page-text-main); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px; cursor: pointer; transition: 0.3s; }
-        .map-control.is-active { border-color: var(--map-accent); color: var(--map-accent); }
-        .pipeline-map-frame { border: 0.5px solid color-mix(in srgb, var(--frame-border) 55%, transparent); background: rgba(11, 18, 32, 0.6); padding: 16px; aspect-ratio: 181 / 89; }
+        .map-controls-divider { width: 1px; align-self: stretch; background: color-mix(in srgb, var(--frame-border) 65%, transparent); margin: 0 2px; }
+        .map-tuning-strip {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            align-items: center;
+            margin-top: 2px;
+            padding-top: 8px;
+            border-top: 1px dashed color-mix(in srgb, var(--frame-border) 70%, transparent);
+        }
+        .map-tuning-group {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            align-items: center;
+        }
+        .map-tuning-group.is-hidden { display: none; }
+        .map-tuning-field { display: inline-flex; align-items: center; gap: 6px; }
+        .map-tuning-field--reset { margin-left: auto; }
+        .map-tuning-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--page-text-dim);
+            white-space: nowrap;
+        }
+        .map-tuning-help {
+            width: 100%;
+            margin: 0;
+            font-size: 0.64rem;
+            line-height: 1.4;
+            color: var(--page-text-dim);
+            opacity: 0.9;
+        }
+        .map-tuning-help.is-hidden { display: none; }
+        .map-tuning-input {
+            width: 64px;
+            min-height: 28px;
+            padding: 3px 6px;
+            border: 1px solid var(--frame-border);
+            background: transparent;
+            color: var(--page-text-main);
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .map-tuning-input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+            border-color: var(--accent);
+        }
+        .map-control {
+            --map-control-color: var(--map-accent);
+            background: transparent;
+            border: 1px solid color-mix(in srgb, var(--map-control-color) 25%, var(--frame-border));
+            color: var(--page-text-main);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+            opacity: 0.75;
+            position: relative;
+        }
+        .map-control.is-active {
+            border-color: var(--map-control-color);
+            color: var(--map-control-color);
+            background: color-mix(in srgb, var(--map-control-color) 10%, transparent);
+            opacity: 1;
+        }
+        .map-control--layer-preview { --map-control-color: var(--page-text-dim); opacity: 0.85; }
+        .map-control--layer-preview.is-active {
+            --map-control-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 14%, transparent);
+        }
+        .map-control--pointer-mode {
+            --map-control-color: color-mix(in srgb, var(--accent) 72%, var(--page-text-main));
+            opacity: 0.88;
+        }
+        .map-flash-presets {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .map-control--flash-preset {
+            --map-control-color: color-mix(in srgb, var(--page-text-main) 52%, var(--accent));
+            font-size: 0.62rem;
+            letter-spacing: 0.7px;
+            opacity: 0.86;
+            min-height: 30px;
+            padding: 7px 10px;
+        }
+        .map-control--tuning-reset {
+            --map-control-color: var(--page-text-dim);
+            font-size: 0.64rem;
+            letter-spacing: 0.8px;
+            opacity: 0.9;
+            min-height: 30px;
+        }
+        .map-control--tuning-reset:hover {
+            --map-control-color: var(--accent);
+            color: var(--accent);
+            border-color: var(--accent);
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
+        }
+        .map-control.is-active::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border: 1px solid color-mix(in srgb, var(--map-control-color) 55%, transparent);
+            border-radius: 2px;
+            opacity: 0;
+            transform: scale(1);
+            pointer-events: none;
+            animation: mapControlPulse 2.8s ease-out infinite;
+        }
+        .pipeline-map-frame {
+            --map-pointer-size: 42px;
+            --map-pointer-x: -999px;
+            --map-pointer-y: -999px;
+            --map-pointer-active-opacity: 1;
+            --map-pointer-falloff-px: 0.5px;
+            border: 0.5px solid color-mix(in srgb, var(--frame-border) 55%, transparent);
+            background: rgba(11, 18, 32, 0.6);
+            padding: 16px;
+            aspect-ratio: 181 / 89;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
         [data-theme="light"] .pipeline-map-frame { border: 0; background: #e7edf5; }
-        .pipeline-map-frame svg { width: 100%; height: auto; display: block; }
+        .pipeline-map-frame::before {
+            content: "";
+            position: absolute;
+            top: -30%;
+            left: -35%;
+            width: 34%;
+            height: 160%;
+            pointer-events: none;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+            transform: translateX(-165%) rotate(14deg);
+            opacity: 0.28;
+            animation: mapFrameSheen 11s linear infinite;
+            z-index: 1;
+        }
+        .pipeline-map-frame::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--map-pointer-size);
+            height: var(--map-pointer-size);
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255, 255, 255, 1) calc(100% - var(--map-pointer-falloff-px)), rgba(255, 255, 255, 0) 100%);
+            transform: translate3d(var(--map-pointer-x), var(--map-pointer-y), 0) translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            will-change: transform, opacity;
+            mix-blend-mode: difference;
+            z-index: 3;
+        }
+        .pipeline-map-frame .map-pointer-trail-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .pipeline-map-frame .map-pointer-print {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--map-pointer-size);
+            height: var(--map-pointer-size);
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.74) 14%, rgba(255, 255, 255, 0.36) 52%, rgba(255, 255, 255, 0.12) 74%, rgba(255, 255, 255, 0) 100%);
+            transform: translate3d(-999px, -999px, 0) translate(-50%, -50%);
+            opacity: 0;
+            will-change: transform, opacity;
+            mix-blend-mode: difference;
+            filter: blur(0.55px);
+        }
+        [data-theme="light"] .pipeline-map-frame .map-pointer-print { filter: blur(0.45px); }
+        .pipeline-map-frame.has-pointer-glow::after { opacity: var(--map-pointer-active-opacity); }
+        .pipeline-map-frame.map-pointer-mode-flash::after { opacity: 0 !important; }
+        .pipeline-map-frame.map-pointer-mode-flash .map-pointer-trail-layer { display: none; }
+        [data-theme="light"] .pipeline-map-frame::before { opacity: 0.16; }
+        .pipeline-map-frame.map-layer-preview-active::after {
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            transform: none;
+            background: #ffffff;
+            opacity: var(--map-layer-preview-opacity, 1);
+        }
+        .pipeline-map-frame.map-layer-preview-active .map-pointer-trail-layer { display: none; }
+        .pipeline-map-frame svg { width: 100%; height: auto; display: block; position: relative; z-index: 2; }
         .map-ocean { fill: var(--map-ocean-fill); }
         .map-dot { fill: var(--map-dot-water); opacity: 0.95; }
         .map-dot.is-land { fill: var(--map-dot-land); }
@@ -207,33 +415,29 @@
         .map-dot.map-dot--blink-fade { animation: mapDotPulseFade 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-dot.map-dot--blink-glow { animation: mapDotPulseGlow 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-dot.map-dot--blink-blend { animation: mapDotPulseBlend 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
-        .map-overlay { opacity: 0; transition: opacity 0.3s ease; }
-        .map-overlay.is-active { opacity: 1; }
+        .map-dot.map-dot--hover-flash { animation: mapDotHoverFlash 0.24s cubic-bezier(0.2, 0.62, 0.3, 1); }
+        .map-overlay { opacity: 0; visibility: hidden; pointer-events: none; will-change: opacity; transition: opacity 0.24s ease; }
+        .map-overlay.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
         .map-overlay circle { fill: var(--map-accent); }
-        .map-overlay .map-marker--blink-slow { animation: mapPulseSlow 2.8s infinite; }
-        .map-overlay .map-marker--blink-rapid { animation: mapPulseRapid 1.2s infinite; }
-        .map-overlay .map-marker--blink-fade { animation: mapPulseFade 3.4s infinite; }
         .map-overlay text { fill: var(--page-text-main); font-size: 5px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.45px; }
         .pipeline-map-frame svg.map--compact .map-overlay text { font-size: 4.5px; letter-spacing: 0.3px; }
         .pipeline-map-frame svg.map--tiny .map-overlay text { display: none; }
+        .map-overlay .map-marker circle,
+        .map-overlay .map-marker rect {
+            transform-box: fill-box;
+            transform-origin: center;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
         @media (hover: hover) and (pointer: fine) {
-            .map-overlay .map-marker text { opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
-            .map-overlay .map-marker:hover text { opacity: 1; }
-        }
-
-        @keyframes mapPulseSlow {
-            0%, 100% { opacity: 0.35; }
-            50% { opacity: 1; }
-        }
-        @keyframes mapPulseRapid {
-            0%, 100% { opacity: 0.25; }
-            50% { opacity: 1; }
-        }
-        @keyframes mapPulseFade {
-            0% { opacity: 0.15; }
-            35% { opacity: 0.9; }
-            70% { opacity: 0.4; }
-            100% { opacity: 0.2; }
+            .map-overlay .map-marker text {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(0.8px);
+                transition: opacity 0.16s ease, transform 0.16s ease;
+            }
+            .map-overlay .map-marker:hover text { opacity: 1; transform: translateY(0); }
+            .map-overlay .map-marker:hover circle,
+            .map-overlay .map-marker:hover rect { transform: translateY(-0.3px) scale(1.08); opacity: 1; }
         }
         @keyframes mapDotPulseSlow {
             0%, 100% { opacity: 0.15; filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
@@ -259,6 +463,21 @@
             0% { opacity: 1; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: none; }
             50% { opacity: 1; fill: var(--map-dot-glow-to, var(--map-dot-glow-from, var(--map-dot-base-fill))); filter: none; }
             100% { opacity: 1; fill: var(--map-dot-glow-from, var(--map-dot-base-fill)); filter: none; }
+        }
+        @keyframes mapDotHoverFlash {
+            0% { filter: invert(1) brightness(1.2) saturate(1.15); }
+            45% { filter: invert(0.35) brightness(1.06) saturate(1.06); }
+            100% { filter: none; }
+        }
+        @keyframes mapFrameSheen {
+            0% { transform: translateX(-165%) rotate(14deg); }
+            45% { transform: translateX(345%) rotate(14deg); }
+            100% { transform: translateX(345%) rotate(14deg); }
+        }
+        @keyframes mapControlPulse {
+            0% { opacity: 0.4; transform: scale(1); }
+            70% { opacity: 0; transform: scale(1.08); }
+            100% { opacity: 0; transform: scale(1.08); }
         }
         .sync-track { width: 100%; height: 4px; background: var(--frame-border); border-radius: 2px; margin-top: 10px; position: relative; }
         .sync-progress { height: 100%; background: var(--accent); border-radius: 2px; position: relative; width: 0%; transition-property: width; transition-timing-function: linear; }
@@ -648,6 +867,12 @@
             .header-index a { padding: 10px 12px; }
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; }
             .pipeline-map-controls { gap: 8px; }
+            .map-controls-divider { display: none; }
+            .map-tuning-strip { gap: 6px 8px; padding-top: 6px; }
+            .map-tuning-field--reset { margin-left: 0; width: 100%; }
+            .map-tuning-label { font-size: 0.56rem; }
+            .map-tuning-help { font-size: 0.58rem; }
+            .map-tuning-input { width: 58px; min-height: 26px; font-size: 0.68rem; }
             .map-control { font-size: 0.72rem; letter-spacing: 0.8px; padding: 9px 12px; }
             .staff-gateway-021026 .staff-gateway-layout-021026 { grid-template-columns: 1fr; }
             .vpn-nav-021026 { padding: 16px 20px; }
@@ -677,10 +902,26 @@
             .pipeline-map-frame { padding: 12px; }
             .pipeline-map-controls { gap: 7px; }
             .map-control { min-height: 40px; padding: 10px 13px; font-size: 0.74rem; }
+            .map-tuning-strip { gap: 6px; }
+            .map-tuning-field { width: calc(50% - 6px); }
+            .map-tuning-input { width: 100%; }
+            .map-tuning-help { font-size: 0.56rem; }
+            .map-tuning-field--reset { width: 100%; }
             .staff-gateway-profiles-021026 { grid-template-columns: 1fr; }
             .staff-photo-grid-021026 { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 600px) {
             #accessModal .concierge-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .pipeline-map-frame::before { animation: none; opacity: 0; }
+            .pipeline-map-frame::after { transition: none; opacity: 0; }
+            .map-overlay,
+            .map-control,
+            .map-overlay .map-marker text,
+            .map-overlay .map-marker circle,
+            .map-overlay .map-marker rect { transition: none; }
+            .map-control.is-active::after { animation: none; opacity: 0; }
         }

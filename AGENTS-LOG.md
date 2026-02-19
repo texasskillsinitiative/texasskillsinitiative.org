@@ -388,4 +388,134 @@
 - Resolutions/outcomes: Session closed with no additional code changes or commits after the pushed clean-exit package.
 - Commit hash(es): `e111bd1`, `59592a6`, `56abae9`
 
-[AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-02-18 09:30:14 -06:00
+### 2026-02-18 22:34:55 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Started new active packet in Packet B scope for map behavior update; reviewed current map toggle/render paths in `js/main.js`, map styling in `css/main.css`, and toggle authoring notes in `assets/world-map.md`.
+- Troubleshooting suggestions: Keep map edits isolated to Packet B files to avoid collisions with current legal/docs working-tree changes.
+- Resolutions/outcomes: Located toggle-point blink hook (`applyMdToggleData`) and matching marker-blink CSS as the exact removal target.
+- Commit hash(es): none
+
+### 2026-02-18 22:34:55 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed toggle marker blink class assignment/rendering in `js/main.js`, removed marker blink animation rules/keyframes in `css/main.css`, added smoother overlay switching behavior (`visibility`/`pointer-events` gating + faster opacity transition), and updated toggle docs in `assets/world-map.md` to mark trailing blink column as accepted-but-ignored.
+- Troubleshooting suggestions: If additional smoothness is needed after this baseline, reduce active overlay marker count per toggle group and hide text labels under `900px` earlier to cut SVG text paint cost.
+- Resolutions/outcomes: Toggle points no longer blink, overlay state changes are lighter-weight, and docs now match runtime behavior.
+- Commit hash(es): none
+
+### 2026-02-18 22:42:04 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added theme-specific category defaults for toggle marker colors in `css/main.css` (`--map-toggle-initial-evaluation`, `--map-toggle-structured-intake`, `--map-toggle-technical-review`, `--map-toggle-reference-model`), updated `js/main.js` so toggle `accent` resolves to `var(--map-toggle-{slug}, var(--map-accent))`, and documented category token behavior in `assets/world-map.md`.
+- Troubleshooting suggestions: Keep category labels stable in the MD toggle column if you rely on auto-color defaults; custom color values in the row still override defaults.
+- Resolutions/outcomes: Toggle categories now render with distinct defaults in dark/light themes without requiring per-row color edits.
+- Commit hash(es): none
+
+### 2026-02-18 22:45:36 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed visible MD/legacy map control blocks from `index.html`, retired legacy/MD map control handlers from `js/main.js` (including dynamic control-button creation and click toggling), and simplified overlay rendering/CSS so MD-authored category markers display together without below-map toggle controls.
+- Troubleshooting suggestions: If per-category visibility control is needed later, reintroduce controls as a separate packet using a non-overlay state model (for example, filter classes) to avoid reviving legacy PNG assumptions.
+- Resolutions/outcomes: Pipeline map no longer renders toggle buttons under the map, and current marker/category color logic remains intact.
+- Commit hash(es): none
+
+### 2026-02-18 22:49:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restored MD-only map category toggle controls in `index.html` and `js/main.js`, kept legacy toggle controls retired, re-enabled overlay show/hide state classes, and styled toggle buttons in `css/main.css` to use each category marker color (`--map-control-color`) for active border/text/background parity.
+- Troubleshooting suggestions: Keep toggle category labels stable in MD rows to preserve predictable button order and category color-token mapping.
+- Resolutions/outcomes: Toggle buttons are back for current MD logic, old legacy control surface remains removed, and button colors now match visible category points.
+- Commit hash(es): none
+
+### 2026-02-18 22:54:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Phase 1 map polish in `css/main.css`: added a subtle frame sheen pseudo-element animation (`mapFrameSheen`) using transform-only motion, set layering/isolation on `.pipeline-map-frame`, and added `prefers-reduced-motion` fallbacks that disable sheen and map control/overlay transitions.
+- Troubleshooting suggestions: Keep sheen transform-only (no blur/filter animation) to retain low GPU overhead; if users report distraction, increase loop duration before lowering opacity.
+- Resolutions/outcomes: Map now has a premium ambient sweep effect with accessibility-safe reduced-motion behavior and minimal performance risk.
+- Commit hash(es): none
+
+### 2026-02-18 23:14:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Phase 2 map polish in `css/main.css`: added active toggle-button pulse ring (`mapControlPulse`), added marker shape micro-lift on hover plus label translate/opacity easing under hover-capable pointers, and extended reduced-motion overrides to disable new animation/transition paths.
+- Troubleshooting suggestions: If pulse feels too busy, increase `mapControlPulse` duration first; if hover motion feels sharp, reduce marker scale from `1.08` to `1.05`.
+- Resolutions/outcomes: Controls and markers now feel more responsive/premium without pointer-tracking or heavy runtime logic.
+- Commit hash(es): none
+
+### 2026-02-18 23:19:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented one-layer pointer-reactive map highlight: added `.pipeline-map-frame::after` spotlight layer in `css/main.css` and added RAF-throttled pointer handlers in `js/main.js` that update only two CSS variables (`--map-pointer-x`, `--map-pointer-y`) on fine-pointer/non-reduced-motion devices.
+- Troubleshooting suggestions: If GPU use appears elevated on some systems, first lower spotlight size/opacity before reducing event sampling cadence.
+- Resolutions/outcomes: Pointer-linked polish now runs as a single transformed layer with constrained runtime cost and no per-dot updates.
+- Commit hash(es): none
+
+### 2026-02-18 23:27:31 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Converted the pointer spotlight visual from white glow to blend-mode inversion reveal by updating `.pipeline-map-frame::after` in `css/main.css` to use stronger white radial values with `mix-blend-mode: difference` and adjusted theme-specific active opacity.
+- Troubleshooting suggestions: If inversion appears too strong in certain map regions, reduce `.pipeline-map-frame.has-pointer-glow::after` opacity before changing blend mode.
+- Resolutions/outcomes: Pointer layer now reveals opposite-tone map detail in-place (aligned with existing map content) while keeping the single-layer performance profile.
+- Commit hash(es): none
+
+### 2026-02-18 23:30:49 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reduced pointer reveal footprint by changing `.pipeline-map-frame::after` size to CSS variable (`--map-pointer-size`) and computing that value in `js/main.js` from map grid pitch (`viewBox width` to rendered width), targeting about 7 dot cells across with clamps for responsive stability.
+- Troubleshooting suggestions: If you want it tighter or broader, adjust the multiplier (`dotStepPx * 7`) in `applyMapSizeClass` before changing clamp bounds.
+- Resolutions/outcomes: Pointer inversion now behaves like a focused local reveal (roughly 6-8 dots in diameter) instead of a broad spotlight.
+- Commit hash(es): none
+
+### 2026-02-18 23:42:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added temporary blend-layer inspection controls in map UI by extending `applyMdToggleData` (`js/main.js`) with two debug buttons (`Full Layer 100%`, `Full Layer 50%`) and frame debug classes; added corresponding CSS preview states (`map-layer-preview-full-100/50`) in `css/main.css` that force `::after` to full-frame coverage at fixed opacity.
+- Troubleshooting suggestions: If preview switches are no longer needed after tuning, remove `map-control--layer-preview` button creation and the two frame preview class rules together in one cleanup packet.
+- Resolutions/outcomes: You can now inspect the full compositing layer directly at 100% and 50% opacity from the same control row used by category toggles.
+- Commit hash(es): none
+
+### 2026-02-18 23:47:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pointer spotlight edge profile in `css/main.css` to hard-mask behavior (`radial-gradient` solid interior with `calc(100% - 0.5px)` cutoff), and set active spotlight opacity to full in both dark/light theme states.
+- Troubleshooting suggestions: If the edge appears too alias-sharp on some displays, increase the falloff from `0.5px` to `1px` before lowering spotlight opacity.
+- Resolutions/outcomes: Pointer reveal now reads as a crisp circular inversion mask rather than a soft spotlight gradient.
+- Commit hash(es): none
+
+### 2026-02-18 23:52:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded temporary layer-preview buttons in `js/main.js` from two levels to five (`Full Layer 100/90/80/70/60%`), switched preview classing to a single `map-layer-preview-active` mode with `--map-layer-preview-opacity`, and updated CSS preview rules accordingly; also added pointer persistence by changing pointer update loop to eased RAF interpolation and adding ~160ms leave linger before removing `has-pointer-glow`.
+- Troubleshooting suggestions: If pointer lag feels too sticky, reduce interpolation factor (`0.24`) or shorten leave linger timeout (`160ms`) in `initPipelineMap`.
+- Resolutions/outcomes: Preview control granularity is higher for blend tuning, and pointer reveal now persists briefly after movement/exit rather than snapping off immediately.
+- Commit hash(es): none
+
+### 2026-02-18 23:57:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a temporary live tuning strip in map controls (`js/main.js` + `css/main.css`) with text inputs for pointer glow parameters (`Size Dots`, `Falloff Px`, `Opacity`, `Ease`, `Linger Ms`), wired to update frame datasets/CSS vars in real time and immediately re-apply map sizing where required.
+- Troubleshooting suggestions: Keep temporary tuning UI in-sync with pointer runtime defaults by updating `mapGlowTuningDefaults` first when changing initial behavior.
+- Resolutions/outcomes: You can now tune core pointer glow values directly in-browser without code edits or reload-only iteration.
+- Commit hash(es): none
+
+### 2026-02-19 00:00:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded full-layer preview buttons to complete 10% steps (`100` to `10`) in `js/main.js`, and added `Reset Defaults` button in the tuning strip that restores all pointer glow runtime defaults (`dot size`, `falloff`, `opacity`, `easing`, `linger`) and refreshes computed pointer size.
+- Troubleshooting suggestions: If tuning presets become permanent, convert `mapGlowTuningDefaults` and the reset handler to a shared config object before removing debug UI.
+- Resolutions/outcomes: You now have finer preview granularity plus one-click return to baseline values during live tuning.
+- Commit hash(es): none
+
+### 2026-02-19 00:09:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked pointer runtime in `js/main.js` from eased-head tracking to snap-to-cursor head plus a decaying `map-pointer-trail` ghost layer, keeping RAF throttling and existing linger tuning; relabeled tuning input `Ease` to `Trail Ease`; updated modifier helper text to explain each textbox in plain language; added trail-layer styling in `css/main.css` and hid trail during full-layer preview mode.
+- Troubleshooting suggestions: If the trail feels too smeared, lower `Linger Ms` first; if it feels too tight, lower `Trail Ease` before increasing dot size.
+- Resolutions/outcomes: Pointer persistence now reads as motion trail instead of cursor lag, and the tuning strip includes clearer on-page guidance for modifier purpose.
+- Commit hash(es): none
+
+### 2026-02-19 00:16:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the ghost-chase trail implementation in `js/main.js` with pooled stamp prints (`.map-pointer-print`) emitted on pointer movement, with per-print fade animation duration derived from `Linger Ms` and print cadence/density derived from `Trail Ease`; updated `css/main.css` to use `.map-pointer-trail-layer` and hide it in full-layer preview mode.
+- Troubleshooting suggestions: If prints are still too dense, lower `Trail Ease`; if they vanish too fast, increase `Linger Ms` in small steps (for example +80ms).
+- Resolutions/outcomes: Cursor now leaves distinct fading footprints that read as a trail, without the laggy “chasing orb” look.
+- Commit hash(es): none
+
+### 2026-02-19 00:52:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a separate `Hover Flash` mode in `js/main.js` with a new map control button; implemented per-dot hover pulses (center + neighboring cells) that invert and fade back using WAAPI on pointer move; added dot-grid lookup caching for efficient hit targeting; enforced mutual exclusion so trail/head pointer layers are suppressed while flash mode is active; updated map tuning helper copy and added CSS mode/fallback rules in `css/main.css`.
+- Troubleshooting suggestions: If flash appears too strong, reduce `startInvert`/`startBrightness` in `flashDot`; if it feels sparse, lower the movement/time gate in `emitHoverFlash`.
+- Resolutions/outcomes: You can now switch between the existing trail behavior and a smoother live dot-invert hover animation without running both concurrently.
+- Commit hash(es): none
+
+### 2026-02-19 01:06:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retuned trail mode in `js/main.js` to feel like a soft ghost trail by increasing pooled trail prints, increasing overlap density (shorter interval and distance gates), extending fade duration, and lowering per-print opacity; updated trail animation scaling/easing for gentler decay; softened `.map-pointer-print` style in `css/main.css` with a diffuse radial profile and slight blur; updated helper text to reflect ghost-trail semantics.
+- Troubleshooting suggestions: If ghosting still feels heavy, lower `Linger Ms` first; if it feels too thin, raise `Opacity` before increasing `Trail Ease`.
+- Resolutions/outcomes: Trail mode now leaves a smoother, softer afterimage instead of sharp print marks.
+- Commit hash(es): none
+
+### 2026-02-19 01:10:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Split pointer tuning UI into mode-scoped groups in `js/main.js` so trail controls and flash controls are shown only when their mode is active; added live `Hover Flash` tuners (`Flash Size`, `Fade Ms`, `Intensity`, `Grid Step`, `Delay Ms`) with dataset-backed defaults and clamped input handlers; added mode-specific reset behavior (`Reset Trail Defaults` / `Reset Flash Defaults`); parameterized flash runtime to use these values for radius, duration, strength, movement step threshold, and throttle interval; added `.map-tuning-group`/hidden state styles in `css/main.css`.
+- Troubleshooting suggestions: If flash feels noisy, increase `Grid Step` and `Delay Ms`; if it feels weak, increase `Intensity` before increasing `Flash Size`.
+- Resolutions/outcomes: You can now tune the active mode directly without seeing irrelevant controls from the other mode, and flash behavior has dedicated real-time knobs.
+- Commit hash(es): none
+
+### 2026-02-19 02:32:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed manual `Hover Flash` textbox controls from `js/main.js` and replaced them with curated preset buttons (`Flash Compact`, `Flash Balanced`, `Flash Wide`, `Flash Lingering`); bound runtime flash radius/duration/intensity/grid timing/throttle to selected preset values; kept size variants constrained to baseline with one-step smaller/larger options; updated tuning help copy; updated `STATUS.md` active-focus priority order for delivery target Friday, February 20, 2026 (map/pipeline first, then remaining readiness items).
+- Troubleshooting suggestions: If presets still feel too strong, reduce `intensity` in the `wide` preset first; if they feel too subtle, increase `durationMs` in `balanced` before changing radius.
+- Resolutions/outcomes: Flash mode is now preset-driven (no manual clutter), and planning is explicitly sequenced for tomorrow EOD completion with map/pipeline as first priority.
+- Commit hash(es): none
+
+### 2026-02-19 02:36:20 -06:00 | Agent: Codex | Version: GPT-5 | Session Clean Close
+- Actions taken: Finalized map pointer-mode tuning changes by replacing manual hover-flash controls with preset buttons, reevaluated/updated roadmap priority in `STATUS.md` for a February 20, 2026 EOD target (pipeline/map first), ran final syntax verification (`node --check js/main.js`), and prepared clean-exit checkpoint commit for in-scope files.
+- Troubleshooting suggestions: Start the next session on pipeline/map final QA using the updated Priority 1 block in `STATUS.md`, then proceed through remaining `0.6` checks in order.
+- Resolutions/outcomes: Session closed with map interaction controls simplified (preset-driven flash mode) and roadmap sequencing explicitly aligned to next-day completion goals.
+- Commit hash(es): recorded in clean-exit handoff summary.
