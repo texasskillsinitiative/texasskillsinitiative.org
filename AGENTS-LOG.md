@@ -928,4 +928,10 @@
 - Resolutions/outcomes: Mobile work is now tracked as first-class roadmap scope with packet boundaries defined for safe implementation sequencing.
 - Commit hash(es): none
 
+### 2026-02-20 01:21:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed automated prelaunch browser checks using local Playwright runtime (`snapshot/.pw`), covering section/tab routing, access + portal modal open/close/outside-click flows, concierge collapse behavior, theme toggle + logo swap, console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`. Fixed detected overflow regressions in `css/main.css` (tablet nav wrap/CTA sizing plus mandate/workflow handheld layout collapse) and re-ran the matrix to zero findings.
+- Troubleshooting suggestions: Keep this Playwright smoke pattern as a repeatable guardrail for subsequent mobile/nav changes; prior failures were concentrated in nav CTA width pressure and non-collapsed section layouts under narrow viewports.
+- Resolutions/outcomes: Core launch-readiness smoke checks pass with zero console errors and zero horizontal overflow across the tested width matrix after responsive fixes.
+- Commit hash(es): `76b1563`
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

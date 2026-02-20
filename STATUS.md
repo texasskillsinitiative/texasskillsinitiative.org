@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: targeted Playwright pipeline/map smoke check on 2026-02-16 (local static server + browser run): section presence (`#overview`, `#pipeline`, `#engagement`, `#team`), MD map dot render, MD/legacy toggle behavior, override-dot presence, responsive checks at `900px` and `600px`, and browser console error capture.
+Latest verification: targeted Playwright launch-readiness smoke checks on 2026-02-20 (local static server + browser run): section/tab routing, access/portal modal open-close paths, concierge collapse behavior, theme toggle + logo swap, console error capture, internal/legal link audit, and responsive overflow matrix at `1024/900/768/600/480/390/360` after mobile overflow fixes.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -134,13 +134,14 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] Complete the pipeline page map implementation and final readiness pass.
 - [Planned] Review override color choices in both dark/light themes for contrast and readability consistency.
 - [Planned] Stakeholder form QA: concierge selection, required fields, email validation, 3s trap, hold-to-clear, and success/error states.
-- [Planned] Concierge selection collapse QA (non-selected buttons hide smoothly after selection).
+- [Done] Concierge selection collapse QA (non-selected buttons hide smoothly after selection) validated via automated browser smoke check.
 - [Planned] Modal behavior validation (open/close/outside-click/submit lockout/success transitions).
-- [Planned] Navigation tabs validation (hash navigation, active states, focus styles).
-- [Planned] Theme toggle and logo swap validation (dark/light).
-- [Planned] Responsive layout review (mobile nav, modal scroll, form layout, staff grid).
+- [Done] Navigation tabs validation baseline (hash navigation + active section state) verified across all primary sections in automated browser smoke checks.
+- [Planned] Navigation focus-style verification (keyboard-only tab/shift-tab visual confirmation) pending manual pass.
+- [Done] Theme toggle and logo swap validation (dark/light) verified in automated browser checks.
+- [Done] Responsive layout review baseline completed with automated overflow matrix (`1024/900/768/600/480/390/360`) and corrective CSS updates for nav + section layout overflow.
 - [Planned] Accessibility pass (keyboard/focus/contrast/ARIA/screen-reader order).
-- [Planned] Link check across internal and legal pages.
+- [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
 - [Planned] Replace draft founder letter in `index.html` with final approved copy.
@@ -180,10 +181,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 ## Risk Register (Living)
 - [Open] `R-001` Map behavior regressions while supporting dual-mode overlays, switch semantics, and flexible MD parsing.
   - Affects: `0.6` launch readiness QA.
-  - Validation needed: manual browser checks for multi-switch behavior, hover label behavior, and responsive behavior at `900px` / `600px`.
+  - Validation needed: manual browser checks for multi-switch behavior and hover-label behavior (responsive overflow checks have now been expanded and automated through `1024/900/768/600/480/390/360`).
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Ran targeted Playwright launch-readiness smoke checks (tabs, modals, concierge collapse, theme/logo swap, console capture) and automated internal/legal link audit with zero missing local links/fragments.
+- [Done] 2026-02-20: Fixed responsive overflow regressions across nav + section layouts and verified zero horizontal overflow at `1024/900/768/600/480/390/360`.
 - [Done] 2026-02-11: Intake and internal portal behavior matured (validation, submission metadata, portal simulation).
 - [Done] 2026-02-12: Legal/compliance docs and launch checklist work added.
 - [Done] 2026-02-13: UI refinements and map asset preparation.
