@@ -213,7 +213,7 @@
         .nav-mobile-toggle {
             display: none;
             width: 44px;
-            height: 40px;
+            height: 44px;
             border: 1px solid var(--frame-border);
             background: color-mix(in srgb, var(--card-bg) 90%, transparent);
             color: var(--page-text-main);
@@ -277,8 +277,8 @@
             color: var(--page-text-dim);
         }
         .mobile-nav-close {
-            width: 34px;
-            height: 34px;
+            width: 44px;
+            height: 44px;
             border: 1px solid var(--frame-border);
             background: transparent;
             color: var(--page-text-main);
@@ -953,7 +953,7 @@
         .rubric-action-link {
             display: inline-flex;
             align-items: center;
-            min-height: 40px;
+            min-height: 44px;
             padding: 0 16px;
             border: 1px solid var(--frame-border);
             color: var(--page-text-main);
@@ -1539,6 +1539,17 @@
             .mobile-nav-drawer,
             .mobile-nav-backdrop { display: block; }
             .logo { height: 42px; }
+            .section-wrap {
+                padding-left: clamp(18px, 3.4vw, 28px);
+                padding-right: clamp(18px, 3.4vw, 28px);
+            }
+            .instruction-box { padding: 22px 20px; margin-bottom: 28px; }
+            .rubric-intro { flex-direction: column; gap: 14px; margin-bottom: 26px; }
+            .rubric-banner { min-height: 160px; }
+            .pipeline-option { margin: 20px 0 28px; }
+            .workflow-step { padding: 22px; }
+            .engagement-intended { margin-top: 20px; }
+            .team-tab { min-height: 64px; }
             .overview-hero {
                 padding: clamp(10px, 2.8svh, 22px) 18px clamp(12px, 3svh, 26px);
                 min-height: calc(100svh - var(--nav-current-height, 82px) - 4px);
@@ -1557,6 +1568,7 @@
 
         @media (max-width: 900px) {
             nav { padding: 10px 20px 0; height: auto; gap: 15px; }
+            .section-wrap { padding-left: 20px; padding-right: 20px; }
             .header-index { flex-wrap: wrap; justify-content: center; gap: 10px; }
             .header-index a { padding: 4px 9px; min-height: 24px; min-width: 58px; }
             .header-index .nav-num { left: 8px; font-size: 0.64rem; }
@@ -1581,6 +1593,7 @@
             .mandate-card-lead { margin-bottom: 20px; font-size: 1.08rem; }
             .mandate-points { gap: 18px; padding-top: 20px; }
             .rubric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+            .btn-cta--rubric { min-height: 44px; }
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; }
             .btn-portal--primary { width: min(100%, 170px); }
             #mandate,
@@ -1624,19 +1637,33 @@
         }
 
         @media (max-width: 600px) {
+            .section-wrap { padding-left: 14px; padding-right: 14px; }
             #mandate,
             #rubric,
             #pipeline,
             #engagement,
             #team { padding-top: 36px; }
+            .instruction-box { padding: 16px 14px; margin-bottom: 22px; border-left-width: 3px; }
             .overview-hero { padding: clamp(8px, 2.2svh, 16px) 14px clamp(10px, 2.8svh, 20px); }
             .overview-content { width: min(100%, 620px); }
             .pipeline-map--raised { transform: translateY(-10px); }
+            .mandate-card { padding: 18px; }
+            .mandate-card-lead { margin-bottom: 14px; font-size: 0.98rem; }
+            .mandate-points { gap: 12px; padding-top: 14px; }
             .mandate-intro-text { font-size: 1.12rem; }
+            .rubric-intro-title { font-size: 1rem; }
+            .rubric-intro-copy { font-size: 0.88rem; line-height: 1.45; }
             .rubric-grid { grid-template-columns: 1fr; }
+            .rubric-item { padding: 16px; }
+            .rubric-item-copy { font-size: 0.84rem; }
             .rubric-action-panel { padding: 16px; }
             .rubric-action-buttons { gap: 8px; }
-            .btn-cta--rubric { min-height: 38px; }
+            .btn-cta--rubric { min-height: 44px; }
+            .rubric-action-link { min-height: 44px; }
+            .workflow-step { padding: 16px; }
+            .workflow-copy { font-size: 0.84rem; }
+            .engagement-framing-copy { font-size: 0.9rem; line-height: 1.5; }
+            .engagement-intended-list { font-size: 0.82rem; line-height: 1.45; }
             .header-index a { min-width: 52px; }
             .header-index .nav-num { font-size: 0.58rem; }
             .header-index .nav-label { font-size: 0.58rem; letter-spacing: 1.3px; }
@@ -1656,6 +1683,8 @@
             .map-tuning-field--reset { width: 100%; }
             .staff-gateway-profiles-021026 { grid-template-columns: 1fr; }
             .staff-photo-grid-021026 { grid-template-columns: 1fr; }
+            .team-tab { padding: 10px 12px; }
+            .team-tab span { font-size: 0.66rem; letter-spacing: 0.9px; }
         }
 
         @media (max-width: 600px) {

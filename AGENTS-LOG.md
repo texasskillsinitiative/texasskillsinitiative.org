@@ -1012,4 +1012,10 @@
 - Resolutions/outcomes: Overview text block now remains visible on first render across tested phone viewports without needing initial manual scroll to reach headline/copy.
 - Commit hash(es): none
 
+### 2026-02-20 10:27:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed the next Packet G handheld pass in `css/main.css`: reduced section side padding at mobile breakpoints, tightened instruction/rubric/workflow spacing for phone flow, switched rubric intro to stacked layout on mobile widths, and raised key touch targets (`#mobileNavToggle`, `#mobileNavClose`, drawer controls, rubric action controls). Re-ran `tmp-mobile-nav-check.js`, `tmp-smoke-core.js`, and a targeted 390px tap-target metric check.
+- Troubleshooting suggestions: Keep map-control hit areas intentionally compact unless a dedicated mobile map-control redesign is approved, since increasing those controls to full 44px would materially alter established map test/control density.
+- Resolutions/outcomes: Mobile nav and section interactions remain stable (no overflow/console regressions), with better handheld spacing rhythm and confirmed 44px+ touch targets on primary mobile controls.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

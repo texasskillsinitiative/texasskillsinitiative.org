@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -188,6 +188,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Applied a mobile spacing/typography pass for handheld sections (`mandate`, `rubric`, `pipeline`, `engagement`, `team`) and raised key touch targets (`mobile nav toggle/close`, drawer controls, rubric action controls) to improve phone ergonomics without changing section behavior.
 - [Done] 2026-02-20: Fixed mobile overview first-screen visibility by removing excess effective top spacing and adding dynamic viewport-fit scaling tied to live nav height so hero text remains visible without scrolling on tested phone viewports.
 - [Done] 2026-02-20: Added accessibility follow-up baseline improvements (skip link, landmark labeling, mobile drawer label reference, and team panel initial ARIA state cleanup), with regression checks passing.
 - [Done] 2026-02-20: Added versioned CSS/JS asset query parameters (`?v=20260220-mobilefix`) across site pages to force cache refresh and prevent mixed old/new mobile-nav asset loads on real devices.
