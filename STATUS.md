@@ -141,7 +141,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Theme toggle and logo swap validation (dark/light) verified in automated browser checks.
 - [Done] Responsive layout review baseline completed with automated overflow matrix (`1024/900/768/600/480/390/360`) and corrective CSS updates for nav + section layout overflow.
 - [Done] Accessibility baseline update: added missing `alt` attributes for index visual assets and re-ran missing-alt audit (0 missing).
-- [Done] Accessibility pass (keyboard/focus/ARIA baseline): modal close controls converted to keyboard-focusable buttons, modal semantics added (`role`, `aria-modal`, `aria-labelledby`, `aria-describedby`, `aria-hidden`), focus trap and Escape-close behavior implemented, and ARIA target/reference checks verified clean.
+- [Done] Accessibility pass (keyboard/focus/ARIA baseline): modal close controls converted to keyboard-focusable buttons, modal semantics added (`role`, `aria-modal`, `aria-labelledby`, `aria-describedby`, `aria-hidden`), focus trap and Escape-close behavior implemented, rubric cards moved from `div[role="button"]` to native `<button>` controls, and ARIA target/reference checks verified clean.
 - [Planned] Accessibility follow-up: manual contrast and screen-reader reading-order pass.
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 

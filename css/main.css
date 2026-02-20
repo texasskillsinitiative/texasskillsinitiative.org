@@ -754,6 +754,11 @@
             background: var(--card-bg);
             padding: 20px;
             cursor: pointer;
+            width: 100%;
+            text-align: left;
+            color: inherit;
+            font: inherit;
+            appearance: none;
             transition: border-color var(--motion-base) var(--motion-ease-standard), transform var(--motion-base) var(--motion-ease-standard), box-shadow var(--motion-base) var(--motion-ease-standard), background var(--motion-base) var(--motion-ease-standard);
         }
         .rubric-item:hover,

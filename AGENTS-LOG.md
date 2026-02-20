@@ -964,4 +964,10 @@
 - Resolutions/outcomes: Pipeline readiness verification advanced to done-state confidence, and modal keyboard/accessibility baseline is now materially stronger with repeatable browser evidence.
 - Commit hash(es): none
 
+### 2026-02-20 01:45:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Improved rubric accessibility semantics by converting rubric cards from `div[role="button"]` to native `<button>` elements in `index.html`, with matching style resets in `css/main.css`. Re-ran smoke, modal keyboard traversal, ARIA reference audit, and map readiness checks (all clean).
+- Troubleshooting suggestions: Keep rubric cards as native button controls to preserve keyboard/screen-reader semantics while reducing JS key-event dependence.
+- Resolutions/outcomes: Role-button audit now reports zero custom role-button nodes, and rubric interactions remain functional without introducing layout overflow or console errors.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
