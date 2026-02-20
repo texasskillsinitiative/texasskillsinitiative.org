@@ -934,4 +934,10 @@
 - Resolutions/outcomes: Core launch-readiness smoke checks pass with zero console errors and zero horizontal overflow across the tested width matrix after responsive fixes.
 - Commit hash(es): `76b1563`
 
+### 2026-02-20 01:24:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded automated launch-readiness checks for form/modal behavior using Playwright: validated access flow 3-second trap, submit lockout (`Sending...` + disabled button), success transition rendering, malformed-email validity via constraint API, and hold-to-clear full reset of fields + concierge state. Updated `STATUS.md` Milestone 0.6 items to reflect completed QA checks and tightened verification summary wording.
+- Troubleshooting suggestions: Remaining launch-readiness manual gap is keyboard/focus-style accessibility confirmation; keep that as the next targeted pass to close Milestone 0.6 with higher confidence.
+- Resolutions/outcomes: Additional prelaunch checklist items are now evidence-backed and reclassified to `[Done]`, with automated outputs confirming expected runtime behavior.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

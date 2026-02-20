@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: targeted Playwright launch-readiness smoke checks on 2026-02-20 (local static server + browser run): section/tab routing, access/portal modal open-close paths, concierge collapse behavior, theme toggle + logo swap, console error capture, internal/legal link audit, and responsive overflow matrix at `1024/900/768/600/480/390/360` after mobile overflow fixes.
+Latest verification: targeted Playwright launch-readiness smoke checks on 2026-02-20 (local static server + browser run): section/tab routing, access/portal modal open-close paths, access submit flow checks (3s trap, submit lockout, success transition), concierge collapse behavior, malformed-email validity + hold-to-clear reset behavior, theme toggle + logo swap, console error capture, internal/legal link audit, and responsive overflow matrix at `1024/900/768/600/480/390/360` after mobile overflow fixes.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -133,9 +133,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 ## Milestone 0.6 - Launch Readiness QA
 - [Planned] Complete the pipeline page map implementation and final readiness pass.
 - [Planned] Review override color choices in both dark/light themes for contrast and readability consistency.
-- [Planned] Stakeholder form QA: concierge selection, required fields, email validation, 3s trap, hold-to-clear, and success/error states.
+- [Done] Stakeholder form QA completed in automated browser checks: concierge selection/state wiring, required-field constraint behavior, malformed email validity, 3s trap, hold-to-clear reset, submit lockout, and success-state transition.
 - [Done] Concierge selection collapse QA (non-selected buttons hide smoothly after selection) validated via automated browser smoke check.
-- [Planned] Modal behavior validation (open/close/outside-click/submit lockout/success transitions).
+- [Done] Modal behavior validation completed for access + portal modals (open/close/outside-click paths) plus submit lockout/success transition checks in access flow.
 - [Done] Navigation tabs validation baseline (hash navigation + active section state) verified across all primary sections in automated browser smoke checks.
 - [Planned] Navigation focus-style verification (keyboard-only tab/shift-tab visual confirmation) pending manual pass.
 - [Done] Theme toggle and logo swap validation (dark/light) verified in automated browser checks.
