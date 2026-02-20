@@ -1000,4 +1000,16 @@
 - Resolutions/outcomes: Keyboard and landmark semantics are tighter, with no regression in nav/map/modal checks after the accessibility refinements.
 - Commit hash(es): none
 
+### 2026-02-20 09:24:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected active unclosed-session tail marker at startup and continued from current working tree without resets.
+- Troubleshooting suggestions: If handoffs happen mid-packet, keep the tail marker and append a recovery note first so packet continuity stays auditable.
+- Resolutions/outcomes: Unclean-exit condition acknowledged and recovery flow applied before additional edits.
+- Commit hash(es): none
+
+### 2026-02-20 09:24:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Finished mobile overview first-screen fit pass by wrapping hero text in `.overview-content`, tightening overview section padding, adding live nav-height aware `--overview-fit-scale` logic in `js/main.js`, and validating with Playwright viewport-fit checks at `390x844`, `360x740`, and `412x915`.
+- Troubleshooting suggestions: If future copy growth causes clipping on very short screens, lower the fit-scale floor (`0.72`) or shorten line breaks before changing global nav height.
+- Resolutions/outcomes: Overview text block now remains visible on first render across tested phone viewports without needing initial manual scroll to reach headline/copy.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

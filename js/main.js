@@ -735,6 +735,7 @@ function softCloseModal() {
     document.querySelectorAll('.reveal-text, .asset-image, #pipeline-metrics').forEach(el => observer.observe(el));
     const overview = document.querySelector('.overview-hero');
     if (overview) {
+        const overviewContent = overview.querySelector('.overview-content') || overview;
         const tagline = overview.querySelector('.overview-tagline');
         const lines = overview.querySelectorAll('.overview-line');
         const overviewCopy = overview.querySelector('.overview-copy');
@@ -749,12 +750,51 @@ function softCloseModal() {
             overviewTimers.length = 0;
         };
 
+        const fitOverviewToViewport = () => {
+            const nav = document.querySelector('nav');
+            const navHeight = nav ? Math.ceil(nav.getBoundingClientRect().height) : 0;
+            if (navHeight > 0) {
+                document.documentElement.style.setProperty('--nav-current-height', `${navHeight}px`);
+            }
+            overview.style.setProperty('--overview-fit-scale', '1');
+            const currentHash = window.location.hash || '#overview';
+            const overviewActive = currentHash === '#overview' || !document.querySelector('.section-wrap:target');
+            if (!overviewActive || window.innerWidth > MOBILE_NAV_BREAKPOINT) return;
+
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
+            if (!viewportHeight) return;
+            const computed = window.getComputedStyle(overview);
+            const padTop = parseFloat(computed.paddingTop) || 0;
+            const padBottom = parseFloat(computed.paddingBottom) || 0;
+            const reserved = padTop + padBottom + 8;
+            const available = viewportHeight - navHeight - reserved;
+            const contentHeight = overviewContent ? overviewContent.scrollHeight : 0;
+            if (available <= 0 || contentHeight <= 0) return;
+
+            const ratio = available / contentHeight;
+            if (ratio >= 1) return;
+            const nextScale = Math.min(1, Math.max(0.72, ratio));
+            overview.style.setProperty('--overview-fit-scale', nextScale.toFixed(3));
+        };
+
+        let overviewFitRaf = 0;
+        const scheduleOverviewFit = () => {
+            if (overviewFitRaf) {
+                window.cancelAnimationFrame(overviewFitRaf);
+            }
+            overviewFitRaf = window.requestAnimationFrame(() => {
+                overviewFitRaf = 0;
+                fitOverviewToViewport();
+            });
+        };
+
         const schedule = (fn, delaySeconds) => {
             const timer = window.setTimeout(fn, Math.max(delaySeconds, 0) * 1000);
             overviewTimers.push(timer);
         };
 
         const runOverviewSequence = () => {
+            scheduleOverviewFit();
             clearOverviewTimers();
 
             const revealItems = overview.querySelectorAll('.reveal-text');
@@ -818,6 +858,13 @@ function softCloseModal() {
         };
 
         window._runOverviewSequence = runOverviewSequence;
+        window._fitOverviewToViewport = fitOverviewToViewport;
+        window.addEventListener('resize', scheduleOverviewFit);
+        window.addEventListener('orientationchange', scheduleOverviewFit);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) scheduleOverviewFit();
+        });
+        scheduleOverviewFit();
 
         if (overviewContinue) {
             overviewContinue.addEventListener('click', () => {
@@ -865,6 +912,9 @@ function softCloseModal() {
 
         if (resolvedId === 'overview' && typeof window._runOverviewSequence === 'function') {
             window._runOverviewSequence();
+            if (typeof window._fitOverviewToViewport === 'function') {
+                window._fitOverviewToViewport();
+            }
         }
 
         if (shouldResetScroll) {
