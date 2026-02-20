@@ -1691,6 +1691,22 @@
             #accessModal .concierge-grid { grid-template-columns: 1fr; }
         }
 
+        @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+            :root { --tab-switch-motion: 0.44s; }
+            .mobile-nav-drawer { transition-duration: 0.34s; }
+            .pipeline-map-frame::before { animation: none; opacity: 0; }
+            .pipeline-map-frame.map-frame-category-flash-active::before,
+            .pipeline-map-frame.map-frame-category-flash-active .map-frame-gap-flash-layer { animation-duration: 0.82s; }
+            .map-overlay {
+                transition: opacity 0.7s cubic-bezier(0.2, 0.62, 0.22, 1), visibility 0s linear 0.7s;
+            }
+            .map-control.is-active::after { animation: none; opacity: 0.28; }
+            .rubric-item:hover,
+            .workflow-step:hover,
+            .engagement-signal:hover,
+            .team-tab:hover { transform: none; }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .pipeline-map-frame::after { transition: none; opacity: 0; }
             .pipeline-map-frame::before { animation: none; opacity: 0; }

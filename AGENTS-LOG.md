@@ -1018,4 +1018,10 @@
 - Resolutions/outcomes: Mobile nav and section interactions remain stable (no overflow/console regressions), with better handheld spacing rhythm and confirmed 44px+ touch targets on primary mobile controls.
 - Commit hash(es): none
 
+### 2026-02-20 10:30:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a mobile/coarse-pointer guardrail block in `css/main.css` to reduce animation overhead without changing behavior: shortened mobile tab-switch timing, disabled decorative map-frame sheen on coarse/small viewports, disabled active map-control pulse animation in those contexts, reduced map-overlay transition duration, and removed hover-lift transforms for touch-centric conditions. Re-ran `tmp-mobile-nav-check.js` and `tmp-smoke-core.js`.
+- Troubleshooting suggestions: If map transitions feel too abrupt on specific devices, tune only the coarse-pointer `map-overlay` duration first; avoid changing desktop/reduced-motion timing paths.
+- Resolutions/outcomes: Motion cost is lower on handheld contexts while nav/tab/map interactions remain regression-clean.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
