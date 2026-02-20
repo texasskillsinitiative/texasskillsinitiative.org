@@ -988,4 +988,10 @@
 - Resolutions/outcomes: Wrapped-tab mobile behavior has been replaced by a tested drawer workflow at `<=1024` while desktop nav behavior remains intact.
 - Commit hash(es): none
 
+### 2026-02-20 09:06:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Diagnosed real-device mixed-layout symptom as likely stale-asset cache mismatch (new HTML with old CSS/JS), then shipped cache-busting query versions for shared stylesheet and main script references across all HTML pages. Also hardened mobile drawer behavior for touch devices (outside-pointer close + stronger iOS-style scroll lock) and re-ran mobile-nav interaction checks.
+- Troubleshooting suggestions: When running local device tests against LAN hosts, prefer a versioned asset query bump after major CSS/JS nav changes to avoid stale cache blends.
+- Resolutions/outcomes: Site now forces fresh `main.css`/`main.js` retrieval (`?v=20260220-mobilefix`), eliminating mixed old/new mobile nav rendering states observed on S24.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

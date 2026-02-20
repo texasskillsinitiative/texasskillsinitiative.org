@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -187,6 +187,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Added versioned CSS/JS asset query parameters (`?v=20260220-mobilefix`) across site pages to force cache refresh and prevent mixed old/new mobile-nav asset loads on real devices.
 - [Done] 2026-02-20: Implemented mobile navigation drawer (`<=1024`) with hamburger toggle, focus-safe interaction model (ESC/backdrop close + trap + focus restore), drawer link sync to hash tabs, and access-modal handoff from drawer CTA.
 - [Done] 2026-02-20: Completed modal accessibility hardening (dialog semantics, keyboard trap, Escape close, focus restore) and verified via Playwright keyboard traversal.
 - [Done] 2026-02-20: Completed pipeline map readiness automation for startup defaults, category toggle behavior, and test-settings hotkey modal gating.
