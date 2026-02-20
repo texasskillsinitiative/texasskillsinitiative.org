@@ -7,10 +7,10 @@
     <script>
         document.documentElement.classList.remove('no-js');
     </script>
-    <link rel="icon" href="assets/logo/tsi-logo-tn-favicon-noborder.svg" type="image/svg+xml">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/logo/tsi-logo-tn-favicon-noborder.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/logo/tsi-logo-tn-icon-border-android.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/logo/tsi-logo-tn-icon-border-crapple.png">
+    <link rel="icon" href="assets/global/icon/tsi-favicon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/global/icon/tsi-favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/global/icon/tsi-app-android-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/global/icon/tsi-app-apple-180.png">
     <link rel="manifest" href="site.webmanifest">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.css?v=20260220-mobilefix">
@@ -25,8 +25,8 @@
 <!-- Navigation Section Start -->
 <nav aria-label="Primary">
     <div class="logo-container">
-        <img src="assets/logo/tsi-logo-main-dark.svg" class="logo logo-dark" alt="TSI">
-        <img src="assets/logo/tsi-logo-main-light.svg" class="logo logo-light" alt="TSI">
+        <img src="assets/global/logo/tsi-main-dark.svg" class="logo logo-dark" alt="TSI">
+        <img src="assets/global/logo/tsi-main-light.svg" class="logo logo-light" alt="TSI">
     </div>
     <button type="button" class="nav-mobile-toggle" id="mobileNavToggle" aria-controls="mobileNavDrawer" aria-expanded="false" aria-label="Open site navigation">
         <span class="nav-mobile-toggle-line" aria-hidden="true"></span>
@@ -80,8 +80,8 @@
 <!-- Portal Modal Section Start --> 
 <div class="modal-overlay" id="portalModal" data-modal-overlay role="dialog" aria-modal="true" aria-labelledby="portalModalTitle" aria-describedby="portalModalHelper" aria-hidden="true">
     <div class="modal-content">
-        <img src="assets/logo/tsi-logo-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
-        <img src="assets/logo/tsi-logo-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
+        <img src="assets/global/logo/tsi-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
+        <img src="assets/global/logo/tsi-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
         <button type="button" class="close-modal" data-modal-close="portalModal" aria-label="Close internal access modal">×</button>
         <h3 id="portalModalTitle">TSI Internal</h3>
         <p class="portal-helper" id="portalModalHelper">Enter your TSI username to begin authentication.</p>
@@ -107,8 +107,8 @@
 <!-- Access Modal Section Start -->
 <div class="modal-overlay" id="accessModal" data-modal-overlay role="dialog" aria-modal="true" aria-labelledby="accessModalTitle" aria-describedby="accessModalIntro" aria-hidden="true">
     <div class="modal-content">
-        <img src="assets/logo/tsi-logo-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
-        <img src="assets/logo/tsi-logo-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
+        <img src="assets/global/logo/tsi-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
+        <img src="assets/global/logo/tsi-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
         <button type="button" class="close-modal" id="accessModalClose" data-modal-close="accessModal" aria-label="Close access modal">×</button>
         <h3 id="accessModalTitle">AN INVITATION TO COLLABORATE</h3>
 
@@ -228,7 +228,7 @@
 <!-- Mandate Section Start -->
 <section class="section-wrap" id="mandate" role="tabpanel" aria-labelledby="tab-mandate" tabindex="-1">
     <div class="mandate-layout">
-        <div class="asset-image mandate-asset"><img src="assets/asset_1a.png" alt="Regional industrial corridor illustration"></div>
+        <div class="asset-image mandate-asset"><img src="assets/pages/mandate/mandate-corridor-illustration.png" alt="Regional industrial corridor illustration"></div>
         <div class="mandate-column">
             <div class="instruction-box instruction-box--compact">
                 <p class="mandate-intro-text">
@@ -293,31 +293,31 @@
             <p class="rubric-intro-copy">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
         </div>
         <div class="asset-image rubric-banner">
-            <img src="assets/Analysis_banner.png" alt="Analysis Banner" class="rubric-banner-img">
+            <img src="assets/pages/rubric/rubric-analysis-banner.png" alt="Analysis Banner" class="rubric-banner-img">
         </div>
     </div>
 
     <div class="rubric-grid">
         <button type="button" class="rubric-item" data-rubric-key="vocational-literacy" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3a.png" alt="Vocational literacy rubric icon"></div>
+            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-vocational-literacy.png" alt="Vocational literacy rubric icon"></div>
             <h4 class="rubric-item-title">Vocational Literacy</h4>
             <p class="rubric-item-copy">Regional technical education alignment based on Texas standards.</p>
             <p class="rubric-item-hint">Click for action pathway</p>
         </button>
         <button type="button" class="rubric-item" data-rubric-key="onboarding-velocity" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3b.png" alt="Onboarding velocity rubric icon"></div>
+            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-onboarding-velocity.png" alt="Onboarding velocity rubric icon"></div>
             <h4 class="rubric-item-title">Onboarding Velocity</h4>
             <p class="rubric-item-copy">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
             <p class="rubric-item-hint">Click for action pathway</p>
         </button>
         <button type="button" class="rubric-item" data-rubric-key="regulatory-coherence" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3c.png" alt="Regulatory coherence rubric icon"></div>
+            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Regulatory coherence rubric icon"></div>
             <h4 class="rubric-item-title">Regulatory Coherence</h4>
             <p class="rubric-item-copy">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
             <p class="rubric-item-hint">Click for action pathway</p>
         </button>
         <button type="button" class="rubric-item" data-rubric-key="reliability" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3d.png" alt="Reliability rubric icon"></div>
+            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-reliability.png" alt="Reliability rubric icon"></div>
             <h4 class="rubric-item-title">Reliability</h4>
             <p class="rubric-item-copy">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
             <p class="rubric-item-hint">Click for action pathway</p>
@@ -346,7 +346,7 @@
         <div class="pipeline-map pipeline-map--raised">
             <div class="pipeline-map-controls pipeline-map-controls--md" role="group" aria-label="Map category toggles" data-map-controls="md"></div>
             <div class="pipeline-map-frame" aria-label="Vector world map">
-                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-md="assets/world-map.md" data-map-fallback="assets/world-map.png">
+                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-md="assets/pages/pipeline/pipeline-world-map.md" data-map-fallback="assets/pages/pipeline/pipeline-world-map.png">
                     <rect width="181" height="89" class="map-ocean" />
                     <g class="map-dots" data-dot-grid></g>
                 </svg>
@@ -354,7 +354,7 @@
 
             <p class="pipeline-map-label" hidden>PNG Map (legacy)</p>
             <div class="pipeline-map-frame" aria-label="Vector world map" hidden>
-                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-src="assets/world-map.png" data-map-disabled="true">
+                <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-src="assets/pages/pipeline/pipeline-world-map.png" data-map-disabled="true">
                     <rect width="181" height="89" class="map-ocean" />
                     <g class="map-dots" data-dot-grid></g>
                     <g class="map-overlay overlay-us is-active">
@@ -435,15 +435,15 @@
 <section class="section-wrap staff-gateway-021026" id="team" role="tabpanel" aria-labelledby="tab-team" tabindex="-1">
     <div class="team-tab-bar" role="tablist" aria-label="Team Sections">
         <button type="button" class="team-tab is-active" data-team-target="founder" role="tab" aria-controls="team-panel-founder" aria-selected="true">
-            <img src="assets/hr/hs_michael.jpg" alt="" aria-hidden="true">
+            <img src="assets/pages/team/team-founder-michael.jpg" alt="" aria-hidden="true">
             <span>Founder Statement</span>
         </button>
         <button type="button" class="team-tab" data-team-target="community" role="tab" aria-controls="team-panel-community" aria-selected="false">
-            <img src="assets/hr/cp_02.png" alt="" aria-hidden="true">
+            <img src="assets/pages/team/team-tab-community.png" alt="" aria-hidden="true">
             <span>Community & Partnerships</span>
         </button>
         <button type="button" class="team-tab" data-team-target="operations" role="tab" aria-controls="team-panel-operations" aria-selected="false">
-            <img src="assets/hr/po_01.png" alt="" aria-hidden="true">
+            <img src="assets/pages/team/team-tab-operations.png" alt="" aria-hidden="true">
             <span>Programs & Operations</span>
         </button>
     </div>
@@ -453,7 +453,7 @@
                 <article class="founder-variant-021026 founder-variant-021026--overlap">
             <div class="founder-image-wrap-021026">
                 <figure class="founder-image-frame-021026 founder-image-frame-021026--16x9 founder-image-frame-021026--wide founder-image-frame-021026--hero">
-                    <img src="assets/hr/hs_michael.jpg" alt="Michael Steiner - Founder">
+                    <img src="assets/pages/team/team-founder-michael.jpg" alt="Michael Steiner - Founder">
                     <div class="founder-image-overlay-021026 founder-image-overlay-021026--top">
                         <p class="founder-quote-021026">“In this industry, a template is just a polite word for laziness (or we don't have time for you). We don't push blueprints; we build individual solutions for the specific reality of your corridor.”</p>
                         <p class="founder-quote-meta-021026">Michael Steiner · Founder</p>
@@ -478,7 +478,7 @@
                     <div class="staff-section-grid staff-section-grid--stack">
                         <div class="staff-profile-card-021026 staff-profile-card-021026--manager staff-profile-card-021026--centered">
                             <div class="staff-profile-image-021026">
-                                <img src="assets/hr/hs_elena.png" alt="Elena - Community & Partnerships Manager" class="staff-profile-photo-top">
+                                <img src="assets/pages/team/team-manager-elena.png" alt="Elena - Community & Partnerships Manager" class="staff-profile-photo-top">
                             </div>
                             <div class="staff-profile-details-021026">
                                 <p class="staff-profile-name-021026">Elena</p>
@@ -492,11 +492,11 @@
                         </div>
                         <div class="staff-section-gallery">
                             <figure class="staff-section-thumb">
-                                <img src="assets/hr/cp_01.png" alt="Community partnership session">
+                                <img src="assets/pages/team/team-gallery-community-session.png" alt="Community partnership session">
                                 <figcaption>Partner Alignment</figcaption>
                             </figure>
                             <figure class="staff-section-thumb">
-                                <img src="assets/hr/hs_elena.png" alt="Elena portrait">
+                                <img src="assets/pages/team/team-manager-elena.png" alt="Elena portrait">
                                 <figcaption>Regional Stewardship</figcaption>
                             </figure>
                         </div>
@@ -510,7 +510,7 @@
                     <div class="staff-section-grid staff-section-grid--stack">
                         <div class="staff-profile-card-021026 staff-profile-card-021026--manager staff-profile-card-021026--centered">
                             <div class="staff-profile-image-021026">
-                                <img src="assets/hr/hs_laura.png" alt="Laura - Programs & Operations Manager">
+                                <img src="assets/pages/team/team-manager-laura.png" alt="Laura - Programs & Operations Manager">
                             </div>
                             <div class="staff-profile-details-021026">
                                 <p class="staff-profile-name-021026">Laura</p>
@@ -524,11 +524,11 @@
                         </div>
                         <div class="staff-section-gallery">
                             <figure class="staff-section-thumb">
-                                <img src="assets/hr/po_02.png" alt="Program operations coordination">
+                                <img src="assets/pages/team/team-gallery-operations-coordination.png" alt="Program operations coordination">
                                 <figcaption>Program Delivery</figcaption>
                             </figure>
                             <figure class="staff-section-thumb">
-                                <img src="assets/hr/hs_laura2.png" alt="Laura portrait">
+                                <img src="assets/pages/team/team-portrait-laura.png" alt="Laura portrait">
                                 <figcaption>Operational Control</figcaption>
                             </figure>
                         </div>
@@ -598,6 +598,7 @@
     <script src="js/main.js?v=20260220-mobilefix" defer></script>
 </body>
 </html>
+
 
 
 

@@ -7,14 +7,15 @@
   "theme_color": "#0d1324",
   "icons": [
     {
-      "src": "assets/logo/tsi-logo-tn-favicon-noborder.png",
+      "src": "assets/global/icon/tsi-favicon-32.png",
       "sizes": "32x32",
       "type": "image/png"
     },
     {
-      "src": "assets/logo/tsi-logo-tn-icon-border-android.png",
+      "src": "assets/global/icon/tsi-app-android-192.png",
       "sizes": "192x192",
       "type": "image/png"
     }
   ]
 }
+

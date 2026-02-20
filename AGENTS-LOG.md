@@ -1036,4 +1036,10 @@
 - Resolutions/outcomes: Mobile-overhaul planning state now aligns with delivered implementation status.
 - Commit hash(es): none
 
+### 2026-02-20 11:02:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed Milestone `0.8` asset naming-convention rollout: moved active shared assets to `assets/global/{logo|icon}` and active section assets to `assets/pages/{mandate|rubric|pipeline|team}`, updated all affected references in `index.html`, legal/internal pages, and `site.webmanifest`, and refreshed `ASSET_INVENTORY.md` to reflect the new convention and current referenced/unreferenced sets. Ran `tmp-smoke-core.js`, `tmp-map-check.js`, and `tmp-mobile-nav-check.js` after migration.
+- Troubleshooting suggestions: Keep legacy assets in place until archive/remove decisions are approved; if additional page-scoped assets are introduced, route them directly into `assets/pages/<section>/...` to prevent future rename churn.
+- Resolutions/outcomes: Active asset paths are now descriptive and consistently organized by global vs page scope, with core nav/map/mobile behaviors verified after path migration.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

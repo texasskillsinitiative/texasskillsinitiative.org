@@ -2,31 +2,39 @@
 
 Scope: `assets/` references scanned against `index.html`, legal pages, `tsi_internal.html`, `css/main.css`, `js/main.js`, `site.webmanifest`, `sitemap.xml`, and `robots.txt`.
 
+## Naming Convention (Rolled Out)
+- Global shared assets: `assets/global/{logo|icon}/...`
+- Page-scoped assets: `assets/pages/{mandate|rubric|pipeline|team}/...`
+- Legacy/unwired variants remain in original folders until archive/remove decisions are approved.
+
 ## Referenced Core Assets
-- Logos/icons in active use:
-  - `assets/logo/tsi-logo-main-dark.svg`
-  - `assets/logo/tsi-logo-main-light.svg`
-  - `assets/logo/tsi-logo-tn-favicon-noborder.svg`
-  - `assets/logo/tsi-logo-tn-favicon-noborder.png`
-  - `assets/logo/tsi-logo-tn-icon-border-android.png`
-  - `assets/logo/tsi-logo-tn-icon-border-crapple.png`
-- Primary content/media in active use:
-  - `assets/Analysis_banner.png`
-  - `assets/asset_1a.png`
-  - `assets/asset_3a.png`
-  - `assets/asset_3b.png`
-  - `assets/asset_3c.png`
-  - `assets/asset_3d.png`
-  - `assets/world-map.md`
-  - `assets/world-map.png`
-  - `assets/hr/cp_01.png`
-  - `assets/hr/cp_02.png`
-  - `assets/hr/hs_elena.png`
-  - `assets/hr/hs_laura.png`
-  - `assets/hr/hs_laura2.png`
-  - `assets/hr/hs_michael.jpg`
-  - `assets/hr/po_01.png`
-  - `assets/hr/po_02.png`
+- Global logo/icon assets:
+  - `assets/global/logo/tsi-main-dark.svg`
+  - `assets/global/logo/tsi-main-light.svg`
+  - `assets/global/icon/tsi-favicon.svg`
+  - `assets/global/icon/tsi-favicon-32.png`
+  - `assets/global/icon/tsi-app-android-192.png`
+  - `assets/global/icon/tsi-app-apple-180.png`
+- Mandate:
+  - `assets/pages/mandate/mandate-corridor-illustration.png`
+- Rubric:
+  - `assets/pages/rubric/rubric-analysis-banner.png`
+  - `assets/pages/rubric/rubric-icon-vocational-literacy.png`
+  - `assets/pages/rubric/rubric-icon-onboarding-velocity.png`
+  - `assets/pages/rubric/rubric-icon-regulatory-coherence.png`
+  - `assets/pages/rubric/rubric-icon-reliability.png`
+- Pipeline:
+  - `assets/pages/pipeline/pipeline-world-map.md`
+  - `assets/pages/pipeline/pipeline-world-map.png`
+- Team:
+  - `assets/pages/team/team-founder-michael.jpg`
+  - `assets/pages/team/team-tab-community.png`
+  - `assets/pages/team/team-tab-operations.png`
+  - `assets/pages/team/team-manager-elena.png`
+  - `assets/pages/team/team-manager-laura.png`
+  - `assets/pages/team/team-portrait-laura.png`
+  - `assets/pages/team/team-gallery-community-session.png`
+  - `assets/pages/team/team-gallery-operations-coordination.png`
 
 ## Unreferenced Candidates
 - General:
@@ -74,4 +82,4 @@ Scope: `assets/` references scanned against `index.html`, legal pages, `tsi_inte
 ## Recommended Next Pass
 1. Confirm whether unreferenced HR/logo variants are intentional archive assets or removal candidates.
 2. Remove or archive `assets/new 3.txt` from production tree.
-3. If assets are retained for future use, relocate to a clearly named archive folder (for example `assets/_archive/`) and keep active assets in page-scoped folders.
+3. If assets are retained for future use, relocate to a clearly named archive folder (for example `assets/_archive/`) and keep active assets in the global/page-scoped structure.
