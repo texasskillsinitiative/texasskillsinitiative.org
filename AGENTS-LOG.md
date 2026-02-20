@@ -952,4 +952,16 @@
 - Resolutions/outcomes: Map/override marker readability is more stable across land/water/ocean backgrounds in both themes while retaining current category color language.
 - Commit hash(es): none
 
+### 2026-02-20 01:30:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected active-session tail marker at startup and recorded unclean-exit recovery note per contract before resuming packet execution.
+- Troubleshooting suggestions: Resume from current working tree and validate pending uncommitted files before the next packet-scoped commit.
+- Resolutions/outcomes: Prior session treated as unexpectedly closed; active marker retained for this live session.
+- Commit hash(es): none
+
+### 2026-02-20 01:41:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed automated pipeline-map readiness checks (startup sprinkle completion, sweep-off default, category toggles, and modal-gated map test hotkey behavior), then implemented accessibility hardening for both modals in `index.html`/`js/main.js`/`css/main.css`: dialog semantics, keyboard-focusable close controls, Escape-close handling, focus trapping, and focus restore. Re-ran Playwright smoke, responsive overflow matrix, modal keyboard traversal, ARIA-reference audit, and console-error capture (clean).
+- Troubleshooting suggestions: Keep using script-file based Playwright runs in this environment when inline here-string execution is blocked by command-policy parsing.
+- Resolutions/outcomes: Pipeline readiness verification advanced to done-state confidence, and modal keyboard/accessibility baseline is now materially stronger with repeatable browser evidence.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

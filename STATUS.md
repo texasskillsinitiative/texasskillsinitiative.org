@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: targeted Playwright launch-readiness smoke checks on 2026-02-20 (local static server + browser run): section/tab routing, access/portal modal open-close paths, access submit flow checks (3s trap, submit lockout, success transition), concierge collapse behavior, malformed-email validity + hold-to-clear reset behavior, theme toggle + logo swap, console error capture, internal/legal link audit, and responsive overflow matrix at `1024/900/768/600/480/390/360` after mobile overflow fixes.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -131,7 +131,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Remote node gate page scaffold in `tsi_internal.html`.
 
 ## Milestone 0.6 - Launch Readiness QA
-- [Planned] Complete the pipeline page map implementation and final readiness pass.
+- [Done] Completed pipeline map implementation readiness pass with automated checks for startup reveal completion, default sweep-off startup mode (`sprinkle`), category toggle state changes, and map test-settings hotkey gating behind portal-modal-open condition.
 - [Done] Reviewed override/map marker color readability in dark/light themes and added map marker stroke token + non-scaling outline treatment for stronger cross-terrain contrast consistency.
 - [Done] Stakeholder form QA completed in automated browser checks: concierge selection/state wiring, required-field constraint behavior, malformed email validity, 3s trap, hold-to-clear reset, submit lockout, and success-state transition.
 - [Done] Concierge selection collapse QA (non-selected buttons hide smoothly after selection) validated via automated browser smoke check.
@@ -141,7 +141,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Theme toggle and logo swap validation (dark/light) verified in automated browser checks.
 - [Done] Responsive layout review baseline completed with automated overflow matrix (`1024/900/768/600/480/390/360`) and corrective CSS updates for nav + section layout overflow.
 - [Done] Accessibility baseline update: added missing `alt` attributes for index visual assets and re-ran missing-alt audit (0 missing).
-- [Planned] Accessibility pass (keyboard/focus/contrast/ARIA/screen-reader order).
+- [Done] Accessibility pass (keyboard/focus/ARIA baseline): modal close controls converted to keyboard-focusable buttons, modal semantics added (`role`, `aria-modal`, `aria-labelledby`, `aria-describedby`, `aria-hidden`), focus trap and Escape-close behavior implemented, and ARIA target/reference checks verified clean.
+- [Planned] Accessibility follow-up: manual contrast and screen-reader reading-order pass.
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
@@ -182,10 +183,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 ## Risk Register (Living)
 - [Open] `R-001` Map behavior regressions while supporting dual-mode overlays, switch semantics, and flexible MD parsing.
   - Affects: `0.6` launch readiness QA.
-  - Validation needed: manual browser checks for multi-switch behavior and hover-label behavior (responsive overflow checks have now been expanded and automated through `1024/900/768/600/480/390/360`).
+  - Validation needed: manual browser checks for multi-switch hover-label behavior under long interactive sessions (default-state/toggle/startup/hotkey state checks now automated).
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Completed modal accessibility hardening (dialog semantics, keyboard trap, Escape close, focus restore) and verified via Playwright keyboard traversal.
+- [Done] 2026-02-20: Completed pipeline map readiness automation for startup defaults, category toggle behavior, and test-settings hotkey modal gating.
 - [Done] 2026-02-20: Ran targeted Playwright launch-readiness smoke checks (tabs, modals, concierge collapse, theme/logo swap, console capture) and automated internal/legal link audit with zero missing local links/fragments.
 - [Done] 2026-02-20: Fixed responsive overflow regressions across nav + section layouts and verified zero horizontal overflow at `1024/900/768/600/480/390/360`.
 - [Done] 2026-02-11: Intake and internal portal behavior matured (validation, submission metadata, portal simulation).

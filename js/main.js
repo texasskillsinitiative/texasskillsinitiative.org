@@ -14,6 +14,75 @@
         '1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
         '2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
     };
+    const MODAL_FOCUS_SELECTOR = [
+        'a[href]',
+        'button:not([disabled])',
+        'input:not([disabled]):not([type="hidden"])',
+        'select:not([disabled])',
+        'textarea:not([disabled])',
+        '[tabindex]:not([tabindex="-1"])'
+    ].join(',');
+    const _modalFocusRestore = new Map();
+
+    function getOpenModals() {
+        return Array.from(document.querySelectorAll('[data-modal-overlay]')).filter((overlay) => {
+            const style = window.getComputedStyle(overlay);
+            return style.display !== 'none' && style.visibility !== 'hidden';
+        });
+    }
+
+    function getTopOpenModal() {
+        const open = getOpenModals();
+        return open.length ? open[open.length - 1] : null;
+    }
+
+    function getFocusableInModal(modal) {
+        if (!modal) return [];
+        return Array.from(modal.querySelectorAll(MODAL_FOCUS_SELECTOR)).filter((node) => {
+            if (!(node instanceof HTMLElement)) return false;
+            if (node.hidden) return false;
+            if (node.getAttribute('aria-hidden') === 'true') return false;
+            const style = window.getComputedStyle(node);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return node.offsetParent !== null || style.position === 'fixed';
+        });
+    }
+
+    function focusFirstModalElement(modal) {
+        const focusables = getFocusableInModal(modal);
+        if (focusables.length) {
+            focusables[0].focus();
+            return;
+        }
+        if (modal) {
+            modal.setAttribute('tabindex', '-1');
+            modal.focus();
+        }
+    }
+
+    function trapModalFocus(modal, event) {
+        if (!modal || event.key !== 'Tab') return;
+        const focusables = getFocusableInModal(modal);
+        if (!focusables.length) {
+            event.preventDefault();
+            return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        const activeInsideModal = Boolean(active && modal.contains(active));
+        if (event.shiftKey) {
+            if (!activeInsideModal || active === first || active === modal) {
+                event.preventDefault();
+                last.focus();
+            }
+            return;
+        }
+        if (!activeInsideModal || active === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
 
     function _021026_setConciergeVisibility(form, tier) {
         const groups = form.querySelectorAll('[data-concierge-group]');
@@ -159,14 +228,27 @@ function toggleModal(modalId, show) {
     if (!modal) return;
 
     if (show) {
+        if (document.activeElement instanceof HTMLElement) {
+            _modalFocusRestore.set(modalId, document.activeElement);
+        }
         modal.style.display = 'flex'; // or 'block' depending on your CSS
+        modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden'; // Prevents background scrolling
         if (modalId === 'accessModal' && !window._formOpenTime) {
             window._formOpenTime = Date.now();
         }
+        window.requestAnimationFrame(() => focusFirstModalElement(modal));
     } else {
         modal.style.display = 'none';
-        document.body.style.overflow = '';
+        modal.setAttribute('aria-hidden', 'true');
+        if (!getOpenModals().length) {
+            document.body.style.overflow = '';
+        }
+        const restoreTarget = _modalFocusRestore.get(modalId);
+        if (restoreTarget && typeof restoreTarget.focus === 'function') {
+            restoreTarget.focus();
+        }
+        _modalFocusRestore.delete(modalId);
     }
     }
 
@@ -526,6 +608,38 @@ function softCloseModal() {
         document.querySelectorAll('[data-action=\"success-another\"]').forEach(button => {
             button.addEventListener('click', resetFormToNew);
         });
+
+        if (!window.__tsiModalKeyboardBound) {
+            document.addEventListener('keydown', (event) => {
+                const openModal = getTopOpenModal();
+                if (!openModal) return;
+                if (event.key === 'Escape') {
+                    event.preventDefault();
+                    const modalId = openModal.id;
+                    if (modalId === 'accessModal') {
+                        requestCloseAccessModal();
+                    } else {
+                        toggleModal(modalId, false);
+                    }
+                    return;
+                }
+                trapModalFocus(openModal, event);
+            });
+            document.addEventListener('focusin', (event) => {
+                const openModal = getTopOpenModal();
+                if (!openModal) return;
+                const target = event.target;
+                if (!(target instanceof HTMLElement)) return;
+                if (openModal.contains(target)) return;
+                const focusables = getFocusableInModal(openModal);
+                if (focusables.length) {
+                    focusables[0].focus();
+                } else {
+                    openModal.focus();
+                }
+            });
+            window.__tsiModalKeyboardBound = true;
+        }
     }
 
     function initPortalOptions() {
@@ -590,6 +704,7 @@ function softCloseModal() {
     _021026_initConciergeForm();
     initPortalOptions();
     initHoldToClear();
+    initRubricActions();
     initTeamTabs();
     initPipelineMap();
 
@@ -754,6 +869,68 @@ function softCloseModal() {
 
     window.addEventListener('hashchange', () => setActiveTabFromHash({ resetScroll: true }));
     setActiveTabFromHash({ resetScroll: true });
+
+    function initRubricActions() {
+        const cards = Array.from(document.querySelectorAll('.rubric-item[data-rubric-key]'));
+        if (!cards.length) return;
+
+        const panel = document.getElementById('rubricActionPanel');
+        const panelTitle = document.getElementById('rubricActionTitle');
+        const panelCopy = document.getElementById('rubricActionCopy');
+        const panelOutput = document.getElementById('rubricActionOutput');
+        if (!panel || !panelTitle || !panelCopy || !panelOutput) return;
+
+        const rubricProfiles = {
+            'vocational-literacy': {
+                title: 'Vocational Literacy',
+                copy: 'Map where workforce training already aligns with corridor requirements, then isolate capability evidence still needed for stage advancement.',
+                output: 'Output: Workforce capability baseline and fast-gap shortlist for intake triage.'
+            },
+            'onboarding-velocity': {
+                title: 'Onboarding Velocity',
+                copy: 'Validate whether labor and implementation pathways can move fast enough to support real industrial onboarding windows.',
+                output: 'Output: Time-to-readiness timeline with bottleneck checkpoints.'
+            },
+            'regulatory-coherence': {
+                title: 'Regulatory Coherence',
+                copy: 'Assess legal reliability, policy consistency, and investment protections that determine whether a corridor can sustain commitments.',
+                output: 'Output: Regulatory risk posture summary for corridor screening.'
+            },
+            'reliability': {
+                title: 'Reliability',
+                copy: 'Stress-test infrastructure durability across power, logistics, and operational continuity under scaled industrial load.',
+                output: 'Output: Infrastructure reliability profile and resilience notes.'
+            }
+        };
+
+        const setActiveCard = (card) => {
+            const key = card.getAttribute('data-rubric-key') || '';
+            const profile = rubricProfiles[key] || rubricProfiles['vocational-literacy'];
+
+            cards.forEach(item => {
+                const isActive = item === card;
+                item.classList.toggle('is-active', isActive);
+                item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+            });
+
+            panelTitle.textContent = profile.title;
+            panelCopy.textContent = profile.copy;
+            panelOutput.textContent = profile.output;
+        };
+
+        cards.forEach(card => {
+            card.addEventListener('click', () => {
+                setActiveCard(card);
+            });
+            card.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter' && event.key !== ' ') return;
+                event.preventDefault();
+                setActiveCard(card);
+            });
+        });
+
+        setActiveCard(cards[0]);
+    }
 
     function initTeamTabs() {
         const tabs = document.querySelectorAll('.team-tab');

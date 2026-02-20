@@ -196,7 +196,23 @@
         .no-js #accessModal .form-noscript { display: none; }
         .modal-content { background: var(--card-bg); border: 1px solid var(--frame-border); width: 100%; max-width: 450px; padding: 40px; position: relative; text-align: center; }
         .modal-logo { height: 50px; width: auto; margin: 0 auto 20px auto; }
-        .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.5rem; color: var(--page-text-dim); }
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--page-text-dim);
+            border: 0;
+            background: transparent;
+            padding: 0;
+            line-height: 1;
+            font-family: inherit;
+        }
+        .close-modal:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
         .option-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 25px; }
         .option-btn { background: var(--page-bg); border: 1px solid var(--frame-border); padding: 18px; color: var(--page-text-main); text-align: left; cursor: pointer; transition: 0.3s; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; text-decoration: none; }
         .option-btn:hover { border-color: var(--accent); background: var(--card-bg); }

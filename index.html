@@ -48,13 +48,13 @@
 </nav>
 <!-- Navigation Section End -->
 <!-- Portal Modal Section Start --> 
-<div class="modal-overlay" id="portalModal" data-modal-overlay>
+<div class="modal-overlay" id="portalModal" data-modal-overlay role="dialog" aria-modal="true" aria-labelledby="portalModalTitle" aria-describedby="portalModalHelper" aria-hidden="true">
     <div class="modal-content">
         <img src="assets/logo/tsi-logo-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/tsi-logo-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" data-modal-close="portalModal">×</span>
-        <h3>TSI Internal</h3>
-        <p class="portal-helper">Enter your TSI username to begin authentication.</p>
+        <button type="button" class="close-modal" data-modal-close="portalModal" aria-label="Close internal access modal">×</button>
+        <h3 id="portalModalTitle">TSI Internal</h3>
+        <p class="portal-helper" id="portalModalHelper">Enter your TSI username to begin authentication.</p>
         <form class="portal-login" id="portalLoginForm">
             <label for="portalUsername">TSI Username</label>
             <input type="text" id="portalUsername" name="tsi_username" placeholder="name@texasskillsinitiative.org" autocomplete="username">
@@ -75,16 +75,16 @@
 </div>
 <!-- Portal Modal Section End -->
 <!-- Access Modal Section Start -->
-<div class="modal-overlay" id="accessModal" data-modal-overlay>
+<div class="modal-overlay" id="accessModal" data-modal-overlay role="dialog" aria-modal="true" aria-labelledby="accessModalTitle" aria-describedby="accessModalIntro" aria-hidden="true">
     <div class="modal-content">
         <img src="assets/logo/tsi-logo-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
         <img src="assets/logo/tsi-logo-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
-        <span class="close-modal" id="accessModalClose" data-modal-close="accessModal">×</span>
-        <h3>AN INVITATION TO COLLABORATE</h3>
+        <button type="button" class="close-modal" id="accessModalClose" data-modal-close="accessModal" aria-label="Close access modal">×</button>
+        <h3 id="accessModalTitle">AN INVITATION TO COLLABORATE</h3>
 
         <div id="accessModalBody" class="access-modal-body">
         <form id="stakeholderForm" class="stakeholder-form" method="post">
-            <p class="form-intro">This is an open invitation for individuals and organizations to share context or register interest. Your local perspective is essential data that helps us understand the specific reality of your corridor. This does not create any obligation, it just starts the conversation.</p>
+            <p class="form-intro" id="accessModalIntro">This is an open invitation for individuals and organizations to share context or register interest. Your local perspective is essential data that helps us understand the specific reality of your corridor. This does not create any obligation, it just starts the conversation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
             <div class="concierge-block">
                 <span class="form-helper concierge-helper">Select the perspective that best matches you.</span>
