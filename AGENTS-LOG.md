@@ -970,4 +970,10 @@
 - Resolutions/outcomes: Role-button audit now reports zero custom role-button nodes, and rubric interactions remain functional without introducing layout overflow or console errors.
 - Commit hash(es): none
 
+### 2026-02-20 01:47:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed a repository asset/reference inventory pass, added `ASSET_INVENTORY.md` with active and unreferenced asset sets, and updated `STATUS.md` Milestone 0.8 to mark the inventory baseline complete.
+- Troubleshooting suggestions: Before deleting unreferenced assets, confirm owner intent for HR portrait variants and logo-derivative packs to avoid removing intentionally staged media.
+- Resolutions/outcomes: Prelaunch asset-cleanup work now has a concrete baseline with explicit candidates and next actions instead of an open-ended planned item.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

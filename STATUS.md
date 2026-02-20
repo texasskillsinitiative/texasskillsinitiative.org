@@ -159,7 +159,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 ## Milestone 0.8 - Launch Operations + Repo Hardening
 - [Planned] Confirm production form endpoint and sheet capture behavior.
 - [Planned] Snapshot/backup current build prior to launch.
-- [Planned] Asset inventory and naming normalization pass (global vs page-scoped), including favicon/app icon completeness and archive of unused variants.
+- [Done] Asset inventory baseline completed (`ASSET_INVENTORY.md`) with active-reference mapping and unreferenced candidate list for cleanup/archive decisions.
 - [Planned] Apply asset naming convention rollout for page-scoped vs global assets and update references.
 - [Planned] Repository privacy hardening for local-only operational docs and Apps Script backend (`form-backend/`) before public release.
 - [Done] Documented required Codex launch mode in `AGENTS.md` (`codex -a never -s danger-full-access`) for low-interruption autonomous execution.
