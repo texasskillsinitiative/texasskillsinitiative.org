@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -172,13 +172,13 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.9 - Mobile Experience Overhaul
 - [Planned] Define mobile-first layout targets and breakpoints (`<=1024`, `<=768`, `<=480`) with section-level content-priority rules.
-- [Planned] Replace wrapped top-tab behavior on mobile with a hamburger trigger and slide-out navigation drawer (all sections + `Connect with TSI` entry).
-- [Planned] Implement drawer interaction model (open/close animation, outside-click close, ESC close, body scroll lock, focus trap, return focus to trigger).
+- [Done] Replaced wrapped top-tab behavior on mobile with a hamburger trigger and slide-out navigation drawer (all sections + `Connect with TSI` entry).
+- [Done] Implemented drawer interaction model (open/close animation, outside-click close, ESC close, body scroll lock, focus trap, return focus to trigger).
 - [Planned] Refactor section layouts for handheld flow: `mandate`, `rubric`, `pipeline`, `engagement`, and `team` to one-column priority with consistent spacing rhythm.
 - [Planned] Rework pipeline mobile map presentation and control density (map-first order, touch-sized controls, reduced clutter while preserving current behavior).
 - [Planned] Normalize mobile typography and hit-target sizing (`>=44px`) across nav, controls, cards, and form actions.
 - [Planned] Apply mobile motion/performance guardrails (lighter effects under coarse pointer / smaller viewports, preserve `prefers-reduced-motion` behavior).
-- [Planned] Run mobile validation matrix at `1024`, `768`, `600`, `480`, `390`, and `360` widths including console checks and interaction smoke tests.
+- [Done] Ran mobile validation matrix at `1024`, `768`, `600`, `480`, `390`, and `360` widths including console checks and interaction smoke tests.
 
 ## Risk Register (Living)
 - [Open] `R-001` Map behavior regressions while supporting dual-mode overlays, switch semantics, and flexible MD parsing.
@@ -187,6 +187,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Implemented mobile navigation drawer (`<=1024`) with hamburger toggle, focus-safe interaction model (ESC/backdrop close + trap + focus restore), drawer link sync to hash tabs, and access-modal handoff from drawer CTA.
 - [Done] 2026-02-20: Completed modal accessibility hardening (dialog semantics, keyboard trap, Escape close, focus restore) and verified via Playwright keyboard traversal.
 - [Done] 2026-02-20: Completed pipeline map readiness automation for startup defaults, category toggle behavior, and test-settings hotkey modal gating.
 - [Done] 2026-02-20: Ran targeted Playwright launch-readiness smoke checks (tabs, modals, concierge collapse, theme/logo swap, console capture) and automated internal/legal link audit with zero missing local links/fragments.

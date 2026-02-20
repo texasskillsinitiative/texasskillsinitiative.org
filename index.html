@@ -27,6 +27,11 @@
         <img src="assets/logo/tsi-logo-main-dark.svg" class="logo logo-dark" alt="TSI">
         <img src="assets/logo/tsi-logo-main-light.svg" class="logo logo-light" alt="TSI">
     </div>
+    <button type="button" class="nav-mobile-toggle" id="mobileNavToggle" aria-controls="mobileNavDrawer" aria-expanded="false" aria-label="Open site navigation">
+        <span class="nav-mobile-toggle-line" aria-hidden="true"></span>
+        <span class="nav-mobile-toggle-line" aria-hidden="true"></span>
+        <span class="nav-mobile-toggle-line" aria-hidden="true"></span>
+    </button>
     <div class="header-index" role="tablist" aria-label="Primary">
         <a href="#overview" role="tab" id="tab-overview" aria-controls="overview" aria-label="Overview"><span class="nav-num">00</span></a>
         <a href="#mandate" role="tab" id="tab-mandate" aria-controls="mandate"><span class="nav-num">01</span><span class="nav-label">Mandate</span></a>
@@ -46,6 +51,30 @@
         </button>
     </div>
 </nav>
+<div class="mobile-nav-backdrop" id="mobileNavBackdrop" hidden></div>
+<aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true" aria-label="Mobile Navigation">
+    <div class="mobile-nav-header">
+        <p class="mobile-nav-title">Navigation</p>
+        <button type="button" class="mobile-nav-close" id="mobileNavClose" aria-label="Close navigation menu">×</button>
+    </div>
+    <p class="mobile-nav-helper">Choose a section to navigate. Use Connect to open intake.</p>
+    <div class="mobile-nav-links">
+        <a href="#overview" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">00</span><span>Overview</span></a>
+        <a href="#mandate" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">01</span><span>Mandate</span></a>
+        <a href="#rubric" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">02</span><span>Rubric</span></a>
+        <a href="#pipeline" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">03</span><span>Pipeline</span></a>
+        <a href="#engagement" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">04</span><span>Engagement</span></a>
+        <a href="#team" class="mobile-nav-link" data-mobile-nav-link><span class="mobile-nav-num">05</span><span>Team</span></a>
+    </div>
+    <button type="button" class="btn-portal btn-portal--mobile-drawer" data-modal-open="accessModal">
+        <span class="btn-portal-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M3 5h18v14H3V5zm2.2 1.8L12 12.1l6.8-5.3H5.2zm14.8 10.4V8.2L12 14.3 4 8.2v9h16z"></path>
+            </svg>
+        </span>
+        <span>Connect with TSI</span>
+    </button>
+</aside>
 <!-- Navigation Section End -->
 <!-- Portal Modal Section Start --> 
 <div class="modal-overlay" id="portalModal" data-modal-overlay role="dialog" aria-modal="true" aria-labelledby="portalModalTitle" aria-describedby="portalModalHelper" aria-hidden="true">
