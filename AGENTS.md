@@ -2,12 +2,17 @@
 
 This file defines recommended autonomous behavior for this repository.
 
-`Inactive by default`: Do not enforce this policy unless the user explicitly says to activate it for a session.
+`Active by default`: Enforce this policy for the session unless the user explicitly says to disable it.
+
+`Required execution mode for low-interruption autonomy`:
+- Launch Codex with `codex -a never -s danger-full-access` for this repository when you want direct execution without approval prompts.
+- If this mode is not used, approval prompts and sandbox limits may block requested actions.
 
 ## 1) Source Of Truth
 - `STATUS.md` is the primary roadmap and progress tracker for this repository.
 - `AGENTS-LOG.md` is the running session log for actions, troubleshooting notes, and resolutions.
 - `PACKETS.md` defines concurrent work boundaries to prevent overlap/cross-contamination.
+- `PRODUCT-PRD-BLUEPRINT.md` is the product-scope reference for what is in-scope now vs deferred.
 - Do not infer scope from deleted or legacy docs.
 
 ## 2) Scope Discipline
@@ -15,6 +20,8 @@ This file defines recommended autonomous behavior for this repository.
 2. Keep edits isolated to files directly related to the active packet.
 3. Do not add out-of-scope features unless explicitly requested.
 4. Prefer targeted edits over broad redesign.
+5. If sequencing is not explicitly set by the user and a packet/milestone can adversely affect later work, schedule it as late as practical.
+6. If a risky packet/milestone must proceed, report expected blast radius and rollback expectations before and after implementation.
 
 ## 3) Execution Behavior
 1. Work end-to-end autonomously unless blocked by:
@@ -23,6 +30,8 @@ This file defines recommended autonomous behavior for this repository.
    - missing credentials, secrets, or access
 2. Prefer reliable minimal implementations over speculative expansion.
 3. Restate assumptions when task details are ambiguous.
+4. Default writable scope is the repository root (`C:\dev\tsi\tsi-site-repo`) for requested work.
+5. Access outside the repository root is allowed only when explicitly requested by the user and permitted by the runtime/OS.
 
 ## 4) Planning Restrictions
 - Do not create or change milestones independently.
@@ -34,10 +43,13 @@ This file defines recommended autonomous behavior for this repository.
 1. Before coding, state the target item and intended files.
 2. After coding, update `STATUS.md` for any material progress or status change.
 3. Any completed claim should have repo-verifiable evidence (diff, test output, or commit).
+4. If packet boundaries/dependencies/conflicts change, update `PACKETS.md` in the same change set.
+5. If cross-milestone risk exists, document it in `STATUS.md` with concrete validation/rollback guidance.
+6. After validation/user confirmation, reclassify active risk notes (remove, downgrade, keep, or escalate) before starting the next work cycle.
 
 ## 6) Safety And Change Hygiene
 1. Do not include unrelated files in commits.
-2. Do not modify operator/local data artifacts unless requested.
+2. Treat non-repo files as out-of-scope unless the user explicitly requests access.
 3. Do not remove docs/policies without a replacement in the same change.
 4. Avoid destructive git actions unless explicitly requested.
 5. Keep workstreams separate (for example, do not mix map/pipeline edits with legal/docs updates in one commit).
@@ -56,6 +68,8 @@ This file defines recommended autonomous behavior for this repository.
 ## 8) Commit And Reporting Policy
 - Use clear commit messages scoped to the task.
 - Commit only when requested or when a workflow explicitly requires commit checkpoints.
+- For milestone-gated autonomous workflows (when requested), commit a checkpoint after each completed milestone; if push is blocked/unavailable, report it explicitly.
+- A user-requested clean exit requires a commit when at least one item status changed in `STATUS.md` during the session (`[Planned]`, `[Blocked]`, `[Done]` transitions). Otherwise, commit only if explicitly requested.
 - Push only when explicitly requested.
 - After each completed packet, report:
   - changed files
@@ -69,8 +83,9 @@ This file defines recommended autonomous behavior for this repository.
 3. Run relevant verification.
 4. Update `STATUS.md` and any task-relevant checklist docs.
 5. If the change affects parallel-work boundaries, update `PACKETS.md` before finishing.
-6. Summarize results and remaining risks.
-7. Continue to next requested packet without expanding scope.
+6. Reclassify active risk notes after verification/user confirmation and update `STATUS.md` accordingly.
+7. Summarize results and remaining risks.
+8. Continue to next requested packet without expanding scope.
 
 ## 10) Agent Log Requirements (`AGENTS-LOG.md`)
 1. Keep a brief running log during the session and update it periodically (start, major action/change, troubleshooting event, and before close).
@@ -105,10 +120,10 @@ If the user requests to close/end the session, perform this sequence before exit
 4. Run a final repository check:
    - `git status`
    - `git log --oneline -n 3`
-5. If commit/push was requested, ensure it is complete and report:
+5. For a user-requested clean exit, if any item status changed in `STATUS.md` during the session, commit all in-scope working-tree changes before exit unless `git status` is clean. If no `STATUS.md` item statuses changed, commit is optional unless explicitly requested. Push only if explicitly requested, and report:
    - changed files
    - final commit hash
-   - push result
+   - push result (if pushed)
 6. Provide a short handoff summary:
    - completed work
    - remaining work

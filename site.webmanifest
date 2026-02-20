@@ -1,0 +1,20 @@
+{
+  "name": "Texas Skills Initiative",
+  "short_name": "TSI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1324",
+  "theme_color": "#0d1324",
+  "icons": [
+    {
+      "src": "assets/logo/tsi-logo-tn-favicon-noborder.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/logo/tsi-logo-tn-icon-border-android.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

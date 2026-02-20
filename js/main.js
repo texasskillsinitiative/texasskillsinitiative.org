@@ -709,7 +709,16 @@ function softCloseModal() {
         }
     }
 
-    function setActiveTabFromHash() {
+    const jumpViewportToTop = () => {
+        const root = document.documentElement;
+        const previousScrollBehavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(0, 0);
+        root.style.scrollBehavior = previousScrollBehavior;
+    };
+
+    function setActiveTabFromHash(options = {}) {
+        const shouldResetScroll = options.resetScroll !== false;
         const hash = window.location.hash || '#overview';
         const tabId = hash.startsWith('#') ? hash.slice(1) : 'overview';
         const targetExists = document.getElementById(tabId);
@@ -731,10 +740,20 @@ function softCloseModal() {
         if (resolvedId === 'overview' && typeof window._runOverviewSequence === 'function') {
             window._runOverviewSequence();
         }
+
+        if (shouldResetScroll) {
+            requestAnimationFrame(() => {
+                jumpViewportToTop();
+            });
+        }
     }
 
-    window.addEventListener('hashchange', setActiveTabFromHash);
-    setActiveTabFromHash();
+    if (window.history && 'scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+    }
+
+    window.addEventListener('hashchange', () => setActiveTabFromHash({ resetScroll: true }));
+    setActiveTabFromHash({ resetScroll: true });
 
     function initTeamTabs() {
         const tabs = document.querySelectorAll('.team-tab');
@@ -762,10 +781,10 @@ function softCloseModal() {
     function initPipelineMap() {
         const maps = Array.from(document.querySelectorAll('.pipeline-map svg'))
             .filter(map => map.getAttribute('data-map-disabled') !== 'true');
-        if (!maps.length) return;
         const frameToMap = new WeakMap();
         const pointerModeSetters = new WeakMap();
         const mapDotGrid = new WeakMap();
+        const mapColumnGlowRuntimes = new WeakMap();
         const mapGlowTuningDefaults = {
             dotSize: 7,
             falloffPx: 0.5,
@@ -775,47 +794,100 @@ function softCloseModal() {
         };
         const mapFlashTuningDefaults = {
             radiusCells: 1.4,
-            durationMs: 210,
+            durationMs: 80,
             intensity: 1,
             gridStep: 0.65,
             throttleMs: 10
         };
+        const mapFlashDurationBounds = {
+            min: 80,
+            max: 2000
+        };
+        const mapFlashDurationTestValues = [460, 720, 960, 1440, 2000];
+        const mapColumnGlowDefaults = {
+            speedMs: 1200,
+            maxOpacity: 0.1,
+            activeLines: 3,
+            loadMs: 600,
+            startupSpeedMs: 20,
+            startupMaxOpacity: 1,
+            startupActiveLines: 3,
+            startupLoadMs: 20
+        };
+        const mapStartupSprinkleDefaults = {
+            durationMs: 1500,
+            stepMs: 20,
+            seed: 37
+        };
+        const mapFlashVisualDefaults = {
+            compactGlow: true
+        };
         const mapFlashPresetDefaults = {
-            presetId: 'balanced',
+            presetId: 'compact',
             presets: {
                 compact: {
                     label: 'Flash Compact',
-                    radiusCells: 1.0,
-                    durationMs: 190,
+                    radiusCells: 0.5,
+                    durationMs: 80,
                     intensity: 0.88,
                     gridStep: 0.72,
-                    throttleMs: 12
-                },
-                balanced: {
-                    label: 'Flash Balanced',
-                    radiusCells: 1.4,
-                    durationMs: 210,
-                    intensity: 1,
-                    gridStep: 0.65,
-                    throttleMs: 10
-                },
-                wide: {
-                    label: 'Flash Wide',
-                    radiusCells: 1.8,
-                    durationMs: 190,
-                    intensity: 1.12,
-                    gridStep: 0.58,
-                    throttleMs: 8
-                },
-                lingering: {
-                    label: 'Flash Lingering',
-                    radiusCells: 1.4,
-                    durationMs: 280,
-                    intensity: 0.94,
-                    gridStep: 0.74,
-                    throttleMs: 12
+                    throttleMs: 12,
+                    centerOnly: true
                 }
             }
+        };
+        let mapTestsToastTimer = 0;
+        const showMapTestsToggleNotice = (visible) => {
+            let toast = document.getElementById('mapTestsToggleToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'mapTestsToggleToast';
+                toast.className = 'map-tests-toggle-toast';
+                toast.setAttribute('role', 'status');
+                toast.setAttribute('aria-live', 'polite');
+                document.body.appendChild(toast);
+            }
+            toast.textContent = visible
+                ? 'Map test settings shown'
+                : 'Map test settings hidden';
+            toast.classList.add('is-visible');
+            if (mapTestsToastTimer) {
+                window.clearTimeout(mapTestsToastTimer);
+                mapTestsToastTimer = 0;
+            }
+            mapTestsToastTimer = window.setTimeout(() => {
+                toast.classList.remove('is-visible');
+                mapTestsToastTimer = 0;
+            }, 1200);
+        };
+        const mapTestsVisibilityStorageKey = 'tsi-map-tests-visible';
+        const readMapTestsVisibility = () => {
+            try {
+                return window.localStorage.getItem(mapTestsVisibilityStorageKey) === '1';
+            } catch (_) {
+                return false;
+            }
+        };
+        let mapTestsVisible = readMapTestsVisibility();
+        const syncMapTestsVisibility = () => {
+            document.querySelectorAll('[data-map-tests], [data-test-settings]').forEach(node => {
+                node.hidden = !mapTestsVisible;
+                node.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
+                node.style.display = mapTestsVisible ? '' : 'none';
+            });
+        };
+        const setMapTestsVisible = (nextVisible) => {
+            mapTestsVisible = Boolean(nextVisible);
+            try {
+                if (mapTestsVisible) {
+                    window.localStorage.setItem(mapTestsVisibilityStorageKey, '1');
+                } else {
+                    window.localStorage.removeItem(mapTestsVisibilityStorageKey);
+                }
+            } catch (_) {
+                // Ignore storage failures; visibility still updates for this session.
+            }
+            syncMapTestsVisibility();
         };
         const applyFlashPresetToFrame = (frame, presetId) => {
             if (!frame) return mapFlashPresetDefaults.presetId;
@@ -827,6 +899,7 @@ function softCloseModal() {
             frame.dataset.mapFlashIntensity = String(preset.intensity);
             frame.dataset.mapFlashGridStep = String(preset.gridStep);
             frame.dataset.mapFlashThrottleMs = String(preset.throttleMs);
+            frame.dataset.mapFlashCenterOnly = preset.centerOnly ? 'true' : 'false';
             return resolvedPresetId;
         };
         maps.forEach(map => {
@@ -840,12 +913,39 @@ function softCloseModal() {
             if (!Number.isFinite(numericValue)) return fallback;
             return Math.min(max, Math.max(min, numericValue));
         };
+        const ensureFrameCategoryFlashLayer = (frame) => {
+            if (!frame) return;
+            if (frame.querySelector('.map-frame-gap-flash-layer')) return;
+            const layer = document.createElement('span');
+            layer.className = 'map-frame-gap-flash-layer';
+            layer.setAttribute('aria-hidden', 'true');
+            frame.insertBefore(layer, frame.firstChild);
+        };
         const ensureFrameTuningDefaults = (frame) => {
             if (!frame) return;
+            ensureFrameCategoryFlashLayer(frame);
             if (!frame.dataset.mapPointerDotSize) frame.dataset.mapPointerDotSize = String(mapGlowTuningDefaults.dotSize);
             if (!frame.dataset.mapPointerEase) frame.dataset.mapPointerEase = String(mapGlowTuningDefaults.easing);
             if (!frame.dataset.mapPointerLinger) frame.dataset.mapPointerLinger = String(mapGlowTuningDefaults.lingerMs);
             if (!frame.dataset.mapPointerMode) frame.dataset.mapPointerMode = 'trail';
+            if (!frame.dataset.mapFlashCompactGlow) frame.dataset.mapFlashCompactGlow = mapFlashVisualDefaults.compactGlow ? 'true' : 'false';
+            if (!frame.dataset.mapGlowForceOn) frame.dataset.mapGlowForceOn = 'false';
+            if (!frame.dataset.mapGlowEnabled) frame.dataset.mapGlowEnabled = 'false';
+            if (!frame.dataset.mapGlowMaxOpacity) frame.dataset.mapGlowMaxOpacity = String(mapColumnGlowDefaults.maxOpacity);
+            if (!frame.dataset.mapGlowActiveLines) frame.dataset.mapGlowActiveLines = String(mapColumnGlowDefaults.activeLines);
+            if (!frame.dataset.mapGlowSpeedMs) frame.dataset.mapGlowSpeedMs = String(mapColumnGlowDefaults.speedMs);
+            if (!frame.dataset.mapGlowLoadMs) frame.dataset.mapGlowLoadMs = String(mapColumnGlowDefaults.loadMs);
+            if (!frame.dataset.mapGlowTailLoadSync) frame.dataset.mapGlowTailLoadSync = 'false';
+            if (!frame.dataset.mapGlowLeadFull) frame.dataset.mapGlowLeadFull = 'false';
+            if (!frame.dataset.mapGlowLeadEdgeLine) frame.dataset.mapGlowLeadEdgeLine = 'false';
+            if (!frame.dataset.mapGlowStartupMode) frame.dataset.mapGlowStartupMode = 'sprinkle';
+            if (!frame.dataset.mapGlowSprinkleMs) frame.dataset.mapGlowSprinkleMs = String(mapStartupSprinkleDefaults.durationMs);
+            if (!frame.dataset.mapGlowSprinkleStepMs) frame.dataset.mapGlowSprinkleStepMs = String(mapStartupSprinkleDefaults.stepMs);
+            if (!frame.dataset.mapGlowSprinkleSeed) frame.dataset.mapGlowSprinkleSeed = String(mapStartupSprinkleDefaults.seed);
+            if (!frame.dataset.mapGlowStartupSpeedMs) frame.dataset.mapGlowStartupSpeedMs = String(mapColumnGlowDefaults.startupSpeedMs);
+            if (!frame.dataset.mapGlowStartupMaxOpacity) frame.dataset.mapGlowStartupMaxOpacity = String(mapColumnGlowDefaults.startupMaxOpacity);
+            if (!frame.dataset.mapGlowStartupActiveLines) frame.dataset.mapGlowStartupActiveLines = String(mapColumnGlowDefaults.startupActiveLines);
+            if (!frame.dataset.mapGlowStartupLoadMs) frame.dataset.mapGlowStartupLoadMs = String(mapColumnGlowDefaults.startupLoadMs);
             applyFlashPresetToFrame(frame, frame.dataset.mapFlashPreset || mapFlashPresetDefaults.presetId);
             if (!frame.style.getPropertyValue('--map-pointer-falloff-px')) {
                 frame.style.setProperty('--map-pointer-falloff-px', `${mapGlowTuningDefaults.falloffPx}px`);
@@ -853,6 +953,440 @@ function softCloseModal() {
             if (!frame.style.getPropertyValue('--map-pointer-active-opacity')) {
                 frame.style.setProperty('--map-pointer-active-opacity', String(mapGlowTuningDefaults.activeOpacity));
             }
+        };
+        const stopColumnGlow = (map, removeLayer = false) => {
+            const runtime = mapColumnGlowRuntimes.get(map);
+            if (runtime) {
+                if (runtime.timerId) {
+                    window.clearInterval(runtime.timerId);
+                    runtime.timerId = 0;
+                }
+                if (runtime.sprinkleTimerId) {
+                    window.clearInterval(runtime.sprinkleTimerId);
+                    runtime.sprinkleTimerId = 0;
+                }
+                if (runtime.leadRafId) {
+                    window.cancelAnimationFrame(runtime.leadRafId);
+                    runtime.leadRafId = 0;
+                }
+                if (runtime.dissipateRafId) {
+                    window.cancelAnimationFrame(runtime.dissipateRafId);
+                    runtime.dissipateRafId = 0;
+                }
+                if (runtime.sprinkleDotsHidden && runtime.grid && Array.isArray(runtime.grid.dots)) {
+                    runtime.grid.dots.forEach(dot => {
+                        if (dot) dot.style.opacity = '';
+                    });
+                    runtime.sprinkleDotsHidden = false;
+                }
+                mapColumnGlowRuntimes.delete(map);
+            }
+            map.style.clipPath = '';
+            map.style.webkitClipPath = '';
+            if (removeLayer) {
+                const existingLayer = map.querySelector('.map-column-glow-layer');
+                if (existingLayer) existingLayer.remove();
+            }
+        };
+        const buildSprinkleOrder = (total, seedRaw) => {
+            const order = new Array(total);
+            for (let i = 0; i < total; i += 1) order[i] = i;
+            let seed = Math.abs(Math.floor(Number(seedRaw))) || mapStartupSprinkleDefaults.seed;
+            const nextRand = () => {
+                seed ^= (seed << 13);
+                seed ^= (seed >>> 17);
+                seed ^= (seed << 5);
+                return seed >>> 0;
+            };
+            for (let i = total - 1; i > 0; i -= 1) {
+                const j = nextRand() % (i + 1);
+                const temp = order[i];
+                order[i] = order[j];
+                order[j] = temp;
+            }
+            return order;
+        };
+        const startColumnGlow = (map) => {
+            const frame = map.closest('.pipeline-map-frame');
+            ensureFrameTuningDefaults(frame);
+            const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
+            const forceOn = frame && frame.dataset.mapGlowForceOn === 'true';
+            const allowMotion = forceOn || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!allowMotion) {
+                stopColumnGlow(map, true);
+                return;
+            }
+            const grid = mapDotGrid.get(map);
+            if (!grid || !Number.isFinite(grid.width) || grid.width <= 0 || !Number.isFinite(grid.height) || grid.height <= 0) {
+                stopColumnGlow(map, true);
+                return;
+            }
+            const maxOpacity = clampNumber(frame && frame.dataset.mapGlowMaxOpacity, 0.1, 1, mapColumnGlowDefaults.maxOpacity);
+            const activeLines = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowActiveLines,
+                1,
+                24,
+                mapColumnGlowDefaults.activeLines
+            ));
+            const speedMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowSpeedMs,
+                8,
+                1200,
+                mapColumnGlowDefaults.speedMs
+            ));
+            const loadMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowLoadMs,
+                20,
+                600,
+                mapColumnGlowDefaults.loadMs
+            ));
+            const startupMaxOpacity = clampNumber(
+                frame && frame.dataset.mapGlowStartupMaxOpacity,
+                0.1,
+                1,
+                mapColumnGlowDefaults.startupMaxOpacity
+            );
+            const startupActiveLines = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowStartupActiveLines,
+                1,
+                24,
+                mapColumnGlowDefaults.startupActiveLines
+            ));
+            const startupSpeedMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowStartupSpeedMs,
+                8,
+                1200,
+                mapColumnGlowDefaults.startupSpeedMs
+            ));
+            const startupLoadMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowStartupLoadMs,
+                20,
+                600,
+                mapColumnGlowDefaults.startupLoadMs
+            ));
+            const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
+            const startupSprinkleMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowSprinkleMs,
+                200,
+                12000,
+                mapStartupSprinkleDefaults.durationMs
+            ));
+            const startupSprinkleStepMs = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowSprinkleStepMs,
+                8,
+                250,
+                mapStartupSprinkleDefaults.stepMs
+            ));
+            const startupSprinkleSeed = Math.round(clampNumber(
+                frame && frame.dataset.mapGlowSprinkleSeed,
+                1,
+                999999,
+                mapStartupSprinkleDefaults.seed
+            ));
+            const shouldRunInitialReveal = Boolean(frame && frame.dataset.mapGlowInitialRevealDone !== 'true');
+            const useSprinkleStartup = shouldRunInitialReveal && startupMode === 'sprinkle';
+            if (!sweepEnabled && !useSprinkleStartup) {
+                stopColumnGlow(map, true);
+                return;
+            }
+            if (!sweepEnabled && useSprinkleStartup) {
+                stopColumnGlow(map, true);
+                const dots = grid.dots;
+                if (!Array.isArray(dots) || !dots.length) {
+                    if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                    return;
+                }
+                const order = buildSprinkleOrder(dots.length, startupSprinkleSeed);
+                dots.forEach(dot => {
+                    if (dot) dot.style.opacity = '0';
+                });
+                let revealed = 0;
+                const tickCount = Math.max(1, Math.ceil(startupSprinkleMs / startupSprinkleStepMs));
+                const batchSize = Math.max(1, Math.ceil(order.length / tickCount));
+                const runtime = {
+                    timerId: 0,
+                    sprinkleTimerId: 0,
+                    leadRafId: 0,
+                    dissipateRafId: 0,
+                    grid,
+                    sprinkleDotsHidden: true
+                };
+                mapColumnGlowRuntimes.set(map, runtime);
+                const revealBatch = () => {
+                    const next = Math.min(order.length, revealed + batchSize);
+                    for (let i = revealed; i < next; i += 1) {
+                        const dot = dots[order[i]];
+                        if (dot) dot.style.opacity = '';
+                    }
+                    revealed = next;
+                    if (revealed >= order.length) {
+                        if (runtime.sprinkleTimerId) {
+                            window.clearInterval(runtime.sprinkleTimerId);
+                            runtime.sprinkleTimerId = 0;
+                        }
+                        runtime.sprinkleDotsHidden = false;
+                        if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                        mapColumnGlowRuntimes.delete(map);
+                    }
+                };
+                revealBatch();
+                if (revealed < order.length) {
+                    runtime.sprinkleTimerId = window.setInterval(revealBatch, startupSprinkleStepMs);
+                }
+                return;
+            }
+            const syncTailFadeToLoad = Boolean(frame && frame.dataset.mapGlowTailLoadSync === 'true');
+            const forceLeadFullOpacity = Boolean(frame && frame.dataset.mapGlowLeadFull === 'true');
+            const showLeadEdgeLine = Boolean(frame && frame.dataset.mapGlowLeadEdgeLine === 'true');
+            const startupLineCount = Math.max(1, Math.min(startupActiveLines, grid.width));
+            const normalLineCount = Math.max(1, Math.min(activeLines, grid.width));
+            const lineCount = Math.max(startupLineCount, normalLineCount);
+            const landFadeExponent = 0.88;
+            const oceanFadeExponent = 1.12;
+            const columnLandRatios = new Array(grid.width).fill(0);
+            for (let x = 0; x < grid.width; x += 1) {
+                let landCount = 0;
+                for (let y = 0; y < grid.height; y += 1) {
+                    const dot = grid.dots[(y * grid.width) + x];
+                    if (dot && dot.classList.contains('is-land')) landCount += 1;
+                }
+                columnLandRatios[x] = landCount / grid.height;
+            }
+
+            stopColumnGlow(map, true);
+
+            const layer = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            layer.setAttribute('class', 'map-column-glow-layer');
+            layer.setAttribute('aria-hidden', 'true');
+
+            const lineRects = [];
+            for (let i = 0; i < lineCount; i += 1) {
+                const lineRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                lineRect.setAttribute('class', 'map-column-glow map-column-glow--line');
+                lineRect.setAttribute('x', '0');
+                lineRect.setAttribute('y', '0');
+                lineRect.setAttribute('width', '1');
+                lineRect.setAttribute('height', String(grid.height));
+                lineRect.style.opacity = '0';
+                layer.appendChild(lineRect);
+                lineRects.push(lineRect);
+            }
+            const dissipateRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            dissipateRect.setAttribute('class', 'map-column-glow map-column-glow--line');
+            dissipateRect.setAttribute('x', '0');
+            dissipateRect.setAttribute('y', '0');
+            dissipateRect.setAttribute('width', '1');
+            dissipateRect.setAttribute('height', String(grid.height));
+            dissipateRect.style.opacity = '0';
+            layer.appendChild(dissipateRect);
+            const edgeRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            edgeRect.setAttribute('class', 'map-column-glow map-column-glow--line map-column-glow--edge');
+            edgeRect.setAttribute('x', '0');
+            edgeRect.setAttribute('y', '0');
+            edgeRect.setAttribute('width', '0.1');
+            edgeRect.setAttribute('height', String(grid.height));
+            edgeRect.style.opacity = '0';
+            layer.appendChild(edgeRect);
+
+            map.appendChild(layer);
+
+            const runtime = {
+                timerId: 0,
+                sprinkleTimerId: 0,
+                lineRects,
+                dissipateRect,
+                edgeRect,
+                grid,
+                currentColumn: -1,
+                leadRafId: 0,
+                dissipateRafId: 0,
+                prevTrailingColumn: -1,
+                prevTrailingOpacity: 0,
+                sprinkleDotsHidden: false,
+                initialRevealActive: shouldRunInitialReveal
+            };
+            const getPhaseConfig = () => (runtime.initialRevealActive
+                ? {
+                    lineCount: startupLineCount,
+                    maxOpacity: startupMaxOpacity,
+                    loadMs: startupLoadMs,
+                    stepMs: Math.max(startupSpeedMs, startupLoadMs)
+                }
+                : {
+                    lineCount: normalLineCount,
+                    maxOpacity,
+                    loadMs,
+                    stepMs: Math.max(speedMs, loadMs)
+                });
+            if (runtime.initialRevealActive && !useSprinkleStartup) {
+                map.style.clipPath = 'inset(0 100% 0 0)';
+                map.style.webkitClipPath = 'inset(0 100% 0 0)';
+            }
+            const revealLeadLine = (lineRect, columnX, opacity, revealMs) => {
+                lineRect.style.transition = 'none';
+                lineRect.setAttribute('x', String(columnX));
+                lineRect.setAttribute('y', '0');
+                lineRect.setAttribute('height', '0');
+                lineRect.style.opacity = opacity.toFixed(3);
+                if (runtime.leadRafId) {
+                    window.cancelAnimationFrame(runtime.leadRafId);
+                    runtime.leadRafId = 0;
+                }
+                runtime.leadRafId = window.requestAnimationFrame(() => {
+                    runtime.leadRafId = 0;
+                    lineRect.style.transition = `height ${revealMs}ms cubic-bezier(0.22, 0.72, 0.26, 1), opacity ${revealMs}ms linear`;
+                    lineRect.setAttribute('height', String(grid.height));
+                });
+            };
+            const dissipateTrailingLine = (columnX, startOpacity, dissipateMs) => {
+                if (!runtime.dissipateRect || !Number.isFinite(columnX) || startOpacity <= 0) return;
+                if (runtime.dissipateRafId) {
+                    window.cancelAnimationFrame(runtime.dissipateRafId);
+                    runtime.dissipateRafId = 0;
+                }
+                const targetY = Math.max(0, grid.height - 0.55);
+                runtime.dissipateRect.style.transition = 'none';
+                runtime.dissipateRect.setAttribute('x', String(columnX));
+                runtime.dissipateRect.setAttribute('y', '0');
+                runtime.dissipateRect.setAttribute('height', String(grid.height));
+                runtime.dissipateRect.style.opacity = startOpacity.toFixed(3);
+                runtime.dissipateRafId = window.requestAnimationFrame(() => {
+                    runtime.dissipateRafId = 0;
+                    runtime.dissipateRect.style.transition = `y ${dissipateMs}ms cubic-bezier(0.2, 0.65, 0.22, 1), height ${dissipateMs}ms cubic-bezier(0.2, 0.65, 0.22, 1), opacity ${dissipateMs}ms linear`;
+                    runtime.dissipateRect.setAttribute('y', targetY.toFixed(3));
+                    runtime.dissipateRect.setAttribute('height', '0.55');
+                    runtime.dissipateRect.style.opacity = '0';
+                });
+            };
+            const advanceInitialReveal = () => {
+                if (!runtime.initialRevealActive) return;
+                const revealedColumns = Math.max(0, Math.min(grid.width, runtime.currentColumn + 1));
+                const rightPercent = ((grid.width - revealedColumns) / grid.width) * 100;
+                const clipValue = `inset(0 ${rightPercent.toFixed(3)}% 0 0)`;
+                map.style.clipPath = clipValue;
+                map.style.webkitClipPath = clipValue;
+                if (revealedColumns >= grid.width) {
+                    runtime.initialRevealActive = false;
+                    if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                    map.style.clipPath = '';
+                    map.style.webkitClipPath = '';
+                    if (runtime.timerId) {
+                        const nextPhase = getPhaseConfig();
+                        window.clearInterval(runtime.timerId);
+                        runtime.timerId = window.setInterval(runStep, nextPhase.stepMs);
+                    }
+                }
+            };
+            const runStartupSprinkle = (onComplete) => {
+                const dots = grid.dots;
+                if (!Array.isArray(dots) || !dots.length) {
+                    if (typeof onComplete === 'function') onComplete();
+                    return;
+                }
+                const order = buildSprinkleOrder(dots.length, startupSprinkleSeed);
+                dots.forEach(dot => {
+                    if (dot) dot.style.opacity = '0';
+                });
+                runtime.sprinkleDotsHidden = true;
+                let revealed = 0;
+                const tickCount = Math.max(1, Math.ceil(startupSprinkleMs / startupSprinkleStepMs));
+                const batchSize = Math.max(1, Math.ceil(order.length / tickCount));
+                const revealBatch = () => {
+                    const next = Math.min(order.length, revealed + batchSize);
+                    for (let i = revealed; i < next; i += 1) {
+                        const dot = dots[order[i]];
+                        if (dot) dot.style.opacity = '';
+                    }
+                    revealed = next;
+                    if (revealed >= order.length) {
+                        if (runtime.sprinkleTimerId) {
+                            window.clearInterval(runtime.sprinkleTimerId);
+                            runtime.sprinkleTimerId = 0;
+                        }
+                        runtime.sprinkleDotsHidden = false;
+                        if (typeof onComplete === 'function') onComplete();
+                    }
+                };
+                revealBatch();
+                if (revealed < order.length) {
+                    runtime.sprinkleTimerId = window.setInterval(revealBatch, startupSprinkleStepMs);
+                }
+            };
+            const runStep = () => {
+                runtime.currentColumn = (runtime.currentColumn + 1) % grid.width;
+                advanceInitialReveal();
+                const phase = getPhaseConfig();
+                if (runtime.prevTrailingColumn >= 0 && runtime.prevTrailingOpacity > 0) {
+                    const dissipateMs = syncTailFadeToLoad
+                        ? Math.round(phase.loadMs * 1.12)
+                        : Math.max(80, Math.round(Math.min(phase.stepMs, phase.loadMs)));
+                    dissipateTrailingLine(runtime.prevTrailingColumn, runtime.prevTrailingOpacity, dissipateMs);
+                }
+                if (runtime.edgeRect) {
+                    runtime.edgeRect.style.transition = 'none';
+                    runtime.edgeRect.style.opacity = '0';
+                }
+                let nextTrailingColumn = -1;
+                let nextTrailingOpacity = 0;
+                runtime.lineRects.forEach((lineRect, lineIdx) => {
+                    const columnX = (runtime.currentColumn - lineIdx + grid.width) % grid.width;
+                    if (lineIdx >= phase.lineCount) {
+                        lineRect.style.transition = 'none';
+                        lineRect.setAttribute('x', String(columnX));
+                        lineRect.setAttribute('y', '0');
+                        lineRect.setAttribute('height', String(grid.height));
+                        lineRect.style.opacity = '0';
+                        return;
+                    }
+                    if (lineIdx === 0) {
+                        const leadOpacity = forceLeadFullOpacity ? 1 : phase.maxOpacity;
+                        revealLeadLine(lineRect, columnX, leadOpacity, phase.loadMs);
+                        if (showLeadEdgeLine && runtime.edgeRect) {
+                            const edgeOpacity = Math.max(0.3, Math.min(1, leadOpacity * 2.8));
+                            runtime.edgeRect.setAttribute('x', (columnX + 0.95).toFixed(3));
+                            runtime.edgeRect.setAttribute('y', '0');
+                            runtime.edgeRect.setAttribute('height', String(grid.height));
+                            runtime.edgeRect.style.opacity = edgeOpacity.toFixed(3);
+                        }
+                        return;
+                    }
+                    const landRatio = columnLandRatios[columnX] || 0;
+                    const fadeExponent = oceanFadeExponent + ((landFadeExponent - oceanFadeExponent) * landRatio);
+                    const baseTailWeight = (phase.lineCount - lineIdx) / phase.lineCount;
+                    const tailWeight = Math.pow(Math.max(0, baseTailWeight), fadeExponent);
+                    const opacity = phase.maxOpacity * tailWeight;
+                    const tailFadeMs = syncTailFadeToLoad
+                        ? phase.loadMs
+                        : Math.max(80, Math.round(Math.min(phase.stepMs, phase.loadMs * 0.68)));
+                    lineRect.style.transition = `opacity ${tailFadeMs}ms linear`;
+                    lineRect.setAttribute('x', String(columnX));
+                    lineRect.setAttribute('y', '0');
+                    lineRect.setAttribute('height', String(grid.height));
+                    lineRect.style.opacity = opacity.toFixed(3);
+                    if (lineIdx === phase.lineCount - 1) {
+                        nextTrailingColumn = columnX;
+                        nextTrailingOpacity = opacity;
+                    }
+                });
+                runtime.prevTrailingColumn = nextTrailingColumn;
+                runtime.prevTrailingOpacity = nextTrailingOpacity;
+            };
+            mapColumnGlowRuntimes.set(map, runtime);
+            if (useSprinkleStartup) {
+                runStartupSprinkle(() => {
+                    runtime.initialRevealActive = false;
+                    if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                    runStep();
+                    runtime.timerId = window.setInterval(runStep, getPhaseConfig().stepMs);
+                });
+                return;
+            }
+            runStep();
+            const initialStepMs = getPhaseConfig().stepMs;
+            runtime.timerId = window.setInterval(runStep, initialStepMs);
+        };
+        const syncColumnGlowForMap = (map) => {
+            startColumnGlow(map);
         };
 
         const applyMapSizeClass = (map) => {
@@ -927,7 +1461,8 @@ function softCloseModal() {
                 let lastFlashAt = 0;
                 let isPointerInside = false;
                 let hideTimer = 0;
-                const dotFlashAnims = new WeakMap();
+                const dotFlashAnims = new Map();
+                const dotFlashRuntimeVarResetTimers = new Map();
                 const getPointerMode = () => (frame.dataset.mapPointerMode === 'flash' ? 'flash' : 'trail');
                 const applyPointerMode = (mode) => {
                     const normalizedMode = mode === 'flash' ? 'flash' : 'trail';
@@ -1022,14 +1557,37 @@ function softCloseModal() {
                     lastPrintY = y;
                     lastPrintAt = now;
                 };
-                const flashDot = (dot, strength = 1, durationMsOverride = null) => {
+                const clearFlashRuntimeVars = (dot) => {
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-from');
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-mid');
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-to');
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-filter-start');
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-filter-mid');
+                    dot.style.removeProperty('--map-dot-hover-flash-runtime-filter-end');
+                };
+                const flashDot = (dot, strength = 1, durationMsOverride = null, options = null) => {
                     if (!dot) return;
+                    const runtimeResetTimer = dotFlashRuntimeVarResetTimers.get(dot);
+                    if (runtimeResetTimer) {
+                        window.clearTimeout(runtimeResetTimer);
+                        dotFlashRuntimeVarResetTimers.delete(dot);
+                    }
+                    clearFlashRuntimeVars(dot);
                     const existingAnim = dotFlashAnims.get(dot);
                     if (existingAnim) {
                         existingAnim.cancel();
                         dotFlashAnims.delete(dot);
                     }
                     const cappedStrength = clampNumber(strength, 0.2, 1, 1);
+                    const useOppositePalette = Boolean(options && options.useOppositePalette);
+                    const suppressFilter = Boolean(options && options.suppressFilter);
+                    const flashFrom = dot.style.getPropertyValue('--map-dot-hover-flash-from') || 'var(--map-dot-base-fill)';
+                    const flashMidDefault = dot.style.getPropertyValue('--map-dot-hover-flash-mid') || flashFrom;
+                    const flashToDefault = dot.style.getPropertyValue('--map-dot-hover-flash-to') || flashMidDefault;
+                    const flashMidOpposite = dot.style.getPropertyValue('--map-dot-hover-flash-opposite-mid') || flashMidDefault;
+                    const flashToOpposite = dot.style.getPropertyValue('--map-dot-hover-flash-opposite-to') || flashToDefault;
+                    const flashMid = useOppositePalette ? flashMidOpposite : flashMidDefault;
+                    const flashTo = useOppositePalette ? flashToOpposite : flashToDefault;
                     if (typeof dot.animate === 'function') {
                         const startInvert = clampNumber(0.55 + (cappedStrength * 0.45), 0, 1, 1);
                         const midInvert = clampNumber(0.16 + (cappedStrength * 0.2), 0, 1, 0.32);
@@ -1037,15 +1595,22 @@ function softCloseModal() {
                         const midBrightness = (1.01 + (cappedStrength * 0.08)).toFixed(3);
                         const durationMs = Math.round(
                             Number.isFinite(Number(durationMsOverride))
-                                ? clampNumber(durationMsOverride, 80, 700, mapFlashTuningDefaults.durationMs)
+                                ? clampNumber(durationMsOverride, mapFlashDurationBounds.min, mapFlashDurationBounds.max, mapFlashTuningDefaults.durationMs)
                                 : (130 + ((1 - cappedStrength) * 110))
                         );
+                        const flashKeyframes = suppressFilter
+                            ? [
+                                { fill: flashTo, filter: 'none' },
+                                { fill: flashMid, filter: 'none', offset: 0.46 },
+                                { fill: flashFrom, filter: 'none' }
+                            ]
+                            : [
+                                { fill: flashTo, filter: `invert(${startInvert.toFixed(3)}) brightness(${startBrightness}) saturate(1.12)` },
+                                { fill: flashMid, filter: `invert(${midInvert.toFixed(3)}) brightness(${midBrightness}) saturate(1.05)`, offset: 0.46 },
+                                { fill: flashFrom, filter: 'none' }
+                            ];
                         const flashAnim = dot.animate(
-                            [
-                                { filter: `invert(${startInvert.toFixed(3)}) brightness(${startBrightness}) saturate(1.12)` },
-                                { filter: `invert(${midInvert.toFixed(3)}) brightness(${midBrightness}) saturate(1.05)`, offset: 0.46 },
-                                { filter: 'none' }
-                            ],
+                            flashKeyframes,
                             {
                                 duration: durationMs,
                                 easing: 'cubic-bezier(0.2, 0.62, 0.3, 1)',
@@ -1068,14 +1633,30 @@ function softCloseModal() {
 
                     const fallbackDurationMs = Math.round(
                         Number.isFinite(Number(durationMsOverride))
-                            ? clampNumber(durationMsOverride, 80, 700, mapFlashTuningDefaults.durationMs)
+                            ? clampNumber(durationMsOverride, mapFlashDurationBounds.min, mapFlashDurationBounds.max, mapFlashTuningDefaults.durationMs)
                             : (130 + ((1 - cappedStrength) * 110))
                     );
+                    dot.style.setProperty('--map-dot-hover-flash-runtime-from', flashFrom);
+                    dot.style.setProperty('--map-dot-hover-flash-runtime-mid', flashMid);
+                    dot.style.setProperty('--map-dot-hover-flash-runtime-to', flashTo);
+                    if (suppressFilter) {
+                        dot.style.setProperty('--map-dot-hover-flash-runtime-filter-start', 'none');
+                        dot.style.setProperty('--map-dot-hover-flash-runtime-filter-mid', 'none');
+                        dot.style.setProperty('--map-dot-hover-flash-runtime-filter-end', 'none');
+                    }
                     dot.style.setProperty('--map-dot-hover-flash-duration', `${fallbackDurationMs}ms`);
                     dot.classList.remove('map-dot--hover-flash');
                     // Force keyframe restart only for non-WAAPI fallback engines.
                     void dot.getBoundingClientRect();
                     dot.classList.add('map-dot--hover-flash');
+                    const resetTimer = window.setTimeout(() => {
+                        const activeTimer = dotFlashRuntimeVarResetTimers.get(dot);
+                        if (activeTimer === resetTimer) {
+                            dotFlashRuntimeVarResetTimers.delete(dot);
+                            clearFlashRuntimeVars(dot);
+                        }
+                    }, fallbackDurationMs + 40);
+                    dotFlashRuntimeVarResetTimers.set(dot, resetTimer);
                 };
                 const emitHoverFlash = (event, force = false) => {
                     const map = frameToMap.get(frame);
@@ -1096,11 +1677,32 @@ function softCloseModal() {
                     const now = performance.now();
                     const movedCells = Math.hypot(gridX - lastFlashCellX, gridY - lastFlashCellY);
                     const flashRadiusCells = clampNumber(frame.dataset.mapFlashRadiusCells, 0.5, 4, mapFlashTuningDefaults.radiusCells);
-                    const flashDurationMs = clampNumber(frame.dataset.mapFlashDurationMs, 80, 700, mapFlashTuningDefaults.durationMs);
+                    const flashDurationMs = clampNumber(frame.dataset.mapFlashDurationMs, mapFlashDurationBounds.min, mapFlashDurationBounds.max, mapFlashTuningDefaults.durationMs);
                     const flashIntensity = clampNumber(frame.dataset.mapFlashIntensity, 0.2, 1.6, mapFlashTuningDefaults.intensity);
                     const flashGridStep = clampNumber(frame.dataset.mapFlashGridStep, 0, 2, mapFlashTuningDefaults.gridStep);
                     const flashThrottleMs = clampNumber(frame.dataset.mapFlashThrottleMs, 0, 40, mapFlashTuningDefaults.throttleMs);
+                    const flashCenterOnly = frame.dataset.mapFlashCenterOnly === 'true';
+                    const flashCompactGlow = frame.dataset.mapFlashCompactGlow !== 'false';
                     if (!force && movedCells < flashGridStep && (now - lastFlashAt) < flashThrottleMs) return;
+
+                    if (flashCenterOnly) {
+                        if (!flashCompactGlow) {
+                            Array.from(dotFlashAnims.entries()).forEach(([activeDot, activeAnim]) => {
+                                activeAnim.cancel();
+                                if (activeDot) {
+                                    activeDot.style.filter = 'none';
+                                    activeDot.classList.remove('map-dot--hover-flash');
+                                }
+                            });
+                            dotFlashAnims.clear();
+                        }
+                        const centerDot = grid.dots[(gridY * grid.width) + gridX];
+                        flashDot(centerDot, flashIntensity, flashDurationMs, { useOppositePalette: true, suppressFilter: true });
+                        lastFlashCellX = gridX;
+                        lastFlashCellY = gridY;
+                        lastFlashAt = now;
+                        return;
+                    }
 
                     const radiusInt = Math.max(1, Math.ceil(flashRadiusCells));
                     for (let offsetY = -radiusInt; offsetY <= radiusInt; offsetY += 1) {
@@ -1180,6 +1782,8 @@ function softCloseModal() {
                 blend: 3.4
             };
             const baseFill = isLand ? 'var(--map-dot-land)' : 'var(--map-dot-water)';
+            const flashAccentWater = 'color-mix(in srgb, #38bdf8 62%, #ffffff)';
+            const flashAccentLand = 'color-mix(in srgb, #f59e0b 62%, #ffffff)';
             const resolveBlinkMode = (blinkValue) => {
                 if (!blinkValue) return '';
                 if (blinkValue === 'random') {
@@ -1200,6 +1804,11 @@ function softCloseModal() {
             dot.setAttribute('cy', y);
             dot.setAttribute('r', radius);
             dot.style.setProperty('--map-dot-base-fill', baseFill);
+            let flashFrom = baseFill;
+            let flashMid = isLand ? 'color-mix(in srgb, var(--map-dot-land) 72%, #ffffff)' : 'color-mix(in srgb, var(--map-dot-water) 72%, #ffffff)';
+            let flashTo = isLand ? flashAccentLand : flashAccentWater;
+            const flashMidOpposite = isLand ? 'var(--map-dot-water)' : 'var(--map-dot-land)';
+            const flashToOpposite = flashMidOpposite;
             const classes = ['map-dot'];
             if (isLand) classes.push('is-land');
             if (overrideStyle) {
@@ -1209,6 +1818,13 @@ function softCloseModal() {
                 if (hasColor) {
                     classes.push('map-dot--override');
                     dot.style.fill = overrideStyle.color;
+                    flashFrom = overrideStyle.color;
+                    flashMid = hasColor2 ? overrideStyle.color : `color-mix(in srgb, ${overrideStyle.color} 76%, #ffffff)`;
+                    flashTo = hasColor2 ? overrideStyle.color2 : `color-mix(in srgb, ${overrideStyle.color} 58%, #ffffff)`;
+                }
+                if (!hasColor && hasColor2) {
+                    flashMid = `color-mix(in srgb, ${baseFill} 70%, ${overrideStyle.color2})`;
+                    flashTo = overrideStyle.color2;
                 }
                 if (hasBlink) {
                     const resolvedBlinkMode = resolveBlinkMode(overrideStyle.blink);
@@ -1238,6 +1854,11 @@ function softCloseModal() {
                     }
                 }
             }
+            dot.style.setProperty('--map-dot-hover-flash-from', flashFrom);
+            dot.style.setProperty('--map-dot-hover-flash-mid', flashMid);
+            dot.style.setProperty('--map-dot-hover-flash-to', flashTo);
+            dot.style.setProperty('--map-dot-hover-flash-opposite-mid', flashMidOpposite);
+            dot.style.setProperty('--map-dot-hover-flash-opposite-to', flashToOpposite);
             dot.setAttribute('class', classes.join(' '));
             return dot;
         };
@@ -1267,6 +1888,7 @@ function softCloseModal() {
                 }
             }
             mapDotGrid.set(map, { width, height, dots });
+            syncColumnGlowForMap(map);
         };
 
         const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -1279,23 +1901,56 @@ function softCloseModal() {
         const applyMdToggleData = (toggleGroups, map, controls) => {
             if (!map || !controls) return;
             controls.innerHTML = '';
+            const mapShell = controls.closest('.pipeline-map');
+            const frame = map.closest('.pipeline-map-frame');
+            if (mapShell) {
+                let helper = mapShell.querySelector('.map-controls-helper');
+                if (!helper) {
+                    helper = document.createElement('p');
+                    helper.className = 'map-controls-helper';
+                    if (frame && frame.parentNode === mapShell) {
+                        mapShell.insertBefore(helper, frame);
+                    } else {
+                        mapShell.appendChild(helper);
+                    }
+                }
+                helper.textContent = 'Click a category to toggle map markers. You can leave multiple categories on at once.';
+            }
+            let testsDock = mapShell ? mapShell.querySelector('[data-map-tests]') : null;
+            if (!testsDock && mapShell) {
+                testsDock = document.createElement('div');
+                testsDock.className = 'pipeline-map-tests';
+                testsDock.setAttribute('data-map-tests', 'true');
+                mapShell.insertBefore(testsDock, controls);
+            }
+            if (testsDock) {
+                testsDock.innerHTML = '';
+                testsDock.hidden = !mapTestsVisible;
+                testsDock.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
+                testsDock.style.display = mapTestsVisible ? '' : 'none';
+            }
 
             map.querySelectorAll('.map-overlay').forEach(node => node.remove());
-            const frame = map.closest('.pipeline-map-frame');
             const overlayFragment = document.createDocumentFragment();
             toggleGroups.forEach(toggleGroup => {
                 const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
                 const btn = document.createElement('button');
                 btn.type = 'button';
-                btn.className = 'map-control is-active';
+                btn.className = 'map-control';
                 btn.setAttribute('data-map-target', toggleGroup.targetClass);
-                btn.setAttribute('aria-pressed', 'true');
+                btn.setAttribute('aria-pressed', 'false');
                 btn.style.setProperty('--map-control-color', representativeColor);
                 btn.textContent = toggleGroup.buttonLabel;
                 controls.appendChild(btn);
+                const categoryDescription = document.createElement('p');
+                categoryDescription.className = 'map-category-description';
+                categoryDescription.setAttribute('data-map-description-target', toggleGroup.targetClass);
+                categoryDescription.style.setProperty('--map-description-color', representativeColor);
+                categoryDescription.textContent = toggleGroup.description || 'No category description set in world-map.md.';
+                controls.appendChild(categoryDescription);
 
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                group.setAttribute('class', `map-overlay ${toggleGroup.targetClass} is-active`);
+                group.setAttribute('class', `map-overlay ${toggleGroup.targetClass}`);
 
                 toggleGroup.markers.forEach(marker => {
                     const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -1329,76 +1984,19 @@ function softCloseModal() {
             });
             map.appendChild(overlayFragment);
 
-            const layerPreviewButtons = [];
             if (frame) {
                 ensureFrameTuningDefaults(frame);
-                let syncModeScopedTuning = () => {};
                 const setPointerMode = pointerModeSetters.get(frame);
-                if (typeof setPointerMode === 'function') {
-                    const pointerModeBtn = document.createElement('button');
-                    pointerModeBtn.type = 'button';
-                    pointerModeBtn.className = 'map-control map-control--pointer-mode';
-                    pointerModeBtn.setAttribute('aria-pressed', 'false');
-                    pointerModeBtn.textContent = 'Hover Flash';
-                    const syncPointerModeButton = () => {
-                        const isFlashMode = frame.dataset.mapPointerMode === 'flash';
-                        pointerModeBtn.classList.toggle('is-active', isFlashMode);
-                        pointerModeBtn.setAttribute('aria-pressed', isFlashMode ? 'true' : 'false');
-                    };
-                    pointerModeBtn.addEventListener('click', () => {
-                        const isFlashMode = frame.dataset.mapPointerMode === 'flash';
-                        setPointerMode(isFlashMode ? 'trail' : 'flash');
-                        syncPointerModeButton();
-                        syncModeScopedTuning();
-                    });
-                    syncPointerModeButton();
-                    controls.appendChild(pointerModeBtn);
-                }
-                const divider = document.createElement('span');
-                divider.className = 'map-controls-divider';
-                divider.setAttribute('aria-hidden', 'true');
-                controls.appendChild(divider);
-
-                const previewModes = ['100', '90', '80', '70', '60', '50', '40', '30', '20', '10'];
-                const setLayerPreviewMode = (mode) => {
-                    const normalizedMode = previewModes.includes(mode) ? mode : '';
-                    frame.classList.toggle('map-layer-preview-active', Boolean(normalizedMode));
-                    if (normalizedMode) {
-                        frame.style.setProperty('--map-layer-preview-opacity', `${(Number(normalizedMode) / 100).toFixed(2)}`);
-                    } else {
-                        frame.style.removeProperty('--map-layer-preview-opacity');
-                    }
-                    layerPreviewButtons.forEach(button => {
-                        const isActive = button.getAttribute('data-map-layer-preview') === normalizedMode;
-                        button.classList.toggle('is-active', isActive);
-                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
-                    });
-                };
-                previewModes.forEach((mode) => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'map-control map-control--layer-preview';
-                    btn.setAttribute('data-map-layer-preview', mode);
-                    btn.setAttribute('aria-pressed', 'false');
-                    btn.textContent = `Full Layer ${mode}%`;
-                    btn.addEventListener('click', () => {
-                        const isActive = btn.classList.contains('is-active');
-                        setLayerPreviewMode(isActive ? '' : mode);
-                    });
-                    controls.appendChild(btn);
-                    layerPreviewButtons.push(btn);
-                });
+                if (typeof setPointerMode === 'function') setPointerMode('flash');
 
                 const tuningStrip = document.createElement('div');
                 tuningStrip.className = 'map-tuning-strip';
                 tuningStrip.setAttribute('role', 'group');
                 tuningStrip.setAttribute('aria-label', 'Map glow tuning');
                 const tuningInputs = {};
-                const trailTuningGroup = document.createElement('div');
-                trailTuningGroup.className = 'map-tuning-group map-tuning-group--trail';
+                let syncEffectReadouts = () => {};
                 const flashTuningGroup = document.createElement('div');
                 flashTuningGroup.className = 'map-tuning-group map-tuning-group--flash';
-                tuningStrip.appendChild(trailTuningGroup);
                 tuningStrip.appendChild(flashTuningGroup);
                 const createTuningField = (id, labelText, inputValue, onInput, groupNode, step = 'any') => {
                     const field = document.createElement('div');
@@ -1416,170 +2014,782 @@ function softCloseModal() {
                     input.spellcheck = false;
                     input.value = inputValue;
                     input.setAttribute('data-step', step);
-                    input.addEventListener('change', () => onInput(input.value, input));
-                    input.addEventListener('blur', () => onInput(input.value, input));
+                    input.addEventListener('change', () => {
+                        onInput(input.value, input);
+                        syncEffectReadouts();
+                    });
+                    input.addEventListener('blur', () => {
+                        onInput(input.value, input);
+                        syncEffectReadouts();
+                    });
                     field.appendChild(label);
                     field.appendChild(input);
                     groupNode.appendChild(field);
                     tuningInputs[id] = input;
                     return input;
                 };
-                createTuningField(
-                    'mapTuneDots',
-                    'Size Dots',
-                    frame.dataset.mapPointerDotSize || String(mapGlowTuningDefaults.dotSize),
-                    (rawValue, input) => {
-                        const nextValue = clampNumber(rawValue, 3, 20, mapGlowTuningDefaults.dotSize);
-                        frame.dataset.mapPointerDotSize = String(nextValue);
-                        input.value = String(nextValue);
-                        applyMapSizeClass(map);
-                    },
-                    trailTuningGroup
-                );
-                createTuningField(
-                    'mapTuneFalloff',
-                    'Falloff Px',
-                    String(clampNumber(
-                        parseFloat(frame.style.getPropertyValue('--map-pointer-falloff-px')) || mapGlowTuningDefaults.falloffPx,
-                        0,
-                        6,
-                        mapGlowTuningDefaults.falloffPx
-                    )),
-                    (rawValue, input) => {
-                        const nextValue = clampNumber(rawValue, 0, 6, mapGlowTuningDefaults.falloffPx);
-                        frame.style.setProperty('--map-pointer-falloff-px', `${nextValue}px`);
-                        input.value = String(nextValue);
-                    },
-                    trailTuningGroup
-                );
-                createTuningField(
-                    'mapTuneOpacity',
-                    'Opacity',
-                    String(clampNumber(
-                        parseFloat(frame.style.getPropertyValue('--map-pointer-active-opacity')) || mapGlowTuningDefaults.activeOpacity,
-                        0,
-                        1,
-                        mapGlowTuningDefaults.activeOpacity
-                    )),
-                    (rawValue, input) => {
-                        const nextValue = clampNumber(rawValue, 0, 1, mapGlowTuningDefaults.activeOpacity);
-                        frame.style.setProperty('--map-pointer-active-opacity', String(nextValue));
-                        input.value = String(nextValue);
-                    },
-                    trailTuningGroup
-                );
-                createTuningField(
-                    'mapTuneEase',
-                    'Trail Ease',
-                    frame.dataset.mapPointerEase || String(mapGlowTuningDefaults.easing),
-                    (rawValue, input) => {
-                        const nextValue = clampNumber(rawValue, 0.05, 0.6, mapGlowTuningDefaults.easing);
-                        frame.dataset.mapPointerEase = String(nextValue);
-                        input.value = String(nextValue);
-                    },
-                    trailTuningGroup
-                );
-                createTuningField(
-                    'mapTuneLinger',
-                    'Linger Ms',
-                    frame.dataset.mapPointerLinger || String(mapGlowTuningDefaults.lingerMs),
-                    (rawValue, input) => {
-                        const nextValue = clampNumber(rawValue, 0, 1500, mapGlowTuningDefaults.lingerMs);
-                        frame.dataset.mapPointerLinger = String(Math.round(nextValue));
-                        input.value = String(Math.round(nextValue));
-                    },
-                    trailTuningGroup
-                );
-                const flashPresetButtons = [];
-                const flashPresetRow = document.createElement('div');
-                flashPresetRow.className = 'map-flash-presets';
-                const syncFlashPresetButtons = () => {
-                    const activePreset = frame.dataset.mapFlashPreset || mapFlashPresetDefaults.presetId;
-                    flashPresetButtons.forEach(({ id, button }) => {
-                        const isActive = id === activePreset;
+                const flashDurationButtons = [];
+                const flashVisualButtons = [];
+                const sweepActionButtons = [];
+                const startupModeButtons = [];
+                const flashDurationRow = document.createElement('div');
+                flashDurationRow.className = 'map-flash-presets map-flash-presets--duration';
+                const flashVisualRow = document.createElement('div');
+                flashVisualRow.className = 'map-flash-presets map-flash-presets--visual';
+                const startupModeRow = document.createElement('div');
+                startupModeRow.className = 'map-flash-presets map-flash-presets--visual';
+                const startupGlowControlsRow = document.createElement('div');
+                startupGlowControlsRow.className = 'map-flash-presets map-flash-presets--glow-controls';
+                const startupSprinkleControlsRow = document.createElement('div');
+                startupSprinkleControlsRow.className = 'map-flash-presets map-flash-presets--glow-controls';
+                const runtimeGlowControlsRow = document.createElement('div');
+                runtimeGlowControlsRow.className = 'map-flash-presets map-flash-presets--glow-controls';
+                const setFlashDurationMs = (rawValue, input = null) => {
+                    const nextValue = Math.round(clampNumber(
+                        rawValue,
+                        mapFlashDurationBounds.min,
+                        mapFlashDurationBounds.max,
+                        mapFlashTuningDefaults.durationMs
+                    ));
+                    frame.dataset.mapFlashDurationMs = String(nextValue);
+                    if (input) input.value = String(nextValue);
+                    syncEffectReadouts();
+                };
+                const syncFlashDurationControls = () => {
+                    const activeDuration = Math.round(clampNumber(
+                        frame.dataset.mapFlashDurationMs,
+                        mapFlashDurationBounds.min,
+                        mapFlashDurationBounds.max,
+                        mapFlashTuningDefaults.durationMs
+                    ));
+                    frame.dataset.mapFlashDurationMs = String(activeDuration);
+                    if (tuningInputs.mapTuneFlashLinger) {
+                        tuningInputs.mapTuneFlashLinger.value = String(activeDuration);
+                    }
+                    flashDurationButtons.forEach(({ value, button }) => {
+                        const isActive = value === activeDuration;
                         button.classList.toggle('is-active', isActive);
                         button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
                     });
+                    syncEffectReadouts();
                 };
-                Object.entries(mapFlashPresetDefaults.presets).forEach(([presetId, preset]) => {
-                    const presetBtn = document.createElement('button');
-                    presetBtn.type = 'button';
-                    presetBtn.className = 'map-control map-control--flash-preset';
-                    presetBtn.setAttribute('aria-pressed', 'false');
-                    presetBtn.textContent = preset.label;
-                    presetBtn.addEventListener('click', () => {
-                        applyFlashPresetToFrame(frame, presetId);
-                        syncFlashPresetButtons();
+                const syncFlashVisualButtons = () => {
+                    flashVisualButtons.forEach(({ mode, button }) => {
+                        const isActive = mode === 'compactGlow'
+                            ? frame.dataset.mapFlashCompactGlow !== 'false'
+                            : false;
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
                     });
-                    flashPresetRow.appendChild(presetBtn);
-                    flashPresetButtons.push({ id: presetId, button: presetBtn });
+                    syncEffectReadouts();
+                };
+                const syncSweepActionButtons = () => {
+                    sweepActionButtons.forEach(({ mode, button }) => {
+                        const isActive = mode === 'sweepEnabled'
+                            ? frame.dataset.mapGlowEnabled !== 'false'
+                            : (mode === 'tailLoadSync'
+                            ? frame.dataset.mapGlowTailLoadSync === 'true'
+                            : (mode === 'leadFull'
+                                ? frame.dataset.mapGlowLeadFull === 'true'
+                                : (mode === 'leadEdgeLine'
+                                    ? frame.dataset.mapGlowLeadEdgeLine === 'true'
+                                    : false)));
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                    syncEffectReadouts();
+                };
+                const syncStartupModeButtons = () => {
+                    startupModeButtons.forEach(({ mode, button }) => {
+                        const activeMode = frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
+                        const isActive = mode === activeMode;
+                        button.classList.toggle('is-active', isActive);
+                        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+                    });
+                    syncEffectReadouts();
+                };
+                const effectsReadout = document.createElement('div');
+                effectsReadout.className = 'map-effects-readout';
+                const glowTailReadout = document.createElement('p');
+                glowTailReadout.className = 'map-effect-line';
+                const flashReadout = document.createElement('p');
+                flashReadout.className = 'map-effect-line';
+                const sweepReadout = document.createElement('p');
+                sweepReadout.className = 'map-effect-line';
+                const startupReadout = document.createElement('p');
+                startupReadout.className = 'map-effect-line';
+                effectsReadout.appendChild(glowTailReadout);
+                effectsReadout.appendChild(flashReadout);
+                effectsReadout.appendChild(sweepReadout);
+                effectsReadout.appendChild(startupReadout);
+                const applyEffectTier = (node, tier) => {
+                    node.classList.remove('map-effect-line--low', 'map-effect-line--medium', 'map-effect-line--high');
+                    node.classList.add(`map-effect-line--${tier}`);
+                };
+                const calcSweepStats = (activeLinesRaw, speedMsRaw, loadMsRaw, defaults) => {
+                    const activeLines = Math.round(clampNumber(
+                        activeLinesRaw,
+                        1,
+                        24,
+                        defaults.activeLines
+                    ));
+                    const speedMs = Math.round(clampNumber(
+                        speedMsRaw,
+                        8,
+                        1200,
+                        defaults.speedMs
+                    ));
+                    const loadMs = Math.round(clampNumber(
+                        loadMsRaw,
+                        20,
+                        600,
+                        defaults.loadMs
+                    ));
+                    const effectiveStepMs = Math.max(speedMs, loadMs);
+                    const updatesPerSec = 1000 / Math.max(1, effectiveStepMs);
+                    const lineUpdatesPerSec = activeLines * updatesPerSec;
+                    const domWritesPerSec = lineUpdatesPerSec * 2;
+                    const baselineStepMs = Math.max(defaults.speedMs, defaults.loadMs);
+                    const baselineLineUpdatesPerSec = defaults.activeLines * (1000 / baselineStepMs);
+                    const relativeLoad = lineUpdatesPerSec / baselineLineUpdatesPerSec;
+                    const tier = lineUpdatesPerSec >= 80 ? 'high' : (lineUpdatesPerSec >= 35 ? 'medium' : 'low');
+                    return { activeLines, speedMs, loadMs, effectiveStepMs, lineUpdatesPerSec, domWritesPerSec, relativeLoad, tier };
+                };
+                syncEffectReadouts = () => {
+                    const flashDurationMs = Math.round(clampNumber(
+                        frame.dataset.mapFlashDurationMs,
+                        mapFlashDurationBounds.min,
+                        mapFlashDurationBounds.max,
+                        mapFlashTuningDefaults.durationMs
+                    ));
+                    const flashThrottleMs = Math.round(clampNumber(
+                        frame.dataset.mapFlashThrottleMs,
+                        0,
+                        40,
+                        mapFlashTuningDefaults.throttleMs
+                    ));
+                    const compactGlow = frame.dataset.mapFlashCompactGlow !== 'false';
+                    const flashEventsPerSec = 1000 / Math.max(1, flashThrottleMs);
+                    const glowTailOverlap = compactGlow
+                        ? Math.max(1, flashDurationMs / Math.max(1, flashThrottleMs))
+                        : 0;
+                    const glowTailTier = glowTailOverlap >= 18 ? 'high' : (glowTailOverlap >= 8 ? 'medium' : 'low');
+                    applyEffectTier(glowTailReadout, glowTailTier);
+                    glowTailReadout.textContent = compactGlow
+                        ? `Glow Tail (on): ~${glowTailOverlap.toFixed(1)} overlapping fades at max hover rate.`
+                        : 'Glow Tail (off): single-dot flash only (no overlap trail).';
+
+                    const flashConcurrency = compactGlow ? glowTailOverlap : 1;
+                    const flashTier = flashConcurrency >= 18 ? 'high' : (flashConcurrency >= 8 ? 'medium' : 'low');
+                    applyEffectTier(flashReadout, flashTier);
+                    flashReadout.textContent = `Flash Compact: ${flashEventsPerSec.toFixed(1)} max events/s, linger ${flashDurationMs}ms.`;
+
+                    const sweepStats = calcSweepStats(
+                        frame.dataset.mapGlowActiveLines,
+                        frame.dataset.mapGlowSpeedMs,
+                        frame.dataset.mapGlowLoadMs,
+                        {
+                            activeLines: mapColumnGlowDefaults.activeLines,
+                            speedMs: mapColumnGlowDefaults.speedMs,
+                            loadMs: mapColumnGlowDefaults.loadMs
+                        }
+                    );
+                    const tailLoadSync = frame.dataset.mapGlowTailLoadSync === 'true';
+                    const leadFull = frame.dataset.mapGlowLeadFull === 'true';
+                    const leadEdgeLine = frame.dataset.mapGlowLeadEdgeLine === 'true';
+                    const sweepEnabled = frame.dataset.mapGlowEnabled !== 'false';
+                    applyEffectTier(sweepReadout, sweepStats.tier);
+                    sweepReadout.textContent = sweepEnabled
+                        ? `Sweep: ${sweepStats.lineUpdatesPerSec.toFixed(1)} line updates/s, ${sweepStats.domWritesPerSec.toFixed(1)} DOM writes/s (${sweepStats.relativeLoad.toFixed(2)}x default), effective step ${sweepStats.effectiveStepMs}ms, tail-load-sync ${tailLoadSync ? 'on' : 'off'}, lead-full ${leadFull ? 'on' : 'off'}, edge-line ${leadEdgeLine ? 'on' : 'off'}.`
+                        : `Sweep: disabled in test mode (settings retained), tail-load-sync ${tailLoadSync ? 'on' : 'off'}, lead-full ${leadFull ? 'on' : 'off'}, edge-line ${leadEdgeLine ? 'on' : 'off'}.`;
+
+                    const grid = mapDotGrid.get(map);
+                    const startupColumns = grid && Number.isFinite(grid.width) && grid.width > 0 ? grid.width : 0;
+                    const startupDone = frame.dataset.mapGlowInitialRevealDone === 'true';
+                    const startupMode = frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
+                    if (startupMode === 'sprinkle') {
+                        const sprinkleMs = Math.round(clampNumber(
+                            frame.dataset.mapGlowSprinkleMs,
+                            200,
+                            12000,
+                            mapStartupSprinkleDefaults.durationMs
+                        ));
+                        const sprinkleStepMs = Math.round(clampNumber(
+                            frame.dataset.mapGlowSprinkleStepMs,
+                            8,
+                            250,
+                            mapStartupSprinkleDefaults.stepMs
+                        ));
+                        const sprinkleSeed = Math.round(clampNumber(
+                            frame.dataset.mapGlowSprinkleSeed,
+                            1,
+                            999999,
+                            mapStartupSprinkleDefaults.seed
+                        ));
+                        const totalDots = grid && Array.isArray(grid.dots) ? grid.dots.length : 0;
+                        const sprinkleTicks = Math.max(1, Math.ceil(sprinkleMs / sprinkleStepMs));
+                        const sprinkleBatch = Math.max(1, Math.ceil(Math.max(1, totalDots) / sprinkleTicks));
+                        const sprinkleDotsPerSec = sprinkleBatch * (1000 / Math.max(1, sprinkleStepMs));
+                        const sprinkleTier = sprinkleDotsPerSec >= 12000 ? 'high' : (sprinkleDotsPerSec >= 5000 ? 'medium' : 'low');
+                        applyEffectTier(startupReadout, sprinkleTier);
+                        startupReadout.textContent = `Startup Sprinkle (${startupDone ? 'completed' : 'pending'}): ${sprinkleStepMs}ms step, ~${sprinkleBatch} dots/step, seed ${sprinkleSeed}, ~${(sprinkleMs / 1000).toFixed(1)}s target.`;
+                    } else {
+                        const startupStats = calcSweepStats(
+                            frame.dataset.mapGlowStartupActiveLines,
+                            frame.dataset.mapGlowStartupSpeedMs,
+                            frame.dataset.mapGlowStartupLoadMs,
+                            {
+                                activeLines: mapColumnGlowDefaults.startupActiveLines,
+                                speedMs: mapColumnGlowDefaults.startupSpeedMs,
+                                loadMs: mapColumnGlowDefaults.startupLoadMs
+                            }
+                        );
+                        const startupDurationMs = startupColumns * startupStats.effectiveStepMs;
+                        applyEffectTier(startupReadout, startupStats.tier);
+                        startupReadout.textContent = `Startup Sweep (${startupDone ? 'completed' : 'pending'}): ${startupStats.activeLines} lines, speed ${startupStats.speedMs}ms / load ${startupStats.loadMs}ms (effective ${startupStats.effectiveStepMs}ms), ${startupStats.lineUpdatesPerSec.toFixed(1)} updates/s, ~${(startupDurationMs / 1000).toFixed(1)}s first pass.`;
+                    }
+                };
+                const flashVisualLabel = document.createElement('span');
+                flashVisualLabel.className = 'map-tuning-label map-tuning-label--group';
+                flashVisualLabel.textContent = 'Flash Tail Tests';
+                flashTuningGroup.appendChild(flashVisualLabel);
+                const addFlashVisualToggle = (mode, label, onToggle) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'map-control map-control--flash-visual';
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.textContent = label;
+                    btn.addEventListener('click', () => {
+                        onToggle();
+                        syncFlashVisualButtons();
+                        syncEffectReadouts();
+                    });
+                    flashVisualRow.appendChild(btn);
+                    flashVisualButtons.push({ mode, button: btn });
+                };
+                addFlashVisualToggle('compactGlow', 'Glow Tail', () => {
+                    const isActive = frame.dataset.mapFlashCompactGlow !== 'false';
+                    frame.dataset.mapFlashCompactGlow = isActive ? 'false' : 'true';
                 });
-                syncFlashPresetButtons();
-                flashTuningGroup.appendChild(flashPresetRow);
-                const trailHelp = document.createElement('p');
-                trailHelp.className = 'map-tuning-help map-tuning-help--trail';
-                trailHelp.textContent = 'Trail mode: Size Dots = reveal diameter; Falloff Px = edge softness; Opacity = trail strength; Trail Ease = trail density/tightness; Linger Ms = fade length.';
-                tuningStrip.appendChild(trailHelp);
+                flashTuningGroup.appendChild(flashVisualRow);
+
+                const lingerLabel = document.createElement('span');
+                lingerLabel.className = 'map-tuning-label map-tuning-label--group';
+                lingerLabel.textContent = 'Linger Tests';
+                flashTuningGroup.appendChild(lingerLabel);
+                mapFlashDurationTestValues.forEach((durationMs) => {
+                    const durationBtn = document.createElement('button');
+                    durationBtn.type = 'button';
+                    durationBtn.className = 'map-control map-control--flash-duration';
+                    durationBtn.setAttribute('aria-pressed', 'false');
+                    durationBtn.textContent = `Linger ${durationMs}`;
+                    durationBtn.addEventListener('click', () => {
+                        setFlashDurationMs(durationMs);
+                        syncFlashDurationControls();
+                    });
+                    flashDurationRow.appendChild(durationBtn);
+                    flashDurationButtons.push({ value: durationMs, button: durationBtn });
+                });
+                flashTuningGroup.appendChild(flashDurationRow);
+                createTuningField(
+                    'mapTuneFlashLinger',
+                    'Lingering Ms',
+                    frame.dataset.mapFlashDurationMs || String(mapFlashTuningDefaults.durationMs),
+                    (rawValue, input) => {
+                        setFlashDurationMs(rawValue, input);
+                        syncFlashDurationControls();
+                    },
+                    flashTuningGroup,
+                    '1'
+                );
+
+                const sweepActionsLabel = document.createElement('span');
+                sweepActionsLabel.className = 'map-tuning-label map-tuning-label--group';
+                sweepActionsLabel.textContent = 'Sweep Actions';
+                flashTuningGroup.appendChild(sweepActionsLabel);
+                const sweepActionsRow = document.createElement('div');
+                sweepActionsRow.className = 'map-flash-presets map-flash-presets--visual';
+                const resetSweepBtn = document.createElement('button');
+                resetSweepBtn.type = 'button';
+                resetSweepBtn.className = 'map-control map-control--flash-visual';
+                resetSweepBtn.textContent = 'Reset Sweep';
+                resetSweepBtn.addEventListener('click', () => {
+                    frame.dataset.mapGlowInitialRevealDone = 'false';
+                    syncColumnGlowForMap(map);
+                    syncEffectReadouts();
+                });
+                sweepActionsRow.appendChild(resetSweepBtn);
+                const sweepEnabledBtn = document.createElement('button');
+                sweepEnabledBtn.type = 'button';
+                sweepEnabledBtn.className = 'map-control map-control--flash-visual';
+                sweepEnabledBtn.setAttribute('aria-pressed', 'false');
+                sweepEnabledBtn.textContent = 'Sweep On';
+                sweepEnabledBtn.addEventListener('click', () => {
+                    const isActive = frame.dataset.mapGlowEnabled !== 'false';
+                    frame.dataset.mapGlowEnabled = isActive ? 'false' : 'true';
+                    syncColumnGlowForMap(map);
+                    syncSweepActionButtons();
+                });
+                sweepActionsRow.appendChild(sweepEnabledBtn);
+                sweepActionButtons.push({ mode: 'sweepEnabled', button: sweepEnabledBtn });
+                const syncTailLoadBtn = document.createElement('button');
+                syncTailLoadBtn.type = 'button';
+                syncTailLoadBtn.className = 'map-control map-control--flash-visual';
+                syncTailLoadBtn.setAttribute('aria-pressed', 'false');
+                syncTailLoadBtn.textContent = 'Tail = Load';
+                syncTailLoadBtn.addEventListener('click', () => {
+                    const isActive = frame.dataset.mapGlowTailLoadSync === 'true';
+                    frame.dataset.mapGlowTailLoadSync = isActive ? 'false' : 'true';
+                    syncColumnGlowForMap(map);
+                    syncSweepActionButtons();
+                });
+                sweepActionsRow.appendChild(syncTailLoadBtn);
+                sweepActionButtons.push({ mode: 'tailLoadSync', button: syncTailLoadBtn });
+                const leadFullBtn = document.createElement('button');
+                leadFullBtn.type = 'button';
+                leadFullBtn.className = 'map-control map-control--flash-visual';
+                leadFullBtn.setAttribute('aria-pressed', 'false');
+                leadFullBtn.textContent = 'Lead Full';
+                leadFullBtn.addEventListener('click', () => {
+                    const isActive = frame.dataset.mapGlowLeadFull === 'true';
+                    frame.dataset.mapGlowLeadFull = isActive ? 'false' : 'true';
+                    syncColumnGlowForMap(map);
+                    syncSweepActionButtons();
+                });
+                sweepActionsRow.appendChild(leadFullBtn);
+                sweepActionButtons.push({ mode: 'leadFull', button: leadFullBtn });
+                const leadEdgeLineBtn = document.createElement('button');
+                leadEdgeLineBtn.type = 'button';
+                leadEdgeLineBtn.className = 'map-control map-control--flash-visual';
+                leadEdgeLineBtn.setAttribute('aria-pressed', 'false');
+                leadEdgeLineBtn.textContent = 'Edge Line';
+                leadEdgeLineBtn.addEventListener('click', () => {
+                    const isActive = frame.dataset.mapGlowLeadEdgeLine === 'true';
+                    frame.dataset.mapGlowLeadEdgeLine = isActive ? 'false' : 'true';
+                    syncColumnGlowForMap(map);
+                    syncSweepActionButtons();
+                });
+                sweepActionsRow.appendChild(leadEdgeLineBtn);
+                sweepActionButtons.push({ mode: 'leadEdgeLine', button: leadEdgeLineBtn });
+                flashTuningGroup.appendChild(sweepActionsRow);
+
+                const startupSweepLabel = document.createElement('span');
+                startupSweepLabel.className = 'map-tuning-label map-tuning-label--group';
+                startupSweepLabel.textContent = 'Startup Mode';
+                flashTuningGroup.appendChild(startupSweepLabel);
+                const addStartupModeToggle = (mode, label) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'map-control map-control--flash-visual';
+                    btn.setAttribute('aria-pressed', 'false');
+                    btn.textContent = label;
+                    btn.addEventListener('click', () => {
+                        frame.dataset.mapGlowStartupMode = mode;
+                        frame.dataset.mapGlowInitialRevealDone = 'false';
+                        syncColumnGlowForMap(map);
+                        syncStartupModeButtons();
+                    });
+                    startupModeRow.appendChild(btn);
+                    startupModeButtons.push({ mode, button: btn });
+                };
+                addStartupModeToggle('sweep', 'Startup Sweep');
+                addStartupModeToggle('sprinkle', 'Startup Sprinkle');
+                flashTuningGroup.appendChild(startupModeRow);
+
+                const startupSprinkleLabel = document.createElement('span');
+                startupSprinkleLabel.className = 'map-tuning-label map-tuning-label--group';
+                startupSprinkleLabel.textContent = 'Startup Sprinkle Tests';
+                flashTuningGroup.appendChild(startupSprinkleLabel);
+                createTuningField(
+                    'mapTuneGlowSprinkleMs',
+                    'Sprinkle Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowSprinkleMs,
+                        200,
+                        12000,
+                        mapStartupSprinkleDefaults.durationMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 200, 12000, mapStartupSprinkleDefaults.durationMs));
+                        frame.dataset.mapGlowSprinkleMs = String(nextValue);
+                        input.value = String(nextValue);
+                        if (frame.dataset.mapGlowStartupMode === 'sprinkle') {
+                            frame.dataset.mapGlowInitialRevealDone = 'false';
+                        }
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupSprinkleControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowSprinkleStep',
+                    'Step Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowSprinkleStepMs,
+                        8,
+                        250,
+                        mapStartupSprinkleDefaults.stepMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 8, 250, mapStartupSprinkleDefaults.stepMs));
+                        frame.dataset.mapGlowSprinkleStepMs = String(nextValue);
+                        input.value = String(nextValue);
+                        if (frame.dataset.mapGlowStartupMode === 'sprinkle') {
+                            frame.dataset.mapGlowInitialRevealDone = 'false';
+                        }
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupSprinkleControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowSprinkleSeed',
+                    'Seed',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowSprinkleSeed,
+                        1,
+                        999999,
+                        mapStartupSprinkleDefaults.seed
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 1, 999999, mapStartupSprinkleDefaults.seed));
+                        frame.dataset.mapGlowSprinkleSeed = String(nextValue);
+                        input.value = String(nextValue);
+                        if (frame.dataset.mapGlowStartupMode === 'sprinkle') {
+                            frame.dataset.mapGlowInitialRevealDone = 'false';
+                        }
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupSprinkleControlsRow,
+                    '1'
+                );
+                flashTuningGroup.appendChild(startupSprinkleControlsRow);
+
+                const startupSweepFieldsLabel = document.createElement('span');
+                startupSweepFieldsLabel.className = 'map-tuning-label map-tuning-label--group';
+                startupSweepFieldsLabel.textContent = 'Startup Sweep Tests';
+                flashTuningGroup.appendChild(startupSweepFieldsLabel);
+                createTuningField(
+                    'mapTuneGlowStartupOpacity',
+                    'Max Opacity',
+                    String(clampNumber(
+                        frame.dataset.mapGlowStartupMaxOpacity,
+                        0.1,
+                        1,
+                        mapColumnGlowDefaults.startupMaxOpacity
+                    )),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0.1, 1, mapColumnGlowDefaults.startupMaxOpacity);
+                        frame.dataset.mapGlowStartupMaxOpacity = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupGlowControlsRow
+                );
+                createTuningField(
+                    'mapTuneGlowStartupLines',
+                    'Active Lines',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowStartupActiveLines,
+                        1,
+                        24,
+                        mapColumnGlowDefaults.startupActiveLines
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 1, 24, mapColumnGlowDefaults.startupActiveLines));
+                        frame.dataset.mapGlowStartupActiveLines = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupGlowControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowStartupSpeed',
+                    'Speed Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowStartupSpeedMs,
+                        8,
+                        1200,
+                        mapColumnGlowDefaults.startupSpeedMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 8, 1200, mapColumnGlowDefaults.startupSpeedMs));
+                        frame.dataset.mapGlowStartupSpeedMs = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupGlowControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowStartupLoad',
+                    'Load Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowStartupLoadMs,
+                        20,
+                        600,
+                        mapColumnGlowDefaults.startupLoadMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 20, 600, mapColumnGlowDefaults.startupLoadMs));
+                        frame.dataset.mapGlowStartupLoadMs = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    startupGlowControlsRow,
+                    '1'
+                );
+                flashTuningGroup.appendChild(startupGlowControlsRow);
+
+                const sweepLabel = document.createElement('span');
+                sweepLabel.className = 'map-tuning-label map-tuning-label--group';
+                sweepLabel.textContent = 'Sweep Tests';
+                flashTuningGroup.appendChild(sweepLabel);
+                createTuningField(
+                    'mapTuneGlowOpacity',
+                    'Max Opacity',
+                    String(clampNumber(
+                        frame.dataset.mapGlowMaxOpacity,
+                        0.1,
+                        1,
+                        mapColumnGlowDefaults.maxOpacity
+                    )),
+                    (rawValue, input) => {
+                        const nextValue = clampNumber(rawValue, 0.1, 1, mapColumnGlowDefaults.maxOpacity);
+                        frame.dataset.mapGlowMaxOpacity = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    runtimeGlowControlsRow
+                );
+                createTuningField(
+                    'mapTuneGlowLines',
+                    'Active Lines',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowActiveLines,
+                        1,
+                        24,
+                        mapColumnGlowDefaults.activeLines
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 1, 24, mapColumnGlowDefaults.activeLines));
+                        frame.dataset.mapGlowActiveLines = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    runtimeGlowControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowSpeed',
+                    'Speed Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowSpeedMs,
+                        8,
+                        1200,
+                        mapColumnGlowDefaults.speedMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 8, 1200, mapColumnGlowDefaults.speedMs));
+                        frame.dataset.mapGlowSpeedMs = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    runtimeGlowControlsRow,
+                    '1'
+                );
+                createTuningField(
+                    'mapTuneGlowLoad',
+                    'Load Ms',
+                    String(Math.round(clampNumber(
+                        frame.dataset.mapGlowLoadMs,
+                        20,
+                        600,
+                        mapColumnGlowDefaults.loadMs
+                    ))),
+                    (rawValue, input) => {
+                        const nextValue = Math.round(clampNumber(rawValue, 20, 600, mapColumnGlowDefaults.loadMs));
+                        frame.dataset.mapGlowLoadMs = String(nextValue);
+                        input.value = String(nextValue);
+                        syncColumnGlowForMap(map);
+                        syncEffectReadouts();
+                    },
+                    runtimeGlowControlsRow,
+                    '1'
+                );
+                flashTuningGroup.appendChild(runtimeGlowControlsRow);
+                const readoutLabel = document.createElement('span');
+                readoutLabel.className = 'map-tuning-label map-tuning-label--group';
+                readoutLabel.textContent = 'Effect Readout';
+                flashTuningGroup.appendChild(readoutLabel);
+                flashTuningGroup.appendChild(effectsReadout);
+                syncFlashDurationControls();
+                syncFlashVisualButtons();
+                syncSweepActionButtons();
+                syncStartupModeButtons();
+                syncEffectReadouts();
                 const flashHelp = document.createElement('p');
                 flashHelp.className = 'map-tuning-help map-tuning-help--flash';
-                flashHelp.textContent = 'Hover Flash mode presets: Compact = 1 step smaller radius, Balanced = baseline, Wide = 1 step larger radius, Lingering = longer fade. Intensity and grid timing are preset-matched.';
+                flashHelp.textContent = 'Startup Mode selects first-pass behavior (Sweep or Sprinkle). Startup Sweep/Sprinkle tests affect first-pass only. Sweep Tests affect ongoing behavior after startup. Reset Sweep replays first-load map draw.';
                 tuningStrip.appendChild(flashHelp);
                 const resetField = document.createElement('div');
                 resetField.className = 'map-tuning-field map-tuning-field--reset';
                 const resetBtn = document.createElement('button');
                 resetBtn.type = 'button';
                 resetBtn.className = 'map-control map-control--tuning-reset';
-                const applyTrailDefaults = () => {
-                    frame.dataset.mapPointerDotSize = String(mapGlowTuningDefaults.dotSize);
-                    frame.dataset.mapPointerEase = String(mapGlowTuningDefaults.easing);
-                    frame.dataset.mapPointerLinger = String(mapGlowTuningDefaults.lingerMs);
-                    frame.style.setProperty('--map-pointer-falloff-px', `${mapGlowTuningDefaults.falloffPx}px`);
-                    frame.style.setProperty('--map-pointer-active-opacity', String(mapGlowTuningDefaults.activeOpacity));
-                    if (tuningInputs.mapTuneDots) tuningInputs.mapTuneDots.value = String(mapGlowTuningDefaults.dotSize);
-                    if (tuningInputs.mapTuneFalloff) tuningInputs.mapTuneFalloff.value = String(mapGlowTuningDefaults.falloffPx);
-                    if (tuningInputs.mapTuneOpacity) tuningInputs.mapTuneOpacity.value = String(mapGlowTuningDefaults.activeOpacity);
-                    if (tuningInputs.mapTuneEase) tuningInputs.mapTuneEase.value = String(mapGlowTuningDefaults.easing);
-                    if (tuningInputs.mapTuneLinger) tuningInputs.mapTuneLinger.value = String(mapGlowTuningDefaults.lingerMs);
-                    applyMapSizeClass(map);
-                };
                 const applyFlashDefaults = () => {
                     applyFlashPresetToFrame(frame, mapFlashPresetDefaults.presetId);
-                    syncFlashPresetButtons();
+                    frame.dataset.mapFlashCompactGlow = mapFlashVisualDefaults.compactGlow ? 'true' : 'false';
+                    frame.dataset.mapGlowForceOn = 'false';
+                    frame.dataset.mapGlowEnabled = 'false';
+                    frame.dataset.mapGlowMaxOpacity = String(mapColumnGlowDefaults.maxOpacity);
+                    frame.dataset.mapGlowActiveLines = String(mapColumnGlowDefaults.activeLines);
+                    frame.dataset.mapGlowSpeedMs = String(mapColumnGlowDefaults.speedMs);
+                    frame.dataset.mapGlowLoadMs = String(mapColumnGlowDefaults.loadMs);
+                    frame.dataset.mapGlowTailLoadSync = 'false';
+                    frame.dataset.mapGlowLeadFull = 'false';
+                    frame.dataset.mapGlowLeadEdgeLine = 'false';
+                    frame.dataset.mapGlowStartupMode = 'sprinkle';
+                    frame.dataset.mapGlowSprinkleMs = String(mapStartupSprinkleDefaults.durationMs);
+                    frame.dataset.mapGlowSprinkleStepMs = String(mapStartupSprinkleDefaults.stepMs);
+                    frame.dataset.mapGlowSprinkleSeed = String(mapStartupSprinkleDefaults.seed);
+                    frame.dataset.mapGlowStartupSpeedMs = String(mapColumnGlowDefaults.startupSpeedMs);
+                    frame.dataset.mapGlowStartupMaxOpacity = String(mapColumnGlowDefaults.startupMaxOpacity);
+                    frame.dataset.mapGlowStartupActiveLines = String(mapColumnGlowDefaults.startupActiveLines);
+                    frame.dataset.mapGlowStartupLoadMs = String(mapColumnGlowDefaults.startupLoadMs);
+                    frame.dataset.mapGlowInitialRevealDone = 'false';
+                    syncFlashDurationControls();
+                    syncFlashVisualButtons();
+                    syncSweepActionButtons();
+                    syncStartupModeButtons();
+                    if (tuningInputs.mapTuneGlowOpacity) tuningInputs.mapTuneGlowOpacity.value = String(mapColumnGlowDefaults.maxOpacity);
+                    if (tuningInputs.mapTuneGlowLines) tuningInputs.mapTuneGlowLines.value = String(mapColumnGlowDefaults.activeLines);
+                    if (tuningInputs.mapTuneGlowSpeed) tuningInputs.mapTuneGlowSpeed.value = String(mapColumnGlowDefaults.speedMs);
+                    if (tuningInputs.mapTuneGlowLoad) tuningInputs.mapTuneGlowLoad.value = String(mapColumnGlowDefaults.loadMs);
+                    if (tuningInputs.mapTuneGlowSprinkleMs) tuningInputs.mapTuneGlowSprinkleMs.value = String(mapStartupSprinkleDefaults.durationMs);
+                    if (tuningInputs.mapTuneGlowSprinkleStep) tuningInputs.mapTuneGlowSprinkleStep.value = String(mapStartupSprinkleDefaults.stepMs);
+                    if (tuningInputs.mapTuneGlowSprinkleSeed) tuningInputs.mapTuneGlowSprinkleSeed.value = String(mapStartupSprinkleDefaults.seed);
+                    if (tuningInputs.mapTuneGlowStartupSpeed) tuningInputs.mapTuneGlowStartupSpeed.value = String(mapColumnGlowDefaults.startupSpeedMs);
+                    if (tuningInputs.mapTuneGlowStartupOpacity) tuningInputs.mapTuneGlowStartupOpacity.value = String(mapColumnGlowDefaults.startupMaxOpacity);
+                    if (tuningInputs.mapTuneGlowStartupLines) tuningInputs.mapTuneGlowStartupLines.value = String(mapColumnGlowDefaults.startupActiveLines);
+                    if (tuningInputs.mapTuneGlowStartupLoad) tuningInputs.mapTuneGlowStartupLoad.value = String(mapColumnGlowDefaults.startupLoadMs);
+                    syncColumnGlowForMap(map);
+                    syncEffectReadouts();
                 };
                 resetBtn.addEventListener('click', () => {
-                    if (frame.dataset.mapPointerMode === 'flash') {
-                        applyFlashDefaults();
-                        return;
-                    }
-                    applyTrailDefaults();
+                    applyFlashDefaults();
                 });
                 resetField.appendChild(resetBtn);
                 tuningStrip.appendChild(resetField);
-                syncModeScopedTuning = () => {
-                    const isFlashMode = frame.dataset.mapPointerMode === 'flash';
-                    trailTuningGroup.classList.toggle('is-hidden', isFlashMode);
-                    flashTuningGroup.classList.toggle('is-hidden', !isFlashMode);
-                    trailHelp.classList.toggle('is-hidden', isFlashMode);
-                    flashHelp.classList.toggle('is-hidden', !isFlashMode);
-                    resetBtn.textContent = isFlashMode ? 'Reset Flash Defaults' : 'Reset Trail Defaults';
-                };
-                syncModeScopedTuning();
-                controls.appendChild(tuningStrip);
+                resetBtn.textContent = 'Reset Test Defaults';
+                if (testsDock) {
+                    testsDock.appendChild(tuningStrip);
+                } else {
+                    controls.appendChild(tuningStrip);
+                }
             }
 
             const mapControls = controls.querySelectorAll('.map-control[data-map-target]');
             const overlays = map.querySelectorAll('.map-overlay');
+            const categoryDescriptions = controls.querySelectorAll('.map-category-description[data-map-description-target]');
+            let frameFlashTimerId = 0;
+            const triggerFrameCategoryFlash = (targetClass) => {
+                if (!frame) return;
+                const sourceControl = Array.from(mapControls).find(control => control.getAttribute('data-map-target') === targetClass);
+                const flashColor = sourceControl
+                    ? sourceControl.style.getPropertyValue('--map-control-color').trim()
+                    : '';
+                frame.style.setProperty('--map-frame-category-flash-color', flashColor || 'var(--accent)');
+                frame.classList.remove('map-frame-category-flash-active');
+                void frame.offsetWidth;
+                frame.classList.add('map-frame-category-flash-active');
+                if (frameFlashTimerId) {
+                    window.clearTimeout(frameFlashTimerId);
+                }
+                frameFlashTimerId = window.setTimeout(() => {
+                    frame.classList.remove('map-frame-category-flash-active');
+                    frameFlashTimerId = 0;
+                }, 1200);
+            };
+            const setCategoryState = (targetClass, nextState, options = {}) => {
+                overlays.forEach(overlay => {
+                    if (overlay.classList.contains(targetClass)) {
+                        overlay.classList.toggle('is-active', nextState);
+                    }
+                });
+                mapControls.forEach(control => {
+                    if (control.getAttribute('data-map-target') === targetClass) {
+                        control.classList.toggle('is-active', nextState);
+                        control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                    }
+                });
+                categoryDescriptions.forEach(description => {
+                    if (description.getAttribute('data-map-description-target') === targetClass) {
+                        description.classList.toggle('is-active', nextState);
+                    }
+                });
+                if (nextState && options.flashFrame !== false) {
+                    triggerFrameCategoryFlash(targetClass);
+                }
+            };
+            toggleGroups.forEach(toggleGroup => setCategoryState(toggleGroup.targetClass, false, { flashFrame: false }));
             mapControls.forEach(control => {
                 control.addEventListener('click', () => {
                     const target = control.getAttribute('data-map-target');
                     const overlay = Array.from(overlays).find(node => node.classList.contains(target));
                     if (!overlay) return;
                     const nextState = !overlay.classList.contains('is-active');
-                    overlay.classList.toggle('is-active', nextState);
-                    control.classList.toggle('is-active', nextState);
-                    control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                    setCategoryState(target, nextState, { flashFrame: nextState });
                 });
             });
+            const firstToggleGroup = toggleGroups[0];
+            if (firstToggleGroup) {
+                const activateFirstToggleWhenReady = () => {
+                    const hasAnyActive = Array.from(overlays).some(overlay => overlay.classList.contains('is-active'));
+                    if (hasAnyActive) return;
+                    const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
+                    const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
+                    const startupStillPopulating = Boolean(
+                        frame
+                        && frame.dataset.mapGlowInitialRevealDone !== 'true'
+                        && (startupMode === 'sprinkle' || sweepEnabled)
+                    );
+                    if (!startupStillPopulating) {
+                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                        return;
+                    }
+                    let pollCount = 0;
+                    const maxPolls = 500;
+                    const pollReadyState = () => {
+                        const alreadyActive = Array.from(overlays).some(overlay => overlay.classList.contains('is-active'));
+                        if (alreadyActive) return;
+                        const isReady = !frame || frame.dataset.mapGlowInitialRevealDone === 'true';
+                        if (isReady || pollCount >= maxPolls) {
+                            setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                            return;
+                        }
+                        pollCount += 1;
+                        window.setTimeout(pollReadyState, 40);
+                    };
+                    pollReadyState();
+                };
+                window.requestAnimationFrame(() => {
+                    window.requestAnimationFrame(() => {
+                        activateFirstToggleWhenReady();
+                    });
+                });
+            }
         };
 
         const renderFromText = (map, text, label) => {
@@ -1907,24 +3117,40 @@ function softCloseModal() {
                 const resolveToggleCoordinate = (value) => (Number.isInteger(value) ? value + 0.5 : value);
                 const toggleMarkers = toggleLines.map(line => {
                     const parts = line.split('|').map(part => part.trim());
+                    const hasCategoryDescriptionAndTitle = parts.length >= 8
+                        && Number.isFinite(Number(parts[3]))
+                        && Number.isFinite(Number(parts[4]));
                     const hasCategoryAndTitle = parts.length >= 7
                         && Number.isFinite(Number(parts[2]))
-                        && Number.isFinite(Number(parts[3]));
+                        && Number.isFinite(Number(parts[3]))
+                        && !hasCategoryDescriptionAndTitle;
                     const buttonLabel = parts[0] || 'Toggle';
-                    const label = hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel;
-                    const rawX = Number(hasCategoryAndTitle ? parts[2] : parts[1]);
-                    const rawY = Number(hasCategoryAndTitle ? parts[3] : parts[2]);
+                    const description = hasCategoryDescriptionAndTitle ? (parts[1] || '') : '';
+                    const label = hasCategoryDescriptionAndTitle
+                        ? (parts[2] || buttonLabel)
+                        : (hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel);
+                    const rawX = Number(hasCategoryDescriptionAndTitle ? parts[3] : (hasCategoryAndTitle ? parts[2] : parts[1]));
+                    const rawY = Number(hasCategoryDescriptionAndTitle ? parts[4] : (hasCategoryAndTitle ? parts[3] : parts[2]));
                     const x = resolveToggleCoordinate(rawX);
                     const y = resolveToggleCoordinate(rawY);
-                    const shape = (hasCategoryAndTitle ? parts[4] : parts[3] || 'circle').toLowerCase();
-                    const colorToken = (hasCategoryAndTitle ? parts[5] : parts[4] || 'accent').toLowerCase();
-                    const size = Number(hasCategoryAndTitle ? parts[6] : parts[5]) || 4;
+                    const shapeRaw = hasCategoryDescriptionAndTitle
+                        ? parts[5]
+                        : (hasCategoryAndTitle ? parts[4] : parts[3]);
+                    const colorRaw = hasCategoryDescriptionAndTitle
+                        ? parts[6]
+                        : (hasCategoryAndTitle ? parts[5] : parts[4]);
+                    const shape = (shapeRaw || 'circle').toLowerCase();
+                    const colorToken = (colorRaw || 'accent').toLowerCase();
+                    const size = Number(hasCategoryDescriptionAndTitle
+                        ? parts[7]
+                        : (hasCategoryAndTitle ? parts[6] : parts[5])) || 4;
                     const categoryColorToken = `--map-toggle-${slugify(buttonLabel)}`;
                     const color = colorToken === 'accent'
                         ? `var(${categoryColorToken}, var(--map-accent))`
                         : colorToken;
                     return {
                         buttonLabel,
+                        description,
                         label,
                         x,
                         y,
@@ -1943,10 +3169,13 @@ function softCloseModal() {
                         group = {
                             targetClass: marker.targetClass,
                             buttonLabel: marker.buttonLabel,
+                            description: marker.description || '',
                             markers: []
                         };
                         toggleGroupsMap.set(marker.targetClass, group);
                         toggleGroups.push(group);
+                    } else if (!group.description && marker.description) {
+                        group.description = marker.description;
                     }
                     group.markers.push(marker);
                 });
@@ -2014,6 +3243,55 @@ function softCloseModal() {
                 renderFromImage(map, mapSrc, mapSrc);
             }
         });
+        syncMapTestsVisibility();
+        const isPortalModalOpen = () => {
+            const modal = document.getElementById('portalModal');
+            if (!modal) return false;
+            if (modal.style.display === 'flex' || modal.style.display === 'block') return true;
+            return window.getComputedStyle(modal).display !== 'none';
+        };
+        const isTextInputLike = (node) => {
+            if (!node || !(node instanceof HTMLElement)) return false;
+            const tag = node.tagName;
+            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || node.isContentEditable;
+        };
+        if (!window.__tsiMapTestsHotkeyBound) {
+            window.addEventListener('keydown', (event) => {
+                if (event.defaultPrevented) return;
+                if (!event.ctrlKey || !event.shiftKey || event.altKey || event.metaKey) return;
+                if (String(event.key || '').toLowerCase() !== 'm') return;
+                if (isTextInputLike(event.target)) return;
+                if (!isPortalModalOpen()) return;
+                event.preventDefault();
+                const nextVisible = !mapTestsVisible;
+                setMapTestsVisible(nextVisible);
+                showMapTestsToggleNotice(nextVisible);
+            });
+            window.__tsiMapTestsHotkeyBound = true;
+        }
+        if (!window.__tsiMapTestsObserverBound && typeof MutationObserver === 'function') {
+            const testSettingsObserver = new MutationObserver((mutations) => {
+                let shouldSync = false;
+                for (let i = 0; i < mutations.length; i += 1) {
+                    const added = mutations[i].addedNodes;
+                    for (let j = 0; j < added.length; j += 1) {
+                        const node = added[j];
+                        if (!(node instanceof HTMLElement)) continue;
+                        if (
+                            node.matches('[data-map-tests], [data-test-settings]')
+                            || node.querySelector('[data-map-tests], [data-test-settings]')
+                        ) {
+                            shouldSync = true;
+                            break;
+                        }
+                    }
+                    if (shouldSync) break;
+                }
+                if (shouldSync) syncMapTestsVisibility();
+            });
+            testSettingsObserver.observe(document.body, { childList: true, subtree: true });
+            window.__tsiMapTestsObserverBound = true;
+        }
     }
 
     function initHoldToClear() {

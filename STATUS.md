@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-02-19
+Last updated: 2026-02-20
 Latest verification: targeted Playwright pipeline/map smoke check on 2026-02-16 (local static server + browser run): section presence (`#overview`, `#pipeline`, `#engagement`, `#team`), MD map dot render, MD/legacy toggle behavior, override-dot presence, responsive checks at `900px` and `600px`, and browser console error capture.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
@@ -76,6 +76,35 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Retuned trail mode into a softer ghost profile (higher stamp density, lower opacity, blur, and longer fade) for a smoother lingering afterimage.
 - [Done] Split map tuning controls by active pointer mode: trail-only controls are hidden in `Hover Flash` mode and flash-only controls are hidden in trail mode.
 - [Done] Replaced manual `Hover Flash` tuners with varied presets (`Compact`, `Balanced`, `Wide`, `Lingering`) and mode-scoped reset behavior.
+- [Done] Updated `Hover Flash` `Compact` preset to strict single-dot behavior (`radiusCells: 0.5`, `centerOnly`) and aligned helper copy.
+- [Done] Added combinable flash linger tuning in `Hover Flash` mode: duration test buttons (`Linger 190/260/340/460/620`) plus `Lingering Ms` text input for custom fade length on top of any flash preset (including `Compact`).
+- [Done] Added autonomous rolling column glow sweep (left-to-right) using strict two-column state (`lead` + `fading`) so no more than two columns glow/fade simultaneously.
+- [Done] Added `Glow Tests` controls in flash mode, including `Glow Tail` (compact single-dot linger trail on/off).
+- [Done] Removed frame-only vertical sheen sweep effect from map frame and retargeted glow tuning controls to the map column-sweep effect (`Max Opacity`, `Active Lines`, `Speed Ms`).
+- [Done] Added low-cost color-aware hover flash (water/land/override-aware flash color variables) and updated linger test buttons to efficient longer timings (`460/720/960/1440/2000` ms).
+- [Done] Added `Force Sweep On` test toggle to bypass reduced-motion gating for local glow-sweep verification.
+- [Done] Fixed invisible glow-sweep regression by removing CSS hard-`opacity: 0` override on column lines and driving line opacity via inline runtime styles.
+- [Done] Removed the visible MD source label above the pipeline map, added delayed first-category default activation (only first toggle on after map render), softened active-toggle pulse timing, added click-helper copy, and added below-map category descriptions sourced from optional `world-map.md` toggle description fields.
+- [Done] Reworked MD category controls into a fixed two-column map-control grid (`toggle` + `description` per row), with equal-size toggle buttons stacked vertically and category explanations aligned to the right of each toggle.
+- [Done] Adjusted category row sizing and typography: reduced toggle/button height, set explanation text to site body scale, allowed explanation rows to auto-grow only when wrapping, and added one-shot map-frame color flash on category activation.
+- [Done] Softened/slowed category activation frame flash, made explanation cells visually collapsed-left while inactive and expand on activation, and restored startup sprinkle reveal to run even when sweep is disabled.
+- [Done] Reduced frame-to-map inner gap sizing by half (`padding` + gap ring), added synchronized inner-gap flash fill keyed to category color mix, and tightened collapsed description behavior to fully fold left until active.
+- [Done] Locked category control rows to fixed heights and constrained description text to single-line ellipsis so collapsed/expanded states change only width (no vertical growth/layout shift).
+- [Done] Normalized category row box-model sizing (`box-sizing: border-box`) for both toggle buttons and description cells so rendered heights match exactly at all breakpoints.
+- [Done] Slowed description panel expand/collapse timing and aligned it with frame flash animation duration/curve for synchronized toggle feedback.
+- [Done] Retimed toggle-controlled map overlays to match panel/frame timing (`1.1s` cubic-bezier), including delayed `visibility` hide so markers fade out smoothly instead of cutting off.
+- [Done] Updated pipeline-only background header layering so `03 \` top-aligns with `Pipeline` title and first pipeline content overlaps the title area by roughly half without reserving extra layout space.
+- [Done] Increased pipeline background `Pipeline` title scale and retuned first-object overlap so the opening content block covers roughly half of the larger background title across breakpoints.
+- [Done] Forced pipeline title layer deeper into the background (`isolation` + lower header opacity + higher foreground z-index) and made the first content block background more opaque so foreground content clearly covers the title.
+- [Done] Fine-tuned pipeline first-card overlap to increase watermark visibility target (~40% vertical title visibility) by relaxing negative top offsets per breakpoint.
+- [Done] Increased pipeline background title scale further and reduced its intensity (lower opacity + fainter color mix) to keep it large but clearly watermark-like behind content.
+- [Done] Removed the custom pipeline watermark header treatment entirely (markup + CSS overrides), returning pipeline to clean top content flow without redundant in-section title text.
+- [Done] Reduced pipeline top whitespace after header removal by adding pipeline-specific top padding overrides (`56/44/36px` desktop/tablet/mobile).
+- [Done] Added a dedicated thin gold nav/content divider and removed tab bottom offset so tab pills sit directly on the divider line.
+- [Done] Removed residual nav bottom inset by zeroing nav bottom padding and applying a slight tab-row bottom overlap (`-1px`) so tabs physically touch the gold divider.
+- [Done] Applied the pipeline no-header title treatment to `mandate`, `rubric`, `engagement`, and `team` by removing in-section header blocks and sharing the reduced top-padding profile (`56/44/36px`) across those sections.
+- [Done] Updated primary nav tab interaction model: inactive tabs now render shorter by default, hover state keeps outline glow plus smooth scale-up, and active tabs expand taller/wider so neighboring tabs shift aside.
+- [Done] Fixed tab-section startup scroll drift by forcing hash-tab activation to reset viewport to top and setting browser history scroll restoration to `manual` in `js/main.js`.
 - [Done] Map assets added: `assets/world-map.md`, `assets/world-map.png`, `assets/world-map.svg`.
 - [Done] Map source artifact retained: `World_map_without_Antarctica.svg`.
 
@@ -190,6 +219,51 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-19: Softened trail rendering profile by increasing print pool size and overlap, reducing per-print opacity, extending fade duration, and adding blur/soft radial print styling for a true ghost-trail look.
 - [Done] 2026-02-19: Added mode-scoped tuning UI visibility and reset behavior so only active-mode controls are shown (trail vs flash), preventing cross-mode control clutter.
 - [Done] 2026-02-19: Replaced hover-flash live controls with curated presets (including +/- one-step size variants) and mapped runtime radius/duration/intensity/grid timing to selected preset values.
+- [Done] 2026-02-19: Updated `Flash Compact` hover behavior to use opposite land/water flash colors (land flashes with water palette, water flashes with land palette) while keeping non-compact flash palettes unchanged.
+- [Done] 2026-02-19: Removed non-compact flash preset options from map controls and runtime defaults; `Hover Flash` now runs compact-only while preserving compact linger and glow tuning controls.
+- [Done] 2026-02-19: Refined compact opposite-color flash to use exact base terrain colors (`--map-dot-water` / `--map-dot-land`) instead of accent-tinted opposite colors.
+- [Done] 2026-02-19: Removed compact flash luminance boost by disabling invert/brightness/saturation filtering for compact opposite-color flash (WAAPI + fallback paths), so compact now displays only color swap.
+- [Done] 2026-02-19: Added live glow-sweep cost meter in flash `Glow Tests` (line updates/s, DOM writes/s, and relative load vs defaults) and fixed unmatched `var(...)` parentheses in `mapDotHoverFlash` keyframes that were breaking downstream tab/layout CSS parsing.
+- [Done] 2026-02-19: Updated map column sweep so each new lead column quickly reveals top-to-bottom before entering trailing fade columns, replacing instant full-height lead-column pop-in.
+- [Done] 2026-02-19: Added `Load Ms` glow control for vertical lead-column top-to-bottom reveal speed, with dataset/default/reset wiring (`20..600ms`) independent of column sweep step speed.
+- [Done] 2026-02-19: Added one-time initial map reveal tied to the sweep lead edge by clipping the SVG left-to-right during first sweep pass, then clearing clip and marking completion (`mapGlowInitialRevealDone`) so subsequent sweeps run normally.
+- [Done] 2026-02-19: Added first-sweep-only startup speed control (`Startup Speed Ms`) that drives initial sweep cadence before auto-returning to normal `Speed Ms`; added always-visible map test dock near map title plus dynamic per-effect diagnostics (`Trail`, `Flash Compact`, `Sweep`, `Startup Sweep`) that update as tuning values change.
+- [Done] 2026-02-19: Reorganized map test UI into labeled groups (`Flash Tail Tests`, `Sweep Actions`, `Sweep Tests`, `Linger Tests`, `Effect Readout`), removed bottom-row debug buttons next to map category toggles (`Hover Flash` + `Full Layer %`), forced flash-mode behavior with `Glow Tail`, replaced `Force Sweep On` with `Reset Sweep` (replays first-load draw), and removed legacy trail-only tuning fields from the test panel.
+- [Done] 2026-02-19: Split sweep tuning into two full rows: `Startup Sweep Tests` (`Max Opacity`, `Active Lines`, `Speed Ms`, `Load Ms`) applied only during first-pass draw, and `Sweep Tests` with the same fields applied to ongoing post-startup sweep behavior.
+- [Done] 2026-02-19: Moved `Linger Tests` directly under `Flash Tail Tests` (`Glow Tail`) so linger controls are scoped to compact flash/glow-tail tuning, and adjusted sweep trailing fade by terrain mix (slightly longer decay over land-heavy columns, slightly faster decay over ocean-heavy columns).
+- [Done] 2026-02-19: Added `Tail = Load` sweep action toggle that binds trailing-line reveal/fade timing to `Load Ms`; when enabled, trailing lines animate with slight per-line vertical offsets (not identical heights) for clearer staggered tail layering.
+- [Done] 2026-02-19: Lowered sweep speed minimums to `8ms` for both `Startup Sweep Tests` and `Sweep Tests` (runtime clamps + UI input clamps + readout math), enabling faster-than-20ms sweep testing.
+- [Done] 2026-02-19: Prevented vertical reveal pop-in at high `Load Ms` by scheduling sweep steps with effective phase cadence `max(Speed Ms, Load Ms)` (startup and runtime), so a column’s top-to-bottom reveal can finish before the next reassignment.
+- [Done] 2026-02-19: Refined `Tail = Load` tail-line geometry so middle/trailing lines animate top-to-bottom with `y=0` anchoring (no top blank pixels) and apply only bottom-edge staggering for final fade-line level separation.
+- [Done] 2026-02-19: Updated map glow defaults to current test baseline (`Startup: opacity 1, lines 3, speed 20, load 20`; `Runtime: opacity 0.1, lines 3, speed 1200, load 600`; `Flash linger 80ms`) and added sweep burn-dissipation behavior where the prior trailing column fades top-to-bottom instead of popping out.
+- [Done] 2026-02-19: Added `Lead Full` sweep action toggle to force head-line opacity to `1.0` independently of startup/runtime `Max Opacity` settings.
+- [Done] 2026-02-19: Removed vertical reveal/scroll behavior from middle sweep columns; middle columns now render full-height and fade by opacity only, while only the lead column loads top-to-bottom and trailing burn dissipation remains top-to-bottom.
+- [Done] 2026-02-19: Added optional thin front-edge sweep indicator (`Edge Line`) under `Sweep Actions`, rendering a narrow solid lead-edge line in the inter-dot column gap; wired defaults/reset/readout state (`edge-line on/off`).
+- [Done] 2026-02-19: Added test-mode `Sweep On` toggle under `Sweep Actions` to fully enable/disable sweep rendering without losing settings; wired dataset defaults/reset and updated effect readout to report disabled state when off.
+- [Done] 2026-02-19: Added startup reveal mode option (`Startup Sweep` / `Startup Sprinkle`) with testing controls (`Sprinkle Ms`, `Step Ms`, `Seed`) and deterministic seeded sprinkle runtime that starts from blank dots and reveals in batches; startup readout now reports mode-specific diagnostics.
+- [Done] 2026-02-19: Switched startup defaults to the selected sprinkle baseline (`Startup Mode=Sprinkle`, `Sprinkle Ms=1500`, `Step Ms=20`, `Seed=37`) and aligned reset/default initialization to the same values.
+- [Done] 2026-02-19: Set sweep default to off (`Sweep On` inactive by default, including reset defaults) and hid map test dock from end users by default; added private reveal toggle (`Ctrl+Shift+M`) plus optional query flag (`?maptests=1` / `?maptests=0`) with localStorage persistence.
+- [Done] 2026-02-19: Scoped test-panel keyboard toggle so `Ctrl+Shift+M` only works while `TSI INTERNAL` modal (`#portalModal`) is open/visible on screen.
+- [Done] 2026-02-19: Fixed hidden test-dock reliability by enforcing inline display sync (`grid`/`none`) instead of relying only on `[hidden]` (which was being overridden by CSS), removed default persisted visibility (reload now hides unless explicit `?maptests=1`), and added on-screen hotkey confirmation toast (`Map test settings shown/hidden`).
+- [Done] 2026-02-19: Promoted test-panel visibility to a site-global persistent setting controlled only by `Ctrl+Shift+M` while `TSI INTERNAL` modal is open; visibility now applies to both `[data-map-tests]` and `[data-test-settings]`, syncs for dynamically injected panels, and URL query overrides were removed to prevent accidental exposure paths.
+- [Done] 2026-02-20: Updated MD map toggle UX by removing the source label line, activating only the first category by default after render, adding helper click behavior text, and wiring optional category descriptions from `assets/world-map.md` into dim/active synced readouts below the map.
+- [Done] 2026-02-20: Updated category-toggle layout to a 2-column by category-count grid (`toggle` left, explanation right), enforced uniform toggle width/height, and moved description activation state sync to inline control rows.
+- [Done] 2026-02-20: Tuned map category rows to shorter controls with body-sized explanation text (`0.8rem`), made description cells match button height by default with wrap-driven growth, and added non-persistent frame-edge flash keyed to active category color on toggle-on events.
+- [Done] 2026-02-20: Slowed frame-flash animation for gentler category activation feedback, set inactive explanation boxes to collapsed-left state until active, and fixed startup sprinkle regression by allowing sprinkle intro to execute once even when `Sweep On` is off.
+- [Done] 2026-02-20: Halved map-frame inner spacing (`16->8`, `12->6`), added in-sync inner gap flash layer that uses a secondary/tinted category color mix, and ensured startup sprinkle still runs when sweep remains off.
+- [Done] 2026-02-20: Stabilized map control layout by setting fixed grid row heights per breakpoint and enforcing one-line description truncation, preventing map position shifts while toggle descriptions expand/collapse horizontally.
+- [Done] 2026-02-20: Corrected residual button/description height mismatch by applying border-box sizing to both cell types under the MD map control grid.
+- [Done] 2026-02-20: Retimed description expansion transitions to `1.1s` with the same cubic-bezier curve used by frame/gap flash animations so text-panel motion and frame color effects run in sync.
+- [Done] 2026-02-20: Updated `.map-overlay` show/hide transitions to the same `1.1s` easing profile as toggle/text panels, with deferred visibility change on hide for clean fade-out.
+- [Done] 2026-02-20: Adjusted `#pipeline` background header alignment (`align-items: flex-start`, line-height tuning) and applied responsive negative top margins on `.pipeline-note` to partially cover the large title text while keeping pipeline content in normal document flow.
+- [Done] 2026-02-20: Upscaled pipeline background title sizing (`5.2rem` desktop, `4.4rem` tablet, `3.2rem` mobile) and increased responsive negative top offsets on `.pipeline-note` (`-86/-70/-48`) to achieve a stronger half-cover effect.
+- [Done] 2026-02-20: Strengthened foreground-over-background read by isolating `#pipeline` stacking context, raising non-header content to `z-index:2`, reducing header watermark opacity, and setting a denser pipeline-note background blend so the card sits visually above the title.
+- [Done] 2026-02-20: Retuned pipeline-note overlap offsets from `-86/-70/-48` to `-70/-58/-40` (desktop/tablet/mobile) to show more of the background `Pipeline` title while preserving foreground dominance.
+- [Done] 2026-02-20: Upscaled background `Pipeline` title to `6.6/5.6/4.2rem` (desktop/tablet/mobile) and lowered header opacity/color intensity (`0.10/0.09` + softer color-mix) for a larger, fainter watermark presentation.
+- [Done] 2026-02-20: Removed pipeline in-section header block from `index.html` and deleted all pipeline-specific background-header/overlap CSS so the tab bar remains the only section label and pipeline content starts unobstructed.
+- [Done] 2026-02-20: Tightened pipeline section vertical start position by overriding `#pipeline` top padding across breakpoints to eliminate residual empty space above the first content block.
+- [Done] 2026-02-20: Replaced nav bottom border with explicit gold separator (`nav::after`) and set `.header-index` bottom padding to `0` so tab controls rest directly on the separator.
+- [Done] 2026-02-20: Finalized tab-to-divider contact by updating nav padding to `10px ... 0` (desktop/mobile breakpoints) and setting `.header-index` bottom margin to `-1px`.
 
 ## Active Focus
 - Delivery target: Friday, February 20, 2026 (end of day, local).

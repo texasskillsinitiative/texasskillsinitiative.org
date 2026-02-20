@@ -1,5 +1,24 @@
 .cursor/
 .archive/
-.codex_index_patch.diff
 .vscode/
 snapshot/
+.codex_index_patch.diff
+
+# OS and local temp artifacts
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+temp
+
+# Local editor/workspace files
+*.code-workspace
+
+# Local-only governance/session docs
+AGENTS.md
+AGENTS-LOG.md
+STATUS.md
+PACKETS.md
+
+# Local-only Apps Script backend workspace
+form-backend/

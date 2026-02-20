@@ -519,3 +519,335 @@
 - Troubleshooting suggestions: Start the next session on pipeline/map final QA using the updated Priority 1 block in `STATUS.md`, then proceed through remaining `0.6` checks in order.
 - Resolutions/outcomes: Session closed with map interaction controls simplified (preset-driven flash mode) and roadmap sequencing explicitly aligned to next-day completion goals.
 - Commit hash(es): recorded in clean-exit handoff summary.
+
+### 2026-02-19 11:57:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reviewed current hover-flash runtime in `js/main.js`, confirmed compact preset still flashed center + cardinal neighbors, changed `Flash Compact` preset radius from `1.0` to `0.5` for single-dot center-only behavior, and updated flash help copy to match the new behavior.
+- Troubleshooting suggestions: If you also want to remove the center-dot fade (not just neighbors), shorten `compact.durationMs` or adjust `flashDot` keyframes to a harder snap-off.
+- Resolutions/outcomes: Compact flash now targets a single dot only, eliminating the plus-shape neighbor effect while keeping current fade-back animation.
+- Commit hash(es): none
+
+### 2026-02-19 12:00:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Hardened `Flash Compact` behavior in `js/main.js` by adding preset flag `centerOnly`, persisting it via frame dataset, and enforcing center-only flash emission path that clears any active flash animations before flashing the current center cell.
+- Troubleshooting suggestions: If stale behavior persists, hard-refresh the browser (Ctrl+F5) to load updated `js/main.js`; if needed, append a cache-bust query to script URL in `index.html`.
+- Resolutions/outcomes: Compact now behaves as strict one-dot-at-a-time flash, preventing plus-pattern carryover from overlapping fade/jitter events.
+- Commit hash(es): none
+
+### 2026-02-19 12:05:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added combinable flash-duration tuning for map hover flash in `js/main.js`: introduced duration bounds (`80..2000ms`), added `Linger` test-button row (`190/260/340/460/620`) in flash mode controls, added `Lingering Ms` text input for manual duration override, and synchronized preset/reset handlers so duration controls work on top of any base preset including `Flash Compact`; added companion button styling in `css/main.css`.
+- Troubleshooting suggestions: If linger feels too persistent with compact, lower `Lingering Ms` first before changing compact intensity; if control state appears stale, hard-refresh browser cache.
+- Resolutions/outcomes: Flash controls now support compact single-dot shape with independently adjustable fade duration using both quick test buttons and manual text entry.
+- Commit hash(es): none
+
+### 2026-02-19 12:11:15 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented a rolling map-column glow sweep in `js/main.js` and `css/main.css` using a two-rect SVG overlay state machine (`lead` column + `fading` column) that advances left-to-right on interval and restarts cleanly per map re-render.
+- Troubleshooting suggestions: If sweep speed feels too fast/slow, tune `mapColumnGlowDefaults.stepMs` in `js/main.js`; if contrast needs adjustment, tune `.map-column-glow--lead`/`--fade` fills in `css/main.css`.
+- Resolutions/outcomes: Map now shows continuous left-to-right column glow progression with overlap/fade behavior while ensuring no more than two columns are in glow/fade state simultaneously.
+- Commit hash(es): none
+
+### 2026-02-19 12:14:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated flash-mode behavior in `js/main.js` so compact single-dot mode can keep lingering tail drag (`mapFlashCompactGlow`) instead of forcibly clearing prior flashes; added visible `Flash FX Tests` button category (`Glow Tail`, `Sliding Flash`) in map controls; wired `Sliding Flash` to runtime column-sweep enable/disable (`syncColumnGlowForMap`); added matching styles in `css/main.css`; and aligned flash help copy/reset behavior.
+- Troubleshooting suggestions: If compact looks too busy, toggle `Glow Tail` off to restore strict one-dot/no-trail behavior; if ambient sweep is distracting, toggle `Sliding Flash` off.
+- Resolutions/outcomes: You can now run `Flash Compact` with lingering tail behavior and explicitly test/toggle both glow-tail and sliding-flash visual modes from visible control buttons.
+- Commit hash(es): none
+
+### 2026-02-19 12:21:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Per user clarification, removed old frame-only vertical sheen animation from `css/main.css`, removed legacy `Sliding Flash` toggle wiring from `js/main.js`, and added direct glow-sweep test controls (`Max Opacity`, `Active Lines`, `Speed Ms`) under `Glow Tests`, with live runtime reapplication through `syncColumnGlowForMap`.
+- Troubleshooting suggestions: If sweep feels too dense, reduce `Active Lines`; if it feels harsh, lower `Max Opacity`; if it looks jittery, raise `Speed Ms`.
+- Resolutions/outcomes: Controls now target the map column-sweep effect itself (not frame sheen), and the unrelated vertical frame animation is removed.
+- Commit hash(es): none
+
+### 2026-02-19 12:25:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated hover flash in `js/main.js`/`css/main.css` to be color-aware per dot type via precomputed flash color variables (`--map-dot-hover-flash-from/mid/to`) with WAAPI + keyframe fallback support; updated linger test button values to `460/720/960/1440/2000` ms.
+- Troubleshooting suggestions: If override dots feel too bright, reduce the override flash `color-mix` ratios in `createDot`; if motion feels too long, lower `Lingering Ms` or use the lower linger test buttons.
+- Resolutions/outcomes: Hover flash now responds to underlying map color classes without per-frame pixel sampling, and linger presets now cover longer ranges with cleaner interval spacing.
+- Commit hash(es): none
+
+### 2026-02-19 13:10:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `Force Sweep On` toggle in `Glow Tests` (`js/main.js`) to explicitly bypass the `prefers-reduced-motion` gate for map column-sweep testing; wired visual state sync and reset-to-default behavior (`force off`) for the new toggle.
+- Troubleshooting suggestions: Leave `Force Sweep On` off for normal accessibility behavior; enable it only while validating sweep visuals under reduced-motion environments.
+- Resolutions/outcomes: You now have an explicit on-control to run the vertical map-line sweep even when reduced-motion is active in browser/OS settings.
+- Commit hash(es): none
+
+### 2026-02-19 13:17:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Investigated no-visible-effect report for `Force Sweep On`; found `.map-column-glow--line { opacity: 0; }` CSS rule suppressing runtime opacity updates; removed hard opacity from CSS and switched JS sweep updates to inline `style.opacity` assignments for deterministic visibility.
+- Troubleshooting suggestions: If sweep is still subtle after fix, raise `Max Opacity`, increase `Active Lines`, and lower `Speed Ms`; then hard-refresh to clear stale CSS.
+- Resolutions/outcomes: Force toggle now has visible impact because glow-line opacity is no longer pinned to zero by stylesheet precedence.
+- Commit hash(es): none
+
+### 2026-02-19 13:25:58 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated compact hover flash color logic in `js/main.js` so center-only (`Flash Compact`) flashes with the opposite terrain palette (land uses water flash palette; water uses land flash palette), added per-dot opposite palette variables during dot creation, and wired non-WAAPI fallback runtime variables; updated `mapDotHoverFlash` keyframes in `css/main.css` to consume runtime flash vars.
+- Troubleshooting suggestions: If compact colors appear unchanged, hard-refresh (`Ctrl+F5`) to clear stale CSS/JS; if fallback browsers show residual color between flashes, reduce `Lingering Ms` and retest.
+- Resolutions/outcomes: Compact cursor flash now visibly inverts land/water palette while non-compact flash behavior remains unchanged.
+- Commit hash(es): none
+
+### 2026-02-19 13:35:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed non-compact hover flash presets from `js/main.js` by making `mapFlashPresetDefaults` compact-only, removing preset-button render/sync wiring from flash controls, and updating helper copy to describe compact-only behavior while leaving `Lingering Ms`, linger test buttons, `Glow Tail`, and `Glow Tests` controls intact.
+- Troubleshooting suggestions: If old preset buttons still appear, hard-refresh (`Ctrl+F5`) to load updated script bundle.
+- Resolutions/outcomes: Flash controls now expose only compact behavior, with all compact adjustment controls preserved and no other map effects changed.
+- Commit hash(es): none
+
+### 2026-02-19 13:37:47 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated compact opposite flash palette in `js/main.js` to remove accent tinting and use exact opposite base terrain colors by setting `flashMidOpposite`/`flashToOpposite` to `var(--map-dot-water)` or `var(--map-dot-land)` based on the underlying dot type.
+- Troubleshooting suggestions: If red/blue accent tones still appear, hard-refresh (`Ctrl+F5`) to clear stale JS cache.
+- Resolutions/outcomes: Compact flash now swaps directly between land/water base colors without accent color injection.
+- Commit hash(es): none
+
+### 2026-02-19 13:42:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Disabled compact flash filter boost in `js/main.js` by adding `suppressFilter` option to `flashDot` and enabling it for compact center-only emission; extended runtime flash variable reset/set to include filter vars; updated `mapDotHoverFlash` keyframes in `css/main.css` to read runtime filter vars so fallback path also renders compact with no brightness/invert/saturation boost.
+- Troubleshooting suggestions: If flashes still look bright, hard-refresh (`Ctrl+F5`) to ensure updated CSS/JS are loaded.
+- Resolutions/outcomes: Compact flash now renders as pure opposite-color swap with no extra luminance lift.
+- Commit hash(es): none
+
+### 2026-02-19 13:50:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a live glow cost meter in `js/main.js` flash controls (`Glow Tests`) that reports line updates/s, DOM writes/s, and relative load vs defaults; added supporting tier styles in `css/main.css`; fixed two unmatched parentheses in `mapDotHoverFlash` keyframe `fill` var-chains in `css/main.css`, restoring CSS parse integrity for downstream tab/layout rules.
+- Troubleshooting suggestions: If tabs still appear as full-scroll/no borders, hard-refresh (`Ctrl+F5`) to load corrected CSS; verify no stale cached stylesheet is served.
+- Resolutions/outcomes: Glow controls now expose live performance cost, and tab styling/section targeting rules are no longer impacted by keyframe syntax breakage.
+- Commit hash(es): none
+
+### 2026-02-19 14:51:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated column glow runtime in `js/main.js` to animate the lead sweep line top-to-bottom on each step (`revealLeadLine`) while keeping trailing columns as full-height fade lines; added `leadRafId` tracking and cancellation in `stopColumnGlow` to avoid stale animation frames during reset/restart.
+- Troubleshooting suggestions: If reveal feels too fast/slow, tune `revealMs` clamp in `revealLeadLine` (`40..140ms`) relative to `Speed Ms`.
+- Resolutions/outcomes: New sweep columns now populate from top to bottom quickly instead of appearing instantly at full height.
+- Commit hash(es): none
+
+### 2026-02-19 14:55:11 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a dedicated `Load Ms` glow tuning input in `js/main.js` (`mapTuneGlowLoad`) and wired it to frame dataset (`mapGlowLoadMs`) defaults/reset (`mapColumnGlowDefaults.loadMs`), then switched lead-column transition timing to use `loadMs` directly in `revealLeadLine`; updated flash helper copy to include `Load Ms`.
+- Troubleshooting suggestions: If reveal overlap feels too heavy, lower `Load Ms` or raise `Speed Ms`; if reveal is too abrupt, raise `Load Ms` in small steps.
+- Resolutions/outcomes: Vertical top-to-bottom lead-line populate speed is now user-adjustable independently from sweep step speed.
+- Commit hash(es): none
+
+### 2026-02-19 15:00:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented first-load map reveal in `js/main.js` sweep runtime by applying SVG clip-path (`inset`) to the map and advancing it with the lead sweep column (`advanceInitialReveal`) until full width is revealed; persisted completion on frame dataset via `mapGlowInitialRevealDone` so reveal runs once per page load/session; added clip cleanup in `stopColumnGlow`.
+- Troubleshooting suggestions: If reveal does not replay when expected, hard-refresh the page (new frame dataset state starts fresh on reload).
+- Resolutions/outcomes: Initial map load now appears to be drawn by the sweep’s leading edge; subsequent sweeps keep normal behavior without re-hiding the map.
+- Commit hash(es): none
+
+### 2026-02-19 15:09:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added startup-first-sweep control path in `js/main.js` (`mapGlowStartupSpeedMs`) so initial reveal can run at a dedicated speed before reverting to normal `Speed Ms`; added a dedicated test dock near map title (`pipeline-map-tests`) and moved tuning UI there; made sweep/flash tuning visible without requiring `Hover Flash` mode; replaced single sweep-cost text with dynamic per-effect diagnostics (`Trail`, `Flash Compact`, `Sweep`, `Startup Sweep`) and wired live refresh hooks across input/toggle/reset handlers; added supporting styles in `css/main.css`.
+- Troubleshooting suggestions: If you do not see the new dock/readouts near the map title, hard-refresh (`Ctrl+F5`) to clear cached JS/CSS.
+- Resolutions/outcomes: You now have always-visible test fields and live effect-by-effect readouts, plus dedicated startup sweep timing control independent from ongoing sweep speed.
+- Commit hash(es): none
+
+### 2026-02-19 15:19:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked map test UI grouping in `js/main.js` to explicit labeled blocks (`Flash Tail Tests`, `Sweep Actions`, `Sweep Tests`, `Linger Tests`, `Effect Readout`); removed bottom-row debug controls (`Hover Flash` toggle and all `Full Layer %` buttons) by removing their render paths; forced pointer mode to flash in map controls init; replaced `Force Sweep On` with action button `Reset Sweep` that resets `mapGlowInitialRevealDone` and reruns first-load draw; removed trail-only tuning inputs from the dock; updated dynamic readout lines to `Glow Tail`, `Flash Compact`, `Sweep`, and `Startup Sweep`.
+- Troubleshooting suggestions: If old buttons or old grouping still appear, hard-refresh (`Ctrl+F5`) to invalidate cached JS/CSS.
+- Resolutions/outcomes: Test controls are now grouped under clear labels near the map title, readout sits at the bottom, and only map category buttons remain in the user category row.
+- Commit hash(es): none
+
+### 2026-02-19 15:25:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded startup-only sweep control surface in `js/main.js` by adding startup-specific sweep datasets (`mapGlowStartupMaxOpacity`, `mapGlowStartupActiveLines`, `mapGlowStartupSpeedMs`, `mapGlowStartupLoadMs`) and corresponding UI row (`Startup Sweep Tests`) with the same four fields as runtime sweep; retained separate runtime row (`Sweep Tests`) with matching fields; updated sweep runtime phase config so startup values apply only during initial reveal and runtime values apply afterwards.
+- Troubleshooting suggestions: Use `Reset Sweep` after changing startup settings to replay first-pass and verify startup-only effects; if values appear unchanged, hard-refresh (`Ctrl+F5`).
+- Resolutions/outcomes: Startup and ongoing sweep behavior can now be tuned independently using identical field sets on consecutive rows.
+- Commit hash(es): none
+
+### 2026-02-19 15:31:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved `Linger Tests` controls in `js/main.js` to sit directly under `Flash Tail Tests`/`Glow Tail` so linger tuning is grouped with compact flash tail behavior; updated sweep runtime in `startColumnGlow` to precompute per-column land ratios and apply subtle terrain-weighted decay (`land` columns fade slightly slower, `ocean` columns fade slightly faster) while keeping existing startup/runtime sweep controls unchanged.
+- Troubleshooting suggestions: If the terrain fade split feels too subtle or too strong, adjust the internal decay exponents (`landFadeExponent`/`oceanFadeExponent`) in `startColumnGlow`; use `Reset Sweep` to replay startup and compare before/after behavior.
+- Resolutions/outcomes: Linger controls are now scoped under the Glow Tail section, and sweep trailing fade now differentiates by map terrain composition without adding new UI toggles.
+- Commit hash(es): none
+
+### 2026-02-19 15:38:27 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added new `Sweep Actions` toggle button (`Tail = Load`) in `js/main.js` that flips `frame.dataset.mapGlowTailLoadSync`; when enabled, trailing sweep lines use a new `revealTailLine` path with `Load Ms`-based transition timing and slight per-line vertical offsets so tails are not stacked at identical heights; wired default/reset handling (`false`) and readout status (`tail-load-sync on/off`), and added RAF cleanup for tail animations in `stopColumnGlow` and inactive-line branches.
+- Troubleshooting suggestions: If the offset feels too strong or too subtle, tune `offsetY` multiplier (`lineIdx * 0.45`) in `revealTailLine`; use `Reset Sweep` after toggling for easy side-by-side startup comparison.
+- Resolutions/outcomes: You can now force trailing fade/reveal timing to match `Load Ms` with a one-click toggle, while keeping trailing lines slightly vertically staggered as requested.
+- Commit hash(es): none
+
+### 2026-02-19 15:40:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Lowered sweep speed floor in `js/main.js` to allow faster-than-20ms updates by changing startup and runtime speed clamps from `20/60` to `8` across runtime application (`startColumnGlow`), sweep stats/readout math (`calcSweepStats`), and both tuning fields (`Startup Sweep Tests` and `Sweep Tests` input handlers).
+- Troubleshooting suggestions: Browser frame pacing still limits perceived smoothness (sub-16ms intervals can bunch into single frames); use `Load Ms` and `Active Lines` tuning to shape perceived motion rather than relying on very low interval values alone.
+- Resolutions/outcomes: Sweep controls now accept and run at values below `20ms` for both startup and ongoing behavior.
+- Commit hash(es): none
+
+### 2026-02-19 15:43:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Addressed vertical load pop-in by changing phase scheduling in `js/main.js` to use `stepMs = max(Speed Ms, Load Ms)` for both startup and runtime phases (`getPhaseConfig`), including timer handoff after initial reveal completion; updated sweep diagnostics to compute/report load using the same effective cadence and display `effective step` in readout.
+- Troubleshooting suggestions: If you want faster horizontal travel while keeping high `Load Ms`, you will need lower `Load Ms` (or a deeper architectural change with additional line buffers) because current line reuse intentionally waits for reveal completion to avoid pop-in.
+- Resolutions/outcomes: High `Load Ms` no longer causes mid-column vertical reveal truncation/pop as columns advance.
+- Commit hash(es): none
+
+### 2026-02-19 15:50:11 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `Tail = Load` tail animation geometry in `js/main.js` by replacing vertical `y` offsets with top-anchored tails (`y=0` always), and applying slight bottom-only trim (`bottomTrimPx`) based on tail depth so middle/trailing lines still end at slightly different levels without blank pixels at the top.
+- Troubleshooting suggestions: If the bottom stagger is still too subtle/strong, tune `bottomTrimPx` range (`0.2..1.1px`) in `revealTailLine`.
+- Resolutions/outcomes: Leading, middle, and trailing lines now all reveal top-to-bottom with no top-row gaps; fade-stack differentiation remains via bottom-edge staggering.
+- Commit hash(es): none
+
+### 2026-02-19 15:59:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied requested baseline defaults in `js/main.js` (`mapColumnGlowDefaults` now startup `1/3/20/20`, runtime `0.1/3/1200/600`; compact flash linger default `80ms`), added new sweep head option `mapGlowLeadFull` with UI toggle button `Lead Full` under `Sweep Actions`, and reworked sweep tail behavior to feel like dissipating burn-in by always animating middle/trailing lines top-to-bottom plus a dedicated `dissipateRect` pass that fades the previous trailing column top-to-bottom instead of hard pop-out.
+- Troubleshooting suggestions: If burn dissipation lingers too long/short, tune `dissipateMs` multiplier (`phase.loadMs * 1.12`) and/or `targetY` in `dissipateTrailingLine`; if tail reveal is too quick in non-sync mode, tune `tailRevealMs` cap (`phase.loadMs * 0.68`).
+- Resolutions/outcomes: Sweep now keeps top coverage with no blank top pixels, middle/trailing lines animate top-to-bottom, prior trailing line gently dissipates rather than popping, and head-line full-opacity override is independently toggleable.
+- Commit hash(es): none
+
+### 2026-02-19 16:58:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed middle-column vertical reveal path in `js/main.js` by deleting `revealTailLine`/tail RAF reuse and switching non-lead lines to full-height columns with opacity-only fade transitions; kept lead top-to-bottom load and trailing dissipate pass intact, with `Tail = Load` now controlling fade/dissipation timing rather than middle-column vertical growth.
+- Troubleshooting suggestions: If middle fade still feels too abrupt, increase non-sync `tailFadeMs` floor (`80ms`) or enable `Tail = Load` so fade timing follows `Load Ms`.
+- Resolutions/outcomes: Middle columns no longer show scroll/load behavior; they remain fully lit columns that fade, while trailing burn dissipation still disappears top-to-bottom.
+- Commit hash(es): none
+
+### 2026-02-19 17:02:51 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `Edge Line` sweep option in `js/main.js` by introducing dataset flag `mapGlowLeadEdgeLine`, adding a new `Sweep Actions` toggle button, and rendering a narrow dedicated edge rect (`width 0.1`) at the lead column front boundary (`x + 0.95`) with independent visibility; updated reset defaults and sweep readout line to include `edge-line on/off`.
+- Troubleshooting suggestions: If the edge line looks too thick/thin, tune `edgeRect` width (`0.1`) and lead-edge x offset (`+0.95`) in `startColumnGlow`.
+- Resolutions/outcomes: You can now enable a thin, solid front-edge line that rides the sweep head and occupies the pixel-gap region between map columns.
+- Commit hash(es): none
+
+### 2026-02-19 17:07:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added sweep master toggle in `js/main.js` (`mapGlowEnabled`) with new `Sweep On` button in `Sweep Actions`; when off, `startColumnGlow` now stops/removes sweep layer immediately, while retaining current sweep parameters for later re-enable; updated sweep readout text to reflect disabled state and wired reset defaults to restore `Sweep On`.
+- Troubleshooting suggestions: If sweep appears stuck off after toggling, verify `Sweep On` button is active (pressed) and hard-refresh once to clear cached JS.
+- Resolutions/outcomes: You can now turn sweep behavior off/on in test mode without changing any other map settings.
+- Commit hash(es): none
+
+### 2026-02-19 17:12:51 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented startup `Sprinkle` reveal mode in `js/main.js` with deterministic seeded shuffle (`buildSprinkleOrder`) and batch-based reveal from blank map dots; added new startup datasets/defaults (`mapGlowStartupMode`, `mapGlowSprinkleMs`, `mapGlowSprinkleStepMs`, `mapGlowSprinkleSeed`), added `Startup Mode` controls (`Startup Sweep` / `Startup Sprinkle`) plus `Startup Sprinkle Tests` fields (`Sprinkle Ms`, `Step Ms`, `Seed`), and updated startup effect readout to report mode-specific metrics; wired reset/default/state sync and safe cleanup for in-progress sprinkle timers/restoration.
+- Troubleshooting suggestions: If sprinkle feels too chunky, lower `Step Ms` and/or raise `Sprinkle Ms`; if reveal order should change, modify `Seed` (same seed keeps deterministic order).
+- Resolutions/outcomes: You can now choose between sweep startup and sprinkle startup, and tune sprinkle timing/order live from test controls.
+- Commit hash(es): none
+
+### 2026-02-19 17:38:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated startup sprinkle defaults in `js/main.js` to match selected baseline (`durationMs: 1500`, `stepMs: 20`, `seed: 37`), switched startup mode default to `sprinkle` for first-run initialization, and updated reset-default behavior to restore `Startup Sprinkle` mode instead of `Startup Sweep`.
+- Troubleshooting suggestions: If you still see `Startup Sweep` selected after this change, hard-refresh (`Ctrl+F5`) so cached JS is replaced.
+- Resolutions/outcomes: New sessions and reset-default actions now land on the requested startup sprinkle profile from your screenshot.
+- Commit hash(es): none
+
+### 2026-02-19 17:44:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed sweep default state in `js/main.js` to off by default (`mapGlowEnabled='false'`) and aligned reset defaults to keep sweep off; implemented hidden test-panel visibility control using `maptests` query parameter + localStorage key (`tsi-map-tests-visible`) with runtime sync for `[data-map-tests]`; added private keyboard toggle (`Ctrl+Shift+M`) to reveal/hide test controls without exposing them to normal users.
+- Troubleshooting suggestions: Use `?maptests=1` once to force visible test panel (or `Ctrl+Shift+M`), then refresh; if you want to force hide again, use `?maptests=0` or toggle off and refresh.
+- Resolutions/outcomes: End users no longer see the map test dock by default, while you still retain on-demand access and persistent visibility control for testing sessions.
+- Commit hash(es): none
+
+### 2026-02-19 17:48:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restricted the map-test hotkey guard in `js/main.js` by adding `isPortalModalOpen()` check (`#portalModal` visibility) before processing `Ctrl+Shift+M`, so the hidden test panel can only be toggled while the TSI Internal modal is open.
+- Troubleshooting suggestions: If hotkey seems inactive, open `TSI INTERNAL ACCESS` modal first, then press `Ctrl+Shift+M`.
+- Resolutions/outcomes: Keyboard reveal/hide for map test controls is now scoped to the internal-access modal context only.
+- Commit hash(es): none
+
+### 2026-02-19 17:54:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed map test-panel visibility reliability by updating `syncMapTestsVisibility()` and panel creation path to set inline `display` (`grid`/`none`) in addition to `hidden`/`aria-hidden`; removed localStorage-backed persistence default so reload hides tests unless explicit `?maptests=1`; added on-screen toggle confirmation toast (`map-tests-toggle-toast`) shown after successful `Ctrl+Shift+M` toggles.
+- Troubleshooting suggestions: If tests still appear immediately after refresh, verify URL doesn’t include `?maptests=1`; use `?maptests=0` to force-hide for that load.
+- Resolutions/outcomes: Hotkey now gives visible confirmation and the test menu reliably hides on reload for normal users.
+- Commit hash(es): none
+
+### 2026-02-19 17:58:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Finalized site-global test-settings visibility behavior in `js/main.js` by removing URL query override path, restoring localStorage-backed persistence keyed to hotkey intent, extending visibility sync selector to `[data-map-tests], [data-test-settings]`, and adding MutationObserver sync for dynamically added test panels; also removed early return in `initPipelineMap` so global toggle wiring runs even on pages without active map SVGs.
+- Troubleshooting suggestions: If test panels are unexpectedly visible site-wide, open `TSI INTERNAL ACCESS` modal and press `Ctrl+Shift+M` once to turn them off globally.
+- Resolutions/outcomes: Test-panel exposure is now controlled only by the scoped hotkey method, while state applies consistently across pages/locations that include test settings.
+- Commit hash(es): none
+
+### 2026-02-19 18:11:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed map UX adjustments in `index.html`, `js/main.js`, `css/main.css`, and `assets/world-map.md`: removed the visible `MD Map (world-map.md)` label, added helper copy above the map frame, changed MD toggle defaults so all start off and the first category activates shortly after render, softened/slowed active toggle pulse animation, and added below-map category description cards that dim when off and light up with each toggle. Extended MD toggle parsing to support optional `Toggle Category|Category Description|Title|x|y|shape|color|size` rows while preserving legacy toggle formats.
+- Troubleshooting suggestions: For category descriptions, keep at least one row per category with a non-empty `Category Description`; parser uses the first non-empty description found for that category. If the first category does not auto-light, verify no custom script toggles categories before the delayed activation window (~120ms).
+- Resolutions/outcomes: Pipeline map now loads without the source-label artifact, category controls start with only the first category active post-load, click behavior helper text is present, and category meaning text is sourced from `world-map.md` and visually synced to toggle on/off state.
+- Commit hash(es): none
+
+### 2026-02-19 18:16:58 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated MD category control layout in `js/main.js` and `css/main.css` so each category renders as a fixed-size toggle button in the left column with its explanation in the right column (single control grid), producing the requested 2-column by 4-row structure for current four categories; removed separate below-map description host wiring and kept active/inactive sync directly in the grid rows.
+- Troubleshooting suggestions: If text truncation occurs for longer explanations, shorten category description strings in `assets/world-map.md` or increase the second-column width by reducing the fixed toggle column width in `.pipeline-map-controls[data-map-controls=\"md\"]`.
+- Resolutions/outcomes: Category toggles now stack vertically with equal button dimensions, and explanations appear to the right of each toggle with active-state lighting synced to each button.
+- Commit hash(es): none
+
+### 2026-02-19 18:22:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned map category row visuals in `css/main.css` by reducing toggle/control heights, changing category explanation text to site-default body scale, and allowing description rows to auto-grow only when content wraps beyond one line; added one-shot frame flash animation (`map-frame-category-flash-active`) and color variable (`--map-frame-category-flash-color`) on `.pipeline-map-frame`. Wired activation-trigger logic in `js/main.js` so turning a category on flashes the frame briefly using that category color (non-persistent).
+- Troubleshooting suggestions: If flash feels too strong/weak, adjust `@keyframes mapFrameCategoryFlash` opacity/shadow mixes or duration (`0.42s`) in `css/main.css`; if you want the initial auto-enabled category to skip flash, pass `{ flashFrame: false }` to the delayed first-category activation call.
+- Resolutions/outcomes: Category control rows are more compact, explanation text matches general site sizing, rows keep button-height by default while supporting wrapped overflow growth, and each category activation now gives a short color-keyed frame flash.
+- Commit hash(es): none
+
+### 2026-02-19 18:27:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Softened category activation feedback by extending and lowering intensity of `mapFrameCategoryFlash` in `css/main.css` and aligning JS flash-class cleanup timing to new duration (`900ms`). Implemented collapsed-left inactive description behavior (`max-width` collapse + hidden text) that expands on active state in the controls grid. Fixed startup sprinkle regression in `js/main.js` by allowing one-time sprinkle startup to run even when sweep is disabled (`mapGlowEnabled=false`), with dedicated sprinkle-only runtime tracking/cleanup and `mapGlowInitialRevealDone` completion update.
+- Troubleshooting suggestions: If collapsed descriptions feel too narrow, increase inactive `max-width` in `.map-category-description`; if startup sprinkle still doesn’t appear, confirm `Startup Mode` is `Startup Sprinkle` and `mapGlowInitialRevealDone` is reset via `Reset Sweep`.
+- Resolutions/outcomes: Activation flash is gentler/slower, description boxes stay collapsed until toggled on, and sprinkle intro loads again with sweep off.
+- Commit hash(es): none
+
+### 2026-02-19 18:32:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Halved map frame inner spacing by changing `.pipeline-map-frame` padding from `16px` to `8px` (and mobile `12px` to `6px`) in `css/main.css`; added a dedicated in-frame gap flash layer (`.map-frame-gap-flash-layer`) injected from `js/main.js` and animated in sync with the existing outer frame flash class. Tuned collapsed description behavior to fully fold left (`max-width: 0`, zero horizontal padding when inactive) and expand only when active. Confirmed startup sprinkle code path remains available when sweep is disabled and retained syntax-valid `js/main.js`.
+- Troubleshooting suggestions: If gap flash is too subtle/strong, adjust `@keyframes mapFrameCategoryGapFlash` border color mix percentage; if collapsed boxes should peek slightly while inactive, raise inactive `max-width` from `0` to a small value.
+- Resolutions/outcomes: The blank gap is now half-sized, the gap itself flashes in sync with frame activation using a secondary/tinted category color, descriptions collapse hard-left until activated, and sprinkle startup remains functional with sweep off.
+- Commit hash(es): none
+
+### 2026-02-19 18:35:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `css/main.css` map controls layout so category rows are fixed-height across breakpoints (`grid-auto-rows: 42/40/38px`) and both toggle button cells plus description cells use matching `height/min-height/max-height`; description text now uses one-line truncation (`white-space: nowrap`, `text-overflow: ellipsis`) to prevent vertical growth when expanded.
+- Troubleshooting suggestions: If you need more readable text without layout movement, increase right-column width or reduce description copy length in `assets/world-map.md` rather than allowing wrapping.
+- Resolutions/outcomes: Collapsed descriptions now animate only horizontally, row heights stay stable, and map position no longer shifts as toggles are used.
+- Commit hash(es): none
+
+### 2026-02-19 18:40:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed remaining visual height mismatch in `css/main.css` by applying `box-sizing: border-box` to MD grid toggle buttons and description cells across desktop/tablet/mobile overrides, ensuring declared fixed heights include padding/border for both cell types.
+- Troubleshooting suggestions: If any row still appears off by 1px, check browser zoom and font rendering; the CSS now hard-locks cell box heights at each breakpoint.
+- Resolutions/outcomes: Toggle and description cells now render at matching heights row-by-row while retaining horizontal collapse behavior.
+- Commit hash(es): none
+
+### 2026-02-19 18:44:44 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Slowed map category description expansion in `css/main.css` by updating the transition timing for width/padding/color/background/opacity to `1.1s` with the same cubic-bezier curve already used by frame and gap flash animations.
+- Troubleshooting suggestions: If this still feels too fast/slow, adjust the shared `1.1s` duration value in both description transition and frame/gap flash animation declarations together to keep synchronization.
+- Resolutions/outcomes: Description panel expansion now animates more gently and matches frame color flash timing on toggle activation.
+- Commit hash(es): none
+
+### 2026-02-19 18:51:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `js/main.js` first-default category activation flow to wait for startup population completion (`mapGlowInitialRevealDone`) when startup animation is actually running, preventing early auto-on during map populate. Added pipeline-only background header treatment in `css/main.css` (`#pipeline > .header-group` absolute/low-opacity layer with no layout footprint) so main map content starts without header spacing. Retimed toggle-controlled map markers (`.map-overlay`) to `1.1s` cubic-bezier fade in/out with delayed visibility hide for smooth transitions matching toggle/text/frame timing.
+- Troubleshooting suggestions: If the first toggle appears late, verify startup mode and `mapGlowInitialRevealDone` state; if needed, use `Reset Sweep` to replay startup and confirm gating behavior. If background header is too subtle/strong, adjust `#pipeline > .header-group` opacity.
+- Resolutions/outcomes: First auto-toggle now waits for map populate completion, pipeline header is present as a non-blocking background element, and map overlay marker fades are synchronized with the rest of the toggle animation system.
+- Commit hash(es): none
+
+### 2026-02-19 19:04:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined pipeline-only background header layout in `css/main.css` by top-aligning the compact section ID with the large section title (`align-items: flex-start` + `line-height: 1`) and moving the first pipeline content block (`.pipeline-note`) upward using responsive negative top margins so it partially overlaps the large background title text.
+- Troubleshooting suggestions: If overlap is too aggressive/subtle, tune `#pipeline .pipeline-note` `margin-top` values (`-54/-46/-34`) per breakpoint.
+- Resolutions/outcomes: The small `03 \` now aligns with the top of the large `Pipeline` text, and the first content line visually crosses the title by about half as requested.
+- Commit hash(es): none
+
+### 2026-02-19 19:28:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased pipeline-only background title size in `css/main.css` (`5.2rem` desktop, `4.4rem` tablet, `3.2rem` mobile) and strengthened content overlap by increasing `.pipeline-note` negative top margins (`-86/-70/-48`) to create a clearer half-covered large-title effect.
+- Troubleshooting suggestions: If you want a little less overlap, reduce `.pipeline-note` negative margins by ~8-12px at each breakpoint; if you want a bolder watermark title, raise the desktop title size from `5.2rem` toward `5.6rem`.
+- Resolutions/outcomes: Background `Pipeline` text is larger and the first pipeline object now covers a substantial portion (about half) of the title across viewport sizes.
+- Commit hash(es): none
+
+### 2026-02-19 19:30:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined pipeline background layering in `css/main.css` to keep `PIPELINE` firmly behind content by adding `isolation: isolate` on `#pipeline`, lowering watermark opacity, raising non-header children to `z-index: 2`, and making `.pipeline-note` background substantially more opaque via `color-mix` so the foreground card visually covers the title.
+- Troubleshooting suggestions: If title is now too faint, raise `#pipeline > .header-group` opacity slightly (for example `0.13 -> 0.15`) without changing foreground z-index/background opacity.
+- Resolutions/outcomes: Pipeline title now reads as a true background watermark and the first content object clearly sits on top of it.
+- Commit hash(es): none
+
+### 2026-02-19 19:53:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted pipeline overlap tuning in `css/main.css` to reveal more of the background title by reducing negative top offsets on `.pipeline-note` across breakpoints (`-70` desktop, `-58` tablet, `-40` mobile).
+- Troubleshooting suggestions: If you want slightly more/less title reveal, move each offset by ~6-8px in the same direction per breakpoint to keep proportion consistent.
+- Resolutions/outcomes: Background `PIPELINE` watermark now shows more vertical area while foreground content still clearly covers it.
+- Commit hash(es): none
+
+### 2026-02-19 20:02:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased pipeline watermark title scale in `css/main.css` (`6.6rem` desktop, `5.6rem` tablet, `4.2rem` mobile) and made it visually fainter by reducing pipeline header opacity (`0.10` desktop, `0.09` tablet) and lowering title color mix intensity.
+- Troubleshooting suggestions: If the watermark becomes too faint on certain displays, slightly raise `#pipeline > .header-group` opacity first before changing size values.
+- Resolutions/outcomes: `PIPELINE` now appears much larger while reading as a subtler background watermark behind the foreground content.
+- Commit hash(es): none
+
+### 2026-02-19 20:14:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed pipeline in-section header markup from `index.html` and deleted all pipeline-only watermark/overlap CSS overrides from `css/main.css` (`#pipeline` absolute header layer, title sizing/opacity tweaks, and responsive overlap rules), restoring normal pipeline content flow under the tab-based page label.
+- Troubleshooting suggestions: If you later want a minimal non-redundant label, add a small `pipeline-option-label` style line only (no absolute overlay) rather than reinstating large background header layers.
+- Resolutions/outcomes: Pipeline section no longer shows duplicate in-section header/watermark content and now starts cleanly from the instruction card and map controls.
+- Commit hash(es): none
+
+### 2026-02-19 20:17:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reduced top whitespace in pipeline section by adding dedicated `#pipeline` top padding overrides in `css/main.css` (`56px` desktop, `44px` tablet, `36px` mobile), leaving global `.section-wrap` spacing unchanged for other sections.
+- Troubleshooting suggestions: If you want it even tighter, lower the three `#pipeline` padding values in parallel by ~8px each.
+- Resolutions/outcomes: Extra top space above the first pipeline content block is removed without affecting layout spacing of other tabs/sections.
+- Commit hash(es): none
+
+### 2026-02-19 20:21:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added nav/content separator styling in `css/main.css` by removing `nav` default border-bottom and introducing an explicit thin gold line with `nav::after`; adjusted `.header-index` bottom alignment by removing extra bottom padding so tab pills sit directly on the separator.
+- Troubleshooting suggestions: If the gold line is too subtle/strong, tune the `color-mix` percentage in `nav::after` background.
+- Resolutions/outcomes: A thin gold barrier now separates nav and content, and tabs rest directly on that line as requested.
+- Commit hash(es): none
+
+### 2026-02-19 20:22:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Eliminated remaining tab-to-divider gap in `css/main.css` by setting nav bottom padding to `0` on desktop/mobile nav rules (`padding: 10px ... 0`) and applying `.header-index { margin-bottom: -1px; }` so tabs physically meet the gold separator.
+- Troubleshooting suggestions: If tabs feel too low at certain zoom levels, reduce overlap to `margin-bottom: 0` or `-0.5px`.
+- Resolutions/outcomes: Tabs now touch the gold line without visible spacing below.
+- Commit hash(es): none
+
+### 2026-02-19 20:30:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied pipeline title treatment site-wide for tabbed sections by removing in-section heading blocks from `#mandate`, `#rubric`, `#engagement`, and `#team` in `index.html`, and expanded the reduced top-padding override in `css/main.css` to `#mandate/#rubric/#pipeline/#engagement/#team` across desktop/tablet/mobile breakpoints (`56/44/36px`). Then updated primary nav tab interaction styling in `css/main.css`: inactive tabs are shorter by default, hover keeps the outline glow while smoothly scaling up, and active tabs expand taller/wider (`min-height` + `min-width` + padding) so neighboring tabs shift sideways when selected.
+- Troubleshooting suggestions: If active tabs wrap too aggressively on smaller widths, reduce active `min-width` (`92px`) and active horizontal padding in the tab-active selector block; if hover growth feels too strong, lower hover scale from `1.035` to `1.02`.
+- Resolutions/outcomes: The four requested sections now match pipeline’s no-header presentation, and top navigation tabs now provide clearer state contrast with smooth interactive growth behavior and visible layout push on active selection.
+- Commit hash(es): none
+
+### 2026-02-19 20:34:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Patched tab/hash startup behavior in `js/main.js` to eliminate partial-scroll starts by adding `jumpViewportToTop()` and invoking it after each tab hash activation (`setActiveTabFromHash`), plus enabling `history.scrollRestoration = 'manual'` to avoid browser auto-restoring stale vertical offsets across tab/page revisits.
+- Troubleshooting suggestions: If any tab still opens offset, hard-refresh once to clear browser restore state; if you later want back-button position restoration, remove the `scrollRestoration` override and keep only the hashchange top-reset.
+- Resolutions/outcomes: Tab sections now initialize and switch from the top of the viewport consistently instead of sometimes starting slightly scrolled down.
+- Commit hash(es): none
+
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
