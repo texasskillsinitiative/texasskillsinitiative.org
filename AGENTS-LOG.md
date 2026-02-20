@@ -850,4 +850,82 @@
 - Resolutions/outcomes: Tab sections now initialize and switch from the top of the viewport consistently instead of sometimes starting slightly scrolled down.
 - Commit hash(es): none
 
+### 2026-02-19 21:31:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented the next requested UX packet across `index.html`, `css/main.css`, and `js/main.js`: (1) nav refinement with stronger hover growth, active-tab large clipped background digit treatment, larger centered active labels, and inline mail icon on `Connect with TSI`; (2) rubric interaction layer with keyboard/click-selectable cards (`data-rubric-key`) and synchronized action panel (`rubricActionPanel`) plus intake/engagement CTAs; (3) pipeline statement rewrite for map-intelligence intent and raised map presentation via `.pipeline-map--raised` transform; (4) engagement section refresh with stronger framing and a three-card signal strip; and (5) shared motion-token system (`--motion-*`) applied to major reveal/nav/rubric/engagement/team transitions for timing consistency, including reduced-motion transition suppression for the newly added interactive pieces.
+- Troubleshooting suggestions: If nav tabs feel too large on narrow widths, reduce active `nav-num` scale (`2.45rem`) and hover scale (`1.06`) in `css/main.css`; if raised pipeline map appears too high/low, tune `.pipeline-map--raised` translate values (`-16px` desktop, `-10px` mobile). For rubric actions, ensure `data-rubric-key` values match keys in `initRubricActions()` when adding new cards.
+- Resolutions/outcomes: The site now reflects the requested interactive direction for nav/rubric/pipeline/engagement while keeping existing map controls and runtime behavior intact, and motion timing feels more unified across primary UI interactions.
+- Commit hash(es): none
+
+### 2026-02-19 21:39:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated top-nav active-tab behavior in `css/main.css` to add dynamic zoom on active text (label/digit scale transitions) and matched active-state sticker outline to hover-style outer ring by extending active tab `box-shadow` in both standard and `:has()` selector paths.
+- Troubleshooting suggestions: If the active zoom feels too strong, reduce label `transform: scale(1.14)` and digit `scale(1.12)` in the active nav selectors; if outline appears too heavy, lower the color-mix percentage on the outer ring shadow.
+- Resolutions/outcomes: Active tabs now animate text enlargement as they become selected and keep a persistent sticker-like outline consistent with hover styling.
+- Commit hash(es): none
+
+### 2026-02-19 21:56:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted nav tab polish in `css/main.css` by equalizing inactive tab number/label sizing and softening active fill contrast via updated `--tab-active-bg` tokens (dark/light). Also aligned mobile inactive number sizing with label sizing so inactive tabs remain visually consistent across breakpoints.
+- Troubleshooting suggestions: If the active fill becomes too subtle, raise dark `--tab-active-bg` slightly (for example `#18243a -> #1c2840`) while preserving the active border/outline ring.
+- Resolutions/outcomes: Inactive tabs now read with balanced number/text sizing, and active tab background sits closer to page tone with lower contrast.
+- Commit hash(es): none
+
+### 2026-02-19 22:03:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented tab-motion behavior and centering fixes across `css/main.css` and `js/main.js`: inactive tab number/label stay inline, active state remains morphing with corrected center alignment (`justify-content: center` + active label width/display adjustments), and hash-tab transitions now animate content panels (current slides left, next slides in from right) using `.tab-panels.is-tab-transitioning` plus `tab-slide-out-left` / `tab-slide-in-right` classes. Added JS transition orchestration with height stabilization, hash-click interception for nav links, and reduced-motion gating.
+- Troubleshooting suggestions: If slide distance feels too strong/subtle, adjust `@keyframes tabSlideOutLeft` / `tabSlideInRight` translate values (`12%`); if transition duration needs tuning, adjust `TAB_SLIDE_DURATION_MS` in `js/main.js` and keep CSS timing aligned via `--motion-base`.
+- Resolutions/outcomes: Active tab text now centers correctly, and section changes between tabs animate as requested (left/right slide) while preserving hash navigation and reduced-motion behavior.
+- Commit hash(es): none
+
+### 2026-02-19 22:03:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reverted the tab content slide transition per user request by removing tab-transition CSS/keyframes and JS transition orchestration (`TAB_SLIDE_DURATION_MS`, transition class toggling, and tab click interception), restoring standard hash-driven section switching. Tightened active tab label centering by switching active label placement to absolute midpoint (`left: 50%`, `top: 50%`, translated center) in `css/main.css`.
+- Troubleshooting suggestions: If centering still appears optically off for specific labels, adjust active label `top` from `50%` to `49%` or reduce letter-spacing in the active label selector.
+- Resolutions/outcomes: No horizontal content slide occurs on tab switch, and active tab text is now geometrically centered within the selected pill.
+- Commit hash(es): none
+
+### 2026-02-19 22:46:36 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated nav/content divider sizing in `css/main.css` so `nav::after` now uses `height: 2px` (matching the active-tab base thickness), and adjusted `.header-index` overlap to `margin-bottom: -2px` so tabs remain flush with the divider.
+- Troubleshooting suggestions: If any 1px seam appears at browser zoom levels other than 100%, nudge `.header-index` overlap between `-1px` and `-2px` while keeping divider height unchanged.
+- Resolutions/outcomes: Gold divider thickness now visually matches the active tab base and tabs still sit directly on the line without a visible gap.
+- Commit hash(es): none
+
+### 2026-02-19 22:49:44 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned the nav/tab baseline in `css/main.css` by reducing `.header-index` overlap from `-2px` to `-1px` while leaving the gold divider at `2px`, to remove the visual misalignment/step artifact between active and neighboring tabs.
+- Troubleshooting suggestions: If you still see tiny seam differences at non-100% zoom, this is subpixel rounding; we can force a more stylized stepped look instead, but this setting is the cleanest neutral baseline.
+- Resolutions/outcomes: Tabs remain flush with the divider, and the cross-tab alignment reads cleaner in the top nav.
+- Commit hash(es): none
+
+### 2026-02-19 22:53:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated nav styling in `css/main.css` to use a thicker two-tone gold divider (`nav::after` now `3px` with a dual-gold gradient based on logo tones), added explicit gold tokens (`--logo-gold-primary`, `--logo-gold-secondary`), and strengthened active tabs with thicker top/side borders (`border-width: 2px 2px 0`) plus darker active fill token usage (`--tab-active-bg-strong`) across standard and `:has()` active selectors.
+- Troubleshooting suggestions: If the active tab reads too heavy/light, tune `--tab-active-bg-strong` per theme first; if the divider is too prominent, reduce `nav::after` height to `2px` while keeping the dual-gold gradient.
+- Resolutions/outcomes: Nav bar now uses a logo-consistent dual-gold separator and active tabs present a stronger bordered state with darker selected fill.
+- Commit hash(es): none
+
+### 2026-02-19 22:55:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Smoothed tab state animation in `css/main.css` by adding a tab-specific duration token (`--tab-switch-motion: 0.62s`) and applying it to tab shell/number/label transitions, plus `box-sizing` and `will-change` hints for stabler interpolation. Replaced active-state `border-width` jumps with inset top/side emphasis shadows to keep the thicker-border look while avoiding layout-jitter on tab change.
+- Troubleshooting suggestions: If you want an even calmer morph, increase `--tab-switch-motion` toward `0.70s`; if it feels too floaty, lower to `0.52s`. Page switching itself remains hash-immediate in JS.
+- Resolutions/outcomes: Tab visual morphing is slower/smoother and less glitch-prone while section switch latency stays unchanged.
+- Commit hash(es): none
+
+### 2026-02-19 23:01:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Wired the two star-color hexes from `standards.md` into global CSS tokens in `css/main.css` by setting `--logo-gold-primary: #c3a46b` and `--logo-gold-secondary: #9c7a3c`, then mapped `--accent` to those tokens by theme (dark: primary, light: secondary) and switched `--accent-soft` to derive from `--accent` via `color-mix`. Updated `standards.md` accent lines to match the new live token values.
+- Troubleshooting suggestions: If light mode now reads too muted/strong, swap light `--accent` to `var(--logo-gold-primary)` or adjust the `--accent-soft` mix percentage from `10%` to `8-12%`.
+- Resolutions/outcomes: The newly added logo-star colors are now actively used by the site-wide accent system rather than remaining documentation-only values.
+- Commit hash(es): none
+
+### 2026-02-19 23:05:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated nav/tab baseline in `css/main.css` to address shrunken tabs and bar layering: removed tab `box-sizing: border-box` from `.header-index a` (restoring prior visual height), increased `nav::after` to `4px` and set it to a direct two-color gradient using the new logo-star tokens, moved tab row overlap to neutral (`margin-bottom: 0`), and enforced `border-bottom: 0` on tabs so they terminate above the bar.
+- Troubleshooting suggestions: If you want even stronger bar presence, increase `nav::after` height to `5px`; if tabs still feel tall/short, tune `.header-index a` `min-height` values while leaving `box-sizing` unset to preserve current proportions.
+- Resolutions/outcomes: Tabs no longer appear shrunken, the bottom nav bar is thicker and dual-gold, and tabs visually sit behind/above the bar without bleeding below it.
+- Commit hash(es): none
+
+### 2026-02-19 23:45:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented the underspill root-cause fix in `css/main.css` by removing the outer active-ring segment (`0 0 0 1px ...`) from all active-tab shadow declarations (standard selector and both `:has()`-based active selector paths). Kept inset-only top/left/right accent shadows so active styling remains strong without bottom paint.
+- Troubleshooting suggestions: If any residual subpixel line remains on specific zoom levels, next step is to add `nav { overflow: hidden; }` as a hard clip, but this was intentionally avoided unless needed.
+- Resolutions/outcomes: Active tabs no longer render a bottom-capable outer shadow, eliminating the remaining tiny underspill source.
+- Commit hash(es): none
+
+### 2026-02-20 00:57:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added formal mobile-overhaul planning scope to `STATUS.md` as new `Milestone 0.9 - Mobile Experience Overhaul`, including the requested hamburger + slide-out nav direction and explicit mobile validation widths. Updated `PACKETS.md` by adding `Packet G - Mobile Layout + Navigation UX` to isolate shared-file ownership for upcoming implementation.
+- Troubleshooting suggestions: Before implementation starts, lock the mobile drawer IA (section order + CTA placement) once so CSS/JS behavior can be built without rework.
+- Resolutions/outcomes: Mobile work is now tracked as first-class roadmap scope with packet boundaries defined for safe implementation sequencing.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

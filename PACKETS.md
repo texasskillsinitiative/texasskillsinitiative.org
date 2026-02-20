@@ -2,7 +2,7 @@
 
 Purpose: enable multiple agents/users to work in parallel with minimal overlap and no cross-contamination.
 
-Last updated: 2026-02-14
+Last updated: 2026-02-20
 
 ## Core Rules
 1. One active owner per packet at a time.
@@ -104,6 +104,20 @@ Out of scope:
 Suggested branch:
 - `packet-f-governance-docs`
 
+## Packet G - Mobile Layout + Navigation UX
+Primary scope:
+- `index.html` (mobile nav trigger/drawer structure and section ordering hooks if needed)
+- `css/main.css` (mobile-first layout, breakpoints, mobile nav/drawer styling, spacing/type scale)
+- `js/main.js` (mobile drawer open/close logic, focus handling, body scroll lock, tab selection behavior from drawer)
+
+Out of scope:
+- Legal page content updates
+- Form backend/integration logic
+- Pipeline map data formats (`assets/world-map.md`)
+
+Suggested branch:
+- `packet-g-mobile-layout-nav`
+
 ## Shared Files (High Collision Risk)
 - `index.html`
 - `css/main.css`
@@ -131,5 +145,6 @@ If multiple packets need one shared file:
 4. Packet D (internal access)
 5. Packet E (legal/SEO)
 6. Packet F (docs/governance)
+7. Packet G (mobile layout/nav)
 
 Use this order unless the user sets a different priority.

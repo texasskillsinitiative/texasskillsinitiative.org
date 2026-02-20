@@ -102,9 +102,26 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Reduced pipeline top whitespace after header removal by adding pipeline-specific top padding overrides (`56/44/36px` desktop/tablet/mobile).
 - [Done] Added a dedicated thin gold nav/content divider and removed tab bottom offset so tab pills sit directly on the divider line.
 - [Done] Removed residual nav bottom inset by zeroing nav bottom padding and applying a slight tab-row bottom overlap (`-1px`) so tabs physically touch the gold divider.
+- [Done] Matched nav/content gold divider thickness to the active-tab base thickness (`2px`) and adjusted tab-row overlap (`-2px`) so tabs still sit flush on the divider.
+- [Done] Retuned tab-row overlap back to `-1px` while keeping the `2px` divider, which corrects the visual step/misalignment without reintroducing a gap.
+- [Done] Updated the nav divider to a slightly thicker dual-gold treatment (`3px`) using two logo-inspired gold tones for the nav/content boundary.
+- [Done] Strengthened active-tab styling with thicker top/side borders (`2px 2px 0`) and a darker active fill token (`--tab-active-bg-strong`) for clearer selected-state contrast.
+- [Done] Smoothed tab-switch animation without slowing page switching by introducing tab-only motion timing (`--tab-switch-motion: 0.62s`), keeping hash-tab activation immediate, and removing border-width state jumps in favor of inset top/side emphasis shadows.
+- [Done] Replaced global accent token values with logo-star hex colors from `standards.md` (`#c3a46b` / `#9c7a3c`) and wired `--accent`/`--accent-soft` to those tokens so site-wide accent usage inherits the new palette.
+- [Done] Restored nav tab visual size by removing tab-level border-box sizing, increased the nav bottom bar thickness to `4px` with the two new logo-star gold colors, and set tabs to terminate above that bar (`border-bottom: 0`, no negative overlap, bar layered in front) so tabs do not bleed below it.
+- [Done] Removed the remaining active-tab underspill source by dropping the outer active shadow ring (`0 0 0 1px ...`) from all active-state selector paths and keeping inset-only top/side accents.
 - [Done] Applied the pipeline no-header title treatment to `mandate`, `rubric`, `engagement`, and `team` by removing in-section header blocks and sharing the reduced top-padding profile (`56/44/36px`) across those sections.
 - [Done] Updated primary nav tab interaction model: inactive tabs now render shorter by default, hover state keeps outline glow plus smooth scale-up, and active tabs expand taller/wider so neighboring tabs shift aside.
 - [Done] Fixed tab-section startup scroll drift by forcing hash-tab activation to reset viewport to top and setting browser history scroll restoration to `manual` in `js/main.js`.
+- [Done] Upgraded primary nav tab visuals with oversized clipped background digits on active tabs, stronger hover growth, larger centered active labels, and a new icon-enhanced `Connect with TSI` call-to-action button.
+- [Done] Added rubric card click actions: each of the four rubric cards is now keyboard/click selectable with an active state and synchronized action panel (`Selected Rubric Action`) including intake and engagement CTAs.
+- [Done] Updated pipeline opening statement to map-intelligence posture language and lifted map presentation higher using a transform-based raised layout (`.pipeline-map--raised`) to preserve downstream layout flow.
+- [Done] Refreshed engagement presentation with stronger framing copy and a new three-card signal strip (`What You Send`, `What We Evaluate`, `What Happens Next`) while preserving existing intake workflow and boundaries.
+- [Done] Introduced shared motion tokens (`--motion-*`) and applied them across major nav, rubric, engagement, and reveal interactions for more consistent animation timing/curves site-wide, with reduced-motion fallbacks updated for the new interactive elements.
+- [Done] Added active-tab dynamic text zoom behavior (animated label/digit scaling) and matched active-tab sticker-outline ring to hover-style outline treatment for persistent selected-state definition.
+- [Done] Tuned inactive nav typography so tab number and label use equal sizing, and lowered active-tab fill contrast by softening `--tab-active-bg` values in both dark/light themes.
+- [Done] Restored inline inactive tab number/label flow while keeping active-state morphing, tightened active-label centering, and added tab-panel slide transitions (current section exits left while target enters from right) driven by hash-tab changes with reduced-motion guardrails.
+- [Done] Removed the experimental tab content slide transition runtime/CSS (restored standard hash tab swap behavior) and further corrected active tab label centering with absolute midpoint positioning.
 - [Done] Map assets added: `assets/world-map.md`, `assets/world-map.png`, `assets/world-map.svg`.
 - [Done] Map source artifact retained: `World_map_without_Antarctica.svg`.
 
@@ -149,6 +166,16 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Added `PRODUCT-PRD-BLUEPRINT.md` to define approved scope, MVP boundaries, and deferred work.
 - [Blocked] Codex execution-permissions profile alignment in local `~/.codex/config.toml` (write denied by ACL in current runtime).
 - [Blocked] Local ACL cleanup for blocked file operations (`temp`, `.git` index write restrictions); requires elevated OS terminal with ownership privileges.
+
+## Milestone 0.9 - Mobile Experience Overhaul
+- [Planned] Define mobile-first layout targets and breakpoints (`<=1024`, `<=768`, `<=480`) with section-level content-priority rules.
+- [Planned] Replace wrapped top-tab behavior on mobile with a hamburger trigger and slide-out navigation drawer (all sections + `Connect with TSI` entry).
+- [Planned] Implement drawer interaction model (open/close animation, outside-click close, ESC close, body scroll lock, focus trap, return focus to trigger).
+- [Planned] Refactor section layouts for handheld flow: `mandate`, `rubric`, `pipeline`, `engagement`, and `team` to one-column priority with consistent spacing rhythm.
+- [Planned] Rework pipeline mobile map presentation and control density (map-first order, touch-sized controls, reduced clutter while preserving current behavior).
+- [Planned] Normalize mobile typography and hit-target sizing (`>=44px`) across nav, controls, cards, and form actions.
+- [Planned] Apply mobile motion/performance guardrails (lighter effects under coarse pointer / smaller viewports, preserve `prefers-reduced-motion` behavior).
+- [Planned] Run mobile validation matrix at `1024`, `768`, `600`, `480`, `390`, and `360` widths including console checks and interaction smoke tests.
 
 ## Risk Register (Living)
 - [Open] `R-001` Map behavior regressions while supporting dual-mode overlays, switch semantics, and flexible MD parsing.
