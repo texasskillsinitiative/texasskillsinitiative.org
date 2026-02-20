@@ -1030,4 +1030,10 @@
 - Resolutions/outcomes: Mobile pipeline controls are less dense and map-first, touch targets are consistently larger across key surfaces, and modal/nav/map/tab regressions remained clean.
 - Commit hash(es): none
 
+### 2026-02-20 10:34:26 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `STATUS.md` Milestone `0.9` to convert the mobile breakpoint-definition item from planned to done, documenting the implemented breakpoint set and section-priority behavior now present in code.
+- Troubleshooting suggestions: Keep this milestone note synchronized with live breakpoint logic in `css/main.css` to prevent roadmap drift as future mobile tweaks land.
+- Resolutions/outcomes: Mobile-overhaul planning state now aligns with delivered implementation status.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

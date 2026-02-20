@@ -172,7 +172,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Blocked] Local ACL cleanup for blocked file operations (`temp`, `.git` index write restrictions); requires elevated OS terminal with ownership privileges.
 
 ## Milestone 0.9 - Mobile Experience Overhaul
-- [Planned] Define mobile-first layout targets and breakpoints (`<=1024`, `<=768`, `<=480`) with section-level content-priority rules.
+- [Done] Defined and implemented mobile-first layout targets/breakpoints (`<=1024`, `<=768`, `<=600`, `<=480`) with section-priority rules (drawer nav at `<=1024`, one-column content priority and map-first handheld pipeline flow at smaller widths).
 - [Done] Replaced wrapped top-tab behavior on mobile with a hamburger trigger and slide-out navigation drawer (all sections + `Connect with TSI` entry).
 - [Done] Implemented drawer interaction model (open/close animation, outside-click close, ESC close, body scroll lock, focus trap, return focus to trigger).
 - [Done] Refactored section layouts for handheld flow: `mandate`, `rubric`, `pipeline`, `engagement`, and `team` now use one-column priority with consistent spacing rhythm at phone/tablet breakpoints.
