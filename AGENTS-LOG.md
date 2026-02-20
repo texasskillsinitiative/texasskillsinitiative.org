@@ -1048,4 +1048,10 @@
 - Resolutions/outcomes: Repository no longer contains live backend spreadsheet/admin identifiers in tracked config, and backend setup requirements are documented for local deployment.
 - Commit hash(es): none
 
+### 2026-02-20 11:10:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `scripts/create_prelaunch_snapshot.ps1` and executed it to produce an internal launch backup run at `snapshot/e55ca66_2026-02-20_11-09-29` with matching zip archive (`snapshot/e55ca66_2026-02-20_11-09-29.zip`), including metadata (`snapshot-meta.txt`) with source commit and branch.
+- Troubleshooting suggestions: Keep snapshot artifacts untracked/internal and re-run the script immediately before launch if additional release-critical changes land.
+- Resolutions/outcomes: Milestone `0.8` snapshot/backup item now has an automated, repeatable run path and a completed baseline snapshot artifact.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
