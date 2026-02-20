@@ -1054,4 +1054,10 @@
 - Resolutions/outcomes: Milestone `0.8` snapshot/backup item now has an automated, repeatable run path and a completed baseline snapshot artifact.
 - Commit hash(es): none
 
+### 2026-02-20 11:11:35 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ran a non-invasive production form endpoint reachability check against the URL in `js/main.js` (`GET https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec`) and recorded successful response `{\"ok\":true}` in `STATUS.md`.
+- Troubleshooting suggestions: Keep sheet-write verification as a controlled test with explicit owner approval, since POST tests can create persistent rows in production data stores.
+- Resolutions/outcomes: Endpoint health is verified; only sheet-write confirmation remains for full closure of the form-endpoint milestone item.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
