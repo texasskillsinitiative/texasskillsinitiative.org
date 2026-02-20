@@ -946,4 +946,10 @@
 - Resolutions/outcomes: Navigation focus-style verification and an accessibility baseline alt-text gap are now closed with verification evidence.
 - Commit hash(es): none
 
+### 2026-02-20 01:28:44 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Performed a map marker contrast/readability review for dark/light themes and updated `css/main.css` map overlay marker rendering to include a theme-tokenized marker stroke (`--map-marker-stroke`) with non-scaling stroke behavior on marker circles/rects, improving visibility consistency over mixed terrain tones. Re-ran pipeline smoke check for overflow/console regressions (clean).
+- Troubleshooting suggestions: If marker edges feel too heavy/light on high-DPI screens, tune `stroke-width` (`0.42px`) and/or per-theme `--map-marker-stroke` values without changing marker fill categories.
+- Resolutions/outcomes: Map/override marker readability is more stable across land/water/ocean backgrounds in both themes while retaining current category color language.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

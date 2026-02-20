@@ -31,6 +31,7 @@
             --map-ocean-fill: #0b1220;
             --map-dot-water: #1a2234;
             --map-dot-land: #6b7385;
+            --map-marker-stroke: #0b1220;
             --tab-active-bg: #18243a;
             --tab-active-bg-strong: #121d31;
         }
@@ -57,6 +58,7 @@
             --map-ocean-fill: #233247;
             --map-dot-water: #3a4a61;
             --map-dot-land: #7f8ea3;
+            --map-marker-stroke: #1a2636;
             --tab-active-bg: #f2f5fa;
             --tab-active-bg-strong: #e6edf7;
         }
@@ -631,6 +633,9 @@
         .pipeline-map-frame svg.map--tiny .map-overlay text { display: none; }
         .map-overlay .map-marker circle,
         .map-overlay .map-marker rect {
+            stroke: var(--map-marker-stroke);
+            stroke-width: 0.42px;
+            vector-effect: non-scaling-stroke;
             transform-box: fill-box;
             transform-origin: center;
             transition: transform 0.18s ease, opacity 0.18s ease;

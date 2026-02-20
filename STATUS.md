@@ -132,7 +132,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.6 - Launch Readiness QA
 - [Planned] Complete the pipeline page map implementation and final readiness pass.
-- [Planned] Review override color choices in both dark/light themes for contrast and readability consistency.
+- [Done] Reviewed override/map marker color readability in dark/light themes and added map marker stroke token + non-scaling outline treatment for stronger cross-terrain contrast consistency.
 - [Done] Stakeholder form QA completed in automated browser checks: concierge selection/state wiring, required-field constraint behavior, malformed email validity, 3s trap, hold-to-clear reset, submit lockout, and success-state transition.
 - [Done] Concierge selection collapse QA (non-selected buttons hide smoothly after selection) validated via automated browser smoke check.
 - [Done] Modal behavior validation completed for access + portal modals (open/close/outside-click paths) plus submit lockout/success transition checks in access flow.
