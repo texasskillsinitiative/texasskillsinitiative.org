@@ -1047,7 +1047,7 @@
         #accessModal .stakeholder-form.has-concierge .form-actions { display: flex; }
         .no-js #accessModal .form-actions { display: flex; }
         #accessModal .form-actions > div { display: flex; flex-direction: column; align-items: flex-start; }
-        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; }
+        #accessModal .form-submit { background: var(--accent); color: var(--bg-dark); padding: 12px 24px; min-height: 44px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; border: none; cursor: pointer; }
         [data-theme="light"] #accessModal .form-submit { color: #ffffff; }
         #accessModal .form-legal { margin: 6px 0 0 0; font-size: 0.7rem; color: var(--page-text-dim); line-height: 1.4; }
         #accessModal .form-legal a { color: var(--page-text-main); text-decoration: none; border-bottom: 1px solid transparent; }
@@ -1062,7 +1062,7 @@
         #accessModal .form-success-headline .accent { color: var(--accent); }
         #accessModal .form-success-sub { font-size: 0.9rem; color: var(--page-text-dim); margin: 0 0 24px 0; line-height: 1.4; }
         #accessModal .form-success-buttons { display: flex; flex-direction: column; gap: 10px; }
-        #accessModal .form-success-btn { padding: 12px 20px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid var(--frame-border); background: var(--page-bg); color: var(--page-text-main); transition: 0.3s; }
+        #accessModal .form-success-btn { padding: 12px 20px; min-height: 44px; font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid var(--frame-border); background: var(--page-bg); color: var(--page-text-main); transition: 0.3s; }
         #accessModal .form-success-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--card-bg); }
         #accessModal .form-success-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         #accessModal .form-success-btn-primary { background: var(--accent); color: var(--bg-dark); border-color: var(--accent); }
@@ -1070,7 +1070,7 @@
         #accessModal .form-success.fade-out { animation: fadeOut 0.4s ease forwards; }
         #accessModal .form-network-error, #accessModal .form-time-error { text-align: left; margin-top: 20px; }
         #accessModal .form-network-error p, #accessModal .form-time-error p { margin: 0; font-size: 0.95rem; color: var(--accent); line-height: 1.5; }
-        #accessModal .form-clear { background: transparent; border: 1px solid var(--page-text-dim); color: var(--page-text-dim); padding: 8px 16px; font-size: 0.75rem; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; --hold-duration: 2000ms; }
+        #accessModal .form-clear { background: transparent; border: 1px solid var(--page-text-dim); color: var(--page-text-dim); padding: 8px 16px; min-height: 44px; font-size: 0.75rem; cursor: pointer; transition: 0.3s; position: relative; overflow: hidden; --hold-duration: 2000ms; }
         #accessModal .form-clear::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(197, 160, 89, 0.15), rgba(197, 160, 89, 0.45)); transform: scaleX(0); transform-origin: left; opacity: 0; }
         #accessModal .form-clear.is-holding::before { animation: holdFill var(--hold-duration) linear forwards; opacity: 1; }
         #accessModal .form-clear:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
@@ -1636,6 +1636,41 @@
             .staff-profile-details-021026 { align-items: center; }
         }
 
+        @media (max-width: 768px) {
+            .pipeline-map { gap: 10px; }
+            .pipeline-map-frame { order: 1; }
+            .pipeline-map-controls[data-map-controls="md"] {
+                order: 2;
+                grid-template-columns: minmax(0, 1fr);
+                grid-auto-rows: auto;
+                gap: 6px;
+            }
+            .pipeline-map-controls[data-map-controls="md"] .map-control[data-map-target] {
+                width: 100%;
+                min-height: 44px;
+                height: 44px;
+                max-height: none;
+                font-size: 0.7rem;
+                letter-spacing: 0.9px;
+            }
+            .pipeline-map-controls[data-map-controls="md"] .map-category-description {
+                display: none;
+                height: auto;
+                min-height: 0;
+                max-height: none;
+                white-space: normal;
+                font-size: 0.74rem;
+                line-height: 1.35;
+                padding: 0 10px;
+            }
+            .pipeline-map-controls[data-map-controls="md"] .map-category-description.is-active {
+                display: flex;
+                max-width: 100%;
+                min-height: 44px;
+                padding: 8px 10px;
+            }
+        }
+
         @media (max-width: 600px) {
             .section-wrap { padding-left: 14px; padding-right: 14px; }
             #mandate,
@@ -1670,12 +1705,12 @@
             .header-index a[href="#overview"] .nav-num { font-size: 0.58rem; }
             .pipeline-map-frame { padding: 6px; --map-frame-gap-size: 6px; }
             .pipeline-map-controls { gap: 7px; }
-            .map-control { min-height: 40px; padding: 10px 13px; font-size: 0.74rem; }
-            .pipeline-map-controls[data-map-controls="md"] { grid-template-columns: 150px minmax(0, 1fr); grid-auto-rows: 38px; gap: 7px 8px; }
-            .pipeline-map-controls[data-map-controls="md"] .map-control[data-map-target] { width: 150px; min-height: 38px; height: 38px; max-height: 38px; box-sizing: border-box; padding: 7px 8px; font-size: 0.66rem; }
-            .pipeline-map-controls[data-map-controls="md"] .map-category-description { height: 38px; min-height: 38px; max-height: 38px; box-sizing: border-box; font-size: 0.75rem; }
-            .pipeline-map-controls[data-map-controls="md"] .map-category-description:not(.is-active) { padding: 5px 0; }
-            .pipeline-map-controls[data-map-controls="md"] .map-category-description.is-active { padding: 5px 8px; }
+            .map-control { min-height: 44px; padding: 10px 13px; font-size: 0.74rem; }
+            .pipeline-map-controls[data-map-controls="md"] { grid-template-columns: minmax(0, 1fr); grid-auto-rows: auto; gap: 6px; }
+            .pipeline-map-controls[data-map-controls="md"] .map-control[data-map-target] { width: 100%; min-height: 44px; height: 44px; max-height: none; box-sizing: border-box; padding: 9px 10px; font-size: 0.68rem; }
+            .pipeline-map-controls[data-map-controls="md"] .map-category-description { display: none; height: auto; min-height: 0; max-height: none; box-sizing: border-box; font-size: 0.74rem; white-space: normal; line-height: 1.35; }
+            .pipeline-map-controls[data-map-controls="md"] .map-category-description:not(.is-active) { padding: 0 10px; }
+            .pipeline-map-controls[data-map-controls="md"] .map-category-description.is-active { display: flex; min-height: 44px; padding: 8px 10px; }
             .map-tuning-strip { gap: 6px; }
             .map-tuning-field { width: calc(50% - 6px); }
             .map-tuning-input { width: 100%; }

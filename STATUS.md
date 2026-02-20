@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls), mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls, access-form action buttons), mobile map-control density/map-first checks (`tmp-map-check.js`) after handheld control layout changes, mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -175,9 +175,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] Define mobile-first layout targets and breakpoints (`<=1024`, `<=768`, `<=480`) with section-level content-priority rules.
 - [Done] Replaced wrapped top-tab behavior on mobile with a hamburger trigger and slide-out navigation drawer (all sections + `Connect with TSI` entry).
 - [Done] Implemented drawer interaction model (open/close animation, outside-click close, ESC close, body scroll lock, focus trap, return focus to trigger).
-- [Planned] Refactor section layouts for handheld flow: `mandate`, `rubric`, `pipeline`, `engagement`, and `team` to one-column priority with consistent spacing rhythm.
-- [Planned] Rework pipeline mobile map presentation and control density (map-first order, touch-sized controls, reduced clutter while preserving current behavior).
-- [Planned] Normalize mobile typography and hit-target sizing (`>=44px`) across nav, controls, cards, and form actions.
+- [Done] Refactored section layouts for handheld flow: `mandate`, `rubric`, `pipeline`, `engagement`, and `team` now use one-column priority with consistent spacing rhythm at phone/tablet breakpoints.
+- [Done] Reworked pipeline mobile map presentation/control density: map-first order on handheld widths, touch-sized controls, and reduced control-panel clutter while preserving existing map behavior.
+- [Done] Normalized mobile typography and hit-target sizing (`>=44px`) across primary nav controls, drawer controls, rubric actions, map controls, and access-form action buttons.
 - [Done] Apply mobile motion/performance guardrails (lighter effects under coarse pointer / smaller viewports, preserve `prefers-reduced-motion` behavior).
 - [Done] Ran mobile validation matrix at `1024`, `768`, `600`, `480`, `390`, and `360` widths including console checks and interaction smoke tests.
 
@@ -188,6 +188,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Completed handheld pipeline map pass with map-first ordering and reduced mobile control clutter (single-column control flow on phone widths with active-description reveal), plus kept map/toggle behavior intact in automated checks.
+- [Done] 2026-02-20: Completed mobile hit-target normalization by raising access-form action controls to `>=44px` and aligning primary handheld control surfaces (nav/drawer/rubric/map/form) to touch-friendly minima.
 - [Done] 2026-02-20: Added mobile/coarse-pointer motion guardrails to reduce decorative animation load (map frame sheen, active map-control pulse, hover lift transforms, and tab-switch timing) while preserving interaction behavior and reduced-motion compatibility.
 - [Done] 2026-02-20: Applied a mobile spacing/typography pass for handheld sections (`mandate`, `rubric`, `pipeline`, `engagement`, `team`) and raised key touch targets (`mobile nav toggle/close`, drawer controls, rubric action controls) to improve phone ergonomics without changing section behavior.
 - [Done] 2026-02-20: Fixed mobile overview first-screen visibility by removing excess effective top spacing and adding dynamic viewport-fit scaling tied to live nav height so hero text remains visible without scrolling on tested phone viewports.

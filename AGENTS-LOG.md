@@ -1024,4 +1024,10 @@
 - Resolutions/outcomes: Motion cost is lower on handheld contexts while nav/tab/map interactions remain regression-clean.
 - Commit hash(es): none
 
+### 2026-02-20 10:33:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed additional Packet G mobile refinements in `css/main.css`: switched pipeline map to map-first ordering on handheld widths, restructured mobile map controls into a touch-sized single-column flow with active-description reveal only, and normalized access-modal action controls (`form-submit`, `form-clear`, `form-success-btn`) to `>=44px`. Re-ran `tmp-modal-a11y-check.js`, `tmp-mobile-nav-check.js`, `tmp-map-check.js`, and `tmp-smoke-core.js`.
+- Troubleshooting suggestions: If users need always-visible map descriptions on phone, re-enable passive description rows only for tablet widths while keeping phone widths in active-only reveal mode to avoid clutter.
+- Resolutions/outcomes: Mobile pipeline controls are less dense and map-first, touch targets are consistently larger across key surfaces, and modal/nav/map/tab regressions remained clean.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
