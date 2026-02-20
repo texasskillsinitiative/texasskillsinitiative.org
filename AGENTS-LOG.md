@@ -1060,4 +1060,10 @@
 - Resolutions/outcomes: Endpoint health is verified; only sheet-write confirmation remains for full closure of the form-endpoint milestone item.
 - Commit hash(es): none
 
+### 2026-02-20 11:35:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied requested 0.7 content updates in `index.html` (final founder letter text, community/operations gallery image swaps, operations section research-oriented copy, and added full-team operations image using `assets/pages/team/team-gallery-operations-full-team.png`), updated legal pages (`terms.html`, `privacy.html`, `security.html`, `accessibility.html`) with version-history sections and 2025 initial-version dating, and updated 0.7 status tracking notes in `STATUS.md` (including manual media QA reminder). Re-ran `tmp-smoke-core.js`, `tmp-map-check.js`, and `tmp-mobile-nav-check.js`.
+- Troubleshooting suggestions: Run a quick manual visual pass on team gallery image sizing/cropping after deploy and remove any visible watermarks from source media before final launch sign-off.
+- Resolutions/outcomes: Requested content/copy/media/legal-versioning changes are in place with no automated regressions in navigation, map interactions, or mobile drawer behavior.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

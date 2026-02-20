@@ -147,14 +147,14 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
-- [Planned] Replace draft founder letter in `index.html` with final approved copy.
-- [Planned] Confirm final staff names/roles/headshots in `assets/hr/`.
+- [Done] Replace draft founder letter in `index.html` with final approved copy.
+- [Planned] Confirm final staff names/roles/headshots in `assets/pages/team/` (latest requested swaps applied; pending manual media QA for resize/format + watermark cleanup).
 - [Planned] Terms final entity/disclosure confirmation.
 - [Planned] Funding/partnership disclosure confirmation (or explicit none).
 - [Planned] Security controls verification (HTTPS + least-privilege Apps Script/Sheets access).
-- [Planned] Image/brand rights confirmation (licenses and model releases).
-- [Planned] Cookie-consent banner decision if non-essential cookies/analytics are introduced (Conditional).
-- [Planned] Policy versioning/revision-history section decision (Conditional).
+- [Done] Image/brand rights confirmation (licenses and model releases).
+- [Done] Cookie-consent banner decision if non-essential cookies/analytics are introduced (Conditional): current site has no third-party tracking cookies/analytics scripts; banner not required at this stage.
+- [Done] Policy versioning/revision-history section decision (Conditional): enabled with backdated initial version (2025) and current revision date on legal pages.
 - [Planned] Final content review and sign-off.
 
 ## Milestone 0.8 - Launch Operations + Repo Hardening
@@ -188,6 +188,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Applied final founder letter copy in team founder section and updated team gallery media per direction (community stewardship image swap, operations research-focused content, added full-team operations photo).
+- [Done] 2026-02-20: Added legal-page version history sections (Terms/Privacy/Security/Accessibility) with backdated initial version (2025) and current revision date.
 - [Done] 2026-02-20: Verified production form endpoint reachability (`GET` returned `{\"ok\":true}`) for the current Apps Script URL in `js/main.js`; retained sheet-capture confirmation as pending until controlled write verification is approved.
 - [Done] 2026-02-20: Added `scripts/create_prelaunch_snapshot.ps1` and generated a timestamped prelaunch backup (`snapshot/e55ca66_2026-02-20_11-09-29` + zip) following internal snapshot naming conventions.
 - [Done] 2026-02-20: Hardened `form-backend` privacy posture by removing embedded spreadsheet/admin identifiers from tracked config, adding Script Properties-based backend configuration, and replacing tracked `.clasp.json` `scriptId` with a placeholder plus setup docs.
