@@ -1,7 +1,7 @@
 # TSI Site Status
 
 Last updated: 2026-02-20
-Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
+Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
 ## Milestone 0.1 - Core Site Foundation
@@ -142,7 +142,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Responsive layout review baseline completed with automated overflow matrix (`1024/900/768/600/480/390/360`) and corrective CSS updates for nav + section layout overflow.
 - [Done] Accessibility baseline update: added missing `alt` attributes for index visual assets and re-ran missing-alt audit (0 missing).
 - [Done] Accessibility pass (keyboard/focus/ARIA baseline): modal close controls converted to keyboard-focusable buttons, modal semantics added (`role`, `aria-modal`, `aria-labelledby`, `aria-describedby`, `aria-hidden`), focus trap and Escape-close behavior implemented, rubric cards moved from `div[role="button"]` to native `<button>` controls, and ARIA target/reference checks verified clean.
-- [Planned] Accessibility follow-up: manual contrast and screen-reader reading-order pass.
+- [Done] Accessibility follow-up baseline: added skip-link navigation, improved landmark/label semantics (primary nav + mobile drawer `aria-labelledby`), aligned inactive team-panel default `aria-hidden` states, and removed redundant custom key handling on native rubric buttons.
+- [Planned] Accessibility follow-up final: manual assistive-technology pass on physical screen readers (TalkBack/VoiceOver) plus targeted light-theme contrast spot checks.
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
@@ -187,6 +188,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-20: Added accessibility follow-up baseline improvements (skip link, landmark labeling, mobile drawer label reference, and team panel initial ARIA state cleanup), with regression checks passing.
 - [Done] 2026-02-20: Added versioned CSS/JS asset query parameters (`?v=20260220-mobilefix`) across site pages to force cache refresh and prevent mixed old/new mobile-nav asset loads on real devices.
 - [Done] 2026-02-20: Implemented mobile navigation drawer (`<=1024`) with hamburger toggle, focus-safe interaction model (ESC/backdrop close + trap + focus restore), drawer link sync to hash tabs, and access-modal handoff from drawer CTA.
 - [Done] 2026-02-20: Completed modal accessibility hardening (dialog semantics, keyboard trap, Escape close, focus restore) and verified via Playwright keyboard traversal.

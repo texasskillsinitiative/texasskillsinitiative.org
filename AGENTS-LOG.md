@@ -994,4 +994,10 @@
 - Resolutions/outcomes: Site now forces fresh `main.css`/`main.js` retrieval (`?v=20260220-mobilefix`), eliminating mixed old/new mobile nav rendering states observed on S24.
 - Commit hash(es): none
 
+### 2026-02-20 09:14:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed accessibility follow-up baseline pass: added skip-link support to `#mainContent`, labeled primary nav, switched mobile drawer to `aria-labelledby` title reference, corrected default `aria-hidden` for inactive team panels, and removed redundant custom keydown handling for native rubric buttons. Re-ran mobile-nav interaction checks, section routing/overflow matrix, and ARIA reference audit.
+- Troubleshooting suggestions: Remaining accessibility closure should be done on physical screen readers (TalkBack/VoiceOver) because automated checks do not validate spoken reading-order quality.
+- Resolutions/outcomes: Keyboard and landmark semantics are tighter, with no regression in nav/map/modal checks after the accessibility refinements.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

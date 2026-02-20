@@ -1093,11 +1093,13 @@ function softCloseModal() {
             card.addEventListener('click', () => {
                 setActiveCard(card);
             });
-            card.addEventListener('keydown', (event) => {
-                if (event.key !== 'Enter' && event.key !== ' ') return;
-                event.preventDefault();
-                setActiveCard(card);
-            });
+            if (card.tagName !== 'BUTTON') {
+                card.addEventListener('keydown', (event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    setActiveCard(card);
+                });
+            }
         });
 
         setActiveCard(cards[0]);
