@@ -894,7 +894,24 @@ function softCloseModal() {
         if (!toggle || !drawer || !backdrop || !closeBtn) return;
 
         let restoreFocusTarget = null;
+        let scrollLockY = 0;
         const isDesktop = () => window.innerWidth > MOBILE_NAV_BREAKPOINT;
+        const lockMobileBodyScroll = () => {
+            scrollLockY = window.scrollY || window.pageYOffset || 0;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `${-scrollLockY}px`;
+            document.body.style.width = '100%';
+        };
+        const unlockMobileBodyScroll = () => {
+            const topValue = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            if (topValue) {
+                const restoredY = Math.abs(parseInt(topValue, 10)) || scrollLockY || 0;
+                window.scrollTo(0, restoredY);
+            }
+        };
 
         const getDrawerFocusable = () => Array.from(drawer.querySelectorAll(MODAL_FOCUS_SELECTOR)).filter((node) => {
             if (!(node instanceof HTMLElement)) return false;
@@ -908,9 +925,11 @@ function softCloseModal() {
             const shouldRestoreFocus = options.restoreFocus !== false;
             if (!drawer.classList.contains('is-open')) return;
             document.body.classList.remove('mobile-nav-open');
+            unlockMobileBodyScroll();
             drawer.classList.remove('is-open');
             drawer.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
+            toggle.setAttribute('aria-label', 'Open site navigation');
             backdrop.classList.remove('is-open');
             window.setTimeout(() => {
                 if (!drawer.classList.contains('is-open')) {
@@ -930,6 +949,7 @@ function softCloseModal() {
             if (isDesktop()) return;
             restoreFocusTarget = document.activeElement instanceof HTMLElement ? document.activeElement : toggle;
             document.body.classList.add('mobile-nav-open');
+            lockMobileBodyScroll();
             backdrop.hidden = false;
             window.requestAnimationFrame(() => {
                 backdrop.classList.add('is-open');
@@ -937,6 +957,7 @@ function softCloseModal() {
             drawer.classList.add('is-open');
             drawer.setAttribute('aria-hidden', 'false');
             toggle.setAttribute('aria-expanded', 'true');
+            toggle.setAttribute('aria-label', 'Close site navigation');
             const focusable = getDrawerFocusable();
             if (focusable.length) {
                 focusable[0].focus();
@@ -955,6 +976,13 @@ function softCloseModal() {
         });
         closeBtn.addEventListener('click', () => closeMobileNav());
         backdrop.addEventListener('click', () => closeMobileNav());
+        document.addEventListener('pointerdown', (event) => {
+            if (!drawer.classList.contains('is-open')) return;
+            const target = event.target;
+            if (!(target instanceof Node)) return;
+            if (drawer.contains(target) || toggle.contains(target)) return;
+            closeMobileNav({ restoreFocus: false });
+        });
         drawer.querySelectorAll('[data-mobile-nav-link]').forEach(link => {
             link.addEventListener('click', () => closeMobileNav({ restoreFocus: false }));
         });
