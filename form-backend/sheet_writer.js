@@ -1,5 +1,6 @@
 function appendRowToSheet(rowArray) {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheetId = requireSpreadsheetId_();
+  var ss = SpreadsheetApp.openById(sheetId);
   var sheet = ss.getSheetByName(CONFIG.SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(CONFIG.SHEET_NAME);
@@ -25,7 +26,8 @@ function notifyAdmin(subject, body) {
 }
 
 function appendToNamedSheet(sheetName, headerArray, rowArray) {
-  var ss = SpreadsheetApp.openById(CONFIG.SPREADSHEET_ID);
+  var sheetId = requireSpreadsheetId_();
+  var ss = SpreadsheetApp.openById(sheetId);
   var sheet = ss.getSheetByName(sheetName);
   if (!sheet) {
     sheet = ss.insertSheet(sheetName);
@@ -39,4 +41,12 @@ function appendToNamedSheet(sheetName, headerArray, rowArray) {
     } catch (e) { /* ignore */ }
   }
   sheet.appendRow(rowArray);
+}
+
+function requireSpreadsheetId_() {
+  var sheetId = String(CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sheetId) {
+    throw new Error('Missing CONFIG.SPREADSHEET_ID. Set Script Property SPREADSHEET_ID before deploy.');
+  }
+  return sheetId;
 }

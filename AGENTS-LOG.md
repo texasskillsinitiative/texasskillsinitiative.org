@@ -1042,4 +1042,10 @@
 - Resolutions/outcomes: Active asset paths are now descriptive and consistently organized by global vs page scope, with core nav/map/mobile behaviors verified after path migration.
 - Commit hash(es): none
 
+### 2026-02-20 11:07:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Hardened `form-backend` tracked files by removing embedded spreadsheet/admin identifiers from `config.js`, switching backend configuration to Script Properties resolution, adding explicit missing-ID guardrails in `sheet_writer.js`, replacing tracked `.clasp.json` `scriptId` with a placeholder, and adding `form-backend/README.md` setup instructions. Re-ran site smoke/map checks and backend syntax checks.
+- Troubleshooting suggestions: Treat `form-backend/.clasp.json` as local deployment metadata and set `scriptId` only in local/private context before clasp operations.
+- Resolutions/outcomes: Repository no longer contains live backend spreadsheet/admin identifiers in tracked config, and backend setup requirements are documented for local deployment.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
