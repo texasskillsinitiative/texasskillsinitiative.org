@@ -137,9 +137,10 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Concierge selection collapse QA (non-selected buttons hide smoothly after selection) validated via automated browser smoke check.
 - [Done] Modal behavior validation completed for access + portal modals (open/close/outside-click paths) plus submit lockout/success transition checks in access flow.
 - [Done] Navigation tabs validation baseline (hash navigation + active section state) verified across all primary sections in automated browser smoke checks.
-- [Planned] Navigation focus-style verification (keyboard-only tab/shift-tab visual confirmation) pending manual pass.
+- [Done] Navigation focus-style verification completed via keyboard-tab check (`:focus-visible` outline present on primary nav tabs).
 - [Done] Theme toggle and logo swap validation (dark/light) verified in automated browser checks.
 - [Done] Responsive layout review baseline completed with automated overflow matrix (`1024/900/768/600/480/390/360`) and corrective CSS updates for nav + section layout overflow.
+- [Done] Accessibility baseline update: added missing `alt` attributes for index visual assets and re-ran missing-alt audit (0 missing).
 - [Planned] Accessibility pass (keyboard/focus/contrast/ARIA/screen-reader order).
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
 

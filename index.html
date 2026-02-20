@@ -36,7 +36,14 @@
         <a href="#team" role="tab" id="tab-team" aria-controls="team"><span class="nav-num">05</span><span class="nav-label">Team</span></a>
     </div>
     <div class="header-actions header-actions--primary">
-        <button class="btn-portal btn-portal--primary" data-modal-open="accessModal">Connect with TSI</button>
+        <button class="btn-portal btn-portal--primary" data-modal-open="accessModal">
+            <span class="btn-portal-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M3 5h18v14H3V5zm2.2 1.8L12 12.1l6.8-5.3H5.2zm14.8 10.4V8.2L12 14.3 4 8.2v9h16z"></path>
+                </svg>
+            </span>
+            <span>Connect with TSI</span>
+        </button>
     </div>
 </nav>
 <!-- Navigation Section End -->
@@ -191,7 +198,7 @@
 <!-- Mandate Section Start -->
 <section class="section-wrap" id="mandate" role="tabpanel" aria-labelledby="tab-mandate" tabindex="-1">
     <div class="mandate-layout">
-        <div class="asset-image mandate-asset"><img src="assets/asset_1a.png"></div>
+        <div class="asset-image mandate-asset"><img src="assets/asset_1a.png" alt="Regional industrial corridor illustration"></div>
         <div class="mandate-column">
             <div class="instruction-box instruction-box--compact">
                 <p class="mandate-intro-text">
@@ -261,25 +268,39 @@
     </div>
 
     <div class="rubric-grid">
-        <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3a.png"></div>
+        <div class="rubric-item" data-rubric-key="vocational-literacy" role="button" tabindex="0" aria-pressed="false">
+            <div class="asset-image rubric-icon"><img src="assets/asset_3a.png" alt="Vocational literacy rubric icon"></div>
             <h4 class="rubric-item-title">Vocational Literacy</h4>
             <p class="rubric-item-copy">Regional technical education alignment based on Texas standards.</p>
+            <p class="rubric-item-hint">Click for action pathway</p>
         </div>
-        <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3b.png"></div>
+        <div class="rubric-item" data-rubric-key="onboarding-velocity" role="button" tabindex="0" aria-pressed="false">
+            <div class="asset-image rubric-icon"><img src="assets/asset_3b.png" alt="Onboarding velocity rubric icon"></div>
             <h4 class="rubric-item-title">Onboarding Velocity</h4>
             <p class="rubric-item-copy">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
+            <p class="rubric-item-hint">Click for action pathway</p>
         </div>
-        <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3c.png"></div>
+        <div class="rubric-item" data-rubric-key="regulatory-coherence" role="button" tabindex="0" aria-pressed="false">
+            <div class="asset-image rubric-icon"><img src="assets/asset_3c.png" alt="Regulatory coherence rubric icon"></div>
             <h4 class="rubric-item-title">Regulatory Coherence</h4>
             <p class="rubric-item-copy">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
+            <p class="rubric-item-hint">Click for action pathway</p>
         </div>
-        <div class="rubric-item">
-            <div class="asset-image rubric-icon"><img src="assets/asset_3d.png"></div>
+        <div class="rubric-item" data-rubric-key="reliability" role="button" tabindex="0" aria-pressed="false">
+            <div class="asset-image rubric-icon"><img src="assets/asset_3d.png" alt="Reliability rubric icon"></div>
             <h4 class="rubric-item-title">Reliability</h4>
             <p class="rubric-item-copy">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
+            <p class="rubric-item-hint">Click for action pathway</p>
+        </div>
+    </div>
+    <div class="rubric-action-panel" id="rubricActionPanel" aria-live="polite">
+        <p class="rubric-action-eyebrow">Selected Rubric Action</p>
+        <h4 class="rubric-action-title" id="rubricActionTitle">Vocational Literacy</h4>
+        <p class="rubric-action-copy" id="rubricActionCopy">Identify where technical education supply already aligns to corridor needs, then capture evidence gaps through structured intake.</p>
+        <p class="rubric-action-output" id="rubricActionOutput">Output: Workforce capability baseline and fast-gap shortlist for evaluation.</p>
+        <div class="rubric-action-buttons">
+            <button type="button" class="btn-cta btn-cta--rubric" data-modal-open="accessModal">Open Intake</button>
+            <a class="rubric-action-link" href="#engagement">Go to Engagement</a>
         </div>
     </div>
 </section>
@@ -287,12 +308,12 @@
 <!-- Pipeline Section Start -->
 <section class="section-wrap" id="pipeline" role="tabpanel" aria-labelledby="tab-pipeline" tabindex="-1">
     <div class="instruction-box pipeline-note">
-        International corridors are currently in structured observational phase. Stage position reflects internal evaluation status and does not indicate formal deployment.
+        This map reflects live corridor intelligence by evaluation stage. Markers indicate current analytical posture and readiness signals, not deployment commitments.
     </div>
 
     <div class="pipeline-option">
         <p class="pipeline-option-label">Map</p>
-        <div class="pipeline-map">
+        <div class="pipeline-map pipeline-map--raised">
             <div class="pipeline-map-controls pipeline-map-controls--md" role="group" aria-label="Map category toggles" data-map-controls="md"></div>
             <div class="pipeline-map-frame" aria-label="Vector world map">
                 <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map" data-map-md="assets/world-map.md" data-map-fallback="assets/world-map.png">
@@ -337,10 +358,28 @@
 <!-- Engagement Section Start -->
 <section class="section-wrap section-wrap--no-border" id="engagement" role="tabpanel" aria-labelledby="tab-engagement" tabindex="-1">
     <div class="instruction-box engagement-framing">
+        <div class="engagement-framing-head">
+            <p class="engagement-kicker">Structured Intake Channel</p>
+            <p class="engagement-framing-title">Start with context, not a proposal.</p>
+        </div>
         <button class="btn-cta btn-cta--inline" data-modal-open="accessModal">Start the conversation</button>
-        <p>
-            TSI begins engagement by collecting structured regional intelligence. We do not initiate with a proposal—we initiate with listening. This intake process allows institutional leaders and stakeholders to contribute ground-level context that informs corridor evaluation.
+        <p class="engagement-framing-copy">
+            TSI engagement begins with disciplined intake from regional institutions, operators, and technical stakeholders. We map what is already true on the ground before discussing any corridor path.
         </p>
+    </div>
+    <div class="engagement-signals">
+        <article class="engagement-signal">
+            <p class="engagement-signal-label">What You Send</p>
+            <p class="engagement-signal-copy">Operational context, constraints, and observed opportunities from your vantage point.</p>
+        </article>
+        <article class="engagement-signal">
+            <p class="engagement-signal-label">What We Evaluate</p>
+            <p class="engagement-signal-copy">Rubric alignment, stage readiness, and potential corridor fit based on submitted evidence.</p>
+        </article>
+        <article class="engagement-signal">
+            <p class="engagement-signal-label">What Happens Next</p>
+            <p class="engagement-signal-copy">If alignment exists, we schedule a scoped dialogue with clear expectations and boundaries.</p>
+        </article>
     </div>
     <div class="workflow-grid">
         <div class="workflow-step"><span class="step-num">01. SHARE CONTEXT</span><p class="workflow-copy">Select your perspective and submit relevant institutional or regional insight. No obligation is created by submission.</p></div>
