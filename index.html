@@ -186,14 +186,16 @@
             <p class="form-intro" id="accessModalIntro">This is an open invitation for individuals and organizations to share context or register interest. Your local perspective is essential data that helps us understand the specific reality of your corridor. This does not create any obligation, it just starts the conversation.</p>
             <input type="text" name="website" class="form-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
             <div class="concierge-block">
-                <span class="form-helper concierge-helper">Select the perspective that best matches you.</span>
+                <span class="form-helper concierge-helper">Select the perspective that best matches your purpose.</span>
                 <div class="concierge-grid" role="group" aria-label="Digital Concierge">
-                    <button type="button" class="concierge-btn" data-concierge-track="government" data-concierge-tier="1">Regional & Government Authority</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="education" data-concierge-tier="1">Educational Leadership & Instruction</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="private-sector" data-concierge-tier="1">Private Sector & Industry Leadership</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="small-business" data-concierge-tier="1">Small Business & Local Commerce</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="professional" data-concierge-tier="2">Professional & Technical Perspective</button>
-                    <button type="button" class="concierge-btn" data-concierge-track="student" data-concierge-tier="2">Student & Community Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="government" data-concierge-tier="1" data-concierge-type="stakeholder">Regional & Government Authority</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="education" data-concierge-tier="1" data-concierge-type="stakeholder">Educational Leadership & Instruction</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="private-sector" data-concierge-tier="1" data-concierge-type="stakeholder">Private Sector & Industry Leadership</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="small-business" data-concierge-tier="1" data-concierge-type="stakeholder">Small Business & Local Commerce</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="professional" data-concierge-tier="2" data-concierge-type="stakeholder">Professional & Technical Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="student" data-concierge-tier="2" data-concierge-type="stakeholder">Student & Community Perspective</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="investor" data-concierge-tier="1" data-concierge-type="investor">Investor / Capital Partner</button>
+                    <button type="button" class="concierge-btn" data-concierge-track="employment" data-concierge-tier="2" data-concierge-type="employment">Employment Application</button>
                 </div>
                 <div class="concierge-back-row">
                     <button type="button" class="concierge-back" id="conciergeBackBtn" aria-label="Back to concierge options">
@@ -205,6 +207,7 @@
             </div>
             <input type="hidden" id="handlerTier" name="handler_tier" value="">
             <input type="hidden" id="conciergeTrack" name="concierge_track" value="">
+            <input type="hidden" id="submissionType" name="submission_type" value="">
             <div class="concierge-fields" data-concierge-group="common" hidden>
                 <div class="form-field">
                     <label for="name">Name</label>
@@ -236,6 +239,48 @@
                     <label for="focus">Area of focus</label>
                     <span class="form-helper">Discipline, program, or technical specialty</span>
                     <input type="text" id="focus" name="focus">
+                </div>
+            </div>
+            <div class="concierge-fields" data-concierge-group="investor" hidden>
+                <div class="form-field">
+                    <label for="investorStage">Investment stage / profile</label>
+                    <span class="form-helper">Optional. Example: Seed, Growth, Infrastructure, Strategic.</span>
+                    <input type="text" id="investorStage" name="investor_stage">
+                </div>
+                <div class="form-field">
+                    <label for="investorCheckRange">Typical check range</label>
+                    <span class="form-helper">Optional. Example: 250K-1M, 5M-20M.</span>
+                    <input type="text" id="investorCheckRange" name="investor_check_range">
+                </div>
+                <div class="form-field">
+                    <label for="investorThesis">Investment focus</label>
+                    <span class="form-helper">Optional. Sectors, constraints, and preferred structure.</span>
+                    <textarea id="investorThesis" name="investor_thesis"></textarea>
+                </div>
+            </div>
+            <div class="concierge-fields" data-concierge-group="employment" hidden>
+                <div class="form-field">
+                    <label for="employmentRoleInterest">Role of interest</label>
+                    <span class="form-helper">Optional. Example: Research Analyst, Program Ops, Community Partnerships.</span>
+                    <input type="text" id="employmentRoleInterest" name="employment_role_interest">
+                </div>
+                <div class="form-field">
+                    <label for="employmentTimeline">Availability timeline</label>
+                    <span class="form-helper">Optional. Example: immediate, 30 days, part-time.</span>
+                    <input type="text" id="employmentTimeline" name="employment_timeline">
+                </div>
+                <div class="form-field">
+                    <label for="employmentLocationPref">Location preference</label>
+                    <span class="form-helper">Optional. Example: remote, hybrid, relocation available.</span>
+                    <input type="text" id="employmentLocationPref" name="employment_location_pref">
+                </div>
+            </div>
+            <div class="concierge-fields" data-concierge-group="attachment" hidden>
+                <div class="form-field">
+                    <label for="applicationFile">Attachment</label>
+                    <span class="form-helper">Optional. Upload a resume, profile, or briefing deck (max 8MB).</span>
+                    <input type="file" id="applicationFile" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg">
+                    <span class="form-error" id="fileError" role="alert"></span>
                 </div>
             </div>
             <div class="concierge-fields" data-concierge-group="shared" hidden>

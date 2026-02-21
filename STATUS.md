@@ -323,6 +323,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-21: Relocated page-local diagnostics controls to their sections (`#pipeline` map-test toggle and `#overview` tuning controls), while keeping internal modal focused on activation/global controls; section debug panels remain hidden until local debug mode is active.
 - [Done] 2026-02-21: Added Overview click-to-inspect local debug flow: in debug mode, clicking Overview tokens (e.g., Texas' Tested) binds element-level controls for color, fade style, and fade timing, with per-element reset and replay support.
 - [Done] 2026-02-21: Added site-wide local Sequence Lab (debug mode only) with click-target scope selection plus order/start/step/fade controls and replay; integrated with Overview run-order/start/step and section-level reveal replay without removing existing Pipeline map test controls.
+- [Done] 2026-02-21: Added investor/employment intake routes to the engagement concierge with dedicated field groups and optional attachment upload (up to 8MB), plus backend routing by `submission_type` to separate sheet targets/spreadsheets and Drive file storage using script-property placeholders.
+- [Done] 2026-02-21: Added temporary operator checklist `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md` with launch-priority setup/validation tasks for investor and employment intake deployment.
 ## Active Focus
 - Delivery target: Friday, February 20, 2026 (end of day, local).
 - Priority 1: finish pipeline/map completion and validation first (`Milestone 0.6` map implementation/readiness items + `R-001` checks).

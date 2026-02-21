@@ -15,6 +15,13 @@
         '1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
         '2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
     };
+    const _021026_SUBMISSION_MESSAGES = {
+        stakeholder: _021026_TIER_MESSAGES['2'],
+        investor: 'Thank you for your investor interest. Your request has been logged for the investment information workflow, and our team will follow up if there is strategic alignment.',
+        employment: 'Thank you for your employment application. Your submission has been logged for internal review, and we will contact you if there is a role fit.'
+    };
+    const FORM_ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
+    const FORM_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
     const MODAL_FOCUS_SELECTOR = [
         'a[href]',
         'button:not([disabled])',
@@ -24,6 +31,37 @@
         '[tabindex]:not([tabindex="-1"])'
     ].join(',');
     const _modalFocusRestore = new Map();
+
+    function normalizeSubmissionType(value) {
+        const raw = String(value || '').trim().toLowerCase();
+        if (raw === 'investor' || raw.includes('investor')) return 'investor';
+        if (raw === 'employment' || raw.includes('employment')) return 'employment';
+        return 'stakeholder';
+    }
+
+    function extractFileExtension(filename) {
+        const raw = String(filename || '').trim();
+        const idx = raw.lastIndexOf('.');
+        if (idx < 0) return '';
+        return raw.slice(idx + 1).toLowerCase();
+    }
+
+    function readFileAsBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = () => reject(new Error('file_read_error'));
+            reader.onload = () => {
+                const result = String(reader.result || '');
+                const commaIdx = result.indexOf(',');
+                if (commaIdx < 0) {
+                    reject(new Error('file_parse_error'));
+                    return;
+                }
+                resolve(result.slice(commaIdx + 1));
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     function getOpenModals() {
         return Array.from(document.querySelectorAll('[data-modal-overlay]')).filter((overlay) => {
@@ -92,11 +130,20 @@
         }
     }
 
-    function _021026_setConciergeVisibility(form, tier) {
+    function _021026_setConciergeVisibility(form, tier, submissionType) {
+        const nextType = normalizeSubmissionType(submissionType);
         const groups = form.querySelectorAll('[data-concierge-group]');
         groups.forEach(group => {
             const groupName = group.getAttribute('data-concierge-group');
-            const shouldShow = tier && (groupName === 'common' || groupName === 'shared' || groupName === (tier === '1' ? 'tier-1' : 'tier-2'));
+            const shouldShow = Boolean(
+                tier && (
+                    groupName === 'common'
+                    || groupName === 'shared'
+                    || groupName === (tier === '1' ? 'tier-1' : 'tier-2')
+                    || groupName === nextType
+                    || (groupName === 'attachment' && (nextType === 'investor' || nextType === 'employment'))
+                )
+            );
             group.hidden = !shouldShow;
             group.classList.toggle('is-visible', shouldShow);
             group.querySelectorAll('input, textarea, select').forEach(field => {
@@ -110,8 +157,11 @@
         const grid = form.querySelector('.concierge-grid');
         const backBtn = form.querySelector('#conciergeBackBtn');
         const error = form.querySelector('#conciergeError');
+        const fileError = form.querySelector('#fileError');
         const handlerTierInput = form.querySelector('#handlerTier');
         const trackInput = form.querySelector('#conciergeTrack');
+        const submissionTypeInput = form.querySelector('#submissionType');
+        const fileInput = form.querySelector('#applicationFile');
 
         buttons.forEach(button => {
             button.classList.remove('is-active');
@@ -124,12 +174,20 @@
 
         if (handlerTierInput) handlerTierInput.value = '';
         if (trackInput) trackInput.value = '';
+        if (submissionTypeInput) submissionTypeInput.value = '';
         if (error) {
             error.textContent = '';
             error.classList.remove('visible');
         }
+        if (fileError) {
+            fileError.textContent = '';
+            fileError.classList.remove('visible');
+        }
+        if (fileInput) {
+            fileInput.value = '';
+        }
 
-        _021026_setConciergeVisibility(form, '');
+        _021026_setConciergeVisibility(form, '', '');
     }
 
     function resetFormDataOnly() {
@@ -369,14 +427,13 @@ function softCloseModal() {
 }
 
     // THE SUBMIT HANDLER
-    document.getElementById('stakeholderForm').addEventListener('submit', function(e) {
-        // PREVENT the page from clearing/refreshing
-        e.preventDefault(); 
+    document.getElementById('stakeholderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
         if (window._isSubmitting) {
             return;
         }
-        
+
         const form = this;
         const submitBtn = form.querySelector('.form-submit');
         const timeError = document.getElementById('formTimeError');
@@ -386,14 +443,16 @@ function softCloseModal() {
         const messageError = document.getElementById('messageError');
         const emailError = document.getElementById('emailError');
         const conciergeError = document.getElementById('conciergeError');
+        const fileError = document.getElementById('fileError');
         const handlerTierInput = document.getElementById('handlerTier');
+        const submissionTypeInput = document.getElementById('submissionType');
+        const fileInput = document.getElementById('applicationFile');
         const successSub = document.getElementById('formSuccessSub');
         const modalBody = document.getElementById('accessModalBody');
         const formSuccess = document.getElementById('formSuccess');
         const successCloseBtn = document.getElementById('successCloseBtn');
         const successAnotherBtn = document.getElementById('successAnotherBtn');
 
-        // Reset UI state
         if (timeError) timeError.hidden = true;
         if (networkError) {
             networkError.hidden = true;
@@ -406,6 +465,10 @@ function softCloseModal() {
         if (conciergeError) {
             conciergeError.textContent = '';
             conciergeError.classList.remove('visible');
+        }
+        if (fileError) {
+            fileError.textContent = '';
+            fileError.classList.remove('visible');
         }
 
         if (!handlerTierInput || !handlerTierInput.value) {
@@ -443,14 +506,12 @@ function softCloseModal() {
             return;
         }
 
-        // 1. Check Time Trap (3 seconds)
         const timeElapsed = Date.now() - (window._formOpenTime || 0);
         if (timeElapsed < SUBMIT_MIN_MS) {
             if (timeError) timeError.hidden = false;
-            return; // Stops here, text stays in boxes
+            return;
         }
 
-        // 2. Simple Email Validation
         const email = document.getElementById('email').value;
         if (!email.includes('@')) {
             if (emailError) {
@@ -460,78 +521,124 @@ function softCloseModal() {
             return;
         }
 
-        // 3. Start Submission
         window._isSubmitting = true;
         window._submitStartedAt = Date.now();
         submitBtn.disabled = true;
         submitBtn.textContent = 'Sending...';
         startSubmissionTimers();
 
-        // Prepare data
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
+        try {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            delete data.application_file;
+            const submissionType = normalizeSubmissionType(
+                (submissionTypeInput && submissionTypeInput.value) || data.submission_type || 'stakeholder'
+            );
+            data.submission_type = submissionType;
+            data.page_path = window.location.pathname || '/';
+            data.referrer = document.referrer || 'direct';
+            data.submission_id = generateSubmissionId();
+            data.timestamp_local = formatLocalTimestamp(new Date());
 
-        data.page_path = window.location.pathname || '/';
-        data.referrer = document.referrer || 'direct';
-        data.submission_id = generateSubmissionId();
-        data.timestamp_local = formatLocalTimestamp(new Date());
-
-        fetch(FORM_ENDPOINT, {
-            method: 'POST',
-            body: JSON.stringify(data)
-        })
-        .then(res => {
-            return res
-                .json()
-                .catch(() => null)
-                .then(body => ({ res, body }));
-        })
-        .then(({ res, body }) => {
-            if (!window._isSubmitting) {
-                return;
-            }
-            const isOk = res.ok && body && body.ok === true;
-            if (isOk) {
-                window._successShownAt = Date.now();
-                window._formLastState = 'success';
-                window._isSubmitting = false;
-                stopSubmissionTimers();
-                clearFormStatus();
-                // Trigger Success UI
-                if (successSub) {
-                    successSub.textContent = _021026_TIER_MESSAGES[handlerTierInput.value] || _021026_TIER_MESSAGES['2'];
+            const selectedFile = (fileInput && !fileInput.disabled && fileInput.files && fileInput.files[0])
+                ? fileInput.files[0]
+                : null;
+            if (selectedFile) {
+                const extension = extractFileExtension(selectedFile.name);
+                if (!FORM_ATTACHMENT_ALLOWED_EXTENSIONS.has(extension)) {
+                    if (fileError) {
+                        fileError.textContent = 'Unsupported file type. Use PDF, DOC/DOCX, PPT/PPTX, TXT, PNG, or JPG.';
+                        fileError.classList.add('visible');
+                    }
+                    throw new Error('attachment_validation');
                 }
-                if (modalBody) {
-                    modalBody.scrollTop = 0;
-                    modalBody.classList.add('success-visible');
+                if (selectedFile.size > FORM_ATTACHMENT_MAX_BYTES) {
+                    if (fileError) {
+                        fileError.textContent = 'Attachment exceeds 8MB limit.';
+                        fileError.classList.add('visible');
+                    }
+                    throw new Error('attachment_validation');
                 }
-                if (formSuccess) {
-                    formSuccess.hidden = false;
-                    formSuccess.classList.add('reveal-active');
-                }
-                if (successCloseBtn) successCloseBtn.disabled = true;
-                if (successAnotherBtn) successAnotherBtn.disabled = true;
-                setTimeout(() => {
-                    if (successCloseBtn) successCloseBtn.disabled = false;
-                    if (successAnotherBtn) successAnotherBtn.disabled = false;
-                }, SUCCESS_GRACE_MS);
-                form.hidden = true;
+                setFormStatus('Preparing attachment upload...');
+                const fileBase64 = await readFileAsBase64(selectedFile);
+                data.attachment_name = selectedFile.name;
+                data.attachment_type = selectedFile.type || '';
+                data.attachment_size = String(selectedFile.size);
+                data.attachment_data = fileBase64;
             } else {
-                throw new Error((body && body.error) ? body.error : 'Server error');
+                data.attachment_name = '';
+                data.attachment_type = '';
+                data.attachment_size = '';
+                data.attachment_data = '';
             }
-        })
-        .catch(err => {
+
+            setFormStatus('Submitting your form...');
+            const res = await fetch(FORM_ENDPOINT, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            const body = await res.json().catch(() => null);
+            const isOk = res.ok && body && body.ok === true;
+            if (!isOk) {
+                throw new Error((body && body.error) ? body.error : 'server_error');
+            }
+
+            window._successShownAt = Date.now();
+            window._formLastState = 'success';
+            window._isSubmitting = false;
+            stopSubmissionTimers();
+            clearFormStatus();
+
+            if (successSub) {
+                successSub.textContent = _021026_SUBMISSION_MESSAGES[submissionType]
+                    || _021026_TIER_MESSAGES[handlerTierInput.value]
+                    || _021026_TIER_MESSAGES['2'];
+            }
+            if (modalBody) {
+                modalBody.scrollTop = 0;
+                modalBody.classList.add('success-visible');
+            }
+            if (formSuccess) {
+                formSuccess.hidden = false;
+                formSuccess.classList.add('reveal-active');
+            }
+            if (successCloseBtn) successCloseBtn.disabled = true;
+            if (successAnotherBtn) successAnotherBtn.disabled = true;
+            setTimeout(() => {
+                if (successCloseBtn) successCloseBtn.disabled = false;
+                if (successAnotherBtn) successAnotherBtn.disabled = false;
+            }, SUCCESS_GRACE_MS);
+            form.hidden = true;
+        } catch (err) {
             if (!window._isSubmitting) {
                 return;
             }
+            const errCode = String((err && err.message) || '');
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit';
-            if (networkError) networkError.hidden = false;
+            const isAttachmentError = (
+                errCode === 'attachment_validation'
+                || errCode === 'file_too_large'
+                || errCode === 'invalid_attachment_type'
+                || errCode === 'invalid_attachment'
+                || errCode === 'file_upload_error'
+            );
+            if (isAttachmentError && fileError) {
+                if (!fileError.textContent) {
+                    fileError.textContent = 'Attachment upload failed. Please review file type and size.';
+                }
+                fileError.classList.add('visible');
+            } else if (networkError) {
+                if (errCode.startsWith('file_')) {
+                    networkError.querySelector('p').textContent = 'Attachment upload failed. Please try again.';
+                }
+                networkError.hidden = false;
+            }
             window._isSubmitting = false;
             window._successShownAt = null;
             stopSubmissionTimers();
             clearFormStatus();
-        });
+        }
     });
 
     function _021026_initConciergeForm() {
@@ -543,13 +650,15 @@ function softCloseModal() {
         const backBtn = form.querySelector('#conciergeBackBtn');
         const handlerTierInput = form.querySelector('#handlerTier');
         const trackInput = form.querySelector('#conciergeTrack');
+        const submissionTypeInput = form.querySelector('#submissionType');
         const error = form.querySelector('#conciergeError');
 
         buttons.forEach(button => {
             button.setAttribute('aria-pressed', 'false');
             button.addEventListener('click', () => {
                 const tier = button.getAttribute('data-concierge-tier') || '';
-                const label = button.textContent.trim();
+                const trackKey = button.getAttribute('data-concierge-track') || button.textContent.trim();
+                const submissionType = normalizeSubmissionType(button.getAttribute('data-concierge-type') || 'stakeholder');
                 buttons.forEach(btn => {
                     btn.classList.remove('is-active');
                     btn.classList.remove('is-hidden');
@@ -566,12 +675,13 @@ function softCloseModal() {
                 if (backBtn) backBtn.classList.add('is-visible');
                 form.classList.add('has-concierge');
                 if (handlerTierInput) handlerTierInput.value = tier;
-                if (trackInput) trackInput.value = label;
+                if (trackInput) trackInput.value = trackKey;
+                if (submissionTypeInput) submissionTypeInput.value = submissionType;
                 if (error) {
                     error.textContent = '';
                     error.classList.remove('visible');
                 }
-                _021026_setConciergeVisibility(form, tier);
+                _021026_setConciergeVisibility(form, tier, submissionType);
             });
         });
 
@@ -582,10 +692,11 @@ function softCloseModal() {
         }
 
         const initialTier = handlerTierInput ? handlerTierInput.value : '';
+        const initialSubmissionType = submissionTypeInput ? submissionTypeInput.value : '';
         if (initialTier) {
             form.classList.add('has-concierge');
         }
-        _021026_setConciergeVisibility(form, initialTier);
+        _021026_setConciergeVisibility(form, initialTier, initialSubmissionType);
     }
 
     function initModalTriggers() {

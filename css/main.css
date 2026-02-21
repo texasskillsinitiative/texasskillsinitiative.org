@@ -1227,7 +1227,8 @@
         .no-js #accessModal .concierge-back-row { display: none; }
         .no-js #accessModal .concierge-fields[hidden] { display: flex !important; }
         .no-js #accessModal #handlerTier,
-        .no-js #accessModal #conciergeTrack { display: none; }
+        .no-js #accessModal #conciergeTrack,
+        .no-js #accessModal #submissionType { display: none; }
         #accessModal .concierge-error { min-height: 1rem; }
         #accessModal .concierge-fields { display: none; flex-direction: column; gap: 16px; }
         #accessModal .concierge-fields.is-visible { display: flex; }
@@ -1235,6 +1236,7 @@
         #accessModal .form-field label { font-size: 0.8rem; font-weight: 700; color: var(--page-text-main); }
         #accessModal .form-field .form-helper { font-size: 0.75rem; color: var(--page-text-dim); }
         #accessModal .form-field input, #accessModal .form-field textarea { background: var(--page-bg); border: 1px solid var(--frame-border); color: var(--page-text-main); padding: 10px 12px; font-size: 0.9rem; font-family: inherit; }
+        #accessModal .form-field input[type="file"] { padding: 8px; font-size: 0.8rem; }
         #accessModal .form-field input:focus, #accessModal .form-field textarea:focus { outline: none; border-color: var(--accent); }
         #accessModal .form-field textarea { min-height: 80px; resize: vertical; }
         #accessModal .form-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
