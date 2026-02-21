@@ -1150,4 +1150,15 @@
 - Troubleshooting suggestions: For auto scope, click inside the target section first, then run Replay; use explicit scope when testing hidden/non-active sections.
 - Resolutions/outcomes: Local debug now supports area-driven timing/order testing across sections and keeps prior map/overview debug features functional. Validation passed (`node --check js/main.js`, targeted sequence inspector checks, core smoke + map checks).
 - Commit hash(es): none
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+
+### 2026-02-21 03:01:35 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented new intake routes for investor and employment workflows in the engagement form, added optional attachment upload handling in frontend payload construction, and built backend routing/storage for submission-type-specific spreadsheet targets plus Drive upload metadata capture. Updated backend docs with script-property placeholders and required manual setup steps.
+- Troubleshooting suggestions: If uploads fail in deployed script, verify `UPLOAD_DRIVE_FOLDER_ID` (or Drive root permissions), `FILE_UPLOAD_MAX_BYTES`, and web-app deployment authorization under the active account.
+- Resolutions/outcomes: Investor/employment options are now selectable in concierge UI, attachment payload is validated client-side (type/size) and processed server-side, and records can route to separate spreadsheets/sheets by submission type while preserving existing map/debug tooling.
+- Commit hash(es): none
+
+### 2026-02-21 09:19:26 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Created and prioritized a temporary operator checklist in `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md`, updated `STATUS.md` with the related completion note, ran syntax verification for modified JS backend/frontend files, and finalized the packet with a scoped commit.
+- Troubleshooting suggestions: If deployment errors persist, complete checklist items in order (properties -> permissions -> deploy -> endpoint -> routing tests) before functional debugging.
+- Resolutions/outcomes: Investor/employment intake packet is committed, temporary setup tasks are documented in priority order, and clean-exit protocol has closure details recorded.
+- Commit hash(es): f600e5c
