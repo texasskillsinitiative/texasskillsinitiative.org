@@ -1126,4 +1126,28 @@
 - Troubleshooting suggestions: If diagnostics appear stale after edits, toggle `TSI Internal` debug off/on once to resync control labels with active CSS variables.
 - Resolutions/outcomes: `Fade Ms` now applies immediately during editing and resets predictably; targeted browser verification confirmed CSS var transition from `650ms` back to `1100ms`.
 - Commit hash(es): none
+
+### 2026-02-21 01:55:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Committed local diagnostics and Overview tuning updates, and applied a local read-only attribute safeguard to `js/debug.local.js` to reduce accidental removal/overwrite during development sessions.
+- Troubleshooting suggestions: If you need to edit `js/debug.local.js`, clear read-only first (`attrib -R js\debug.local.js`), edit, then optionally restore read-only (`attrib +R js\debug.local.js`).
+- Resolutions/outcomes: Debug controls and Overview tuning are checkpointed in git (`52aa443`) while keeping local-only gate file untracked.
+- Commit hash(es): 52aa443
+
+### 2026-02-21 02:06:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved page-local diagnostics controls out of the internal modal and into their corresponding sections (`#pipeline` and `#overview`), added section debug panel styling, and updated debug-mode visibility wiring so those panels are hidden by default and shown only when local debug mode is active.
+- Troubleshooting suggestions: If page-local controls are not visible, re-enter local debug mode (`debugme` in TSI Internal) and confirm the target section is active (`#overview` or `#pipeline`).
+- Resolutions/outcomes: Overview tuning is now testable directly in the Overview view, map-test visibility toggle is now in Pipeline, and smoke checks stayed clean with no console errors.
+- Commit hash(es): none
+
+### 2026-02-21 02:30:31 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Overview click-to-inspect diagnostics in local debug mode. Added per-element inspector controls (selected token, color override, fade style, fade timing, per-setting reset, replay), section-level panel placement, and element-level CSS variable overrides for animation/transition behavior.
+- Troubleshooting suggestions: If token selection does not register, confirm local debug mode is active and click directly on an Overview word/phrase token (crosshair cursor indicates inspectable targets).
+- Resolutions/outcomes: Clicking tokens such as `Texas' Tested` now surfaces editable element-level variables and applies updates immediately; smoke + targeted browser checks passed with no console errors.
+- Commit hash(es): none
+
+### 2026-02-21 02:43:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Extended local diagnostics with a site-wide Sequence Lab dock (scope, order, start delay, step delay, fade duration, replay) and click-target section selection; integrated Overview sequence order/start/step controls into `runOverviewSequence`; retained existing pipeline map testing controls and added no destructive changes.
+- Troubleshooting suggestions: For auto scope, click inside the target section first, then run Replay; use explicit scope when testing hidden/non-active sections.
+- Resolutions/outcomes: Local debug now supports area-driven timing/order testing across sections and keeps prior map/overview debug features functional. Validation passed (`node --check js/main.js`, targeted sequence inspector checks, core smoke + map checks).
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

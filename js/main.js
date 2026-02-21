@@ -761,6 +761,29 @@ function softCloseModal() {
         const resetOverviewFadeStyleBtn = document.getElementById('globalDebugResetOverviewFadeStyle');
         const resetOverviewFadeMsBtn = document.getElementById('globalDebugResetOverviewFadeMs');
         const resetOverviewSequenceScaleBtn = document.getElementById('globalDebugResetOverviewSequenceScale');
+        const overviewInspectTargetNode = document.getElementById('globalDebugOverviewInspectTarget');
+        const overviewInspectClearBtn = document.getElementById('globalDebugOverviewInspectClear');
+        const overviewInspectColorInput = document.getElementById('globalDebugOverviewInspectColor');
+        const resetOverviewInspectColorBtn = document.getElementById('globalDebugOverviewInspectResetColor');
+        const overviewInspectFadeStyleSelect = document.getElementById('globalDebugOverviewInspectFadeStyle');
+        const resetOverviewInspectFadeStyleBtn = document.getElementById('globalDebugOverviewInspectResetFadeStyle');
+        const overviewInspectFadeMsInput = document.getElementById('globalDebugOverviewInspectFadeMs');
+        const resetOverviewInspectFadeMsBtn = document.getElementById('globalDebugOverviewInspectResetFadeMs');
+        const overviewReplayBtn = document.getElementById('globalDebugOverviewReplay');
+        const sequenceScopeSelect = document.getElementById('globalDebugSequenceScope');
+        const resetSequenceScopeBtn = document.getElementById('globalDebugSequenceResetScope');
+        const sequenceTargetNode = document.getElementById('globalDebugSequenceTarget');
+        const clearSequenceTargetBtn = document.getElementById('globalDebugSequenceClearTarget');
+        const sequenceOrderSelect = document.getElementById('globalDebugSequenceOrder');
+        const resetSequenceOrderBtn = document.getElementById('globalDebugSequenceResetOrder');
+        const sequenceStartMsInput = document.getElementById('globalDebugSequenceStartMs');
+        const resetSequenceStartMsBtn = document.getElementById('globalDebugSequenceResetStartMs');
+        const sequenceStepMsInput = document.getElementById('globalDebugSequenceStepMs');
+        const resetSequenceStepMsBtn = document.getElementById('globalDebugSequenceResetStepMs');
+        const sequenceDurationMsInput = document.getElementById('globalDebugSequenceDurationMs');
+        const resetSequenceDurationMsBtn = document.getElementById('globalDebugSequenceResetDurationMs');
+        const sequenceReplayBtn = document.getElementById('globalDebugSequenceReplay');
+        const overviewSection = document.getElementById('overview');
         const areaCountNode = document.getElementById('globalDebugAreaCount');
         const areaListNode = document.getElementById('globalDebugAreaList');
         const debugStatus = document.getElementById('globalDebugStatus');
@@ -778,16 +801,28 @@ function softCloseModal() {
             || !overviewFadeStyleSelect || !overviewFadeMsInput || !overviewSequenceScaleSelect
             || !resetOverviewTitleScaleBtn || !resetOverviewCopyScaleBtn || !resetOverviewAccentBtn
             || !resetOverviewFadeStyleBtn || !resetOverviewFadeMsBtn || !resetOverviewSequenceScaleBtn
+            || !overviewInspectTargetNode || !overviewInspectClearBtn || !overviewInspectColorInput
+            || !resetOverviewInspectColorBtn || !overviewInspectFadeStyleSelect || !resetOverviewInspectFadeStyleBtn
+            || !overviewInspectFadeMsInput || !resetOverviewInspectFadeMsBtn || !overviewReplayBtn
+            || !sequenceScopeSelect || !resetSequenceScopeBtn || !sequenceTargetNode || !clearSequenceTargetBtn
+            || !sequenceOrderSelect || !resetSequenceOrderBtn
+            || !sequenceStartMsInput || !resetSequenceStartMsBtn
+            || !sequenceStepMsInput || !resetSequenceStepMsBtn
+            || !sequenceDurationMsInput || !resetSequenceDurationMsBtn || !sequenceReplayBtn
+            || !overviewSection
             || !areaCountNode || !areaListNode
         ) {
             return;
         }
 
         const root = document.documentElement;
+        const sectionDebugPanels = Array.from(document.querySelectorAll('[data-debug-panel]'));
         let debugEnabled = false;
         let debugChecked = false;
         let debugCheckPromise = null;
         let debugModeActive = false;
+        let selectedOverviewNode = null;
+        let lastSequenceTargetSectionId = 'overview';
         const highlightedAreas = new Set();
         let statusTimer = 0;
         const debugDefaults = {
@@ -796,6 +831,11 @@ function softCloseModal() {
             compactLayout: false,
             reducedMotion: false,
             highlightAreas: false,
+            sequenceScope: 'auto',
+            sequenceOrder: 'normal',
+            sequenceStartMs: 120,
+            sequenceStepMs: 140,
+            sequenceDurationMs: 1100,
             overviewTitleScale: 1,
             overviewCopyScale: 1,
             overviewAccentColor: '#c3a46b',
@@ -843,8 +883,14 @@ function softCloseModal() {
                 root.setAttribute('data-debug-color-preset', debugState.colorPreset);
             }
             root.style.setProperty('--debug-text-scale', String(debugState.textScale));
+            root.style.setProperty('--debug-sequence-duration', `${debugState.sequenceDurationMs}ms`);
             root.classList.toggle('debug-layout-compact', debugState.compactLayout);
             root.classList.toggle('debug-motion-reduced', debugState.reducedMotion);
+        };
+        const clampDebugNumber = (rawValue, min, max, fallback) => {
+            const next = Number(rawValue);
+            if (!Number.isFinite(next)) return fallback;
+            return Math.min(max, Math.max(min, Math.round(next)));
         };
         const resolveOverviewFadeEase = (style) => {
             if (style === 'linear') return 'linear';
@@ -876,6 +922,9 @@ function softCloseModal() {
                 root.style.removeProperty('--debug-overview-accent');
             }
             window.__tsiOverviewDebugSequenceScale = debugState.overviewSequenceScale;
+            window.__tsiOverviewDebugOrder = debugState.sequenceOrder;
+            window.__tsiOverviewDebugStartMs = debugState.sequenceStartMs;
+            window.__tsiOverviewDebugStepMs = debugState.sequenceStepMs;
             refreshOverviewDebugPreview(runSequence);
         };
         const parseOverviewFadeMs = (rawValue, fallback = debugDefaults.overviewFadeMs) => {
@@ -889,6 +938,172 @@ function softCloseModal() {
             debugState.overviewFadeMs = parseOverviewFadeMs(overviewFadeMsInput.value, debugState.overviewFadeMs);
             applyOverviewDebugVisuals(runSequence);
             syncDebugControlLabels();
+        };
+        const parseColorToHex = (rawValue, fallback = '#c3a46b') => {
+            const raw = String(rawValue || '').trim();
+            if (!raw) return fallback;
+            if (/^#[0-9a-f]{6}$/i.test(raw)) return raw.toLowerCase();
+            if (/^#[0-9a-f]{3}$/i.test(raw)) {
+                const normalized = raw.slice(1).toLowerCase();
+                return `#${normalized[0]}${normalized[0]}${normalized[1]}${normalized[1]}${normalized[2]}${normalized[2]}`;
+            }
+            const rgba = raw.match(/^rgba?\(([^)]+)\)$/i);
+            if (!rgba) return fallback;
+            const parts = rgba[1].split(',').map((part) => Number(part.trim()));
+            if (parts.length < 3 || parts.slice(0, 3).some((part) => !Number.isFinite(part))) return fallback;
+            const toHex = (value) => Math.max(0, Math.min(255, Math.round(value))).toString(16).padStart(2, '0');
+            return `#${toHex(parts[0])}${toHex(parts[1])}${toHex(parts[2])}`;
+        };
+        const overviewInspectableSelector = '.reveal-word, .overview-phrase';
+        const getOverviewInspectableNodes = () => Array.from(overviewSection.querySelectorAll(overviewInspectableSelector));
+        const isOverviewInspectable = (node) => node instanceof HTMLElement && node.matches(overviewInspectableSelector);
+        const getOverviewTokenLabel = (node) => {
+            if (!(node instanceof HTMLElement)) return 'None';
+            const preferred = node.getAttribute('data-debug-label');
+            const text = preferred || node.textContent || '';
+            const normalized = text.replace(/\s+/g, ' ').trim();
+            return normalized || 'Unnamed token';
+        };
+        const clearOverviewSelectionMarker = () => {
+            if (!(selectedOverviewNode instanceof HTMLElement)) return;
+            selectedOverviewNode.classList.remove('debug-overview-selected');
+        };
+        const setOverviewInspectorEnabled = (enabled) => {
+            const disabled = !enabled;
+            overviewInspectColorInput.disabled = disabled;
+            overviewInspectFadeStyleSelect.disabled = disabled;
+            overviewInspectFadeMsInput.disabled = disabled;
+            resetOverviewInspectColorBtn.disabled = disabled;
+            resetOverviewInspectFadeStyleBtn.disabled = disabled;
+            resetOverviewInspectFadeMsBtn.disabled = disabled;
+        };
+        const clearOverviewInspectColor = (node) => {
+            if (!(node instanceof HTMLElement)) return;
+            delete node.dataset.debugInspectColor;
+            node.classList.remove('debug-overview-color-active');
+            node.style.removeProperty('--tsi-debug-color');
+        };
+        const clearOverviewInspectFadeStyle = (node) => {
+            if (!(node instanceof HTMLElement)) return;
+            delete node.dataset.debugInspectFadeStyle;
+            node.style.removeProperty('--tsi-debug-fade-ease');
+        };
+        const clearOverviewInspectFadeMs = (node) => {
+            if (!(node instanceof HTMLElement)) return;
+            delete node.dataset.debugInspectFadeMs;
+            node.style.removeProperty('--tsi-debug-fade-ms');
+        };
+        const resetOverviewInspectableNode = (node) => {
+            if (!(node instanceof HTMLElement)) return;
+            clearOverviewInspectColor(node);
+            clearOverviewInspectFadeStyle(node);
+            clearOverviewInspectFadeMs(node);
+        };
+        const clearOverviewInspectSelection = () => {
+            clearOverviewSelectionMarker();
+            selectedOverviewNode = null;
+        };
+        const clearAllOverviewInspectableOverrides = () => {
+            getOverviewInspectableNodes().forEach((node) => {
+                if (!(node instanceof HTMLElement)) return;
+                node.classList.remove('debug-overview-selected');
+                resetOverviewInspectableNode(node);
+            });
+            selectedOverviewNode = null;
+        };
+        const syncOverviewInspectorControls = () => {
+            const activeNode = selectedOverviewNode;
+            if (!isOverviewInspectable(activeNode)) {
+                overviewInspectTargetNode.textContent = 'None';
+                overviewInspectColorInput.value = parseColorToHex(debugState.overviewAccentColor, '#c3a46b');
+                overviewInspectFadeStyleSelect.value = debugState.overviewFadeStyle;
+                overviewInspectFadeMsInput.value = String(debugState.overviewFadeMs);
+                setOverviewInspectorEnabled(false);
+                return;
+            }
+            overviewInspectTargetNode.textContent = getOverviewTokenLabel(activeNode);
+            const activeColor = activeNode.dataset.debugInspectColor
+                ? parseColorToHex(activeNode.dataset.debugInspectColor, '#c3a46b')
+                : parseColorToHex(window.getComputedStyle(activeNode).color, '#c3a46b');
+            overviewInspectColorInput.value = activeColor;
+            const fadeStyle = activeNode.dataset.debugInspectFadeStyle || debugState.overviewFadeStyle;
+            overviewInspectFadeStyleSelect.value = fadeStyle;
+            const fadeMs = parseOverviewFadeMs(activeNode.dataset.debugInspectFadeMs, debugState.overviewFadeMs);
+            overviewInspectFadeMsInput.value = String(fadeMs);
+            setOverviewInspectorEnabled(true);
+        };
+        const setSelectedOverviewInspectable = (node) => {
+            if (!isOverviewInspectable(node)) return;
+            clearOverviewSelectionMarker();
+            selectedOverviewNode = node;
+            selectedOverviewNode.classList.add('debug-overview-selected');
+            syncOverviewInspectorControls();
+        };
+        const allSequenceSectionIds = ['overview', 'mandate', 'rubric', 'pipeline', 'engagement', 'team'];
+        const getActiveTabId = () => {
+            const hash = window.location.hash || '#overview';
+            const id = hash.startsWith('#') ? hash.slice(1) : 'overview';
+            return allSequenceSectionIds.includes(id) ? id : 'overview';
+        };
+        const updateSequenceTargetLabel = () => {
+            if (debugState.sequenceScope === 'all') {
+                sequenceTargetNode.textContent = 'all';
+                return;
+            }
+            if (debugState.sequenceScope !== 'auto') {
+                sequenceTargetNode.textContent = debugState.sequenceScope;
+                return;
+            }
+            sequenceTargetNode.textContent = lastSequenceTargetSectionId || getActiveTabId();
+        };
+        const resolveSequenceTargetSections = () => {
+            const scope = String(debugState.sequenceScope || 'auto');
+            if (scope === 'all') return allSequenceSectionIds.slice();
+            if (scope === 'auto') {
+                const autoId = lastSequenceTargetSectionId || getActiveTabId();
+                return allSequenceSectionIds.includes(autoId) ? [autoId] : ['overview'];
+            }
+            return allSequenceSectionIds.includes(scope) ? [scope] : ['overview'];
+        };
+        const replaySectionRevealSequence = (sectionId) => {
+            const sectionNode = document.getElementById(sectionId);
+            if (!(sectionNode instanceof HTMLElement)) return;
+            if (sectionId === 'overview') {
+                window.__tsiOverviewDebugOrder = debugState.sequenceOrder;
+                window.__tsiOverviewDebugStartMs = debugState.sequenceStartMs;
+                window.__tsiOverviewDebugStepMs = debugState.sequenceStepMs;
+                if (typeof window._runOverviewSequence === 'function') {
+                    window._runOverviewSequence();
+                }
+                return;
+            }
+            const targets = Array.from(sectionNode.querySelectorAll('.reveal-text, .asset-image')).filter((node) => {
+                if (!(node instanceof HTMLElement)) return false;
+                if (node.closest('[data-debug-panel]')) return false;
+                return true;
+            });
+            if (!targets.length) return;
+            const ordered = debugState.sequenceOrder === 'reverse' ? targets.slice().reverse() : targets.slice();
+            const startDelaySeconds = debugState.sequenceStartMs / 1000;
+            const stepDelaySeconds = debugState.sequenceStepMs / 1000;
+            ordered.forEach((node, index) => {
+                const delay = startDelaySeconds + (stepDelaySeconds * index);
+                node.style.setProperty('--reveal-delay', `${Math.max(0, delay).toFixed(3)}s`);
+                node.classList.remove('reveal-active');
+                if (node.classList.contains('asset-image')) {
+                    node.classList.remove('revealed');
+                }
+            });
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    ordered.forEach((node) => {
+                        node.classList.add('reveal-active');
+                        if (node.classList.contains('asset-image')) {
+                            node.classList.add('revealed');
+                        }
+                    });
+                });
+            });
         };
 
         const loadLocalDebugConfig = async () => {
@@ -1001,10 +1216,27 @@ function softCloseModal() {
             if (overviewSequenceScaleSelect.value !== overviewSequenceScaleValue) {
                 overviewSequenceScaleSelect.value = overviewSequenceScaleValue;
             }
+            if (sequenceScopeSelect.value !== debugState.sequenceScope) {
+                sequenceScopeSelect.value = debugState.sequenceScope;
+            }
+            if (sequenceOrderSelect.value !== debugState.sequenceOrder) {
+                sequenceOrderSelect.value = debugState.sequenceOrder;
+            }
+            if (Number(sequenceStartMsInput.value) !== debugState.sequenceStartMs) {
+                sequenceStartMsInput.value = String(debugState.sequenceStartMs);
+            }
+            if (Number(sequenceStepMsInput.value) !== debugState.sequenceStepMs) {
+                sequenceStepMsInput.value = String(debugState.sequenceStepMs);
+            }
+            if (Number(sequenceDurationMsInput.value) !== debugState.sequenceDurationMs) {
+                sequenceDurationMsInput.value = String(debugState.sequenceDurationMs);
+            }
             toggleLayoutBtn.textContent = `Compact: ${debugState.compactLayout ? 'On' : 'Off'}`;
             toggleMotionBtn.textContent = `Reduced: ${debugState.reducedMotion ? 'On' : 'Off'}`;
             toggleMapBtn.textContent = mapTestsVisible ? 'On' : 'Off';
             toggleHighlightBtn.textContent = debugState.highlightAreas ? 'On' : 'Off';
+            updateSequenceTargetLabel();
+            syncOverviewInspectorControls();
         };
 
         const resetPortalAuthMessages = () => {
@@ -1022,6 +1254,12 @@ function softCloseModal() {
             defaultContent.setAttribute('aria-hidden', debugModeActive ? 'true' : 'false');
             debugMenu.hidden = !debugModeActive;
             debugMenu.setAttribute('aria-hidden', debugModeActive ? 'false' : 'true');
+            root.classList.toggle('debug-mode-active', debugModeActive);
+            sectionDebugPanels.forEach((panel) => {
+                if (!(panel instanceof HTMLElement)) return;
+                panel.hidden = !debugModeActive;
+                panel.setAttribute('aria-hidden', debugModeActive ? 'false' : 'true');
+            });
         };
 
         const resetDebugSettingsToDefaults = () => {
@@ -1030,6 +1268,11 @@ function softCloseModal() {
             debugState.compactLayout = debugDefaults.compactLayout;
             debugState.reducedMotion = debugDefaults.reducedMotion;
             debugState.highlightAreas = debugDefaults.highlightAreas;
+            debugState.sequenceScope = debugDefaults.sequenceScope;
+            debugState.sequenceOrder = debugDefaults.sequenceOrder;
+            debugState.sequenceStartMs = debugDefaults.sequenceStartMs;
+            debugState.sequenceStepMs = debugDefaults.sequenceStepMs;
+            debugState.sequenceDurationMs = debugDefaults.sequenceDurationMs;
             debugState.overviewTitleScale = debugDefaults.overviewTitleScale;
             debugState.overviewCopyScale = debugDefaults.overviewCopyScale;
             debugState.overviewAccentColor = debugDefaults.overviewAccentColor;
@@ -1037,8 +1280,10 @@ function softCloseModal() {
             debugState.overviewFadeStyle = debugDefaults.overviewFadeStyle;
             debugState.overviewFadeMs = debugDefaults.overviewFadeMs;
             debugState.overviewSequenceScale = debugDefaults.overviewSequenceScale;
+            lastSequenceTargetSectionId = 'overview';
             applyGlobalDebugVisuals();
             applyOverviewDebugVisuals(false);
+            clearAllOverviewInspectableOverrides();
             setMapTestsVisible(false);
             clearAreaHighlight();
         };
@@ -1190,6 +1435,171 @@ function softCloseModal() {
             applyOverviewDebugVisuals(true);
             syncDebugControlLabels();
             notifyDebugStatus('Overview load pace reset.');
+        });
+        const applySelectedOverviewInspectColor = () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            const nextColor = parseColorToHex(overviewInspectColorInput.value, '#c3a46b');
+            selectedOverviewNode.dataset.debugInspectColor = nextColor;
+            selectedOverviewNode.style.setProperty('--tsi-debug-color', nextColor);
+            selectedOverviewNode.classList.add('debug-overview-color-active');
+            syncOverviewInspectorControls();
+        };
+        const applySelectedOverviewInspectFadeStyle = () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            const nextStyle = String(overviewInspectFadeStyleSelect.value || debugState.overviewFadeStyle);
+            selectedOverviewNode.dataset.debugInspectFadeStyle = nextStyle;
+            selectedOverviewNode.style.setProperty('--tsi-debug-fade-ease', resolveOverviewFadeEase(nextStyle));
+            syncOverviewInspectorControls();
+        };
+        const applySelectedOverviewInspectFadeMs = () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            const nextMs = parseOverviewFadeMs(overviewInspectFadeMsInput.value, debugState.overviewFadeMs);
+            selectedOverviewNode.dataset.debugInspectFadeMs = String(nextMs);
+            selectedOverviewNode.style.setProperty('--tsi-debug-fade-ms', `${nextMs}ms`);
+            syncOverviewInspectorControls();
+        };
+        overviewSection.addEventListener('click', (event) => {
+            if (!debugModeActive) return;
+            if (!(event.target instanceof Element)) return;
+            const inspectTarget = event.target.closest(overviewInspectableSelector);
+            if (!isOverviewInspectable(inspectTarget)) return;
+            setSelectedOverviewInspectable(inspectTarget);
+            notifyDebugStatus(`Selected: ${getOverviewTokenLabel(inspectTarget)}.`);
+        });
+        overviewInspectClearBtn.addEventListener('click', () => {
+            clearOverviewInspectSelection();
+            syncOverviewInspectorControls();
+            notifyDebugStatus('Overview selection cleared.');
+        });
+        overviewInspectColorInput.addEventListener('input', () => {
+            applySelectedOverviewInspectColor();
+        });
+        overviewInspectColorInput.addEventListener('change', () => {
+            applySelectedOverviewInspectColor();
+            notifyDebugStatus('Element color updated.');
+        });
+        overviewInspectFadeStyleSelect.addEventListener('change', () => {
+            applySelectedOverviewInspectFadeStyle();
+            notifyDebugStatus('Element fade style updated.');
+        });
+        overviewInspectFadeMsInput.addEventListener('input', () => {
+            applySelectedOverviewInspectFadeMs();
+        });
+        overviewInspectFadeMsInput.addEventListener('change', () => {
+            applySelectedOverviewInspectFadeMs();
+            notifyDebugStatus('Element fade timing updated.');
+        });
+        resetOverviewInspectColorBtn.addEventListener('click', () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            clearOverviewInspectColor(selectedOverviewNode);
+            syncOverviewInspectorControls();
+            notifyDebugStatus('Element color reset.');
+        });
+        resetOverviewInspectFadeStyleBtn.addEventListener('click', () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            clearOverviewInspectFadeStyle(selectedOverviewNode);
+            syncOverviewInspectorControls();
+            notifyDebugStatus('Element fade style reset.');
+        });
+        resetOverviewInspectFadeMsBtn.addEventListener('click', () => {
+            if (!isOverviewInspectable(selectedOverviewNode)) return;
+            clearOverviewInspectFadeMs(selectedOverviewNode);
+            syncOverviewInspectorControls();
+            notifyDebugStatus('Element fade timing reset.');
+        });
+        overviewReplayBtn.addEventListener('click', () => {
+            refreshOverviewDebugPreview(true);
+            notifyDebugStatus('Overview sequence replayed.');
+        });
+        sequenceScopeSelect.addEventListener('change', () => {
+            const nextScope = String(sequenceScopeSelect.value || debugDefaults.sequenceScope);
+            debugState.sequenceScope = nextScope;
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence scope updated.');
+        });
+        sequenceOrderSelect.addEventListener('change', () => {
+            debugState.sequenceOrder = sequenceOrderSelect.value === 'reverse' ? 'reverse' : 'normal';
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence order updated.');
+        });
+        sequenceStartMsInput.addEventListener('input', () => {
+            debugState.sequenceStartMs = clampDebugNumber(sequenceStartMsInput.value, 0, 4000, debugDefaults.sequenceStartMs);
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+        });
+        sequenceStartMsInput.addEventListener('change', () => {
+            debugState.sequenceStartMs = clampDebugNumber(sequenceStartMsInput.value, 0, 4000, debugDefaults.sequenceStartMs);
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence start delay updated.');
+        });
+        sequenceStepMsInput.addEventListener('input', () => {
+            debugState.sequenceStepMs = clampDebugNumber(sequenceStepMsInput.value, 20, 2000, debugDefaults.sequenceStepMs);
+            syncDebugControlLabels();
+        });
+        sequenceStepMsInput.addEventListener('change', () => {
+            debugState.sequenceStepMs = clampDebugNumber(sequenceStepMsInput.value, 20, 2000, debugDefaults.sequenceStepMs);
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence step delay updated.');
+        });
+        sequenceDurationMsInput.addEventListener('input', () => {
+            debugState.sequenceDurationMs = clampDebugNumber(sequenceDurationMsInput.value, 120, 4000, debugDefaults.sequenceDurationMs);
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+        });
+        sequenceDurationMsInput.addEventListener('change', () => {
+            debugState.sequenceDurationMs = clampDebugNumber(sequenceDurationMsInput.value, 120, 4000, debugDefaults.sequenceDurationMs);
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence fade timing updated.');
+        });
+        resetSequenceScopeBtn.addEventListener('click', () => {
+            debugState.sequenceScope = debugDefaults.sequenceScope;
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence scope reset.');
+        });
+        clearSequenceTargetBtn.addEventListener('click', () => {
+            lastSequenceTargetSectionId = getActiveTabId();
+            syncDebugControlLabels();
+            notifyDebugStatus('Click target reset.');
+        });
+        resetSequenceOrderBtn.addEventListener('click', () => {
+            debugState.sequenceOrder = debugDefaults.sequenceOrder;
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence order reset.');
+        });
+        resetSequenceStartMsBtn.addEventListener('click', () => {
+            debugState.sequenceStartMs = debugDefaults.sequenceStartMs;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence start delay reset.');
+        });
+        resetSequenceStepMsBtn.addEventListener('click', () => {
+            debugState.sequenceStepMs = debugDefaults.sequenceStepMs;
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence step delay reset.');
+        });
+        resetSequenceDurationMsBtn.addEventListener('click', () => {
+            debugState.sequenceDurationMs = debugDefaults.sequenceDurationMs;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Sequence fade timing reset.');
+        });
+        sequenceReplayBtn.addEventListener('click', () => {
+            const sections = resolveSequenceTargetSections();
+            sections.forEach((sectionId) => replaySectionRevealSequence(sectionId));
+            notifyDebugStatus(`Replayed sequence: ${sections.join(', ')}.`);
+        });
+        document.addEventListener('click', (event) => {
+            if (!debugModeActive) return;
+            if (!(event.target instanceof Element)) return;
+            if (event.target.closest('#portalModal, #accessModal, [data-debug-panel]')) return;
+            const sectionNode = event.target.closest('.section-wrap');
+            if (!(sectionNode instanceof HTMLElement)) return;
+            const sectionId = String(sectionNode.id || '').trim();
+            if (!allSequenceSectionIds.includes(sectionId)) return;
+            lastSequenceTargetSectionId = sectionId;
+            syncDebugControlLabels();
         });
 
         toggleMapBtn.addEventListener('click', () => {
@@ -1402,23 +1812,39 @@ function softCloseModal() {
 
             void overview.offsetWidth;
 
-            let delay = 0.2;
+            const rawStartMs = Number(window.__tsiOverviewDebugStartMs);
+            const startDelaySeconds = Number.isFinite(rawStartMs)
+                ? Math.min(4, Math.max(0, rawStartMs / 1000))
+                : 0.2;
+            const rawStepMs = Number(window.__tsiOverviewDebugStepMs);
+            const stepMs = Number.isFinite(rawStepMs)
+                ? Math.min(2000, Math.max(40, rawStepMs))
+                : 700;
+            const orderMode = window.__tsiOverviewDebugOrder === 'reverse' ? 'reverse' : 'normal';
+            let delay = startDelaySeconds;
             let maxWordDelay = 0;
             const rawSequenceScale = Number(window.__tsiOverviewDebugSequenceScale);
             const sequenceScale = Number.isFinite(rawSequenceScale)
                 ? Math.min(2, Math.max(0.5, rawSequenceScale))
                 : 1;
-            const lineGap = baseLineGap * sequenceScale;
-            const wordGap = baseWordGap * sequenceScale;
-            const phraseGap = basePhraseGap * sequenceScale;
+            const lineGap = ((stepMs / 1000) * (baseLineGap / baseWordGap)) * sequenceScale;
+            const wordGap = (stepMs / 1000) * sequenceScale;
+            const phraseGap = ((stepMs / 1000) * (basePhraseGap / baseWordGap)) * sequenceScale;
+            const lineNodes = Array.from(lines);
+            const phraseNodes = Array.from(overviewPhrases);
+            if (orderMode === 'reverse') {
+                lineNodes.reverse();
+                phraseNodes.reverse();
+            }
 
             if (tagline) {
                 tagline.style.setProperty('--reveal-delay', `${delay}s`);
                 delay += lineGap;
             }
 
-            lines.forEach(line => {
-                const words = line.querySelectorAll('.reveal-word');
+            lineNodes.forEach(line => {
+                const words = Array.from(line.querySelectorAll('.reveal-word'));
+                if (orderMode === 'reverse') words.reverse();
                 words.forEach((word, idx) => {
                     const wordDelay = delay + idx * wordGap;
                     word.style.setProperty('--reveal-delay', `${wordDelay}s`);
@@ -1435,14 +1861,14 @@ function softCloseModal() {
 
             if (overviewCopy) {
                 const phraseStartDelay = maxWordDelay + 0.6;
-                overviewPhrases.forEach((phrase, idx) => {
+                phraseNodes.forEach((phrase, idx) => {
                     const phraseDelay = phraseStartDelay + idx * phraseGap;
                     schedule(() => {
                         phrase.classList.add('is-phrase-visible');
                     }, phraseDelay);
                 });
 
-                const bodyDelay = phraseStartDelay + (overviewPhrases.length * phraseGap) + 0.3;
+                const bodyDelay = phraseStartDelay + (phraseNodes.length * phraseGap) + 0.3;
                 schedule(() => {
                     overviewCopy.classList.add('is-body-visible');
                 }, bodyDelay);

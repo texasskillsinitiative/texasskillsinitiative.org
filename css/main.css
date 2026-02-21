@@ -107,10 +107,10 @@
         @keyframes holdFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
         .reveal-text { opacity: 0; }
-        .reveal-active { animation: fadeInUp var(--motion-slow) var(--motion-ease-standard) forwards; animation-delay: var(--reveal-delay, 0s); }
+        .reveal-active { animation: fadeInUp var(--debug-sequence-duration, var(--motion-slow)) var(--motion-ease-standard) forwards; animation-delay: var(--reveal-delay, 0s); }
         .overview-hero .reveal-active {
-            animation-duration: var(--debug-overview-fade-ms, var(--motion-slow));
-            animation-timing-function: var(--debug-overview-fade-ease, var(--motion-ease-standard));
+            animation-duration: var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow)));
+            animation-timing-function: var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-standard)));
         }
         .overview-copy {
             color: var(--page-bg);
@@ -128,12 +128,12 @@
             color: var(--page-bg);
             font-weight: inherit;
             font-size: 1.08em;
-            transition: color var(--debug-overview-fade-ms, var(--motion-slow)) var(--debug-overview-fade-ease, var(--motion-ease-soft));
+            transition: color var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow))) var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-soft)));
         }
         .overview-copy .overview-phrase.text-accent { color: var(--page-bg); }
         .overview-copy .overview-phrase.is-phrase-visible { color: var(--page-text-main); }
         .overview-copy .overview-phrase.text-accent.is-phrase-visible { color: var(--accent); }
-        .overview-copy--sweep-underline .overview-phrase { transition: color var(--debug-overview-fade-ms, var(--motion-slow)) var(--debug-overview-fade-ease, var(--motion-ease-soft)); }
+        .overview-copy--sweep-underline .overview-phrase { transition: color var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow))) var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-soft))); }
         .text-accent-strong { font-weight: 700; }
         .overview-copy-line {
             display: block;
@@ -471,10 +471,68 @@
         .portal-debug-areas-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
         .portal-debug-areas-list li { font-size: 0.72rem; color: var(--page-text-main); line-height: 1.35; }
         .portal-debug-areas-list .portal-debug-area-hidden { color: var(--page-text-dim); }
+        .portal-debug-value {
+            min-height: 34px;
+            border: 1px dashed var(--frame-border);
+            color: var(--page-text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 8px;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .section-debug-panel {
+            margin-top: 12px;
+            border: 1px solid var(--frame-border);
+            background: color-mix(in srgb, var(--page-bg) 90%, #0b1220);
+            padding: 10px;
+            display: grid;
+            gap: 8px;
+        }
+        .section-debug-panel[hidden] { display: none !important; }
+        .section-debug-panel--pipeline { margin-bottom: 10px; }
+        .section-debug-panel--overview {
+            max-width: min(760px, 100%);
+            margin: 16px auto 0;
+            text-align: left;
+        }
+        .site-debug-dock {
+            position: fixed;
+            right: 14px;
+            bottom: 14px;
+            width: min(360px, calc(100vw - 28px));
+            z-index: 2400;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+        }
+        .site-debug-dock[hidden] { display: none !important; }
+        @media (max-width: 768px) {
+            .section-debug-panel .portal-debug-row { grid-template-columns: 96px minmax(0, 1fr) 28px; }
+            .site-debug-dock {
+                right: 8px;
+                bottom: 8px;
+                width: min(360px, calc(100vw - 16px));
+            }
+        }
         .debug-area-highlight {
             outline: 1px dashed color-mix(in srgb, var(--accent) 78%, transparent);
             outline-offset: 3px;
             box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+        .overview-hero .reveal-word.debug-overview-color-active,
+        .overview-copy .overview-phrase.debug-overview-color-active.is-phrase-visible {
+            color: var(--tsi-debug-color) !important;
+        }
+        .overview-hero .debug-overview-selected {
+            outline: 1px dashed color-mix(in srgb, var(--accent) 88%, transparent);
+            outline-offset: 2px;
+        }
+        html.debug-mode-active .overview-hero .reveal-word,
+        html.debug-mode-active .overview-hero .overview-phrase {
+            cursor: crosshair;
         }
         :root { --debug-text-scale: 1; }
         html { font-size: calc(16px * var(--debug-text-scale)); }
