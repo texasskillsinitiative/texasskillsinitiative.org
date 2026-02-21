@@ -113,7 +113,12 @@
             transition: color calc(var(--motion-slow) + 0.4s) var(--motion-ease-soft);
             font-size: calc(1.1rem * var(--overview-fit-scale, 1));
             font-weight: 500;
+            text-wrap: normal;
+            overflow-wrap: normal;
+            word-break: normal;
         }
+        .overview-title { text-wrap: balance; }
+        .overview-copy :where(strong, b, .text-main-strong, .text-accent-strong, .overview-phrase) { white-space: nowrap; }
         .overview-copy.is-body-visible { color: color-mix(in srgb, var(--page-text-main) 30%, var(--page-bg)); }
         .overview-copy .overview-phrase {
             color: var(--page-bg);
@@ -126,7 +131,11 @@
         .overview-copy .overview-phrase.text-accent.is-phrase-visible { color: var(--accent); }
         .overview-copy--sweep-underline .overview-phrase { transition: color var(--motion-slow) var(--motion-ease-soft); }
         .text-accent-strong { font-weight: 700; }
-        .overview-copy-line { display: block; margin-top: calc(6px * var(--overview-fit-scale, 1)); }
+        .overview-copy-line {
+            display: block;
+            margin-top: calc(6px * var(--overview-fit-scale, 1));
+            white-space: nowrap;
+        }
         .overview-copy-emph { font-size: 1.08em; }
         .overview-continue {
             margin: calc(26px * var(--overview-fit-scale, 1)) auto 0;
@@ -379,6 +388,97 @@
         .portal-restricted { margin: 6px 0 0 0; font-size: 0.75rem; color: var(--page-text-dim); }
         .portal-error { margin: 8px 0 0 0; font-size: 0.85rem; color: var(--accent); text-align: left; line-height: 1.4; white-space: pre-line; }
         .portal-footer { margin-top: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 0.65rem; color: var(--page-text-dim); text-align: left; }
+        .portal-debug-menu { text-align: left; }
+        .portal-debug-helper { margin: 14px 0 14px 0; font-size: 0.78rem; color: var(--page-text-dim); text-align: left; }
+        .portal-debug-controls { display: grid; gap: 8px; }
+        .portal-debug-controls .option-btn { padding: 12px 14px; min-height: 40px; font-size: 0.68rem; }
+        .portal-debug-group { margin-top: 12px; border: 1px solid var(--frame-border); background: var(--page-bg); padding: 10px; display: grid; gap: 8px; }
+        .portal-debug-group-title { margin: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; letter-spacing: 1px; text-transform: uppercase; color: var(--page-text-dim); }
+        .portal-debug-row { display: grid; grid-template-columns: 112px minmax(0, 1fr) 28px; gap: 8px; align-items: center; }
+        .portal-debug-label { font-size: 0.66rem; letter-spacing: 0.8px; text-transform: uppercase; color: var(--page-text-dim); font-family: 'JetBrains Mono', monospace; }
+        .portal-debug-select {
+            width: 100%;
+            min-height: 34px;
+            border: 1px solid var(--frame-border);
+            background: var(--card-bg);
+            color: var(--page-text-main);
+            padding: 6px 8px;
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .portal-debug-select:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+        .portal-debug-row .option-btn {
+            min-height: 34px;
+            padding: 8px 10px;
+            width: 100%;
+            font-size: 0.66rem;
+            letter-spacing: 0.6px;
+        }
+        .portal-debug-reset {
+            width: 28px;
+            min-height: 28px;
+            border: 1px solid var(--frame-border);
+            background: var(--page-bg);
+            color: var(--page-text-dim);
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            padding: 0;
+        }
+        .portal-debug-reset:hover { color: var(--accent); border-color: var(--accent); }
+        .portal-debug-jump {
+            width: 28px;
+            min-height: 28px;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.58rem;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 0;
+        }
+        .portal-debug-jump:hover { background: var(--accent); color: var(--bg-dark); }
+        .portal-debug-areas { margin-top: 12px; border: 1px solid var(--frame-border); background: var(--page-bg); padding: 12px; }
+        .portal-debug-areas-title { margin: 0 0 8px 0; font-family: 'JetBrains Mono', monospace; font-size: 0.64rem; letter-spacing: 1px; text-transform: uppercase; color: var(--page-text-dim); }
+        .portal-debug-areas-list { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+        .portal-debug-areas-list li { font-size: 0.72rem; color: var(--page-text-main); line-height: 1.35; }
+        .portal-debug-areas-list .portal-debug-area-hidden { color: var(--page-text-dim); }
+        .debug-area-highlight {
+            outline: 1px dashed color-mix(in srgb, var(--accent) 78%, transparent);
+            outline-offset: 3px;
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+        :root { --debug-text-scale: 1; }
+        html { font-size: calc(16px * var(--debug-text-scale)); }
+        html[data-debug-color-preset="cool"] {
+            --accent: #6bd9ff;
+            --logo-gold-primary: #76d8ff;
+            --logo-gold-secondary: #3f8fb5;
+            --map-accent: #4fc6ff;
+        }
+        html[data-debug-color-preset="warm"] {
+            --accent: #e5a15d;
+            --logo-gold-primary: #e5a15d;
+            --logo-gold-secondary: #b56f34;
+            --map-accent: #f28f4a;
+        }
+        html[data-debug-color-preset="mono"] {
+            --accent: #aeb9c8;
+            --logo-gold-primary: #aeb9c8;
+            --logo-gold-secondary: #7e8896;
+            --map-accent: #9fabbc;
+        }
+        html.debug-layout-compact .section-wrap { padding-top: 76px; padding-bottom: 76px; }
+        html.debug-layout-compact nav { height: 86px; }
+        html.debug-layout-compact .pipeline-map-controls[data-map-controls="md"] { gap: 6px 10px; }
+        html.debug-motion-reduced * {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
 
         /* --- SECTIONS --- */
         .section-wrap { padding: 120px 50px; max-width: 1200px; margin: 0 auto; border-bottom: 1px solid var(--frame-border); }

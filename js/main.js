@@ -37,6 +37,13 @@
         return open.length ? open[open.length - 1] : null;
     }
 
+    function isPortalModalOpen() {
+        const modal = document.getElementById('portalModal');
+        if (!modal) return false;
+        if (modal.style.display === 'flex' || modal.style.display === 'block') return true;
+        return window.getComputedStyle(modal).display !== 'none';
+    }
+
     function getFocusableInModal(modal) {
         if (!modal) return [];
         return Array.from(modal.querySelectorAll(MODAL_FOCUS_SELECTOR)).filter((node) => {
@@ -251,6 +258,9 @@ function toggleModal(modalId, show) {
         }
         _modalFocusRestore.delete(modalId);
     }
+    modal.dispatchEvent(new CustomEvent('tsi:modal-visibility', {
+        detail: { modalId, open: Boolean(show) }
+    }));
     }
 
     function handleOutsideClick(event, modalId) {
@@ -654,11 +664,29 @@ function softCloseModal() {
         if (status) status.hidden = true;
         if (failure) failure.hidden = true;
 
-        form.addEventListener('submit', (event) => {
+        form.addEventListener('submit', async (event) => {
             event.preventDefault();
             if (!submitBtn) return;
 
             const rawUsername = usernameInput ? usernameInput.value.trim() : '';
+            if (rawUsername.toLowerCase() === 'debugme') {
+                const debugApi = window.__tsiPortalDebugApi;
+                if (debugApi && typeof debugApi.toggleFromPortalInput === 'function') {
+                    const toggled = await debugApi.toggleFromPortalInput();
+                    if (toggled) {
+                        if (status) status.hidden = true;
+                        if (failure) failure.hidden = true;
+                        if (usernameInput) usernameInput.value = '';
+                        return;
+                    }
+                }
+                if (failure) {
+                    failure.textContent = 'Authentication unavailable.\nPlease contact system administration for access updates.';
+                    failure.hidden = false;
+                }
+                if (status) status.hidden = true;
+                return;
+            }
             const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rawUsername);
             const domainOk = rawUsername.toLowerCase().endsWith('@texasskillsinitiative.org');
 
@@ -701,6 +729,375 @@ function softCloseModal() {
         });
     }
 
+    function initGlobalDebugMenu() {
+        const portalModal = document.getElementById('portalModal');
+        const defaultContent = document.getElementById('portalModalDefaultContent');
+        const debugMenu = document.getElementById('portalDebugMenu');
+        const exitDebugBtn = document.getElementById('globalDebugExit');
+        const colorPresetSelect = document.getElementById('globalDebugColorPreset');
+        const textScaleSelect = document.getElementById('globalDebugTextScale');
+        const toggleLayoutBtn = document.getElementById('globalDebugToggleLayoutCompact');
+        const toggleMotionBtn = document.getElementById('globalDebugToggleMotionReduce');
+        const resetColorBtn = document.getElementById('globalDebugResetColor');
+        const resetTextScaleBtn = document.getElementById('globalDebugResetTextScale');
+        const resetLayoutBtn = document.getElementById('globalDebugResetLayoutCompact');
+        const resetMotionBtn = document.getElementById('globalDebugResetMotionReduce');
+        const toggleMapBtn = document.getElementById('globalDebugToggleMapTests');
+        const resetMapTestsBtn = document.getElementById('globalDebugResetMapTests');
+        const toggleHighlightBtn = document.getElementById('globalDebugToggleHighlight');
+        const resetHighlightBtn = document.getElementById('globalDebugResetHighlight');
+        const sectionTargetSelect = document.getElementById('globalDebugSectionTarget');
+        const sectionGoBtn = document.getElementById('globalDebugSectionGo');
+        const refreshAreasBtn = document.getElementById('globalDebugRefreshAreas');
+        const areaCountNode = document.getElementById('globalDebugAreaCount');
+        const areaListNode = document.getElementById('globalDebugAreaList');
+        const debugStatus = document.getElementById('globalDebugStatus');
+        const portalStatus = document.getElementById('portalStatus');
+        const portalFailure = document.getElementById('portalFailure');
+        if (
+            !portalModal || !defaultContent || !debugMenu
+            || !exitDebugBtn || !colorPresetSelect || !textScaleSelect
+            || !toggleLayoutBtn || !toggleMotionBtn
+            || !resetColorBtn || !resetTextScaleBtn || !resetLayoutBtn || !resetMotionBtn
+            || !toggleMapBtn || !resetMapTestsBtn
+            || !toggleHighlightBtn || !resetHighlightBtn
+            || !sectionTargetSelect || !sectionGoBtn || !refreshAreasBtn
+            || !areaCountNode || !areaListNode
+        ) {
+            return;
+        }
+
+        const root = document.documentElement;
+        let debugEnabled = false;
+        let debugChecked = false;
+        let debugCheckPromise = null;
+        let debugModeActive = false;
+        const highlightedAreas = new Set();
+        let statusTimer = 0;
+        const debugDefaults = {
+            colorPreset: 'default',
+            textScale: 1,
+            compactLayout: false,
+            reducedMotion: false,
+            highlightAreas: false
+        };
+        const debugState = {
+            ...debugDefaults
+        };
+
+        const notifyDebugStatus = (message) => {
+            if (!debugStatus) return;
+            debugStatus.textContent = message;
+            debugStatus.hidden = false;
+            if (statusTimer) {
+                window.clearTimeout(statusTimer);
+                statusTimer = 0;
+            }
+            statusTimer = window.setTimeout(() => {
+                debugStatus.hidden = true;
+                statusTimer = 0;
+            }, 1600);
+        };
+
+        const getDebugBridge = () => window.__tsiDebugBridge || null;
+        const getMapTestsVisible = () => {
+            const bridge = getDebugBridge();
+            return bridge && typeof bridge.getMapTestsVisible === 'function'
+                ? Boolean(bridge.getMapTestsVisible())
+                : false;
+        };
+        const setMapTestsVisible = (nextVisible) => {
+            const bridge = getDebugBridge();
+            if (!bridge || typeof bridge.setMapTestsVisible !== 'function') return false;
+            bridge.setMapTestsVisible(Boolean(nextVisible), { notify: false });
+            return true;
+        };
+
+        const applyGlobalDebugVisuals = () => {
+            if (debugState.colorPreset === 'default') {
+                root.removeAttribute('data-debug-color-preset');
+            } else {
+                root.setAttribute('data-debug-color-preset', debugState.colorPreset);
+            }
+            root.style.setProperty('--debug-text-scale', String(debugState.textScale));
+            root.classList.toggle('debug-layout-compact', debugState.compactLayout);
+            root.classList.toggle('debug-motion-reduced', debugState.reducedMotion);
+        };
+
+        const loadLocalDebugConfig = async () => {
+            if (debugChecked) return debugEnabled;
+            if (debugCheckPromise) return debugCheckPromise;
+            debugCheckPromise = (async () => {
+                try {
+                    const module = await import('./debug.local.js');
+                    const config = module && (module.default || module.TSI_LOCAL_DEBUG || {});
+                    const host = String(window.location.hostname || '').toLowerCase();
+                    const allowedHosts = Array.isArray(config.allowedHosts)
+                        ? config.allowedHosts.map((value) => String(value || '').trim().toLowerCase()).filter(Boolean)
+                        : [];
+                    const allowAnyHost = !allowedHosts.length || allowedHosts.includes('*');
+                    const hostAllowed = allowAnyHost || allowedHosts.some((allowedHost) => {
+                        if (allowedHost.endsWith('*')) {
+                            return host.startsWith(allowedHost.slice(0, -1));
+                        }
+                        return allowedHost === host;
+                    });
+                    debugEnabled = Boolean(config && config.enabled === true && hostAllowed);
+                } catch (_) {
+                    debugEnabled = false;
+                }
+                debugChecked = true;
+                debugCheckPromise = null;
+                return debugEnabled;
+            })();
+            return debugCheckPromise;
+        };
+
+        const clearAreaHighlight = () => {
+            highlightedAreas.forEach((node) => {
+                if (node instanceof HTMLElement) {
+                    node.classList.remove('debug-area-highlight');
+                }
+            });
+            highlightedAreas.clear();
+        };
+
+        const collectLocalAreas = () => {
+            const bridge = getDebugBridge();
+            if (!bridge || typeof bridge.scanLocalAreas !== 'function') return [];
+            return bridge.scanLocalAreas();
+        };
+
+        const applyAreaHighlight = (areas) => {
+            clearAreaHighlight();
+            if (!debugState.highlightAreas) return;
+            areas.forEach((area) => {
+                if (!(area && area.element instanceof HTMLElement)) return;
+                area.element.classList.add('debug-area-highlight');
+                highlightedAreas.add(area.element);
+            });
+        };
+
+        const renderAreaList = () => {
+            const areas = collectLocalAreas();
+            areaListNode.innerHTML = '';
+            areaCountNode.textContent = String(areas.length);
+            if (!areas.length) {
+                const li = document.createElement('li');
+                li.className = 'portal-debug-area-hidden';
+                li.textContent = 'No local test areas detected.';
+                areaListNode.appendChild(li);
+                applyAreaHighlight([]);
+                return;
+            }
+
+            areas.forEach((area) => {
+                const li = document.createElement('li');
+                if (area.hidden) {
+                    li.classList.add('portal-debug-area-hidden');
+                }
+                const sectionLabel = area.sectionId ? ` (#${area.sectionId})` : '';
+                const hiddenLabel = area.hidden ? ' [hidden]' : '';
+                li.textContent = `${area.label}${sectionLabel}${hiddenLabel}`;
+                areaListNode.appendChild(li);
+            });
+            applyAreaHighlight(areas);
+        };
+
+        const syncDebugControlLabels = () => {
+            const mapTestsVisible = getMapTestsVisible();
+            if (colorPresetSelect.value !== debugState.colorPreset) {
+                colorPresetSelect.value = debugState.colorPreset;
+            }
+            const nextTextScaleValue = String(debugState.textScale);
+            if (textScaleSelect.value !== nextTextScaleValue) {
+                textScaleSelect.value = nextTextScaleValue;
+            }
+            toggleLayoutBtn.textContent = `Compact: ${debugState.compactLayout ? 'On' : 'Off'}`;
+            toggleMotionBtn.textContent = `Reduced: ${debugState.reducedMotion ? 'On' : 'Off'}`;
+            toggleMapBtn.textContent = mapTestsVisible ? 'On' : 'Off';
+            toggleHighlightBtn.textContent = debugState.highlightAreas ? 'On' : 'Off';
+        };
+
+        const resetPortalAuthMessages = () => {
+            if (portalStatus) {
+                portalStatus.hidden = true;
+                portalStatus.textContent = 'Verifying identity...';
+            }
+            if (portalFailure) {
+                portalFailure.hidden = true;
+            }
+        };
+
+        const applyModeVisibility = () => {
+            defaultContent.hidden = debugModeActive;
+            defaultContent.setAttribute('aria-hidden', debugModeActive ? 'true' : 'false');
+            debugMenu.hidden = !debugModeActive;
+            debugMenu.setAttribute('aria-hidden', debugModeActive ? 'false' : 'true');
+        };
+
+        const resetDebugSettingsToDefaults = () => {
+            debugState.colorPreset = debugDefaults.colorPreset;
+            debugState.textScale = debugDefaults.textScale;
+            debugState.compactLayout = debugDefaults.compactLayout;
+            debugState.reducedMotion = debugDefaults.reducedMotion;
+            debugState.highlightAreas = debugDefaults.highlightAreas;
+            applyGlobalDebugVisuals();
+            setMapTestsVisible(false);
+            clearAreaHighlight();
+        };
+
+        const setDebugMode = (nextActive, options = {}) => {
+            const opts = options && typeof options === 'object' ? options : {};
+            debugModeActive = Boolean(nextActive);
+            if (!debugModeActive && opts.resetSettings !== false) {
+                resetDebugSettingsToDefaults();
+            }
+            applyModeVisibility();
+            syncDebugControlLabels();
+            resetPortalAuthMessages();
+            if (!debugModeActive) {
+                if (debugStatus) debugStatus.hidden = true;
+                return;
+            }
+            renderAreaList();
+            if (opts.announce !== false) {
+                notifyDebugStatus('Debug mode active.');
+            }
+        };
+
+        colorPresetSelect.addEventListener('change', () => {
+            debugState.colorPreset = colorPresetSelect.value || debugDefaults.colorPreset;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Color preset updated.');
+        });
+        textScaleSelect.addEventListener('change', () => {
+            const next = Number(textScaleSelect.value);
+            debugState.textScale = Number.isFinite(next) ? next : debugDefaults.textScale;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Text size updated.');
+        });
+        toggleLayoutBtn.addEventListener('click', () => {
+            debugState.compactLayout = !debugState.compactLayout;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus(debugState.compactLayout ? 'Compact layout on.' : 'Compact layout off.');
+        });
+        toggleMotionBtn.addEventListener('click', () => {
+            debugState.reducedMotion = !debugState.reducedMotion;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus(debugState.reducedMotion ? 'Reduced motion on.' : 'Reduced motion off.');
+        });
+        resetColorBtn.addEventListener('click', () => {
+            debugState.colorPreset = debugDefaults.colorPreset;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Color preset reset.');
+        });
+        resetTextScaleBtn.addEventListener('click', () => {
+            debugState.textScale = debugDefaults.textScale;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Text size reset.');
+        });
+        resetLayoutBtn.addEventListener('click', () => {
+            debugState.compactLayout = debugDefaults.compactLayout;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Layout format reset.');
+        });
+        resetMotionBtn.addEventListener('click', () => {
+            debugState.reducedMotion = debugDefaults.reducedMotion;
+            applyGlobalDebugVisuals();
+            syncDebugControlLabels();
+            notifyDebugStatus('Motion mode reset.');
+        });
+
+        toggleMapBtn.addEventListener('click', () => {
+            const nextVisible = !getMapTestsVisible();
+            if (!setMapTestsVisible(nextVisible)) {
+                notifyDebugStatus('Map test controls unavailable.');
+                return;
+            }
+            syncDebugControlLabels();
+            renderAreaList();
+            notifyDebugStatus(nextVisible ? 'Map test settings shown.' : 'Map test settings hidden.');
+        });
+        resetMapTestsBtn.addEventListener('click', () => {
+            if (!setMapTestsVisible(false)) {
+                notifyDebugStatus('Map test controls unavailable.');
+                return;
+            }
+            syncDebugControlLabels();
+            renderAreaList();
+            notifyDebugStatus('Map test settings reset.');
+        });
+
+        toggleHighlightBtn.addEventListener('click', () => {
+            debugState.highlightAreas = !debugState.highlightAreas;
+            syncDebugControlLabels();
+            renderAreaList();
+            notifyDebugStatus(debugState.highlightAreas ? 'Area highlight on.' : 'Area highlight off.');
+        });
+        resetHighlightBtn.addEventListener('click', () => {
+            debugState.highlightAreas = debugDefaults.highlightAreas;
+            syncDebugControlLabels();
+            renderAreaList();
+            notifyDebugStatus('Area highlight reset.');
+        });
+
+        sectionGoBtn.addEventListener('click', () => {
+            const target = String(sectionTargetSelect.value || '').trim();
+            if (!target) return;
+            window.location.hash = `#${target}`;
+            toggleModal('portalModal', false);
+        });
+        refreshAreasBtn.addEventListener('click', () => {
+            renderAreaList();
+            notifyDebugStatus('Area scan refreshed.');
+        });
+        exitDebugBtn.addEventListener('click', () => {
+            setDebugMode(false, { resetSettings: true, announce: false });
+            notifyDebugStatus('Debug menu closed.');
+        });
+
+        portalModal.addEventListener('tsi:modal-visibility', (event) => {
+            const open = Boolean(event && event.detail && event.detail.open);
+            if (open) {
+                applyModeVisibility();
+                syncDebugControlLabels();
+                if (debugModeActive) {
+                    renderAreaList();
+                }
+            }
+            if (debugStatus) {
+                debugStatus.hidden = true;
+            }
+        });
+        window.addEventListener('tsi:local-test-areas-changed', () => {
+            if (debugModeActive) {
+                renderAreaList();
+            }
+        });
+
+        applyGlobalDebugVisuals();
+        syncDebugControlLabels();
+        applyModeVisibility();
+
+        window.__tsiPortalDebugApi = {
+            toggleFromPortalInput: async () => {
+                if (!isPortalModalOpen()) return false;
+                const enabled = await loadLocalDebugConfig();
+                if (!enabled) return false;
+                setDebugMode(true, { resetSettings: false });
+                return true;
+            }
+        };
+    }
+
     initModalTriggers();
     initMobileNav();
     _021026_initConciergeForm();
@@ -709,6 +1106,7 @@ function softCloseModal() {
     initRubricActions();
     initTeamTabs();
     initPipelineMap();
+    initGlobalDebugMenu();
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
@@ -744,6 +1142,8 @@ function softCloseModal() {
         const lineGap = 1.5;
         const wordGap = 0.7;
         const overviewTimers = [];
+        let lastFitViewportWidth = window.innerWidth || 0;
+        let lastFitViewportHeight = window.innerHeight || 0;
 
         const clearOverviewTimers = () => {
             overviewTimers.forEach(timer => window.clearTimeout(timer));
@@ -759,7 +1159,7 @@ function softCloseModal() {
             overview.style.setProperty('--overview-fit-scale', '1');
             const currentHash = window.location.hash || '#overview';
             const overviewActive = currentHash === '#overview' || !document.querySelector('.section-wrap:target');
-            if (!overviewActive || window.innerWidth > MOBILE_NAV_BREAKPOINT) return;
+            if (!overviewActive) return;
 
             const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
             if (!viewportHeight) return;
@@ -769,11 +1169,26 @@ function softCloseModal() {
             const reserved = padTop + padBottom + 8;
             const available = viewportHeight - navHeight - reserved;
             const contentHeight = overviewContent ? overviewContent.scrollHeight : 0;
-            if (available <= 0 || contentHeight <= 0) return;
+            let heightRatio = 1;
+            if (available > 0 && contentHeight > 0) {
+                heightRatio = available / contentHeight;
+            }
 
-            const ratio = available / contentHeight;
+            let widthRatio = 1;
+            if (overviewCopy) {
+                const copyLines = overviewCopy.querySelectorAll('.overview-copy-line');
+                copyLines.forEach((line) => {
+                    const lineClientWidth = line.clientWidth || 0;
+                    const lineScrollWidth = line.scrollWidth || 0;
+                    if (lineClientWidth > 0 && lineScrollWidth > lineClientWidth) {
+                        widthRatio = Math.min(widthRatio, lineClientWidth / lineScrollWidth);
+                    }
+                });
+            }
+
+            const ratio = Math.min(heightRatio, widthRatio);
             if (ratio >= 1) return;
-            const nextScale = Math.min(1, Math.max(0.72, ratio));
+            const nextScale = Math.min(1, Math.max(0.5, ratio));
             overview.style.setProperty('--overview-fit-scale', nextScale.toFixed(3));
         };
 
@@ -859,7 +1274,18 @@ function softCloseModal() {
 
         window._runOverviewSequence = runOverviewSequence;
         window._fitOverviewToViewport = fitOverviewToViewport;
-        window.addEventListener('resize', scheduleOverviewFit);
+        window.addEventListener('resize', () => {
+            const nextWidth = window.innerWidth || 0;
+            const nextHeight = window.innerHeight || 0;
+            const widthDelta = Math.abs(nextWidth - lastFitViewportWidth);
+            const heightDelta = Math.abs(nextHeight - lastFitViewportHeight);
+            lastFitViewportWidth = nextWidth;
+            lastFitViewportHeight = nextHeight;
+
+            // Ignore small mobile browser-chrome height jitter while scrolling.
+            if (widthDelta < 2 && heightDelta < 120) return;
+            scheduleOverviewFit();
+        });
         window.addEventListener('orientationchange', scheduleOverviewFit);
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden) scheduleOverviewFit();
@@ -1260,15 +1686,7 @@ function softCloseModal() {
                 mapTestsToastTimer = 0;
             }, 1200);
         };
-        const mapTestsVisibilityStorageKey = 'tsi-map-tests-visible';
-        const readMapTestsVisibility = () => {
-            try {
-                return window.localStorage.getItem(mapTestsVisibilityStorageKey) === '1';
-            } catch (_) {
-                return false;
-            }
-        };
-        let mapTestsVisible = readMapTestsVisibility();
+        let mapTestsVisible = false;
         const syncMapTestsVisibility = () => {
             document.querySelectorAll('[data-map-tests], [data-test-settings]').forEach(node => {
                 node.hidden = !mapTestsVisible;
@@ -1278,15 +1696,6 @@ function softCloseModal() {
         };
         const setMapTestsVisible = (nextVisible) => {
             mapTestsVisible = Boolean(nextVisible);
-            try {
-                if (mapTestsVisible) {
-                    window.localStorage.setItem(mapTestsVisibilityStorageKey, '1');
-                } else {
-                    window.localStorage.removeItem(mapTestsVisibilityStorageKey);
-                }
-            } catch (_) {
-                // Ignore storage failures; visibility still updates for this session.
-            }
             syncMapTestsVisibility();
         };
         const applyFlashPresetToFrame = (frame, presetId) => {
@@ -3644,31 +4053,57 @@ function softCloseModal() {
             }
         });
         syncMapTestsVisibility();
-        const isPortalModalOpen = () => {
-            const modal = document.getElementById('portalModal');
-            if (!modal) return false;
-            if (modal.style.display === 'flex' || modal.style.display === 'block') return true;
-            return window.getComputedStyle(modal).display !== 'none';
-        };
-        const isTextInputLike = (node) => {
-            if (!node || !(node instanceof HTMLElement)) return false;
-            const tag = node.tagName;
-            return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || node.isContentEditable;
-        };
-        if (!window.__tsiMapTestsHotkeyBound) {
-            window.addEventListener('keydown', (event) => {
-                if (event.defaultPrevented) return;
-                if (!event.ctrlKey || !event.shiftKey || event.altKey || event.metaKey) return;
-                if (String(event.key || '').toLowerCase() !== 'm') return;
-                if (isTextInputLike(event.target)) return;
-                if (!isPortalModalOpen()) return;
-                event.preventDefault();
-                const nextVisible = !mapTestsVisible;
-                setMapTestsVisible(nextVisible);
-                showMapTestsToggleNotice(nextVisible);
+        const scanLocalAreas = () => {
+            const candidates = Array.from(document.querySelectorAll('[data-map-tests], [data-test-settings], [data-local-debug-area]'));
+            const areas = [];
+            const seen = new Set();
+            candidates.forEach((node) => {
+                if (!(node instanceof HTMLElement)) return;
+                const areaNode = node.closest('[data-local-debug-area], .pipeline-map, .section-wrap') || node;
+                if (!(areaNode instanceof HTMLElement)) return;
+                if (seen.has(areaNode)) return;
+                seen.add(areaNode);
+                const areaStyle = window.getComputedStyle(areaNode);
+                const section = areaNode.closest('.section-wrap');
+                const sectionId = section ? section.id : '';
+                let label = areaNode.getAttribute('data-debug-label') || areaNode.getAttribute('aria-label') || '';
+                if (!label) {
+                    if (areaNode.matches('.pipeline-map')) {
+                        label = 'Pipeline map test dock';
+                    } else if (areaNode.matches('.section-wrap') && sectionId) {
+                        label = `Section ${sectionId}`;
+                    } else {
+                        label = 'Local test area';
+                    }
+                }
+                areas.push({
+                    label,
+                    sectionId,
+                    hidden: Boolean(
+                        areaNode.hidden
+                        || areaStyle.display === 'none'
+                        || areaStyle.visibility === 'hidden'
+                    ),
+                    element: areaNode
+                });
             });
-            window.__tsiMapTestsHotkeyBound = true;
-        }
+            return areas;
+        };
+
+        const debugBridge = window.__tsiDebugBridge || {};
+        debugBridge.getMapTestsVisible = () => mapTestsVisible;
+        debugBridge.setMapTestsVisible = (nextVisible, options = {}) => {
+            const opts = options && typeof options === 'object' ? options : {};
+            setMapTestsVisible(Boolean(nextVisible));
+            if (opts.notify) {
+                showMapTestsToggleNotice(mapTestsVisible);
+            }
+            return mapTestsVisible;
+        };
+        debugBridge.scanLocalAreas = scanLocalAreas;
+        debugBridge.syncMapTestsVisibility = syncMapTestsVisibility;
+        window.__tsiDebugBridge = debugBridge;
+
         if (!window.__tsiMapTestsObserverBound && typeof MutationObserver === 'function') {
             const testSettingsObserver = new MutationObserver((mutations) => {
                 let shouldSync = false;
@@ -3687,7 +4122,10 @@ function softCloseModal() {
                     }
                     if (shouldSync) break;
                 }
-                if (shouldSync) syncMapTestsVisibility();
+                if (shouldSync) {
+                    syncMapTestsVisibility();
+                    window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
+                }
             });
             testSettingsObserver.observe(document.body, { childList: true, subtree: true });
             window.__tsiMapTestsObserverBound = true;

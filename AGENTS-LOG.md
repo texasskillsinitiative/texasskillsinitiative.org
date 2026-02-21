@@ -1066,4 +1066,58 @@
 - Resolutions/outcomes: Requested content/copy/media/legal-versioning changes are in place with no automated regressions in navigation, map interactions, or mobile drawer behavior.
 - Commit hash(es): none
 
+### 2026-02-20 16:54:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated overview paragraph lead sentence in `index.html` to the requested "At Texas Skills Initiative..." / "Texas Tested economic models..." wording and added global wrap guardrails in `css/main.css` (`text-wrap: pretty` for copy, `text-wrap: balance` for headings, and no-break emphasis selectors for bold phrases). Ran smoke verification via `snapshot/.pw/tmp-smoke-core.js` with a local static server.
+- Troubleshooting suggestions: If any phrase-level no-break causes overflow on ultra-narrow widths, scope the selector to content blocks only (for example `.overview-copy .overview-phrase`) rather than global emphasis classes.
+- Resolutions/outcomes: Overview copy now reflects approved wording, emphasized phrases stay together, and nav/section routing plus overflow checks remained clean in smoke output.
+- Commit hash(es): none
+
+### 2026-02-20 16:59:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined the previous wrap change per user clarification by removing site-wide `text-wrap`/no-break selectors and scoping them to Overview only in `css/main.css` (`.overview-copy` + `.overview-title` + overview-local emphasis selector). Re-ran smoke verification via `snapshot/.pw/tmp-smoke-core.js`.
+- Troubleshooting suggestions: If Overview line breaks still feel too tight at specific phone widths, adjust only `.overview-copy` font size/line-height or set targeted `<br>` boundaries rather than broadening wrap rules site-wide.
+- Resolutions/outcomes: Requested paragraph behavior is now limited to Overview and remains consistent across desktop/mobile; smoke checks stayed clean (no console errors, no overflow, tab routing intact).
+- Commit hash(es): none
+
+### 2026-02-20 17:23:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Addressed Overview line-break snapping and over-wrapping by updating `css/main.css` (`.overview-copy` wrap mode normalized, `.overview-copy-line` forced to single-line nowrap) and `js/main.js` (ignore small mobile resize jitter under 120px height delta during scroll before refitting Overview scale). Rewrote the five Overview copy lines in `index.html` to shorter phrasing that still carries one emphasized phrase per line.
+- Troubleshooting suggestions: If a specific device still shows perceived reflow during chrome collapse/expand, we can increase the resize jitter threshold slightly (for example from `120` to `140`) without affecting orientation-change refits.
+- Resolutions/outcomes: Overview now renders as exactly five lines across tested desktop/mobile viewports, no horizontal overflow was detected at `390x844`, `360x740`, `412x915`, and line-break snapping from scroll-driven resize jitter is suppressed.
+- Commit hash(es): none
+
+### 2026-02-20 23:46:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied the user-provided Overview paragraph copy in `index.html` as exactly five lines with one bold/timed phrase per line (`Texas Skills Initiative`, `Texas' Tested`, `one-of-a-kind`, `exclusively crafted`, `YOUR growth region.`). Updated `fitOverviewToViewport` in `js/main.js` to compute scale from both vertical fit and horizontal line-fit ratios, and to allow this fit behavior on desktop and mobile while preserving existing resize-jitter suppression.
+- Troubleshooting suggestions: If future copy updates increase phrase length, keep one emphasis span per line and let the width-fit ratio drive proportional scaling rather than reintroducing auto wrapping.
+- Resolutions/outcomes: Overview now stays locked to 5 single lines with no spill across tested viewports (`1280x900`, `1024x800`, `900x700`, `412x915`, `390x844`, `360x740`), and smoke checks remain clean.
+- Commit hash(es): none
+
+### 2026-02-21 00:00:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented an internal diagnostics surface in the `TSI Internal` modal and moved test-control toggling behind local-only gating.
+- Troubleshooting suggestions: Keep local diagnostics configuration untracked and host-scoped for development-only use.
+- Resolutions/outcomes: Diagnostics controls require internal context plus local gate conditions and are unavailable in standard/public runtime paths.
+- Commit hash(es): none
+
+### 2026-02-21 00:37:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated diagnostics activation/deactivation flow in `TSI Internal` to avoid browser shortcut conflicts and provide explicit in-menu exit behavior.
+- Troubleshooting suggestions: If diagnostics do not open, verify local gate config exists and is valid for the current host.
+- Resolutions/outcomes: Diagnostics activation now uses an internal-only path with clearer enable/disable behavior across environments.
+- Commit hash(es): none
+
+### 2026-02-21 00:53:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Diagnosed a local diagnostics activation failure as missing local gate config, then restored local gate availability and tightened host-gating behavior.
+- Troubleshooting suggestions: If diagnostics fail in development, verify local gate file presence and host allowlist values.
+- Resolutions/outcomes: Local diagnostics activation restored while keeping non-local environments unaffected.
+- Commit hash(es): none
+
+### 2026-02-21 01:11:55 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded internal diagnostics controls (global + page-scoped) with independent reset actions and updated lifecycle behavior so active test state can be observed outside the modal.
+- Troubleshooting suggestions: Use diagnostics exit/reset first when behavior appears stale, then reapply targeted settings.
+- Resolutions/outcomes: Diagnostics can remain active for live-page verification while still supporting a full reset path from the internal surface.
+- Commit hash(es): none
+
+### 2026-02-21 01:16:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Revalidated local diagnostics activation and restored missing local gate file for this workspace.
+- Troubleshooting suggestions: If activation fails again, recheck local gate file presence in the active repository path.
+- Resolutions/outcomes: Local diagnostics trigger is working again for development use.
+- Commit hash(es): none
+
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

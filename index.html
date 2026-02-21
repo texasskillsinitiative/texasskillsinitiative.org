@@ -84,22 +84,96 @@
         <img src="assets/global/logo/tsi-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
         <button type="button" class="close-modal" data-modal-close="portalModal" aria-label="Close internal access modal">×</button>
         <h3 id="portalModalTitle">TSI Internal</h3>
-        <p class="portal-helper" id="portalModalHelper">Enter your TSI username to begin authentication.</p>
-        <form class="portal-login" id="portalLoginForm">
-            <label for="portalUsername">TSI Username</label>
-            <input type="text" id="portalUsername" name="tsi_username" placeholder="name@texasskillsinitiative.org" autocomplete="username">
-            <p class="portal-error" id="portalFailure" role="alert" hidden>Authentication unavailable.<br>Please contact system administration for access updates.</p>
-            <button type="submit" class="portal-submit" id="portalSubmit">
-                <span>Continue</span>
-                <span class="portal-spinner" aria-hidden="true"></span>
-            </button>
-            <p class="portal-restricted">Access restricted to authorized personnel.</p>
-            <p class="portal-status" id="portalStatus" aria-live="polite" hidden>Verifying identity...</p>
-        </form>
-        <div class="portal-footer">
-            <span>© 2026 Texas Skills Initiative</span>
-            <span>Unauthorized access is prohibited.</span>
-            <span>Preview Environment.</span>
+        <div id="portalModalDefaultContent">
+            <p class="portal-helper" id="portalModalHelper">Enter your TSI username to begin authentication.</p>
+            <form class="portal-login" id="portalLoginForm">
+                <label for="portalUsername">TSI Username</label>
+                <input type="text" id="portalUsername" name="tsi_username" placeholder="name@texasskillsinitiative.org" autocomplete="username">
+                <p class="portal-error" id="portalFailure" role="alert" hidden>Authentication unavailable.<br>Please contact system administration for access updates.</p>
+                <button type="submit" class="portal-submit" id="portalSubmit">
+                    <span>Continue</span>
+                    <span class="portal-spinner" aria-hidden="true"></span>
+                </button>
+                <p class="portal-restricted">Access restricted to authorized personnel.</p>
+                <p class="portal-status" id="portalStatus" aria-live="polite" hidden>Verifying identity...</p>
+            </form>
+            <div class="portal-footer">
+                <span>© 2026 Texas Skills Initiative</span>
+                <span>Unauthorized access is prohibited.</span>
+                <span>Preview Environment.</span>
+            </div>
+        </div>
+        <div id="portalDebugMenu" class="portal-debug-menu" hidden aria-hidden="true">
+            <p class="portal-debug-helper">Local debug mode active.</p>
+            <div class="portal-debug-controls">
+                <button type="button" class="option-btn option-btn--secondary" id="globalDebugExit">Exit Debug Mode</button>
+            </div>
+            <div class="portal-debug-group">
+                <p class="portal-debug-group-title">Global Tests</p>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Color Preset</span>
+                    <select class="portal-debug-select" id="globalDebugColorPreset">
+                        <option value="default">Default</option>
+                        <option value="cool">Cool Shift</option>
+                        <option value="warm">Warm Shift</option>
+                        <option value="mono">Mono Shift</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetColor" aria-label="Reset color preset">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Text Size</span>
+                    <select class="portal-debug-select" id="globalDebugTextScale">
+                        <option value="0.9">90%</option>
+                        <option value="1">100%</option>
+                        <option value="1.1">110%</option>
+                        <option value="1.2">120%</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetTextScale" aria-label="Reset text size">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Layout Format</span>
+                    <button type="button" class="option-btn" id="globalDebugToggleLayoutCompact">Compact: Off</button>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetLayoutCompact" aria-label="Reset layout format">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Motion</span>
+                    <button type="button" class="option-btn" id="globalDebugToggleMotionReduce">Reduced: Off</button>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetMotionReduce" aria-label="Reset motion mode">×</button>
+                </div>
+            </div>
+            <div class="portal-debug-group">
+                <p class="portal-debug-group-title">Page Tests</p>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Map Test Settings</span>
+                    <button type="button" class="option-btn" id="globalDebugToggleMapTests">Off</button>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetMapTests" aria-label="Reset map test settings">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Area Highlight</span>
+                    <button type="button" class="option-btn" id="globalDebugToggleHighlight">Off</button>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetHighlight" aria-label="Reset area highlight">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Open Section</span>
+                    <select class="portal-debug-select" id="globalDebugSectionTarget">
+                        <option value="overview">Overview</option>
+                        <option value="mandate">Mandate</option>
+                        <option value="rubric">Rubric</option>
+                        <option value="pipeline">Pipeline</option>
+                        <option value="engagement">Engagement</option>
+                        <option value="team">Team</option>
+                    </select>
+                    <button type="button" class="portal-debug-jump" id="globalDebugSectionGo">Go</button>
+                </div>
+                <div class="portal-debug-controls">
+                    <button type="button" class="option-btn option-btn--secondary" id="globalDebugRefreshAreas">Refresh Area Scan</button>
+                </div>
+            </div>
+            <p class="portal-status" id="globalDebugStatus" aria-live="polite" hidden>Debug mode active.</p>
+            <div class="portal-debug-areas">
+                <p class="portal-debug-areas-title">Local test areas: <span id="globalDebugAreaCount">0</span></p>
+                <ul class="portal-debug-areas-list" id="globalDebugAreaList"></ul>
+            </div>
         </div>
     </div>
 </div>
@@ -566,10 +640,11 @@
         </h1>
 
         <p class="overview-copy overview-copy--sweep-underline">
-            <span class="overview-copy-line">The <span class="text-main-strong overview-phrase">Texas Skills Initiative</span> leverages the industrial power</span>
-            <span class="overview-copy-line">of the Texas economic model to build <span class="text-main-strong overview-phrase">one-of-a-kind</span> ecosystems.</span>
-            <span class="overview-copy-line">We don't export pre-set plans; we engineer solutions <span class="text-main-strong overview-phrase">built exclusively for</span></span>
-            <span class="overview-copy-line">the distinct needs of <span class="text-accent text-accent-strong overview-copy-emph overview-phrase">your growth region.</span></span>
+            <span class="overview-copy-line">At <span class="text-main-strong overview-phrase">Texas Skills Initiative</span>, we leverage the</span>
+            <span class="overview-copy-line">power of <span class="text-main-strong overview-phrase">Texas' Tested</span> economic engines to</span>
+            <span class="overview-copy-line">design <span class="text-main-strong overview-phrase">one-of-a-kind</span> development pipelines. Providing</span>
+            <span class="overview-copy-line">engineered and <span class="text-main-strong overview-phrase">exclusively crafted</span> solutions</span>
+            <span class="overview-copy-line">tailored to the needs of <span class="text-accent text-accent-strong overview-copy-emph overview-phrase">YOUR growth region.</span></span>
         </p>
         <a class="overview-continue" href="#mandate">Click to continue</a>
     </div>

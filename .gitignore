@@ -22,3 +22,6 @@ PACKETS.md
 
 # Local-only Apps Script backend workspace
 form-backend/
+
+# Local-only debug activation file (do not commit)
+js/debug.local.js
