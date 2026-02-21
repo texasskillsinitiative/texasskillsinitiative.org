@@ -749,6 +749,18 @@ function softCloseModal() {
         const sectionTargetSelect = document.getElementById('globalDebugSectionTarget');
         const sectionGoBtn = document.getElementById('globalDebugSectionGo');
         const refreshAreasBtn = document.getElementById('globalDebugRefreshAreas');
+        const overviewTitleScaleSelect = document.getElementById('globalDebugOverviewTitleScale');
+        const overviewCopyScaleSelect = document.getElementById('globalDebugOverviewCopyScale');
+        const overviewAccentInput = document.getElementById('globalDebugOverviewAccent');
+        const overviewFadeStyleSelect = document.getElementById('globalDebugOverviewFadeStyle');
+        const overviewFadeMsInput = document.getElementById('globalDebugOverviewFadeMs');
+        const overviewSequenceScaleSelect = document.getElementById('globalDebugOverviewSequenceScale');
+        const resetOverviewTitleScaleBtn = document.getElementById('globalDebugResetOverviewTitleScale');
+        const resetOverviewCopyScaleBtn = document.getElementById('globalDebugResetOverviewCopyScale');
+        const resetOverviewAccentBtn = document.getElementById('globalDebugResetOverviewAccent');
+        const resetOverviewFadeStyleBtn = document.getElementById('globalDebugResetOverviewFadeStyle');
+        const resetOverviewFadeMsBtn = document.getElementById('globalDebugResetOverviewFadeMs');
+        const resetOverviewSequenceScaleBtn = document.getElementById('globalDebugResetOverviewSequenceScale');
         const areaCountNode = document.getElementById('globalDebugAreaCount');
         const areaListNode = document.getElementById('globalDebugAreaList');
         const debugStatus = document.getElementById('globalDebugStatus');
@@ -762,6 +774,10 @@ function softCloseModal() {
             || !toggleMapBtn || !resetMapTestsBtn
             || !toggleHighlightBtn || !resetHighlightBtn
             || !sectionTargetSelect || !sectionGoBtn || !refreshAreasBtn
+            || !overviewTitleScaleSelect || !overviewCopyScaleSelect || !overviewAccentInput
+            || !overviewFadeStyleSelect || !overviewFadeMsInput || !overviewSequenceScaleSelect
+            || !resetOverviewTitleScaleBtn || !resetOverviewCopyScaleBtn || !resetOverviewAccentBtn
+            || !resetOverviewFadeStyleBtn || !resetOverviewFadeMsBtn || !resetOverviewSequenceScaleBtn
             || !areaCountNode || !areaListNode
         ) {
             return;
@@ -779,7 +795,14 @@ function softCloseModal() {
             textScale: 1,
             compactLayout: false,
             reducedMotion: false,
-            highlightAreas: false
+            highlightAreas: false,
+            overviewTitleScale: 1,
+            overviewCopyScale: 1,
+            overviewAccentColor: '#c3a46b',
+            overviewAccentEnabled: false,
+            overviewFadeStyle: 'soft',
+            overviewFadeMs: 1100,
+            overviewSequenceScale: 1
         };
         const debugState = {
             ...debugDefaults
@@ -822,6 +845,50 @@ function softCloseModal() {
             root.style.setProperty('--debug-text-scale', String(debugState.textScale));
             root.classList.toggle('debug-layout-compact', debugState.compactLayout);
             root.classList.toggle('debug-motion-reduced', debugState.reducedMotion);
+        };
+        const resolveOverviewFadeEase = (style) => {
+            if (style === 'linear') return 'linear';
+            if (style === 'sharp') return 'cubic-bezier(0.15, 0.75, 0.2, 1)';
+            return 'ease';
+        };
+        const refreshOverviewDebugPreview = (runSequence = false) => {
+            const currentHash = window.location.hash || '#overview';
+            if (currentHash !== '#overview' && document.querySelector('.section-wrap:target')) return;
+            if (runSequence && typeof window._runOverviewSequence === 'function') {
+                window._runOverviewSequence();
+                return;
+            }
+            if (typeof window._fitOverviewToViewport === 'function') {
+                window._fitOverviewToViewport();
+            }
+        };
+        const applyOverviewDebugVisuals = (runSequence = false) => {
+            root.style.setProperty('--debug-overview-title-scale', String(debugState.overviewTitleScale));
+            root.style.setProperty('--debug-overview-copy-scale', String(debugState.overviewCopyScale));
+            root.style.setProperty('--debug-overview-fade-ms', `${debugState.overviewFadeMs}ms`);
+            root.style.setProperty('--debug-overview-fade-ease', resolveOverviewFadeEase(debugState.overviewFadeStyle));
+            root.style.setProperty('--debug-overview-sequence-scale', String(debugState.overviewSequenceScale));
+            if (debugState.overviewAccentEnabled) {
+                root.style.setProperty('--debug-overview-accent', debugState.overviewAccentColor);
+                root.classList.add('debug-overview-accent-active');
+            } else {
+                root.classList.remove('debug-overview-accent-active');
+                root.style.removeProperty('--debug-overview-accent');
+            }
+            window.__tsiOverviewDebugSequenceScale = debugState.overviewSequenceScale;
+            refreshOverviewDebugPreview(runSequence);
+        };
+        const parseOverviewFadeMs = (rawValue, fallback = debugDefaults.overviewFadeMs) => {
+            const raw = String(rawValue ?? '').trim();
+            if (!raw) return fallback;
+            const next = Number(raw);
+            if (!Number.isFinite(next)) return fallback;
+            return Math.min(2600, Math.max(200, Math.round(next)));
+        };
+        const applyOverviewFadeMsFromInput = (runSequence = true) => {
+            debugState.overviewFadeMs = parseOverviewFadeMs(overviewFadeMsInput.value, debugState.overviewFadeMs);
+            applyOverviewDebugVisuals(runSequence);
+            syncDebugControlLabels();
         };
 
         const loadLocalDebugConfig = async () => {
@@ -913,6 +980,27 @@ function softCloseModal() {
             if (textScaleSelect.value !== nextTextScaleValue) {
                 textScaleSelect.value = nextTextScaleValue;
             }
+            const overviewTitleScaleValue = String(debugState.overviewTitleScale);
+            if (overviewTitleScaleSelect.value !== overviewTitleScaleValue) {
+                overviewTitleScaleSelect.value = overviewTitleScaleValue;
+            }
+            const overviewCopyScaleValue = String(debugState.overviewCopyScale);
+            if (overviewCopyScaleSelect.value !== overviewCopyScaleValue) {
+                overviewCopyScaleSelect.value = overviewCopyScaleValue;
+            }
+            if (overviewAccentInput.value.toLowerCase() !== String(debugState.overviewAccentColor).toLowerCase()) {
+                overviewAccentInput.value = debugState.overviewAccentColor;
+            }
+            if (overviewFadeStyleSelect.value !== debugState.overviewFadeStyle) {
+                overviewFadeStyleSelect.value = debugState.overviewFadeStyle;
+            }
+            if (Number(overviewFadeMsInput.value) !== debugState.overviewFadeMs) {
+                overviewFadeMsInput.value = String(debugState.overviewFadeMs);
+            }
+            const overviewSequenceScaleValue = String(debugState.overviewSequenceScale);
+            if (overviewSequenceScaleSelect.value !== overviewSequenceScaleValue) {
+                overviewSequenceScaleSelect.value = overviewSequenceScaleValue;
+            }
             toggleLayoutBtn.textContent = `Compact: ${debugState.compactLayout ? 'On' : 'Off'}`;
             toggleMotionBtn.textContent = `Reduced: ${debugState.reducedMotion ? 'On' : 'Off'}`;
             toggleMapBtn.textContent = mapTestsVisible ? 'On' : 'Off';
@@ -942,7 +1030,15 @@ function softCloseModal() {
             debugState.compactLayout = debugDefaults.compactLayout;
             debugState.reducedMotion = debugDefaults.reducedMotion;
             debugState.highlightAreas = debugDefaults.highlightAreas;
+            debugState.overviewTitleScale = debugDefaults.overviewTitleScale;
+            debugState.overviewCopyScale = debugDefaults.overviewCopyScale;
+            debugState.overviewAccentColor = debugDefaults.overviewAccentColor;
+            debugState.overviewAccentEnabled = debugDefaults.overviewAccentEnabled;
+            debugState.overviewFadeStyle = debugDefaults.overviewFadeStyle;
+            debugState.overviewFadeMs = debugDefaults.overviewFadeMs;
+            debugState.overviewSequenceScale = debugDefaults.overviewSequenceScale;
             applyGlobalDebugVisuals();
+            applyOverviewDebugVisuals(false);
             setMapTestsVisible(false);
             clearAreaHighlight();
         };
@@ -1015,6 +1111,86 @@ function softCloseModal() {
             syncDebugControlLabels();
             notifyDebugStatus('Motion mode reset.');
         });
+        overviewTitleScaleSelect.addEventListener('change', () => {
+            const next = Number(overviewTitleScaleSelect.value);
+            debugState.overviewTitleScale = Number.isFinite(next) ? next : debugDefaults.overviewTitleScale;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview title size updated.');
+        });
+        overviewCopyScaleSelect.addEventListener('change', () => {
+            const next = Number(overviewCopyScaleSelect.value);
+            debugState.overviewCopyScale = Number.isFinite(next) ? next : debugDefaults.overviewCopyScale;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview copy size updated.');
+        });
+        overviewAccentInput.addEventListener('input', () => {
+            debugState.overviewAccentColor = overviewAccentInput.value || debugDefaults.overviewAccentColor;
+            debugState.overviewAccentEnabled = true;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview accent updated.');
+        });
+        overviewFadeStyleSelect.addEventListener('change', () => {
+            debugState.overviewFadeStyle = overviewFadeStyleSelect.value || debugDefaults.overviewFadeStyle;
+            applyOverviewDebugVisuals(true);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview fade style updated.');
+        });
+        overviewFadeMsInput.addEventListener('input', () => {
+            applyOverviewFadeMsFromInput(true);
+        });
+        overviewFadeMsInput.addEventListener('change', () => {
+            applyOverviewFadeMsFromInput(true);
+            notifyDebugStatus('Overview fade timing updated.');
+        });
+        overviewSequenceScaleSelect.addEventListener('change', () => {
+            const next = Number(overviewSequenceScaleSelect.value);
+            debugState.overviewSequenceScale = Number.isFinite(next)
+                ? Math.min(2, Math.max(0.5, next))
+                : debugDefaults.overviewSequenceScale;
+            applyOverviewDebugVisuals(true);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview load pace updated.');
+        });
+        resetOverviewTitleScaleBtn.addEventListener('click', () => {
+            debugState.overviewTitleScale = debugDefaults.overviewTitleScale;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview title size reset.');
+        });
+        resetOverviewCopyScaleBtn.addEventListener('click', () => {
+            debugState.overviewCopyScale = debugDefaults.overviewCopyScale;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview copy size reset.');
+        });
+        resetOverviewAccentBtn.addEventListener('click', () => {
+            debugState.overviewAccentColor = debugDefaults.overviewAccentColor;
+            debugState.overviewAccentEnabled = debugDefaults.overviewAccentEnabled;
+            applyOverviewDebugVisuals(false);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview accent reset.');
+        });
+        resetOverviewFadeStyleBtn.addEventListener('click', () => {
+            debugState.overviewFadeStyle = debugDefaults.overviewFadeStyle;
+            applyOverviewDebugVisuals(true);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview fade style reset.');
+        });
+        resetOverviewFadeMsBtn.addEventListener('click', () => {
+            debugState.overviewFadeMs = debugDefaults.overviewFadeMs;
+            applyOverviewDebugVisuals(true);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview fade timing reset.');
+        });
+        resetOverviewSequenceScaleBtn.addEventListener('click', () => {
+            debugState.overviewSequenceScale = debugDefaults.overviewSequenceScale;
+            applyOverviewDebugVisuals(true);
+            syncDebugControlLabels();
+            notifyDebugStatus('Overview load pace reset.');
+        });
 
         toggleMapBtn.addEventListener('click', () => {
             const nextVisible = !getMapTestsVisible();
@@ -1084,6 +1260,7 @@ function softCloseModal() {
         });
 
         applyGlobalDebugVisuals();
+        applyOverviewDebugVisuals(false);
         syncDebugControlLabels();
         applyModeVisibility();
 
@@ -1139,8 +1316,9 @@ function softCloseModal() {
         const overviewCopy = overview.querySelector('.overview-copy');
         const overviewPhrases = overview.querySelectorAll('.overview-phrase');
         const overviewContinue = overview.querySelector('.overview-continue');
-        const lineGap = 1.5;
-        const wordGap = 0.7;
+        const baseLineGap = 1.5;
+        const baseWordGap = 0.7;
+        const basePhraseGap = 1.6;
         const overviewTimers = [];
         let lastFitViewportWidth = window.innerWidth || 0;
         let lastFitViewportHeight = window.innerHeight || 0;
@@ -1226,6 +1404,13 @@ function softCloseModal() {
 
             let delay = 0.2;
             let maxWordDelay = 0;
+            const rawSequenceScale = Number(window.__tsiOverviewDebugSequenceScale);
+            const sequenceScale = Number.isFinite(rawSequenceScale)
+                ? Math.min(2, Math.max(0.5, rawSequenceScale))
+                : 1;
+            const lineGap = baseLineGap * sequenceScale;
+            const wordGap = baseWordGap * sequenceScale;
+            const phraseGap = basePhraseGap * sequenceScale;
 
             if (tagline) {
                 tagline.style.setProperty('--reveal-delay', `${delay}s`);
@@ -1250,7 +1435,6 @@ function softCloseModal() {
 
             if (overviewCopy) {
                 const phraseStartDelay = maxWordDelay + 0.6;
-                const phraseGap = 1.6;
                 overviewPhrases.forEach((phrase, idx) => {
                     const phraseDelay = phraseStartDelay + idx * phraseGap;
                     schedule(() => {

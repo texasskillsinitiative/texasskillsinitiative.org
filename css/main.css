@@ -108,10 +108,14 @@
 
         .reveal-text { opacity: 0; }
         .reveal-active { animation: fadeInUp var(--motion-slow) var(--motion-ease-standard) forwards; animation-delay: var(--reveal-delay, 0s); }
+        .overview-hero .reveal-active {
+            animation-duration: var(--debug-overview-fade-ms, var(--motion-slow));
+            animation-timing-function: var(--debug-overview-fade-ease, var(--motion-ease-standard));
+        }
         .overview-copy {
             color: var(--page-bg);
-            transition: color calc(var(--motion-slow) + 0.4s) var(--motion-ease-soft);
-            font-size: calc(1.1rem * var(--overview-fit-scale, 1));
+            transition: color calc(var(--debug-overview-fade-ms, var(--motion-slow)) + 0.4s) var(--debug-overview-fade-ease, var(--motion-ease-soft));
+            font-size: calc(1.1rem * var(--overview-fit-scale, 1) * var(--debug-overview-copy-scale, 1));
             font-weight: 500;
             text-wrap: normal;
             overflow-wrap: normal;
@@ -124,12 +128,12 @@
             color: var(--page-bg);
             font-weight: inherit;
             font-size: 1.08em;
-            transition: color var(--motion-slow) var(--motion-ease-soft);
+            transition: color var(--debug-overview-fade-ms, var(--motion-slow)) var(--debug-overview-fade-ease, var(--motion-ease-soft));
         }
         .overview-copy .overview-phrase.text-accent { color: var(--page-bg); }
         .overview-copy .overview-phrase.is-phrase-visible { color: var(--page-text-main); }
         .overview-copy .overview-phrase.text-accent.is-phrase-visible { color: var(--accent); }
-        .overview-copy--sweep-underline .overview-phrase { transition: color var(--motion-slow) var(--motion-ease-soft); }
+        .overview-copy--sweep-underline .overview-phrase { transition: color var(--debug-overview-fade-ms, var(--motion-slow)) var(--debug-overview-fade-ease, var(--motion-ease-soft)); }
         .text-accent-strong { font-weight: 700; }
         .overview-copy-line {
             display: block;
@@ -406,7 +410,29 @@
             font-size: 0.72rem;
             font-family: 'JetBrains Mono', monospace;
         }
+        .portal-debug-number {
+            width: 100%;
+            min-height: 34px;
+            border: 1px solid var(--frame-border);
+            background: var(--card-bg);
+            color: var(--page-text-main);
+            padding: 6px 8px;
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+            box-sizing: border-box;
+        }
+        .portal-debug-color {
+            width: 100%;
+            min-height: 34px;
+            border: 1px solid var(--frame-border);
+            background: var(--card-bg);
+            padding: 2px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
         .portal-debug-select:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+        .portal-debug-number:focus-visible,
+        .portal-debug-color:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
         .portal-debug-row .option-btn {
             min-height: 34px;
             padding: 8px 10px;
@@ -452,6 +478,13 @@
         }
         :root { --debug-text-scale: 1; }
         html { font-size: calc(16px * var(--debug-text-scale)); }
+        :root {
+            --debug-overview-title-scale: 1;
+            --debug-overview-copy-scale: 1;
+            --debug-overview-fade-ms: 1100ms;
+            --debug-overview-fade-ease: ease;
+            --debug-overview-accent: var(--accent);
+        }
         html[data-debug-color-preset="cool"] {
             --accent: #6bd9ff;
             --logo-gold-primary: #76d8ff;
@@ -478,6 +511,10 @@
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
             scroll-behavior: auto !important;
+        }
+        html.debug-overview-accent-active .overview-hero .text-accent,
+        html.debug-overview-accent-active .overview-copy .overview-phrase.text-accent.is-phrase-visible {
+            color: var(--debug-overview-accent) !important;
         }
 
         /* --- SECTIONS --- */
@@ -1402,7 +1439,7 @@
             text-transform: uppercase;
         }
         .overview-title {
-            font-size: calc(4.5rem * var(--overview-fit-scale, 1));
+            font-size: calc(4.5rem * var(--overview-fit-scale, 1) * var(--debug-overview-title-scale, 1));
             font-weight: 700;
             color: var(--page-text-main);
             line-height: 1.08;

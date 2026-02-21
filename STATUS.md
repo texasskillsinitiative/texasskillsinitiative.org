@@ -319,6 +319,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-20: Replaced nav bottom border with explicit gold separator (`nav::after`) and set `.header-index` bottom padding to `0` so tab controls rest directly on the separator.
 - [Done] 2026-02-20: Finalized tab-to-divider contact by updating nav padding to `10px ... 0` (desktop/mobile breakpoints) and setting `.header-index` bottom margin to `-1px`.
 
+- [Done] 2026-02-21: Added Overview diagnostics controls in `TSI Internal` (title size, copy size, accent color, fade style, fade timing, load pace) and wired `Fade Ms` to apply live on input/change with shared clamping and reset defaults.
 ## Active Focus
 - Delivery target: Friday, February 20, 2026 (end of day, local).
 - Priority 1: finish pipeline/map completion and validation first (`Milestone 0.6` map implementation/readiness items + `R-001` checks).

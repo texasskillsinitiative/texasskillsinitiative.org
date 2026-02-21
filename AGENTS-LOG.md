@@ -1120,4 +1120,10 @@
 - Resolutions/outcomes: Local diagnostics trigger is working again for development use.
 - Commit hash(es): none
 
+
+### 2026-02-21 01:53:44 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed Overview diagnostics fade-timing control reliability by wiring `Fade Ms` to both input and change events with shared clamp parsing (`200..2600ms`), preserving local-only diagnostics gating and existing reset behavior.
+- Troubleshooting suggestions: If diagnostics appear stale after edits, toggle `TSI Internal` debug off/on once to resync control labels with active CSS variables.
+- Resolutions/outcomes: `Fade Ms` now applies immediately during editing and resets predictably; targeted browser verification confirmed CSS var transition from `650ms` back to `1100ms`.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

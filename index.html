@@ -169,6 +169,57 @@
                     <button type="button" class="option-btn option-btn--secondary" id="globalDebugRefreshAreas">Refresh Area Scan</button>
                 </div>
             </div>
+            <div class="portal-debug-group">
+                <p class="portal-debug-group-title">Overview Tests</p>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Title Size</span>
+                    <select class="portal-debug-select" id="globalDebugOverviewTitleScale">
+                        <option value="0.9">90%</option>
+                        <option value="1">100%</option>
+                        <option value="1.1">110%</option>
+                        <option value="1.2">120%</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewTitleScale" aria-label="Reset overview title size">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Copy Size</span>
+                    <select class="portal-debug-select" id="globalDebugOverviewCopyScale">
+                        <option value="0.9">90%</option>
+                        <option value="1">100%</option>
+                        <option value="1.1">110%</option>
+                        <option value="1.2">120%</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewCopyScale" aria-label="Reset overview copy size">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Accent</span>
+                    <input class="portal-debug-color" id="globalDebugOverviewAccent" type="color" value="#c3a46b">
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewAccent" aria-label="Reset overview accent color">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Fade Style</span>
+                    <select class="portal-debug-select" id="globalDebugOverviewFadeStyle">
+                        <option value="soft">Soft</option>
+                        <option value="linear">Linear</option>
+                        <option value="sharp">Sharp</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewFadeStyle" aria-label="Reset overview fade style">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Fade Ms</span>
+                    <input class="portal-debug-number" id="globalDebugOverviewFadeMs" type="number" min="200" max="2600" step="50" value="1100">
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewFadeMs" aria-label="Reset overview fade timing">×</button>
+                </div>
+                <div class="portal-debug-row">
+                    <span class="portal-debug-label">Load Pace</span>
+                    <select class="portal-debug-select" id="globalDebugOverviewSequenceScale">
+                        <option value="0.8">Fast</option>
+                        <option value="1">Default</option>
+                        <option value="1.3">Slow</option>
+                    </select>
+                    <button type="button" class="portal-debug-reset" id="globalDebugResetOverviewSequenceScale" aria-label="Reset overview load pace">×</button>
+                </div>
+            </div>
             <p class="portal-status" id="globalDebugStatus" aria-live="polite" hidden>Debug mode active.</p>
             <div class="portal-debug-areas">
                 <p class="portal-debug-areas-title">Local test areas: <span id="globalDebugAreaCount">0</span></p>
