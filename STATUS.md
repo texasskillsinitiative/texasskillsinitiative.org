@@ -1,6 +1,10 @@
 # TSI Site Status
 
-Last updated: 2026-02-21
+Last updated: 2026-02-23
+Current milestone: 0.9
+Next step: complete remaining pre-1.0 launch validation and owner sign-off checks, then close Milestone 1.0.
+Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
+Target date: TBD (owner-defined)
 Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls, access-form action buttons), mobile map-control density/map-first checks (`tmp-map-check.js`) after handheld control layout changes, asset-path rollout regression checks after naming-convention migration (`tmp-smoke-core.js`, `tmp-map-check.js`, `tmp-mobile-nav-check.js`), Apps Script backend hardening checks (`node --check` for `form-backend/*.js`, config-secret scan for previous spreadsheet/script IDs), production form endpoint reachability check (`GET https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec` => `{\"ok\":true}`), snapshot backup run via `scripts/create_prelaunch_snapshot.ps1` (`snapshot/e55ca66_2026-02-20_11-09-29` + `.zip`), mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
@@ -325,6 +329,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-21: Added site-wide local Sequence Lab (debug mode only) with click-target scope selection plus order/start/step/fade controls and replay; integrated with Overview run-order/start/step and section-level reveal replay without removing existing Pipeline map test controls.
 - [Done] 2026-02-21: Added investor/employment intake routes to the engagement concierge with dedicated field groups and optional attachment upload (up to 8MB), plus backend routing by `submission_type` to separate sheet targets/spreadsheets and Drive file storage using script-property placeholders.
 - [Done] 2026-02-21: Added temporary operator checklist `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md` with launch-priority setup/validation tasks for investor and employment intake deployment.
+
+## Milestone 1.0 - MVP Launch
+- [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
+- [Planned] Milestone closure requires packet-backed completion evidence in this file and `AGENTS-LOG.md` without scope expansion.
+- [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
+
 ## Active Focus
 - Delivery target: Friday, February 20, 2026 (end of day, local).
 - Priority 1: finish pipeline/map completion and validation first (`Milestone 0.6` map implementation/readiness items + `R-001` checks).
