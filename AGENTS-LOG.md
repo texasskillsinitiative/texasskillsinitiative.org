@@ -1242,4 +1242,19 @@
 - Troubleshooting suggestions: If desktop popups still show location lists, verify category rows in `assets/pages/pipeline/pipeline-world-map.md` include the second-column description values and hard-refresh cached JS/CSS.
 - Resolutions/outcomes: Desktop now uses only the inline popup-toggle lane and map popups for category messaging, while mobile keeps the prior top-control behavior and does not render desktop popup UI.
 - Commit hash(es): none
+### 2026-02-24 15:55:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied step-1 activation sequencing in `js/main.js`: replaced eager global `initPipelineMap()` call with guarded one-time `ensurePipelineMapInitialized()` invoked only when `#pipeline` is the active tab; updated overview sequencing to keep full first-run reveal while using synchronized 1s fade-in on revisits.
+- Troubleshooting suggestions: If pipeline still appears pre-initialized on first view, verify no external script calls `initPipelineMap()` directly before hash-tab activation and hard-refresh cached JS.
+- Resolutions/outcomes: Pipeline first-run now occurs on first visual pipeline load, preserving first-view animation timing; overview revisits no longer replay full stagger sequence and instead fade in together.
+- Commit hash(es): none
+### 2026-02-24 16:02:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted pipeline/overview UX behavior in `js/main.js` and `css/main.css`: (1) changed tab activation flow to avoid native anchor-scroll bounce by handling hash-tab links with programmatic activation, (2) enabled initial first-category frame flash for both mobile and desktop viewport activation paths, and (3) replaced abrupt mobile category-description show/hide with animated reveal/collapse transitions at `<=768px` and `<=600px`.
+- Troubleshooting suggestions: If tab bounce still appears, hard-refresh and verify no external listeners are forcing `window.location.hash` directly on nav click; if mobile description reveal feels too fast/slow, tune the `max-height`/`opacity` transition durations in the mobile media blocks.
+- Resolutions/outcomes: Desktop tab transitions avoid down-then-up bounce, initial category activation now visibly flashes frame color once, and mobile category text opens with smoother motion under active toggle changes.
+- Commit hash(es): none
+### 2026-02-24 16:56:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed tab-switch regression by removing custom hash-tab click interception path from `js/main.js` and returning to native hash link flow; retained JS panel visibility sync and changed hash-change activation to `resetScroll: false` to reduce bounce side effects. Increased mobile active category-description max-height limits in `css/main.css` (`160px` at `<=768px`, `180px` at `<=600px`) to avoid clipping long first-row location text.
+- Troubleshooting suggestions: If any tab still appears stuck, hard-refresh to clear cached script and verify URL hash updates on click; if clipping persists for unusually long copy, either reduce source line length in MD or raise mobile max-height caps further.
+- Resolutions/outcomes: Desktop tabs can switch again under native hash routing, and mobile first-row category text has larger reveal bounds to prevent truncation.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

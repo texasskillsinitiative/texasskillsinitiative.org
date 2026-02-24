@@ -1807,8 +1807,14 @@ function softCloseModal() {
     initHoldToClear();
     initRubricActions();
     initTeamTabs();
-    initPipelineMap();
     initGlobalDebugMenu();
+    let pipelineMapInitialized = false;
+    const ensurePipelineMapInitialized = () => {
+        if (pipelineMapInitialized) return;
+        initPipelineMap();
+        pipelineMapInitialized = true;
+        window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
+    };
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
@@ -1911,7 +1917,10 @@ function softCloseModal() {
             overviewTimers.push(timer);
         };
 
-        const runOverviewSequence = () => {
+        let overviewHasPlayedOnce = false;
+        const runOverviewSequence = (options = {}) => {
+            const opts = options && typeof options === 'object' ? options : {};
+            const forceFull = Boolean(opts.forceFull);
             scheduleOverviewFit();
             clearOverviewTimers();
 
@@ -1926,6 +1935,22 @@ function softCloseModal() {
             }
 
             void overview.offsetWidth;
+            const showSyncedRevisit = overviewHasPlayedOnce && !forceFull;
+            if (showSyncedRevisit) {
+                // Revisit behavior: synchronized, gentle 1s fade for overview content.
+                overview.style.setProperty('--tsi-debug-fade-ms', '1000ms');
+                overview.style.setProperty('--tsi-debug-fade-ease', 'ease');
+                revealItems.forEach(item => item.style.setProperty('--reveal-delay', '0s'));
+                requestAnimationFrame(() => {
+                    revealItems.forEach(item => item.classList.add('reveal-active'));
+                    if (overviewCopy) overviewCopy.classList.add('is-body-visible');
+                    overviewPhrases.forEach(phrase => phrase.classList.add('is-phrase-visible'));
+                    if (overviewContinue) overviewContinue.classList.add('is-visible');
+                });
+                return;
+            }
+            overview.style.removeProperty('--tsi-debug-fade-ms');
+            overview.style.removeProperty('--tsi-debug-fade-ease');
 
             const rawStartMs = Number(window.__tsiOverviewDebugStartMs);
             const startDelaySeconds = Number.isFinite(rawStartMs)
@@ -1995,6 +2020,7 @@ function softCloseModal() {
                     }, continueDelay);
                 }
             }
+            overviewHasPlayedOnce = true;
         };
 
         window._runOverviewSequence = runOverviewSequence;
@@ -2038,6 +2064,14 @@ function softCloseModal() {
         const tabId = hash.startsWith('#') ? hash.slice(1) : 'overview';
         const targetExists = document.getElementById(tabId);
         const resolvedId = targetExists ? tabId : 'overview';
+        if (resolvedId === 'pipeline') {
+            ensurePipelineMapInitialized();
+        }
+        const sections = document.querySelectorAll('.section-wrap');
+        sections.forEach((section) => {
+            if (!(section instanceof HTMLElement)) return;
+            section.style.display = section.id === resolvedId ? 'block' : 'none';
+        });
 
         document.body.dataset.activeTab = resolvedId;
 
@@ -2074,7 +2108,6 @@ function softCloseModal() {
             });
         }
     }
-
     if (window.history && 'scrollRestoration' in window.history) {
         window.history.scrollRestoration = 'manual';
     }
@@ -2083,9 +2116,9 @@ function softCloseModal() {
         if (typeof window._closeMobileNav === 'function') {
             window._closeMobileNav({ restoreFocus: false });
         }
-        setActiveTabFromHash({ resetScroll: true });
+        setActiveTabFromHash({ resetScroll: false });
     });
-    setActiveTabFromHash({ resetScroll: true });
+    setActiveTabFromHash({ resetScroll: false });
 
     function initMobileNav() {
         const toggle = document.getElementById('mobileNavToggle');
@@ -4671,10 +4704,10 @@ function softCloseModal() {
                 };
                 const activateFirstForViewport = () => {
                     if (isMobileViewport()) {
-                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: true });
                         return;
                     }
-                    setDesktopCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                    setDesktopCategoryState(firstToggleGroup.targetClass, true, { flashFrame: true });
                 };
                 const activateFirstToggleWhenReady = () => {
                     if (hasActiveOverlayForViewport()) return;
