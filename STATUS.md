@@ -2,9 +2,9 @@
 
 Last updated: 2026-02-24
 Current milestone: 1.0
-Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
+Next step: complete remaining Milestone 1.0 launch gates by 2026-02-25 (validation evidence + owner sign-off) and record launch go/no-go.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
-Target date: TBD (owner-defined)
+Target date: 2026-02-25
 Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls, access-form action buttons), mobile map-control density/map-first checks (`tmp-map-check.js`) after handheld control layout changes, asset-path rollout regression checks after naming-convention migration (`tmp-smoke-core.js`, `tmp-map-check.js`, `tmp-mobile-nav-check.js`), Apps Script backend hardening checks (`node --check` for `form-backend/*.js`, config-secret scan for previous spreadsheet/script IDs), production form endpoint reachability check (`GET https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec` => `{\"ok\":true}`), snapshot backup run via `scripts/create_prelaunch_snapshot.ps1` (`snapshot/e55ca66_2026-02-20_11-09-29` + `.zip`), mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
 Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 
@@ -192,6 +192,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Adjusted Overview revisit behavior in `js/main.js`: first visit still runs full staged animation, while second+ visits auto-reveal final state together (single-phase fade), and removed click-triggered replay; debug replay paths now pass `forceFull` to preserve manual diagnostics sequencing.
+- [Done] 2026-02-24: Updated Overview animation behavior in `js/main.js` to keep first-play timing unchanged while accelerating subsequent runs in-session, and enabled click-triggered replay on the active Overview section (with interactive-element guard + replay throttle).
+- [Done] 2026-02-24: Reduced initial-load overhead by deferring `initPipelineMap()` until `#pipeline` becomes the active section (`setActiveTabFromHash` lazy-init guard), so map fetch/render/startup effects do not run on initial site open unless pipeline is visited.
 - [Done] 2026-02-24: Normalized all pipeline map category location titles in `assets/pages/pipeline/pipeline-world-map.md` to explicit `City, Region/Country` formatting so rendered marker labels and category location summaries are source-clean.
 - [Done] 2026-02-24: Removed pipeline map PNG fallback path from `index.html`/`js/main.js` (MD-only map source now required) and switched category helper/popup text to real-world location lists generated from each category's mapped titles.
 - [Done] 2026-02-21: Expanded local-only internal diagnostics controls and independent reset actions for quick visual/behavior testing across key surfaces.
@@ -345,9 +348,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
 
 ## Active Focus
-- Delivery target: TBD (owner-defined for Milestone 1.0 closure).
+- Delivery target: 2026-02-25 (Milestone `1.0` closure decision window).
 - Priority 1: close remaining Milestone `1.0` launch gates using packet-backed evidence in `STATUS.md` + `AGENTS-LOG.md`.
-- Priority 2: complete final owner confirmation items (authorization + production submission-path verification) for launch decision.
+- Priority 2: complete final owner confirmation items (authorization + production submission-path verification) and capture explicit go/no-go outcome.
 - Priority 3: keep governance updates aligned with `PACKETS.md` packet ownership and `PRODUCT-PRD-BLUEPRINT.md` MVP scope.
 
 ## Update Policy

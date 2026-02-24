@@ -1012,7 +1012,7 @@ function softCloseModal() {
             const currentHash = window.location.hash || '#overview';
             if (currentHash !== '#overview' && document.querySelector('.section-wrap:target')) return;
             if (runSequence && typeof window._runOverviewSequence === 'function') {
-                window._runOverviewSequence();
+                window._runOverviewSequence({ forceFull: true });
                 return;
             }
             if (typeof window._fitOverviewToViewport === 'function') {
@@ -1184,7 +1184,7 @@ function softCloseModal() {
                 window.__tsiOverviewDebugStartMs = debugState.sequenceStartMs;
                 window.__tsiOverviewDebugStepMs = debugState.sequenceStepMs;
                 if (typeof window._runOverviewSequence === 'function') {
-                    window._runOverviewSequence();
+                    window._runOverviewSequence({ forceFull: true });
                 }
                 return;
             }
@@ -1807,8 +1807,14 @@ function softCloseModal() {
     initHoldToClear();
     initRubricActions();
     initTeamTabs();
-    initPipelineMap();
     initGlobalDebugMenu();
+    let pipelineMapInitialized = false;
+    const ensurePipelineMapInitialized = () => {
+        if (pipelineMapInitialized) return;
+        initPipelineMap();
+        pipelineMapInitialized = true;
+        window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
+    };
 
     // Theme Toggle & Animations (Keep your existing code here)
     const toggleSwitch = document.querySelector('#checkbox');
@@ -1847,6 +1853,7 @@ function softCloseModal() {
         const overviewTimers = [];
         let lastFitViewportWidth = window.innerWidth || 0;
         let lastFitViewportHeight = window.innerHeight || 0;
+        let overviewHasPlayedOnce = false;
 
         const clearOverviewTimers = () => {
             overviewTimers.forEach(timer => window.clearTimeout(timer));
@@ -1911,7 +1918,8 @@ function softCloseModal() {
             overviewTimers.push(timer);
         };
 
-        const runOverviewSequence = () => {
+        const runOverviewSequence = (options = {}) => {
+            const opts = options && typeof options === 'object' ? options : {};
             scheduleOverviewFit();
             clearOverviewTimers();
 
@@ -1926,6 +1934,22 @@ function softCloseModal() {
             }
 
             void overview.offsetWidth;
+            const shouldForceFull = Boolean(opts.forceFull);
+            const shouldShowFinalState = overviewHasPlayedOnce && !shouldForceFull;
+            if (shouldShowFinalState) {
+                revealItems.forEach(item => item.style.setProperty('--reveal-delay', '0s'));
+                requestAnimationFrame(() => {
+                    revealItems.forEach(item => item.classList.add('reveal-active'));
+                    if (overviewCopy) {
+                        overviewCopy.classList.add('is-body-visible');
+                    }
+                    overviewPhrases.forEach(phrase => phrase.classList.add('is-phrase-visible'));
+                    if (overviewContinue) {
+                        overviewContinue.classList.add('is-visible');
+                    }
+                });
+                return;
+            }
 
             const rawStartMs = Number(window.__tsiOverviewDebugStartMs);
             const startDelaySeconds = Number.isFinite(rawStartMs)
@@ -1995,6 +2019,7 @@ function softCloseModal() {
                     }, continueDelay);
                 }
             }
+            overviewHasPlayedOnce = true;
         };
 
         window._runOverviewSequence = runOverviewSequence;
@@ -2038,6 +2063,9 @@ function softCloseModal() {
         const tabId = hash.startsWith('#') ? hash.slice(1) : 'overview';
         const targetExists = document.getElementById(tabId);
         const resolvedId = targetExists ? tabId : 'overview';
+        if (resolvedId === 'pipeline') {
+            ensurePipelineMapInitialized();
+        }
 
         document.body.dataset.activeTab = resolvedId;
 

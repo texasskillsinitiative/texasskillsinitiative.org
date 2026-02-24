@@ -1232,4 +1232,19 @@
 - Troubleshooting suggestions: Keep new toggle labels consistently delimited in source data to prevent future parser/UI normalization ambiguity and maintain predictable rendered summaries.
 - Resolutions/outcomes: Map marker labels and category location summary text are now clean directly from source data, reducing dependence on runtime correction for current categories.
 - Commit hash(es): none
+### 2026-02-24 08:26:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Investigated cross-section load overhead and deferred pipeline map initialization by replacing eager startup `initPipelineMap()` call with a one-time lazy initializer triggered only when `setActiveTabFromHash` resolves `pipeline`. Re-ran smoke/map/mobile/modal Playwright checks after patch.
+- Troubleshooting suggestions: Keep heavy section runtimes behind section-activation guards; when adding new effects, avoid initializing hidden-section animation loops during first paint.
+- Resolutions/outcomes: Pipeline map data fetch/render/startup effects no longer execute on site open unless `#pipeline` is visited; regression checks remained clean.
+- Commit hash(es): none
+### 2026-02-24 08:33:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Overview sequence runtime so first run preserves current pacing while subsequent runs use faster timing, and added click-triggered replay for the active Overview section with interactive-control exclusion and minimum replay-gap guard. Re-ran syntax + Playwright smoke/map/mobile/modal checks.
+- Troubleshooting suggestions: If replay feels too fast/slow, adjust `overviewRepeatSpeedMultiplier` in `js/main.js` (currently `0.62`) before changing base sequence constants.
+- Resolutions/outcomes: Overview now supports quick repeat playthroughs without affecting first-load cadence, and manual click replay is available without interfering with links/buttons.
+- Commit hash(es): none
+### 2026-02-24 08:41:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Revised Overview logic per updated UX direction: removed click-triggered replay, kept first-run staged sequence unchanged, and switched subsequent Overview activations to a synchronized final-state reveal. Also updated debug-triggered overview replays to force full sequence (`forceFull`) for diagnostic workflows.
+- Troubleshooting suggestions: If the synchronized revisit reveal should be instant instead of fade, skip `.reveal-active` re-application and set terminal classes directly in `runOverviewSequence`.
+- Resolutions/outcomes: Overview revisit behavior now avoids re-running staggered sequencing during normal tab switching; map behavior remains one-time init per page load with no repeat startup when revisiting pipeline.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
