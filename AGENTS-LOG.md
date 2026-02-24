@@ -1287,4 +1287,9 @@
 - Troubleshooting suggestions: If you want a longer/shorter handoff, tune `autoAdvanceHoldSeconds` (`3`) and `autoAdvanceFadeSeconds` (`0.6`) together.
 - Resolutions/outcomes: First-load route change now has an intentional pause and visible fade transition instead of immediate handoff.
 - Commit hash(es): none
+### 2026-02-24 17:45:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added navigation scroll-stabilization helper in `js/main.js` (`stabilizeViewportTop`) and invoked it after hash-tab activation plus initial tab setup to correct intermittent slight downward scroll offset after section transitions.
+- Troubleshooting suggestions: If any section still lands off-top on slow devices, increase stabilization timeout from `80ms` to `120-150ms`.
+- Resolutions/outcomes: Section switches should now settle consistently at top position instead of occasionally stopping a bit lower.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

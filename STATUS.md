@@ -192,6 +192,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Added tab/hash transition scroll stabilization in `js/main.js` (`stabilizeViewportTop`) to enforce top-of-page positioning after section switches and initial activation, addressing intermittent slight downward offset after navigation.
 - [Done] 2026-02-24: Updated first-load Overview auto-handoff timing to pause for 3 seconds after sequence completion, then fade out (`0.6s`) before routing to `#mandate`; preserved one-time guard and active-hash safety check.
 - [Done] 2026-02-24: Restored full initial Overview sequence behavior and added one-time automatic post-sequence handoff to `#mandate` on first visual load only (guarded so it does not repeat and does not override user navigation away from Overview).
 - [Done] 2026-02-24: Applied the same directional 400ms slide-tab transition model to Team section panel switching (`founder`, `community`, `operations`) with index-aware left/right sweep behavior, dynamic panel-wrap height sync, and reduced-motion-safe fallback; no Team content/copy/assets changed.

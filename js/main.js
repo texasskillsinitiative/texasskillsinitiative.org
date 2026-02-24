@@ -2040,6 +2040,15 @@ function softCloseModal() {
         window.scrollTo(0, 0);
         root.style.scrollBehavior = previousScrollBehavior;
     };
+    const stabilizeViewportTop = () => {
+        jumpViewportToTop();
+        requestAnimationFrame(() => {
+            jumpViewportToTop();
+        });
+        window.setTimeout(() => {
+            jumpViewportToTop();
+        }, 80);
+    };
 
     function setActiveTabFromHash(options = {}) {
         const shouldResetScroll = options.resetScroll !== false;
@@ -2100,8 +2109,10 @@ function softCloseModal() {
             window._closeMobileNav({ restoreFocus: false });
         }
         setActiveTabFromHash({ resetScroll: false });
+        stabilizeViewportTop();
     });
     setActiveTabFromHash({ resetScroll: false });
+    stabilizeViewportTop();
 
     function initMobileNav() {
         const toggle = document.getElementById('mobileNavToggle');
