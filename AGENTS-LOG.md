@@ -1302,4 +1302,9 @@
 - Troubleshooting suggestions: If any desktop popup appears too tight in a specific zone after hard refresh, next adjustment is widening zone width candidates slightly (`maxAreaWidthPct` cap) or reducing minimum font-scale floor from `0.8` to `0.76` for edge cases.
 - Resolutions/outcomes: Desktop popups render larger while preserving constrained placement behavior, and mobile button-populated category text is more legible when expanded.
 - Commit hash(es): none
+### 2026-02-24 17:56:13 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned mobile-only pipeline interaction timing in `css/main.css` to match desktop feel: changed mobile (`<=768px` and `<=600px`) category-description reveal/collapse transitions from short open/fade timings to the desktop 1.1s cubic-bezier profile, and increased mobile frame category-flash animation duration from `0.82s` to `1.1s`.
+- Troubleshooting suggestions: If mobile now feels too slow, reduce only `max-height` to `0.9s` while keeping frame flash at `1.1s` so color fade remains synchronized.
+- Resolutions/outcomes: Mobile button activation opens more gently and frame color fade now runs in the same cadence as desktop counterpart timing.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
