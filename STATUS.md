@@ -192,6 +192,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Updated first-load Overview auto-handoff timing to pause for 3 seconds after sequence completion, then fade out (`0.6s`) before routing to `#mandate`; preserved one-time guard and active-hash safety check.
+- [Done] 2026-02-24: Restored full initial Overview sequence behavior and added one-time automatic post-sequence handoff to `#mandate` on first visual load only (guarded so it does not repeat and does not override user navigation away from Overview).
 - [Done] 2026-02-24: Applied the same directional 400ms slide-tab transition model to Team section panel switching (`founder`, `community`, `operations`) with index-aware left/right sweep behavior, dynamic panel-wrap height sync, and reduced-motion-safe fallback; no Team content/copy/assets changed.
 - [Done] 2026-02-24: Adjusted rubric protocol transition motion to full-width directional sweep (`translateX(100%)`) so content movement aligns more clearly with left/right protocol tab selection while retaining 400ms ease-in-out timing.
 - [Done] 2026-02-24: Populated new rubric protocol visuals with currently available local assets under `assets/pages/rubric/` (analysis banner + rubric icon set) and removed temporary missing-file fallback handlers pending delivery of final requested image filenames.

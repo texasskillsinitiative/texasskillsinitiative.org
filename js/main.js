@@ -1815,6 +1815,7 @@ function softCloseModal() {
         const overviewTimers = [];
         let lastFitViewportWidth = window.innerWidth || 0;
         let lastFitViewportHeight = window.innerHeight || 0;
+        let didInitialOverviewAutoAdvance = false;
 
         const clearOverviewTimers = () => {
             overviewTimers.forEach(timer => window.clearTimeout(timer));
@@ -1895,6 +1896,7 @@ function softCloseModal() {
             if (overviewContinue) {
                 overviewContinue.classList.remove('is-visible');
             }
+            overview.classList.remove('is-auto-transition-out');
 
             void overview.offsetWidth;
             const showSyncedRevisit = overviewHasPlayedOnce && !forceFull;
@@ -1979,6 +1981,25 @@ function softCloseModal() {
                     const continueDelay = bodyDelay + 1.0;
                     schedule(() => {
                         overviewContinue.classList.add('is-visible');
+                        // First visual load: hold, then fade out and auto-advance to mandate once.
+                        if (!didInitialOverviewAutoAdvance) {
+                            didInitialOverviewAutoAdvance = true;
+                            const autoAdvanceHoldSeconds = 3;
+                            const autoAdvanceFadeSeconds = 0.6;
+                            window.setTimeout(() => {
+                                const currentHash = window.location.hash || '#overview';
+                                if (currentHash === '#overview') {
+                                    overview.classList.add('is-auto-transition-out');
+                                }
+                            }, Math.max(0, autoAdvanceHoldSeconds * 1000));
+                            window.setTimeout(() => {
+                                const currentHash = window.location.hash || '#overview';
+                                if (currentHash === '#overview') {
+                                    window.location.hash = '#mandate';
+                                }
+                                overview.classList.remove('is-auto-transition-out');
+                            }, Math.max(0, (autoAdvanceHoldSeconds + autoAdvanceFadeSeconds) * 1000));
+                        }
                     }, continueDelay);
                 }
             }

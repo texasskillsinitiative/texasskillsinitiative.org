@@ -112,6 +112,11 @@
             animation-duration: var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow)));
             animation-timing-function: var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-standard)));
         }
+        .overview-hero {
+            opacity: 1;
+            transition: opacity 0.6s ease-in-out;
+        }
+        .overview-hero.is-auto-transition-out { opacity: 0; }
         .overview-copy {
             color: var(--page-bg);
             transition: color calc(var(--debug-overview-fade-ms, var(--motion-slow)) + 0.4s) var(--debug-overview-fade-ease, var(--motion-ease-soft));

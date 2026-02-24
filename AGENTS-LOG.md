@@ -1277,4 +1277,14 @@
 - Troubleshooting suggestions: If Team transition feels too aggressive on certain breakpoints, reduce Team translate distance from `100%` to `72%` while keeping direction classes and duration unchanged.
 - Resolutions/outcomes: Team tab switching now uses the same left/right sweep motion language as Rubric protocol toggle, with content untouched.
 - Commit hash(es): none
+### 2026-02-24 17:33:04 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Overview initial-load flow in `js/main.js` to preserve full first-run sequence and add one-time auto-handoff to `#mandate` after sequence completion; added guard (`didInitialOverviewAutoAdvance`) and active-hash check so auto-advance runs only once and only while user remains on Overview.
+- Troubleshooting suggestions: If auto-handoff timing feels early/late, tune the post-sequence delay (`180ms`) in the Overview continue callback without changing the one-time guard condition.
+- Resolutions/outcomes: Initial site load now plays full Overview animation and then transitions automatically to Mandate, while revisit behavior remains unchanged.
+- Commit hash(es): none
+### 2026-02-24 17:35:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted Overview auto-handoff timing/transition in `js/main.js` and `css/main.css` to match requested flow: keep full initial sequence, hold 3 seconds, apply Overview fade-out class, then navigate to `#mandate` after a 0.6s fade.
+- Troubleshooting suggestions: If you want a longer/shorter handoff, tune `autoAdvanceHoldSeconds` (`3`) and `autoAdvanceFadeSeconds` (`0.6`) together.
+- Resolutions/outcomes: First-load route change now has an intentional pause and visible fade transition instead of immediate handoff.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
