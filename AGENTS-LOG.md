@@ -1174,3 +1174,62 @@
 - Troubleshooting suggestions: Keep commit scope limited to governance docs when Packet F is active to avoid cross-packet collisions with runtime files.
 - Resolutions/outcomes: Checkpoint commit created for PM/governance normalization with no runtime logic changes.
 - Commit hash(es): 2668eb9
+
+### 2026-02-23 11:00:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ran governance resync per user instruction; aligned AGENTS.md with explicit global start-of-session read requirements for both global files, updated STATUS.md machine-field/internal-focus consistency for Milestone 1.0 path, and enforced AGENTS-LOG active-session tail marker hygiene.
+- Troubleshooting suggestions: Keep one active tail marker at EOF during live sessions; replace it only during clean-close protocol.
+- Resolutions/outcomes: Governance docs are synchronized to local + global PM standards without product/runtime file edits.
+- Commit hash(es): none
+
+### 2026-02-23 11:18:30 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented pipeline map vertical-position tuning in css/main.css by reducing normal-mode spacing above the map and switching .pipeline-map--raised to breakpoint-tuned CSS variables so the map sits higher without increasing document flow below.
+- Troubleshooting suggestions: If map appears too high/low on a target breakpoint, tune only #pipeline vars (--pipeline-map-raise, --pipeline-note-gap, --pipeline-map-top-gap, --pipeline-map-label-gap) rather than adding negative margins.
+- Resolutions/outcomes: Map appears higher in the pipeline content area while avoiding push-down of subsequent content blocks; no runtime JS/HTML logic was changed.
+- Commit hash(es): none
+
+### 2026-02-23 11:41:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tightened the pipeline top instruction box vertical padding by adding pipeline-only .pipeline-note top/bottom padding overrides in css/main.css for desktop/tablet/mobile while leaving horizontal padding and layout flow intact.
+- Troubleshooting suggestions: If text feels cramped on any breakpoint, increase .pipeline-note vertical padding in 2px steps before changing map lift variables.
+- Resolutions/outcomes: Pipeline top text box is visually shorter, so the map reads higher without pushing subsequent content lower.
+- Commit hash(es): none
+
+### 2026-02-23 11:49:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented new pipeline map feature in js/main.js/css/main.css: created a second inline category-toggle row directly above the map with labels suffixed by '2', mirrored toggle behavior/state across both button sets, stopped rendering control-grid descriptor rows, and added on-map category popups positioned by category marker centroid.
+- Troubleshooting suggestions: If popup overlap becomes noisy with many active categories, cap concurrent popup visibility or prioritize most recently toggled category in follow-up.
+- Resolutions/outcomes: Inline '...2' buttons now behave like original category toggles, and descriptor text now appears on-map in logical category locations instead of the control grid.
+- Commit hash(es): none
+
+### 2026-02-23 12:03:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restored original map control row functionality/appearance in js/main.js by re-enabling control-row descriptor elements and primary state handling, then split the new inline '<button_title>2' row into an independent toggle lane (separate overlay classes and popup targets) so primary and secondary buttons do not change each other's state.
+- Troubleshooting suggestions: If the two overlay lanes create visual clutter, reduce secondary marker opacity or gate secondary overlays to debug mode only in a follow-up.
+- Resolutions/outcomes: Original row behaves as before, while inline '...2' row can now be toggled independently without affecting original row on/off state.
+- Commit hash(es): none
+
+### 2026-02-23 12:07:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated js/main.js popup placement for the independent '<button_title>2' lane to select ocean-first anchor cells with minimum distance from marker points and from other popups, plus bounded fallback search when no ideal ocean location exists.
+- Troubleshooting suggestions: If a specific category still lands too close to dense marker areas, increase minMarkerDistSq in resolveOceanPopupAnchor or lower popup max-width in CSS.
+- Resolutions/outcomes: Popup text boxes now prefer ocean areas to reduce overlap with data points while remaining close to logical category regions.
+- Commit hash(es): none
+
+### 2026-02-23 12:11:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked js/main.js '<button_title>2' popup placement to be footprint-aware by measuring actual popup box size in-frame, converting to grid-cell footprint, and scoring ocean-anchor candidates by full-box land coverage, marker proximity, bounds fit, and overlap with previously placed popups.
+- Troubleshooting suggestions: If popups still crowd in narrow regions, increase overlap penalty or marker-overlap penalty in resolveOceanPopupAnchor scoring weights.
+- Resolutions/outcomes: Popup placement now evaluates what the text box will actually cover, not just anchor-point location, which reduces data-point coverage and inter-popup collisions.
+- Commit hash(es): none
+
+### 2026-02-23 12:18:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented fixed-zone placement for '<button_title>2' popups in js/main.js using five predefined ocean regions (1-5) from user guidance, with assignment logic enforcing unique zone usage when category count <= 5 and controlled reuse only when category count > 5.
+- Troubleshooting suggestions: If any popup appears outside intended hand-marked regions, tighten zone pct bounds in popupZones and increase zoneContainPenalty in evaluateZoneAnchor.
+- Resolutions/outcomes: Popup boxes are now confined to the five designated ocean areas with non-duplicate usage under five-or-fewer categories, while still accounting for measured text-box footprint.
+- Commit hash(es): none
+### 2026-02-24 08:10:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed pipeline MD->PNG fallback usage (`data-map-fallback` attribute and runtime fallback branch), and replaced map category descriptor/popup copy with location lists derived from real marker titles per category in `js/main.js`. Updated `assets/pages/pipeline/pipeline-world-map.md` UI note and synced `STATUS.md` recent history.
+- Troubleshooting suggestions: If any category labels are authored as compact strings without separators (for example city+country merged), normalize those title strings directly in `pipeline-world-map.md` because UI now renders the authored location titles verbatim.
+- Resolutions/outcomes: Map no longer falls back to legacy image when MD loading/parsing fails, and category text now reflects real-world locations listed in each category dataset.
+- Commit hash(es): none
+### 2026-02-24 08:14:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Normalized all authored map toggle location labels in `assets/pages/pipeline/pipeline-world-map.md` from merged city/country strings to explicit comma-separated format (`City, Country/Region`) and synced `STATUS.md` recent history.
+- Troubleshooting suggestions: Keep new toggle labels consistently delimited in source data to prevent future parser/UI normalization ambiguity and maintain predictable rendered summaries.
+- Resolutions/outcomes: Map marker labels and category location summary text are now clean directly from source data, reducing dependence on runtime correction for current categories.
+- Commit hash(es): none
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

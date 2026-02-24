@@ -197,7 +197,7 @@ $texas={
 # legacy trailing blink column is accepted but ignored.
 # UI note: category buttons are generated from Toggle Category labels and can show/hide each category.
 # UI note: category button border/text color follows the category marker color.
-# UI note: Category Description is optional, and the first non-empty value per category renders below the map.
+# UI note: category descriptions are metadata only; UI category text is generated from real-world location titles listed per category.
 # shape: circle or square, color: accent or CSS color
 # accent resolves by Toggle Category token first, then falls back to var(--map-accent):
 # - Initial Evaluation -> var(--map-toggle-initial-evaluation)
@@ -212,30 +212,30 @@ $texas={
 #Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
 
 Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|1x1|0|0|circle|accent|1|slow
-Initial Evaluation|Ho Chi Minh CityVietnam|143|45|circle|accent|1|slow
-Initial Evaluation|Hai PhongVietnam|142|38|circle|accent|1|slow
-Initial Evaluation|Da NangVietnam|143|41|circle|accent|1|slow
-Initial Evaluation|ManilaPhilippines|152|42|circle|accent|1|slow
-Initial Evaluation|Clark (Angeles)Philippines|152|41|circle|accent|1|slow
-Initial Evaluation|Cebu CityPhilippines|154|45|circle|accent|1|slow
-Initial Evaluation|DavaoPhilippines|154|48|circle|accent|1|slow
-Initial Evaluation|DumaguetePhilippines|153|45|circle|accent|1|slow
-Initial Evaluation|BangkokThailand|140|43|circle|accent|1|slow
-Initial Evaluation|Laem ChabangThailand|141|44|circle|accent|1|slow
-Initial Evaluation|ChennaiIndia|128|41|circle|accent|1|slow
-Initial Evaluation|WroclawPoland|88|18|circle|accent|1|slow
-Initial Evaluation|TangierMorocco|75|29|circle|accent|1|slow
-Initial Evaluation|DubaiUAE|112|35|circle|accent|1|slow
-Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|Guatemala CityGuatemala|23|42|circle|accent|1|slow
-Structured Intake|San SalvadorEl Salvador|24|42|circle|accent|1|slow
-Structured Intake|San JoséCosta Rica|28|46|circle|accent|1|slow
-Structured Intake|Panama CityPanama|30|46|circle|accent|1|slow
-Structured Intake|MonterreyMexico|18|34|circle|accent|1|slow
-Technical Review|Corridors under deep technical, risk, and feasibility review.|NassauBahamas|32|34|circle|accent|1|slow
-Technical Review|San JuanPuerto Rico|35|39|circle|accent|1|slow
-Technical Review|KingstonJamaica|32|34|circle|accent|1|slow
-Technical Review|MedellínColombia|32|47|circle|accent|1|slow
-Reference Model|Operating benchmark corridors used as comparative calibration references.|HoustonUnited States (Texas)|23|32|circle|accent|1|slow
-Reference Model|Dallas–Fort WorthUnited States (Texas)|23|29|circle|accent|1|slow
-Reference Model|San AntonioUnited States (Texas)|21|31|circle|accent|1|slow
+Initial Evaluation|Ho Chi Minh City, Vietnam|143|45|circle|accent|1|slow
+Initial Evaluation|Hai Phong, Vietnam|142|38|circle|accent|1|slow
+Initial Evaluation|Da Nang, Vietnam|143|41|circle|accent|1|slow
+Initial Evaluation|Manila, Philippines|152|42|circle|accent|1|slow
+Initial Evaluation|Clark (Angeles), Philippines|152|41|circle|accent|1|slow
+Initial Evaluation|Cebu City, Philippines|154|45|circle|accent|1|slow
+Initial Evaluation|Davao, Philippines|154|48|circle|accent|1|slow
+Initial Evaluation|Dumaguete, Philippines|153|45|circle|accent|1|slow
+Initial Evaluation|Bangkok, Thailand|140|43|circle|accent|1|slow
+Initial Evaluation|Laem Chabang, Thailand|141|44|circle|accent|1|slow
+Initial Evaluation|Chennai, India|128|41|circle|accent|1|slow
+Initial Evaluation|Wroclaw, Poland|88|18|circle|accent|1|slow
+Initial Evaluation|Tangier, Morocco|75|29|circle|accent|1|slow
+Initial Evaluation|Dubai, UAE|112|35|circle|accent|1|slow
+Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|Guatemala City, Guatemala|23|42|circle|accent|1|slow
+Structured Intake|San Salvador, El Salvador|24|42|circle|accent|1|slow
+Structured Intake|San José, Costa Rica|28|46|circle|accent|1|slow
+Structured Intake|Panama City, Panama|30|46|circle|accent|1|slow
+Structured Intake|Monterrey, Mexico|18|34|circle|accent|1|slow
+Technical Review|Corridors under deep technical, risk, and feasibility review.|Nassau, Bahamas|32|34|circle|accent|1|slow
+Technical Review|San Juan, Puerto Rico|35|39|circle|accent|1|slow
+Technical Review|Kingston, Jamaica|32|34|circle|accent|1|slow
+Technical Review|Medellín, Colombia|32|47|circle|accent|1|slow
+Reference Model|Operating benchmark corridors used as comparative calibration references.|Houston, United States (Texas)|23|32|circle|accent|1|slow
+Reference Model|Dallas–Fort Worth, United States (Texas)|23|29|circle|accent|1|slow
+Reference Model|San Antonio, United States (Texas)|21|31|circle|accent|1|slow
 

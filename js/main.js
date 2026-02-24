@@ -1405,6 +1405,11 @@ function softCloseModal() {
             if (!debugModeActive && opts.resetSettings !== false) {
                 resetDebugSettingsToDefaults();
             }
+            if (debugModeActive) {
+                // Keep debug inert on initial load; apply debug visuals only after explicit activation.
+                applyGlobalDebugVisuals();
+                applyOverviewDebugVisuals(false);
+            }
             applyModeVisibility();
             syncDebugControlLabels();
             resetPortalAuthMessages();
@@ -1780,8 +1785,7 @@ function softCloseModal() {
             }
         });
 
-        applyGlobalDebugVisuals();
-        applyOverviewDebugVisuals(false);
+        // Do not apply debug visuals during initial load.
         syncDebugControlLabels();
         applyModeVisibility();
 
@@ -3428,13 +3432,67 @@ function softCloseModal() {
             if (sibling && sibling.getAttribute('data-map-controls') === 'md') return sibling;
             return document.querySelector('[data-map-controls="md"]');
         };
+        const mapLocationSuffixes = [
+            'United States (Texas)',
+            'El Salvador',
+            'Costa Rica',
+            'Puerto Rico',
+            'Philippines',
+            'Guatemala',
+            'Colombia',
+            'Thailand',
+            'Vietnam',
+            'Morocco',
+            'Bahamas',
+            'Jamaica',
+            'Panama',
+            'Mexico',
+            'Poland',
+            'India',
+            'UAE'
+        ].sort((a, b) => b.length - a.length);
+        const normalizeLocationLabel = (rawLabel) => {
+            const raw = typeof rawLabel === 'string' ? rawLabel.trim() : '';
+            if (!raw) return '';
+            const compact = raw.replace(/\s+/g, ' ');
+            if (/^\d+\s*x\s*\d+$/i.test(compact)) return '';
+            for (let idx = 0; idx < mapLocationSuffixes.length; idx += 1) {
+                const suffix = mapLocationSuffixes[idx];
+                if (!compact.endsWith(suffix) || compact.length <= suffix.length) continue;
+                const head = compact.slice(0, compact.length - suffix.length).trim();
+                if (!head) continue;
+                return `${head}, ${suffix}`;
+            }
+            return compact;
+        };
+        const buildLocationSummary = (markers) => {
+            const markerList = Array.isArray(markers) ? markers : [];
+            const unique = new Set();
+            markerList.forEach((marker) => {
+                const normalized = normalizeLocationLabel(marker && marker.label);
+                if (!normalized) return;
+                unique.add(normalized);
+            });
+            const locations = Array.from(unique);
+            if (!locations.length) return 'No mapped locations listed.';
+            return locations.join(', ');
+        };
         const applyMdToggleData = (toggleGroups, map, controls) => {
             if (!map || !controls) return;
             controls.innerHTML = '';
             const mapShell = controls.closest('.pipeline-map');
             const frame = map.closest('.pipeline-map-frame');
+            if (frame) {
+                frame.classList.add('map-settings-pending');
+                // Main map defaults are applied first to avoid transient debug/test-style flashes.
+                ensureFrameTuningDefaults(frame);
+                applyFlashPresetToFrame(frame, mapFlashPresetDefaults.presetId);
+                frame.dataset.mapFlashCompactGlow = mapFlashVisualDefaults.compactGlow ? 'true' : 'false';
+                frame.dataset.mapPointerMode = 'flash';
+            }
+            let helper = null;
             if (mapShell) {
-                let helper = mapShell.querySelector('.map-controls-helper');
+                helper = mapShell.querySelector('.map-controls-helper');
                 if (!helper) {
                     helper = document.createElement('p');
                     helper.className = 'map-controls-helper';
@@ -3445,6 +3503,26 @@ function softCloseModal() {
                     }
                 }
                 helper.textContent = 'Click a category to toggle map markers. You can leave multiple categories on at once.';
+            }
+            let desktopInlineControls = null;
+            if (mapShell) {
+                desktopInlineControls = mapShell.querySelector('.pipeline-map-inline-controls-desktop');
+                if (!desktopInlineControls) {
+                    desktopInlineControls = document.createElement('div');
+                    desktopInlineControls.className = 'pipeline-map-inline-controls-desktop';
+                    desktopInlineControls.setAttribute('role', 'group');
+                    desktopInlineControls.setAttribute('aria-label', 'Desktop map category toggles');
+                    if (frame && frame.parentNode === mapShell) {
+                        mapShell.insertBefore(desktopInlineControls, frame);
+                    } else {
+                        mapShell.appendChild(desktopInlineControls);
+                    }
+                }
+                desktopInlineControls.innerHTML = '';
+            }
+            if (mapShell && frame && frame.parentNode === mapShell) {
+                if (desktopInlineControls) mapShell.insertBefore(desktopInlineControls, frame);
+                if (helper) mapShell.insertBefore(helper, frame);
             }
             let testsDock = mapShell ? mapShell.querySelector('[data-map-tests]') : null;
             if (!testsDock && mapShell) {
@@ -3462,6 +3540,215 @@ function softCloseModal() {
 
             map.querySelectorAll('.map-overlay').forEach(node => node.remove());
             const overlayFragment = document.createDocumentFragment();
+            let popupLayer = null;
+            if (frame) {
+                popupLayer = frame.querySelector('.map-category-popup-layer');
+                if (!popupLayer) {
+                    popupLayer = document.createElement('div');
+                    popupLayer.className = 'map-category-popup-layer';
+                    frame.appendChild(popupLayer);
+                }
+                popupLayer.innerHTML = '';
+            }
+            const dotGrid = mapDotGrid.get(map) || null;
+            const viewBox = map.viewBox && map.viewBox.baseVal ? map.viewBox.baseVal : { width: 181, height: 89 };
+            const popupGridWidth = Math.max(1, Math.round(dotGrid && dotGrid.width ? dotGrid.width : (viewBox.width || 181)));
+            const popupGridHeight = Math.max(1, Math.round(dotGrid && dotGrid.height ? dotGrid.height : (viewBox.height || 89)));
+            const clampCell = (value, max) => Math.min(max - 1, Math.max(0, Math.round(value)));
+            const areaUsageCounts = new Map();
+            const popupAreasBaseGrid = { width: 181, height: 89 };
+            const popupAreasBase = [
+                { id: '1', xMin: 111, yMin: 50, xMax: 135, yMax: 85 },
+                { id: '2', xMin: 43, yMin: 25, xMax: 66, yMax: 44 },
+                { id: '3', xMin: 2, yMin: 45, xMax: 23, yMax: 63 },
+                { id: '4', xMin: 59, yMin: 54, xMax: 83, yMax: 86 },
+                { id: '5', xMin: 162, yMin: 20, xMax: 178, yMax: 51 },
+                { id: '6', xMin: 2, yMin: 66, xMax: 34, yMax: 86 }
+            ];
+            const popupAreas = popupAreasBase.map(area => {
+                const xScale = popupGridWidth / popupAreasBaseGrid.width;
+                const yScale = popupGridHeight / popupAreasBaseGrid.height;
+                const xMin = clampCell(area.xMin * xScale, popupGridWidth);
+                const xMax = clampCell(area.xMax * xScale, popupGridWidth);
+                const yMin = clampCell(area.yMin * yScale, popupGridHeight);
+                const yMax = clampCell(area.yMax * yScale, popupGridHeight);
+                return {
+                    id: area.id,
+                    xMin: Math.min(xMin, xMax),
+                    xMax: Math.max(xMin, xMax),
+                    yMin: Math.min(yMin, yMax),
+                    yMax: Math.max(yMin, yMax)
+                };
+            });
+            const measurePopupFootprint = (descriptionText, maxWidthPercent = null, fontScale = 1) => {
+                const fallbackWidthCells = Math.max(16, Math.min(56, Math.ceil((descriptionText.length || 0) * 0.6)));
+                const fallbackHeightCells = Math.max(6, Math.min(18, Math.ceil((descriptionText.length || 0) / 24)));
+                if (!popupLayer || !frame) {
+                    return { widthCells: fallbackWidthCells, heightCells: fallbackHeightCells };
+                }
+                const probe = document.createElement('div');
+                probe.className = 'map-category-popup';
+                probe.textContent = descriptionText || '';
+                probe.style.left = '50%';
+                probe.style.top = '50%';
+                probe.style.opacity = '0';
+                probe.style.visibility = 'hidden';
+                probe.style.pointerEvents = 'none';
+                if (Number.isFinite(Number(maxWidthPercent))) {
+                    probe.style.maxWidth = `${Number(maxWidthPercent)}%`;
+                }
+                if (Number.isFinite(Number(fontScale)) && Number(fontScale) > 0 && Number(fontScale) !== 1) {
+                    probe.style.fontSize = `calc(0.64rem * ${Number(fontScale)})`;
+                    probe.style.lineHeight = String(1.35 * Number(fontScale));
+                }
+                popupLayer.appendChild(probe);
+                const probeRect = probe.getBoundingClientRect();
+                const frameRect = frame.getBoundingClientRect();
+                probe.remove();
+                if (!frameRect.width || !frameRect.height || !probeRect.width || !probeRect.height) {
+                    return { widthCells: fallbackWidthCells, heightCells: fallbackHeightCells };
+                }
+                const widthCells = (probeRect.width / frameRect.width) * popupGridWidth;
+                const heightCells = (probeRect.height / frameRect.height) * popupGridHeight;
+                return {
+                    widthCells: clampNumber(widthCells, 9, popupGridWidth * 0.5, fallbackWidthCells),
+                    heightCells: clampNumber(heightCells, 4, popupGridHeight * 0.45, fallbackHeightCells)
+                };
+            };
+            const getPopupRectForAnchor = (x, y, footprint) => {
+                const widthCells = footprint.widthCells;
+                const heightCells = footprint.heightCells;
+                return {
+                    left: (x + 0.5) - (widthCells / 2),
+                    right: (x + 0.5) + (widthCells / 2),
+                    top: (y + 0.5) - (heightCells * 1.08),
+                    bottom: (y + 0.5)
+                };
+            };
+            const assignAreasForPopups = (popupRequests) => {
+                if (!popupRequests.length || !popupAreas.length) return [];
+                return popupRequests.map((request, requestIdx) => {
+                    const areaIdx = requestIdx % popupAreas.length;
+                    const area = popupAreas[areaIdx];
+                    const usage = areaUsageCounts.get(area.id) || 0;
+                    areaUsageCounts.set(area.id, usage + 1);
+                    return { requestIdx, area, slotIndex: usage };
+                });
+            };
+            const getAreaSlotOffset = (slotIndex) => {
+                const slotOffsets = [
+                    { x: 0, y: 0 },
+                    { x: -0.16, y: -0.12 },
+                    { x: 0.16, y: 0.12 },
+                    { x: -0.2, y: 0.14 },
+                    { x: 0.2, y: -0.14 },
+                    { x: 0, y: 0.2 }
+                ];
+                return slotOffsets[slotIndex % slotOffsets.length];
+            };
+            const resolveAreaPopupPlacement = (descriptionText, assignedArea, slotIndex = 0) => {
+                const area = assignedArea || popupAreas[0];
+                if (!area) return { left: '50.0%', top: '50.0%', maxWidth: null, fontScale: 1 };
+                const areaWidth = Math.max(1, area.xMax - area.xMin);
+                const areaHeight = Math.max(1, area.yMax - area.yMin);
+                const areaWidthPct = (areaWidth / popupGridWidth) * 100;
+                const maxAreaWidthPct = Math.min(48, Math.max(18, areaWidthPct * 0.96));
+                const minAreaWidthPct = Math.max(7, Math.min(22, areaWidthPct * 0.36));
+                const widthCandidates = [];
+                for (let widthPct = maxAreaWidthPct; widthPct >= minAreaWidthPct; widthPct -= 2) {
+                    widthCandidates.push(widthPct);
+                }
+                if (!widthCandidates.length) widthCandidates.push(maxAreaWidthPct);
+                const fontScaleCandidates = [1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
+                let selectedWidthPct = widthCandidates[0];
+                let selectedFontScale = 1;
+                let selectedFootprint = measurePopupFootprint(descriptionText || '', selectedWidthPct, selectedFontScale);
+                let bestOverflowScore = Number.POSITIVE_INFINITY;
+                let bestVisualScore = Number.POSITIVE_INFINITY;
+                let bestFitCandidate = null;
+                let bestFitVisualScore = Number.POSITIVE_INFINITY;
+                fontScaleCandidates.forEach(fontScale => {
+                    widthCandidates.forEach(candidateWidthPct => {
+                        const footprintCandidate = measurePopupFootprint(descriptionText || '', candidateWidthPct, fontScale);
+                        const widthOverflow = Math.max(0, footprintCandidate.widthCells - (areaWidth * 0.96));
+                        const heightOverflow = Math.max(0, (footprintCandidate.heightCells * 1.08) - (areaHeight * 0.98));
+                        const overflowScore = (heightOverflow * 10) + widthOverflow;
+                        const visualScore = ((1 - fontScale) * 200) + Math.abs(candidateWidthPct - maxAreaWidthPct);
+                        const fitsArea = widthOverflow <= 0.01 && heightOverflow <= 0.01;
+                        if (fitsArea && visualScore < bestFitVisualScore) {
+                            bestFitVisualScore = visualScore;
+                            bestFitCandidate = { candidateWidthPct, fontScale, footprintCandidate };
+                        }
+                        const isBetter = (
+                            overflowScore < bestOverflowScore
+                            || (overflowScore === bestOverflowScore && visualScore < bestVisualScore)
+                        );
+                        if (isBetter) {
+                            bestOverflowScore = overflowScore;
+                            bestVisualScore = visualScore;
+                            selectedWidthPct = candidateWidthPct;
+                            selectedFontScale = fontScale;
+                            selectedFootprint = footprintCandidate;
+                        }
+                    });
+                });
+                if (bestFitCandidate) {
+                    selectedWidthPct = bestFitCandidate.candidateWidthPct;
+                    selectedFontScale = bestFitCandidate.fontScale;
+                    selectedFootprint = bestFitCandidate.footprintCandidate;
+                }
+                const footprint = selectedFootprint;
+                const areaCenterX = area.xMin + (areaWidth / 2);
+                const areaCenterY = area.yMin + (areaHeight / 2);
+                const offset = getAreaSlotOffset(slotIndex);
+                const slotX = areaCenterX + (offset.x * areaWidth);
+                const slotY = areaCenterY + (offset.y * areaHeight);
+                const halfWidth = footprint.widthCells / 2;
+                const popHeight = footprint.heightCells * 1.08;
+                const minX = area.xMin + halfWidth;
+                const maxX = area.xMax - halfWidth;
+                const minY = area.yMin + popHeight;
+                const maxY = area.yMax;
+                const anchorX = minX > maxX ? areaCenterX : clampNumber(slotX, minX, maxX, areaCenterX);
+                const anchorY = minY > maxY ? areaCenterY : clampNumber(slotY, minY, maxY, areaCenterY);
+                let rect = getPopupRectForAnchor(anchorX, anchorY, footprint);
+                let adjustedX = anchorX;
+                let adjustedY = anchorY;
+                if (rect.left < area.xMin) adjustedX += (area.xMin - rect.left);
+                if (rect.right > area.xMax) adjustedX -= (rect.right - area.xMax);
+                if (rect.top < area.yMin) adjustedY += (area.yMin - rect.top);
+                if (rect.bottom > area.yMax) adjustedY -= (rect.bottom - area.yMax);
+                rect = getPopupRectForAnchor(adjustedX, adjustedY, footprint);
+                const mapMin = 1;
+                const mapMaxX = popupGridWidth - 1;
+                const mapMaxY = popupGridHeight - 1;
+                if (rect.left < mapMin) adjustedX += (mapMin - rect.left);
+                if (rect.right > mapMaxX) adjustedX -= (rect.right - mapMaxX);
+                rect = getPopupRectForAnchor(adjustedX, adjustedY, footprint);
+                if (rect.top < mapMin) adjustedY += (mapMin - rect.top);
+                if (rect.bottom > mapMaxY) adjustedY -= (rect.bottom - mapMaxY);
+                rect = getPopupRectForAnchor(adjustedX, adjustedY, footprint);
+                const leftPercent = Math.min(94, Math.max(6, ((adjustedX + 0.5) / popupGridWidth) * 100));
+                const topPercent = Math.min(96, Math.max(12, ((adjustedY + 0.5) / popupGridHeight) * 100));
+                return {
+                    left: `${leftPercent.toFixed(1)}%`,
+                    top: `${topPercent.toFixed(1)}%`,
+                    maxWidth: `${selectedWidthPct.toFixed(1)}%`,
+                    fontScale: selectedFontScale
+                };
+            };
+            const locationSummaryByTarget = new Map(
+                toggleGroups.map(group => [group.targetClass, buildLocationSummary(group.markers)])
+            );
+            const popupRequests = toggleGroups.map(group => ({
+                targetClass: group.targetClass,
+                markers: group.markers || [],
+                description: locationSummaryByTarget.get(group.targetClass) || ''
+            }));
+            const areaAssignments = assignAreasForPopups(popupRequests);
+            const areaPlacementByTargetClass = new Map(
+                areaAssignments.map(entry => [popupRequests[entry.requestIdx].targetClass, { area: entry.area, slotIndex: entry.slotIndex }])
+            );
             toggleGroups.forEach(toggleGroup => {
                 const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
                 const btn = document.createElement('button');
@@ -3472,15 +3759,28 @@ function softCloseModal() {
                 btn.style.setProperty('--map-control-color', representativeColor);
                 btn.textContent = toggleGroup.buttonLabel;
                 controls.appendChild(btn);
+                const locationSummary = locationSummaryByTarget.get(toggleGroup.targetClass) || 'No mapped locations listed.';
                 const categoryDescription = document.createElement('p');
                 categoryDescription.className = 'map-category-description';
                 categoryDescription.setAttribute('data-map-description-target', toggleGroup.targetClass);
                 categoryDescription.style.setProperty('--map-description-color', representativeColor);
-                categoryDescription.textContent = toggleGroup.description || 'No category description set in world-map.md.';
+                categoryDescription.textContent = locationSummary;
                 controls.appendChild(categoryDescription);
+                if (desktopInlineControls) {
+                    const desktopInlineButton = document.createElement('button');
+                    desktopInlineButton.type = 'button';
+                    desktopInlineButton.className = 'map-control map-control--desktop';
+                    desktopInlineButton.setAttribute('data-map-target', toggleGroup.targetClass);
+                    desktopInlineButton.setAttribute('aria-pressed', 'false');
+                    desktopInlineButton.style.setProperty('--map-control-color', representativeColor);
+                    desktopInlineButton.textContent = toggleGroup.buttonLabel;
+                    desktopInlineControls.appendChild(desktopInlineButton);
+                }
 
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 group.setAttribute('class', `map-overlay ${toggleGroup.targetClass}`);
+                const desktopGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                desktopGroup.setAttribute('class', `map-overlay ${toggleGroup.targetClass}--desktop`);
 
                 toggleGroup.markers.forEach(marker => {
                     const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -3506,11 +3806,41 @@ function softCloseModal() {
                     const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                     label.setAttribute('x', marker.x + (marker.size * 2));
                     label.setAttribute('y', marker.y + (marker.size * 1.8));
-                    label.textContent = marker.label;
+                    label.textContent = normalizeLocationLabel(marker.label) || marker.label;
                     markerGroup.appendChild(label);
                     group.appendChild(markerGroup);
+
+                    const desktopMarkerGroup = markerGroup.cloneNode(true);
+                    desktopGroup.appendChild(desktopMarkerGroup);
                 });
                 overlayFragment.appendChild(group);
+                overlayFragment.appendChild(desktopGroup);
+
+                if (popupLayer) {
+                    const popupText = locationSummary;
+                    const areaPlacement = areaPlacementByTargetClass.get(toggleGroup.targetClass) || null;
+                    const popupAnchor = resolveAreaPopupPlacement(
+                        popupText,
+                        areaPlacement ? areaPlacement.area : null,
+                        areaPlacement ? areaPlacement.slotIndex : 0
+                    );
+                    const popup = document.createElement('div');
+                    popup.className = 'map-category-popup';
+                    popup.setAttribute('data-map-popup-target', `${toggleGroup.targetClass}--desktop`);
+                    popup.style.setProperty('--map-popup-color', representativeColor);
+                    popup.style.left = popupAnchor.left;
+                    popup.style.top = popupAnchor.top;
+                    if (popupAnchor.maxWidth) {
+                        popup.style.width = popupAnchor.maxWidth;
+                        popup.style.maxWidth = popupAnchor.maxWidth;
+                    }
+                    if (popupAnchor.fontScale && popupAnchor.fontScale !== 1) {
+                        popup.style.fontSize = `calc(0.72rem * ${popupAnchor.fontScale})`;
+                        popup.style.lineHeight = String(1.35 * popupAnchor.fontScale);
+                    }
+                    popup.textContent = popupText;
+                    popupLayer.appendChild(popup);
+                }
             });
             map.appendChild(overlayFragment);
 
@@ -4231,12 +4561,18 @@ function softCloseModal() {
             }
 
             const mapControls = controls.querySelectorAll('.map-control[data-map-target]');
+            const desktopMapControls = desktopInlineControls
+                ? desktopInlineControls.querySelectorAll('.map-control[data-map-target]')
+                : [];
             const overlays = map.querySelectorAll('.map-overlay');
             const categoryDescriptions = controls.querySelectorAll('.map-category-description[data-map-description-target]');
+            const categoryPopups = frame
+                ? frame.querySelectorAll('.map-category-popup[data-map-popup-target]')
+                : [];
             let frameFlashTimerId = 0;
-            const triggerFrameCategoryFlash = (targetClass) => {
+            const triggerFrameCategoryFlash = (targetClass, sourceControls) => {
                 if (!frame) return;
-                const sourceControl = Array.from(mapControls).find(control => control.getAttribute('data-map-target') === targetClass);
+                const sourceControl = Array.from(sourceControls || []).find(control => control.getAttribute('data-map-target') === targetClass);
                 const flashColor = sourceControl
                     ? sourceControl.style.getPropertyValue('--map-control-color').trim()
                     : '';
@@ -4270,10 +4606,35 @@ function softCloseModal() {
                     }
                 });
                 if (nextState && options.flashFrame !== false) {
-                    triggerFrameCategoryFlash(targetClass);
+                    triggerFrameCategoryFlash(targetClass, mapControls);
                 }
             };
-            toggleGroups.forEach(toggleGroup => setCategoryState(toggleGroup.targetClass, false, { flashFrame: false }));
+            const setDesktopCategoryState = (targetClass, nextState, options = {}) => {
+                const desktopTargetClass = `${targetClass}--desktop`;
+                overlays.forEach(overlay => {
+                    if (overlay.classList.contains(desktopTargetClass)) {
+                        overlay.classList.toggle('is-active', nextState);
+                    }
+                });
+                desktopMapControls.forEach(control => {
+                    if (control.getAttribute('data-map-target') === targetClass) {
+                        control.classList.toggle('is-active', nextState);
+                        control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                    }
+                });
+                categoryPopups.forEach(popup => {
+                    if (popup.getAttribute('data-map-popup-target') === desktopTargetClass) {
+                        popup.classList.toggle('is-active', nextState);
+                    }
+                });
+                if (nextState && options.flashFrame !== false) {
+                    triggerFrameCategoryFlash(targetClass, desktopMapControls);
+                }
+            };
+            toggleGroups.forEach(toggleGroup => {
+                setCategoryState(toggleGroup.targetClass, false, { flashFrame: false });
+                setDesktopCategoryState(toggleGroup.targetClass, false, { flashFrame: false });
+            });
             mapControls.forEach(control => {
                 control.addEventListener('click', () => {
                     const target = control.getAttribute('data-map-target');
@@ -4283,11 +4644,36 @@ function softCloseModal() {
                     setCategoryState(target, nextState, { flashFrame: nextState });
                 });
             });
+            desktopMapControls.forEach(control => {
+                control.addEventListener('click', () => {
+                    const target = control.getAttribute('data-map-target');
+                    const overlay = Array.from(overlays).find(node => node.classList.contains(`${target}--desktop`));
+                    if (!overlay) return;
+                    const nextState = !overlay.classList.contains('is-active');
+                    setDesktopCategoryState(target, nextState, { flashFrame: nextState });
+                });
+            });
             const firstToggleGroup = toggleGroups[0];
             if (firstToggleGroup) {
+                const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
+                const isDesktopOverlay = (overlay) => Array.from(overlay.classList).some(cls => cls.endsWith('--desktop'));
+                const hasActiveOverlayForViewport = () => {
+                    const mobileView = isMobileViewport();
+                    return Array.from(overlays).some(overlay => {
+                        if (!overlay.classList.contains('is-active')) return false;
+                        const desktopOverlay = isDesktopOverlay(overlay);
+                        return mobileView ? !desktopOverlay : desktopOverlay;
+                    });
+                };
+                const activateFirstForViewport = () => {
+                    if (isMobileViewport()) {
+                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                        return;
+                    }
+                    setDesktopCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                };
                 const activateFirstToggleWhenReady = () => {
-                    const hasAnyActive = Array.from(overlays).some(overlay => overlay.classList.contains('is-active'));
-                    if (hasAnyActive) return;
+                    if (hasActiveOverlayForViewport()) return;
                     const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
                     const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
                     const startupStillPopulating = Boolean(
@@ -4296,17 +4682,16 @@ function softCloseModal() {
                         && (startupMode === 'sprinkle' || sweepEnabled)
                     );
                     if (!startupStillPopulating) {
-                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                        activateFirstForViewport();
                         return;
                     }
                     let pollCount = 0;
                     const maxPolls = 500;
                     const pollReadyState = () => {
-                        const alreadyActive = Array.from(overlays).some(overlay => overlay.classList.contains('is-active'));
-                        if (alreadyActive) return;
+                        if (hasActiveOverlayForViewport()) return;
                         const isReady = !frame || frame.dataset.mapGlowInitialRevealDone === 'true';
                         if (isReady || pollCount >= maxPolls) {
-                            setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: false });
+                            activateFirstForViewport();
                             return;
                         }
                         pollCount += 1;
@@ -4317,8 +4702,11 @@ function softCloseModal() {
                 window.requestAnimationFrame(() => {
                     window.requestAnimationFrame(() => {
                         activateFirstToggleWhenReady();
+                        if (frame) frame.classList.remove('map-settings-pending');
                     });
                 });
+            } else if (frame) {
+                frame.classList.remove('map-settings-pending');
             }
         };
 
@@ -4752,20 +5140,17 @@ function softCloseModal() {
         maps.forEach(map => {
             const mapMdPath = map.getAttribute('data-map-md');
             const mapSrc = map.getAttribute('data-map-src');
-            const mapFallback = map.getAttribute('data-map-fallback');
             if (mapMdPath) {
                 fetch(mapMdPath, { cache: 'no-store' })
                     .then(response => response.text())
                     .then(text => {
                         const ok = renderFromText(map, text, mapMdPath);
-                        if (!ok && mapFallback) {
-                            renderFromImage(map, mapFallback, mapFallback);
+                        if (!ok) {
+                            console.warn(`[map] failed to render md source: ${mapMdPath}`);
                         }
                     })
                     .catch(() => {
-                        if (mapFallback) {
-                            renderFromImage(map, mapFallback, mapFallback);
-                        }
+                        console.warn(`[map] failed to fetch md source: ${mapMdPath}`);
                     });
                 return;
             }

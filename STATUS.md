@@ -1,8 +1,8 @@
 # TSI Site Status
 
-Last updated: 2026-02-23
-Current milestone: 0.9
-Next step: complete remaining pre-1.0 launch validation and owner sign-off checks, then close Milestone 1.0.
+Last updated: 2026-02-24
+Current milestone: 1.0
+Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
 Target date: TBD (owner-defined)
 Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls, access-form action buttons), mobile map-control density/map-first checks (`tmp-map-check.js`) after handheld control layout changes, asset-path rollout regression checks after naming-convention migration (`tmp-smoke-core.js`, `tmp-map-check.js`, `tmp-mobile-nav-check.js`), Apps Script backend hardening checks (`node --check` for `form-backend/*.js`, config-secret scan for previous spreadsheet/script IDs), production form endpoint reachability check (`GET https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec` => `{\"ok\":true}`), snapshot backup run via `scripts/create_prelaunch_snapshot.ps1` (`snapshot/e55ca66_2026-02-20_11-09-29` + `.zip`), mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
@@ -192,6 +192,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Normalized all pipeline map category location titles in `assets/pages/pipeline/pipeline-world-map.md` to explicit `City, Region/Country` formatting so rendered marker labels and category location summaries are source-clean.
+- [Done] 2026-02-24: Removed pipeline map PNG fallback path from `index.html`/`js/main.js` (MD-only map source now required) and switched category helper/popup text to real-world location lists generated from each category's mapped titles.
 - [Done] 2026-02-21: Expanded local-only internal diagnostics controls and independent reset actions for quick visual/behavior testing across key surfaces.
 - [Done] 2026-02-21: Added an internal diagnostics mode in the `TSI Internal` workflow with local gating and session-scoped behavior so test controls remain unavailable in normal/public usage.
 - [Done] 2026-02-20: Replaced Overview paragraph copy with the requested five-line text and preserved phrase animation order by keeping one `overview-phrase` on each line; updated overview fit logic in `js/main.js` to scale against both height and line-width overflow (not just height/mobile), so the locked five lines stay single-line without spill on desktop and mobile.
@@ -331,20 +333,22 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-21: Added temporary operator checklist `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md` with launch-priority setup/validation tasks for investor and employment intake deployment.
 
 ## Milestone 1.0 - MVP Launch
+- [Done] 2026-02-23: Raised the pipeline map visually without pushing downstream content by reformatting normal-mode spacing above the map (`.pipeline-note`, `.pipeline-option`, `.pipeline-option-label`) and converting map lift to breakpoint-tuned CSS variables in `css/main.css`.
+- [Done] 2026-02-23: Reduced vertical padding on the pipeline top instruction box (`.pipeline-note`) across desktop/tablet/mobile to tighten the map lead-in without changing downstream layout flow.
+- [Done] 2026-02-23: Added a second inline map toggle row directly above the map (`<button_title>2` labels) that mirrors category toggle behavior, removed in-grid description-row population, and moved category descriptor text to on-map popups anchored by category marker centroid.
+- [Done] 2026-02-23: Restored original map-control row appearance/function (including descriptor rows), then isolated `<button_title>2` controls to an independent toggle set so primary and secondary rows can be turned on/off without affecting each other.
+- [Done] 2026-02-23: Updated `<button_title>2` popup placement to prefer ocean cells and keep minimum distance from marker points, with bounded fallback search when no ideal ocean slot is available.
+- [Done] 2026-02-23: Refined `<button_title>2` popup placement to account for measured popup footprint (actual rendered box size) and score candidate ocean anchors by full-box coverage overlap, marker clearance, bounds fit, and inter-popup overlap.
+- [Done] 2026-02-23: Constrained `<button_title>2` popup placement to five predefined ocean zones (1–5), enforcing unique zone usage when category count is five or fewer and enabling zone sharing only when category count exceeds five.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
 - [Planned] Milestone closure requires packet-backed completion evidence in this file and `AGENTS-LOG.md` without scope expansion.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
 
 ## Active Focus
-- Delivery target: Friday, February 20, 2026 (end of day, local).
-- Priority 1: finish pipeline/map completion and validation first (`Milestone 0.6` map implementation/readiness items + `R-001` checks).
-- Priority 2: complete remaining `Milestone 0.6` launch-readiness QA (form, modal, navigation, theme, responsive, accessibility, links).
-- Priority 3: proceed to `Milestone 0.7` content/compliance sign-off only after `0.6` is stable.
-- Keep map work edits confined to:
-  - `index.html` (pipeline section)
-  - `css/main.css` (pipeline/map styles)
-  - `js/main.js` (`initPipelineMap` and related map handlers)
-  - `assets/world-map.*`
+- Delivery target: TBD (owner-defined for Milestone 1.0 closure).
+- Priority 1: close remaining Milestone `1.0` launch gates using packet-backed evidence in `STATUS.md` + `AGENTS-LOG.md`.
+- Priority 2: complete final owner confirmation items (authorization + production submission-path verification) for launch decision.
+- Priority 3: keep governance updates aligned with `PACKETS.md` packet ownership and `PRODUCT-PRD-BLUEPRINT.md` MVP scope.
 
 ## Update Policy
 - Use this file as the planning roadmap and progress tracker.
