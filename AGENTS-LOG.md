@@ -1232,4 +1232,14 @@
 - Troubleshooting suggestions: Keep new toggle labels consistently delimited in source data to prevent future parser/UI normalization ambiguity and maintain predictable rendered summaries.
 - Resolutions/outcomes: Map marker labels and category location summary text are now clean directly from source data, reducing dependence on runtime correction for current categories.
 - Commit hash(es): none
+### 2026-02-24 15:37:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added missing popup/desktop-lane CSS in `css/main.css` for existing pipeline map JS runtime (`.pipeline-map-inline-controls-desktop`, `.map-category-popup-layer`, `.map-category-popup`, `.map-category-popup.is-active`), including breakpoint tuning at `900px` and mobile hide guards at `<=768px`; updated reduced-motion transition suppression list to include map popups; synced `STATUS.md` recent history.
+- Troubleshooting suggestions: If popup cards still do not appear on desktop, verify category activation is happening on the desktop lane (`--desktop` overlays) and check for stale cached CSS in browser.
+- Resolutions/outcomes: Pipeline popup UI now has concrete styles and visibility states, so desktop popup rendering/animation paths in `js/main.js` are no longer inert due to missing CSS.
+- Commit hash(es): none
+### 2026-02-24 15:43:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented viewport-specific pipeline map behavior split. In `css/main.css`, set top MD controls (`[data-map-controls="md"]`) to desktop-hidden by default and mobile-enabled at `<=768px` only. In `js/main.js`, changed desktop popup content source to use MD category description text (`Category|Description|...`) with fallback to location summary when description is absent.
+- Troubleshooting suggestions: If desktop popups still show location lists, verify category rows in `assets/pages/pipeline/pipeline-world-map.md` include the second-column description values and hard-refresh cached JS/CSS.
+- Resolutions/outcomes: Desktop now uses only the inline popup-toggle lane and map popups for category messaging, while mobile keeps the prior top-control behavior and does not render desktop popup UI.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

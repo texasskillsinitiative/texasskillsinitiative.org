@@ -3743,7 +3743,9 @@ function softCloseModal() {
             const popupRequests = toggleGroups.map(group => ({
                 targetClass: group.targetClass,
                 markers: group.markers || [],
-                description: locationSummaryByTarget.get(group.targetClass) || ''
+                description: (typeof group.description === 'string' && group.description.trim())
+                    ? group.description.trim()
+                    : (locationSummaryByTarget.get(group.targetClass) || '')
             }));
             const areaAssignments = assignAreasForPopups(popupRequests);
             const areaPlacementByTargetClass = new Map(
@@ -3817,7 +3819,9 @@ function softCloseModal() {
                 overlayFragment.appendChild(desktopGroup);
 
                 if (popupLayer) {
-                    const popupText = locationSummary;
+                    const popupText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
+                        ? toggleGroup.description.trim()
+                        : locationSummary;
                     const areaPlacement = areaPlacementByTargetClass.get(toggleGroup.targetClass) || null;
                     const popupAnchor = resolveAreaPopupPlacement(
                         popupText,

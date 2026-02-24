@@ -192,6 +192,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Split pipeline map behavior by viewport: desktop now hides the top MD control grid and uses inline map toggles + popup overlays only, with popup text sourced from each category description field in `pipeline-world-map.md` (`Category|Description|...`); mobile behavior remains unchanged and popup lane remains disabled.
+- [Done] 2026-02-24: Added missing desktop popup/inline-control CSS wiring in `css/main.css` (`.pipeline-map-inline-controls-desktop`, `.map-category-popup-layer`, `.map-category-popup`) and responsive guards so pipeline popup behavior in `js/main.js` now renders/animates on desktop and stays hidden on mobile lanes.
 - [Done] 2026-02-24: Normalized all pipeline map category location titles in `assets/pages/pipeline/pipeline-world-map.md` to explicit `City, Region/Country` formatting so rendered marker labels and category location summaries are source-clean.
 - [Done] 2026-02-24: Removed pipeline map PNG fallback path from `index.html`/`js/main.js` (MD-only map source now required) and switched category helper/popup text to real-world location lists generated from each category's mapped titles.
 - [Done] 2026-02-21: Expanded local-only internal diagnostics controls and independent reset actions for quick visual/behavior testing across key surfaces.
