@@ -192,6 +192,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Applied the same directional 400ms slide-tab transition model to Team section panel switching (`founder`, `community`, `operations`) with index-aware left/right sweep behavior, dynamic panel-wrap height sync, and reduced-motion-safe fallback; no Team content/copy/assets changed.
 - [Done] 2026-02-24: Adjusted rubric protocol transition motion to full-width directional sweep (`translateX(100%)`) so content movement aligns more clearly with left/right protocol tab selection while retaining 400ms ease-in-out timing.
 - [Done] 2026-02-24: Populated new rubric protocol visuals with currently available local assets under `assets/pages/rubric/` (analysis banner + rubric icon set) and removed temporary missing-file fallback handlers pending delivery of final requested image filenames.
 - [Done] 2026-02-24: Rebuilt Rubric section into a two-state protocol module with segmented top toggle (`Pre-Recommendation Protocol` / `Execution Protocol`), state-specific content layouts (Diagnostic phases 01/02 and Deployment phases 03/04), and directional 400ms slide transitions (`diagnostic -> deployment` left-out/right-in and reverse on return) in `index.html`, `css/main.css`, and `js/main.js`.

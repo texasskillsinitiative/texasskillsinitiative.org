@@ -1272,4 +1272,9 @@
 - Troubleshooting suggestions: If the sweep feels too strong on specific devices, reduce translation to `72%` while keeping directionality and 400ms timing.
 - Resolutions/outcomes: Rubric view transitions now sweep fully across the content stage in the same directional logic as top toggle selection.
 - Commit hash(es): none
+### 2026-02-24 17:22:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied matching directional sweep transitions to Team tabs in `css/main.css` + `js/main.js` without altering content. Converted Team panel runtime behavior to pane-style enter/exit classes (`is-enter-from-right/left`, `is-exit-to-left/right`) with 400ms timing, index-based direction logic, dynamic container-height sync, and reduced-motion-safe direct switching.
+- Troubleshooting suggestions: If Team transition feels too aggressive on certain breakpoints, reduce Team translate distance from `100%` to `72%` while keeping direction classes and duration unchanged.
+- Resolutions/outcomes: Team tab switching now uses the same left/right sweep motion language as Rubric protocol toggle, with content untouched.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

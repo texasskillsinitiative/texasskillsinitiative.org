@@ -2333,26 +2333,92 @@ function softCloseModal() {
     }
 
     function initTeamTabs() {
-        const tabs = document.querySelectorAll('.team-tab');
+        const tabs = Array.from(document.querySelectorAll('.team-tab'));
         if (!tabs.length) return;
+        const panels = Array.from(document.querySelectorAll('.team-panel'));
+        const panelWrap = document.querySelector('.team-panels');
+        if (!panels.length || !panelWrap) return;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const transitionMs = 400;
+        let isAnimating = false;
+        let activeIdx = Math.max(0, tabs.findIndex(tab => tab.classList.contains('is-active')));
+        if (activeIdx >= tabs.length) activeIdx = 0;
+        const panelByKey = new Map(panels.map(panel => [panel.getAttribute('data-team-panel'), panel]));
+        const clearMotionClasses = (panel) => {
+            panel.classList.remove('is-enter-from-right', 'is-enter-from-left', 'is-exit-to-left', 'is-exit-to-right');
+        };
+        const setWrapHeightFor = (panel) => {
+            if (!(panel instanceof HTMLElement)) return;
+            const targetHeight = panel.scrollHeight;
+            if (targetHeight > 0) {
+                panelWrap.style.height = `${targetHeight}px`;
+            }
+        };
+        const setActiveTabVisual = (idx) => {
+            tabs.forEach((tab, tabIdx) => {
+                const selected = tabIdx === idx;
+                tab.classList.toggle('is-active', selected);
+                tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
+        };
+        const finalizePanels = (idx, activePanel) => {
+            panels.forEach((panel) => {
+                const isActive = panel === activePanel;
+                panel.classList.toggle('is-active', isActive);
+                panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                panel.hidden = !isActive;
+                clearMotionClasses(panel);
+            });
+            activeIdx = idx;
+            setActiveTabVisual(idx);
+            setWrapHeightFor(activePanel);
+            isAnimating = false;
+        };
+        const switchTo = (nextIdx) => {
+            if (isAnimating || nextIdx === activeIdx || nextIdx < 0 || nextIdx >= tabs.length) return;
+            const currentTab = tabs[activeIdx];
+            const nextTab = tabs[nextIdx];
+            const currentKey = currentTab.getAttribute('data-team-target');
+            const nextKey = nextTab.getAttribute('data-team-target');
+            const currentPanel = currentKey ? panelByKey.get(currentKey) : null;
+            const nextPanel = nextKey ? panelByKey.get(nextKey) : null;
+            if (!currentPanel || !nextPanel) return;
+            const forward = nextIdx > activeIdx;
+            if (prefersReducedMotion) {
+                finalizePanels(nextIdx, nextPanel);
+                return;
+            }
+            isAnimating = true;
+            nextPanel.hidden = false;
+            nextPanel.setAttribute('aria-hidden', 'false');
+            clearMotionClasses(currentPanel);
+            clearMotionClasses(nextPanel);
+            nextPanel.classList.add(forward ? 'is-enter-from-right' : 'is-enter-from-left');
+            nextPanel.classList.add('is-active');
+            setWrapHeightFor(nextPanel);
+            void nextPanel.offsetWidth;
+            currentPanel.classList.add(forward ? 'is-exit-to-left' : 'is-exit-to-right');
+            nextPanel.classList.remove(forward ? 'is-enter-from-right' : 'is-enter-from-left');
+            window.setTimeout(() => {
+                finalizePanels(nextIdx, nextPanel);
+            }, transitionMs + 24);
+        };
 
-        const panels = document.querySelectorAll('.team-panel');
-
-        tabs.forEach(tab => {
+        tabs.forEach((tab, idx) => {
             tab.addEventListener('click', () => {
-                const target = tab.getAttribute('data-team-target');
-                const targetPanel = target ? document.querySelector(`.team-panel[data-team-panel=\"${target}\"]`) : null;
-                panels.forEach(panel => {
-                    const isActive = panel === targetPanel;
-                    panel.classList.toggle('is-active', isActive);
-                    panel.setAttribute('aria-hidden', isActive ? 'false' : 'true');
-                });
-                tabs.forEach(btn => btn.classList.toggle('is-active', btn === tab));
-                tabs.forEach(btn => btn.setAttribute('aria-selected', btn === tab ? 'true' : 'false'));
+                switchTo(idx);
             });
         });
 
-        tabs[0].click();
+        const initialKey = tabs[activeIdx].getAttribute('data-team-target');
+        const initialPanel = initialKey ? panelByKey.get(initialKey) : panels[0];
+        finalizePanels(activeIdx, initialPanel || panels[0]);
+        window.addEventListener('resize', () => {
+            if (isAnimating) return;
+            const key = tabs[activeIdx] ? tabs[activeIdx].getAttribute('data-team-target') : null;
+            const activePanel = key ? panelByKey.get(key) : null;
+            if (activePanel) setWrapHeightFor(activePanel);
+        });
     }
 
     function initPipelineMap() {

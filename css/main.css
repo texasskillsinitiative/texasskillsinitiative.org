@@ -1577,11 +1577,34 @@
         .team-tab span { display: inline-block; }
         .team-tab.is-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
         .team-tab:hover { border-color: var(--accent); transform: translateY(-1px); }
-        .team-panels { margin-top: 8px; }
-        .team-panel { max-height: 0; overflow: hidden; opacity: 0; transform: translateY(6px); transition: max-height var(--motion-base) var(--motion-ease-standard), opacity var(--motion-base) var(--motion-ease-standard), transform var(--motion-base) var(--motion-ease-standard); }
-        .team-panel.is-active { max-height: 2400px; opacity: 1; transform: translateY(0); }
+        .team-panels {
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+            min-height: 820px;
+            transition: height 400ms ease-in-out;
+        }
+        .team-panel {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transform: translateX(0);
+            pointer-events: none;
+            will-change: transform, opacity;
+            transition: transform 400ms ease-in-out, opacity 400ms ease-in-out;
+        }
+        .team-panel.is-active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .team-panel.is-enter-from-right { transform: translateX(100%); opacity: 0; z-index: 3; }
+        .team-panel.is-enter-from-left { transform: translateX(-100%); opacity: 0; z-index: 3; }
+        .team-panel.is-exit-to-left { transform: translateX(-100%); opacity: 0; z-index: 1; }
+        .team-panel.is-exit-to-right { transform: translateX(100%); opacity: 0; z-index: 1; }
         .no-js .team-tab-bar { display: none; }
-        .no-js .team-panel { max-height: none; opacity: 1; transform: none; }
+        .no-js .team-panels { position: static; overflow: visible; height: auto !important; min-height: 0; }
+        .no-js .team-panel { position: static; opacity: 1; transform: none; pointer-events: auto; }
         .staff-gateway-profiles-021026 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
         .staff-profile-card-021026 { background: var(--card-bg); border: 1px solid var(--frame-border); padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; }
         .staff-profile-card-021026--manager { flex-direction: row; align-items: flex-start; text-align: left; gap: 18px; width: 100%; max-width: 100%; }
