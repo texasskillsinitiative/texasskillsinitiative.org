@@ -1292,4 +1292,14 @@
 - Troubleshooting suggestions: If any section still lands off-top on slow devices, increase stabilization timeout from `80ms` to `120-150ms`.
 - Resolutions/outcomes: Section switches should now settle consistently at top position instead of occasionally stopping a bit lower.
 - Commit hash(es): none
+### 2026-02-24 17:48:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied desktop pipeline load-performance tuning in `js/main.js`: disabled hidden legacy map-debug/tuning UI build path (`mapDebugUiEnabled = false`) so heavy control markup isn’t constructed on init, and reduced popup sizing probe combinations to a small bounded candidate set (`width: max/mid/min`, `fontScale: 1/0.9/0.8`) to cut layout measurement work during popup placement.
+- Troubleshooting suggestions: If load still feels heavy, next step is adding coarse timing logs around `renderFromText -> applyMdToggleData` and skipping popup placement calculations until first desktop toggle interaction.
+- Resolutions/outcomes: Pipeline first-load path now avoids unnecessary debug DOM creation and performs fewer popup measurement iterations, which should improve desktop map activation speed.
+- Commit hash(es): none
+### 2026-02-24 17:54:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased pipeline map text readability for requested lanes by updating desktop popup font sizing in `css/main.css` (`.map-category-popup` base + `<=900px` override) and mobile category-description font sizing in both `<=768px` and `<=600px` blocks; synced popup font-size baselines in `js/main.js` (`measurePopupFootprint` probe + popup inline scale base) to keep zone-fitting/placement logic aligned with larger rendered text.
+- Troubleshooting suggestions: If any desktop popup appears too tight in a specific zone after hard refresh, next adjustment is widening zone width candidates slightly (`maxAreaWidthPct` cap) or reducing minimum font-scale floor from `0.8` to `0.76` for edge cases.
+- Resolutions/outcomes: Desktop popups render larger while preserving constrained placement behavior, and mobile button-populated category text is more legible when expanded.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

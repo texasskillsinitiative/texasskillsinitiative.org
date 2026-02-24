@@ -192,6 +192,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-24: Optimized desktop pipeline-map initialization path in `js/main.js` by disabling legacy hidden map-debug/tuning UI construction and reducing popup footprint candidate search breadth (fewer width/font probe combinations), targeting faster first render on `#pipeline`.
 - [Done] 2026-02-24: Added tab/hash transition scroll stabilization in `js/main.js` (`stabilizeViewportTop`) to enforce top-of-page positioning after section switches and initial activation, addressing intermittent slight downward offset after navigation.
 - [Done] 2026-02-24: Updated first-load Overview auto-handoff timing to pause for 3 seconds after sequence completion, then fade out (`0.6s`) before routing to `#mandate`; preserved one-time guard and active-hash safety check.
 - [Done] 2026-02-24: Restored full initial Overview sequence behavior and added one-time automatic post-sequence handoff to `#mandate` on first visual load only (guarded so it does not repeat and does not override user navigation away from Overview).
@@ -352,6 +353,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-23: Updated `<button_title>2` popup placement to prefer ocean cells and keep minimum distance from marker points, with bounded fallback search when no ideal ocean slot is available.
 - [Done] 2026-02-23: Refined `<button_title>2` popup placement to account for measured popup footprint (actual rendered box size) and score candidate ocean anchors by full-box coverage overlap, marker clearance, bounds fit, and inter-popup overlap.
 - [Done] 2026-02-23: Constrained `<button_title>2` popup placement to five predefined ocean zones (1–5), enforcing unique zone usage when category count is five or fewer and enabling zone sharing only when category count exceeds five.
+- [Done] 2026-02-24: Improved pipeline map readability by increasing desktop popup text size and mobile category-description text size; synced desktop popup measurement/render font baselines in `js/main.js` so larger popup copy retains stable zone-constrained placement.
+- [Planned] 2026-02-24: Fully remove legacy pipeline map debug/tuning runtime code paths from `js/main.js` (currently disabled by `mapDebugUiEnabled` guard) after current UX/perf validation cycle.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
 - [Planned] Milestone closure requires packet-backed completion evidence in this file and `AGENTS-LOG.md` without scope expansion.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.

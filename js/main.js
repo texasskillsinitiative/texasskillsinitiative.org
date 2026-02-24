@@ -3648,18 +3648,22 @@ function softCloseModal() {
                 if (desktopInlineControls) mapShell.insertBefore(desktopInlineControls, frame);
                 if (helper) mapShell.insertBefore(helper, frame);
             }
-            let testsDock = mapShell ? mapShell.querySelector('[data-map-tests]') : null;
-            if (!testsDock && mapShell) {
-                testsDock = document.createElement('div');
-                testsDock.className = 'pipeline-map-tests';
-                testsDock.setAttribute('data-map-tests', 'true');
-                mapShell.insertBefore(testsDock, controls);
-            }
-            if (testsDock) {
-                testsDock.innerHTML = '';
-                testsDock.hidden = !mapTestsVisible;
-                testsDock.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
-                testsDock.style.display = mapTestsVisible ? '' : 'none';
+            const mapDebugUiEnabled = false;
+            let testsDock = null;
+            if (mapDebugUiEnabled) {
+                testsDock = mapShell ? mapShell.querySelector('[data-map-tests]') : null;
+                if (!testsDock && mapShell) {
+                    testsDock = document.createElement('div');
+                    testsDock.className = 'pipeline-map-tests';
+                    testsDock.setAttribute('data-map-tests', 'true');
+                    mapShell.insertBefore(testsDock, controls);
+                }
+                if (testsDock) {
+                    testsDock.innerHTML = '';
+                    testsDock.hidden = !mapTestsVisible;
+                    testsDock.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
+                    testsDock.style.display = mapTestsVisible ? '' : 'none';
+                }
             }
 
             map.querySelectorAll('.map-overlay').forEach(node => node.remove());
@@ -3722,7 +3726,7 @@ function softCloseModal() {
                     probe.style.maxWidth = `${Number(maxWidthPercent)}%`;
                 }
                 if (Number.isFinite(Number(fontScale)) && Number(fontScale) > 0 && Number(fontScale) !== 1) {
-                    probe.style.fontSize = `calc(0.64rem * ${Number(fontScale)})`;
+                    probe.style.fontSize = `calc(0.8rem * ${Number(fontScale)})`;
                     probe.style.lineHeight = String(1.35 * Number(fontScale));
                 }
                 popupLayer.appendChild(probe);
@@ -3778,12 +3782,14 @@ function softCloseModal() {
                 const areaWidthPct = (areaWidth / popupGridWidth) * 100;
                 const maxAreaWidthPct = Math.min(48, Math.max(18, areaWidthPct * 0.96));
                 const minAreaWidthPct = Math.max(7, Math.min(22, areaWidthPct * 0.36));
-                const widthCandidates = [];
-                for (let widthPct = maxAreaWidthPct; widthPct >= minAreaWidthPct; widthPct -= 2) {
-                    widthCandidates.push(widthPct);
-                }
+                const midAreaWidthPct = (maxAreaWidthPct + minAreaWidthPct) / 2;
+                const widthCandidates = Array.from(new Set([
+                    Number(maxAreaWidthPct.toFixed(1)),
+                    Number(midAreaWidthPct.toFixed(1)),
+                    Number(minAreaWidthPct.toFixed(1))
+                ]));
                 if (!widthCandidates.length) widthCandidates.push(maxAreaWidthPct);
-                const fontScaleCandidates = [1, 0.95, 0.9, 0.85, 0.8, 0.75, 0.7];
+                const fontScaleCandidates = [1, 0.9, 0.8];
                 let selectedWidthPct = widthCandidates[0];
                 let selectedFontScale = 1;
                 let selectedFootprint = measurePopupFootprint(descriptionText || '', selectedWidthPct, selectedFontScale);
@@ -3963,7 +3969,7 @@ function softCloseModal() {
                         popup.style.maxWidth = popupAnchor.maxWidth;
                     }
                     if (popupAnchor.fontScale && popupAnchor.fontScale !== 1) {
-                        popup.style.fontSize = `calc(0.72rem * ${popupAnchor.fontScale})`;
+                        popup.style.fontSize = `calc(0.8rem * ${popupAnchor.fontScale})`;
                         popup.style.lineHeight = String(1.35 * popupAnchor.fontScale);
                     }
                     popup.textContent = popupText;
@@ -3977,15 +3983,16 @@ function softCloseModal() {
                 const setPointerMode = pointerModeSetters.get(frame);
                 if (typeof setPointerMode === 'function') setPointerMode('flash');
 
-                const tuningStrip = document.createElement('div');
-                tuningStrip.className = 'map-tuning-strip';
-                tuningStrip.setAttribute('role', 'group');
-                tuningStrip.setAttribute('aria-label', 'Map glow tuning');
-                const tuningInputs = {};
-                let syncEffectReadouts = () => {};
-                const flashTuningGroup = document.createElement('div');
-                flashTuningGroup.className = 'map-tuning-group map-tuning-group--flash';
-                tuningStrip.appendChild(flashTuningGroup);
+                if (mapDebugUiEnabled) {
+                    const tuningStrip = document.createElement('div');
+                    tuningStrip.className = 'map-tuning-strip';
+                    tuningStrip.setAttribute('role', 'group');
+                    tuningStrip.setAttribute('aria-label', 'Map glow tuning');
+                    const tuningInputs = {};
+                    let syncEffectReadouts = () => {};
+                    const flashTuningGroup = document.createElement('div');
+                    flashTuningGroup.className = 'map-tuning-group map-tuning-group--flash';
+                    tuningStrip.appendChild(flashTuningGroup);
                 const createTuningField = (id, labelText, inputValue, onInput, groupNode, step = 'any') => {
                     const field = document.createElement('div');
                     field.className = 'map-tuning-field';
@@ -4681,10 +4688,11 @@ function softCloseModal() {
                 resetField.appendChild(resetBtn);
                 tuningStrip.appendChild(resetField);
                 resetBtn.textContent = 'Reset Test Defaults';
-                if (testsDock) {
-                    testsDock.appendChild(tuningStrip);
-                } else {
-                    controls.appendChild(tuningStrip);
+                    if (testsDock) {
+                        testsDock.appendChild(tuningStrip);
+                    } else {
+                        controls.appendChild(tuningStrip);
+                    }
                 }
             }
 

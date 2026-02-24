@@ -683,7 +683,7 @@
             border-radius: 4px;
             background: color-mix(in srgb, var(--card-bg) 90%, var(--map-popup-color) 10%);
             color: color-mix(in srgb, var(--page-text-main) 84%, var(--map-popup-color));
-            font-size: 0.72rem;
+            font-size: 0.8rem;
             line-height: 1.35;
             letter-spacing: 0.22px;
             box-shadow: 0 6px 14px color-mix(in srgb, #000 38%, transparent);
@@ -1999,7 +1999,7 @@
             .pipeline-map-controls[data-map-controls="md"] .map-category-description { height: 40px; min-height: 40px; max-height: 40px; box-sizing: border-box; font-size: 0.78rem; }
             .pipeline-map-inline-controls-desktop { gap: 6px; }
             .pipeline-map-inline-controls-desktop .map-control--desktop { min-height: 34px; padding: 7px 10px; font-size: 0.62rem; }
-            .pipeline-map-frame .map-category-popup { font-size: 0.66rem; padding: 5px 7px; }
+            .pipeline-map-frame .map-category-popup { font-size: 0.74rem; padding: 5px 7px; }
             .map-controls-divider { display: none; }
             .map-tuning-strip { gap: 6px 8px; padding-top: 6px; }
             .map-tuning-field--reset { margin-left: 0; width: 100%; }
@@ -2059,7 +2059,7 @@
                 max-width: 100%;
                 overflow: hidden;
                 white-space: normal;
-                font-size: 0.74rem;
+                font-size: 0.82rem;
                 line-height: 1.35;
                 padding: 0 10px;
                 opacity: 0;
@@ -2132,7 +2132,7 @@
                 max-width: 100%;
                 overflow: hidden;
                 box-sizing: border-box;
-                font-size: 0.74rem;
+                font-size: 0.82rem;
                 white-space: normal;
                 line-height: 1.35;
                 opacity: 0;
