@@ -597,7 +597,7 @@
         /* Option 6: Map */
         .pipeline-map { display: grid; gap: 16px; }
         .pipeline-map--raised { transform: translateY(-16px); }
-        .pipeline-map-tests { display: grid; gap: 10px; }
+        .pipeline-map-tests { display: none !important; gap: 10px; }
         .map-tests-toggle-toast {
             position: fixed;
             right: 18px;
@@ -736,6 +736,7 @@
             margin-top: 2px;
             padding-top: 8px;
             border-top: 1px dashed color-mix(in srgb, var(--frame-border) 70%, transparent);
+            display: none !important;
         }
         .map-tuning-group {
             width: 100%;

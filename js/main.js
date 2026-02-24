@@ -853,8 +853,6 @@ function softCloseModal() {
         const resetTextScaleBtn = document.getElementById('globalDebugResetTextScale');
         const resetLayoutBtn = document.getElementById('globalDebugResetLayoutCompact');
         const resetMotionBtn = document.getElementById('globalDebugResetMotionReduce');
-        const toggleMapBtn = document.getElementById('globalDebugToggleMapTests');
-        const resetMapTestsBtn = document.getElementById('globalDebugResetMapTests');
         const toggleHighlightBtn = document.getElementById('globalDebugToggleHighlight');
         const resetHighlightBtn = document.getElementById('globalDebugResetHighlight');
         const sectionTargetSelect = document.getElementById('globalDebugSectionTarget');
@@ -905,7 +903,6 @@ function softCloseModal() {
             || !exitDebugBtn || !colorPresetSelect || !textScaleSelect
             || !toggleLayoutBtn || !toggleMotionBtn
             || !resetColorBtn || !resetTextScaleBtn || !resetLayoutBtn || !resetMotionBtn
-            || !toggleMapBtn || !resetMapTestsBtn
             || !toggleHighlightBtn || !resetHighlightBtn
             || !sectionTargetSelect || !sectionGoBtn || !refreshAreasBtn
             || !overviewTitleScaleSelect || !overviewCopyScaleSelect || !overviewAccentInput
@@ -974,18 +971,6 @@ function softCloseModal() {
         };
 
         const getDebugBridge = () => window.__tsiDebugBridge || null;
-        const getMapTestsVisible = () => {
-            const bridge = getDebugBridge();
-            return bridge && typeof bridge.getMapTestsVisible === 'function'
-                ? Boolean(bridge.getMapTestsVisible())
-                : false;
-        };
-        const setMapTestsVisible = (nextVisible) => {
-            const bridge = getDebugBridge();
-            if (!bridge || typeof bridge.setMapTestsVisible !== 'function') return false;
-            bridge.setMapTestsVisible(Boolean(nextVisible), { notify: false });
-            return true;
-        };
 
         const applyGlobalDebugVisuals = () => {
             if (debugState.colorPreset === 'default') {
@@ -1298,7 +1283,6 @@ function softCloseModal() {
         };
 
         const syncDebugControlLabels = () => {
-            const mapTestsVisible = getMapTestsVisible();
             if (colorPresetSelect.value !== debugState.colorPreset) {
                 colorPresetSelect.value = debugState.colorPreset;
             }
@@ -1344,7 +1328,6 @@ function softCloseModal() {
             }
             toggleLayoutBtn.textContent = `Compact: ${debugState.compactLayout ? 'On' : 'Off'}`;
             toggleMotionBtn.textContent = `Reduced: ${debugState.reducedMotion ? 'On' : 'Off'}`;
-            toggleMapBtn.textContent = mapTestsVisible ? 'On' : 'Off';
             toggleHighlightBtn.textContent = debugState.highlightAreas ? 'On' : 'Off';
             updateSequenceTargetLabel();
             syncOverviewInspectorControls();
@@ -1395,7 +1378,6 @@ function softCloseModal() {
             applyGlobalDebugVisuals();
             applyOverviewDebugVisuals(false);
             clearAllOverviewInspectableOverrides();
-            setMapTestsVisible(false);
             clearAreaHighlight();
         };
 
@@ -1716,26 +1698,6 @@ function softCloseModal() {
             if (!allSequenceSectionIds.includes(sectionId)) return;
             lastSequenceTargetSectionId = sectionId;
             syncDebugControlLabels();
-        });
-
-        toggleMapBtn.addEventListener('click', () => {
-            const nextVisible = !getMapTestsVisible();
-            if (!setMapTestsVisible(nextVisible)) {
-                notifyDebugStatus('Map test controls unavailable.');
-                return;
-            }
-            syncDebugControlLabels();
-            renderAreaList();
-            notifyDebugStatus(nextVisible ? 'Map test settings shown.' : 'Map test settings hidden.');
-        });
-        resetMapTestsBtn.addEventListener('click', () => {
-            if (!setMapTestsVisible(false)) {
-                notifyDebugStatus('Map test controls unavailable.');
-                return;
-            }
-            syncDebugControlLabels();
-            renderAreaList();
-            notifyDebugStatus('Map test settings reset.');
         });
 
         toggleHighlightBtn.addEventListener('click', () => {
