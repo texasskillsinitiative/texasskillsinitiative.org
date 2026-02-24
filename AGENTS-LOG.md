@@ -1247,4 +1247,8 @@
 - Troubleshooting suggestions: If the synchronized revisit reveal should be instant instead of fade, skip `.reveal-active` re-application and set terminal classes directly in `runOverviewSequence`.
 - Resolutions/outcomes: Overview revisit behavior now avoids re-running staggered sequencing during normal tab switching; map behavior remains one-time init per page load with no repeat startup when revisiting pipeline.
 - Commit hash(es): none
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-23 23:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed clean-exit protocol after overview/map behavior refinements; finalized session with commit/push and closing repository checks.
+- Troubleshooting suggestions: For subsequent content-only passes, keep runtime behavior unchanged and run the existing Playwright smoke set after each visual/content batch.
+- Resolutions/outcomes: Session closed cleanly. Final checks executed: `git status` (remaining changes are unrelated pre-existing working-tree items), `git log --oneline -n 3` verified latest commits. Push target `origin/pre-release` updated successfully.
+- Commit hash(es): `060a3af` (overview/map behavior update), `22a0e5b` (map fallback removal + location normalization)
