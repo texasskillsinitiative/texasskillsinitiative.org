@@ -1257,4 +1257,19 @@
 - Troubleshooting suggestions: If any tab still appears stuck, hard-refresh to clear cached script and verify URL hash updates on click; if clipping persists for unusually long copy, either reduce source line length in MD or raise mobile max-height caps further.
 - Resolutions/outcomes: Desktop tabs can switch again under native hash routing, and mobile first-row category text has larger reveal bounds to prevent truncation.
 - Commit hash(es): none
+### 2026-02-24 17:13:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested Rubric redesign packet across `index.html`, `css/main.css`, and `js/main.js`: replaced legacy rubric card/action-panel layout with segmented protocol toggle (`Pre-Recommendation Protocol` default + `Execution Protocol`), added two state views with mapped phase copy/content (Diagnostic phases 01/02 and Deployment phases 03/04), wired directional 400ms ease-in-out slide transitions by toggle direction, and added responsive/mobile layout adaptations. Added image-path fallbacks via `onerror` to existing rubric banner for missing requested asset files (`image_8a24c1.jpg`, `image_885743.jpg`, `image_8a2bc6.jpg`) so UI remains stable until final assets are provided.
+- Troubleshooting suggestions: Replace fallback image paths by adding the three requested files under `assets/pages/rubric/` using the exact filenames to remove fallback behavior and match final art direction.
+- Resolutions/outcomes: Rubric now functions as a two-state protocol experience with explicit phase messaging, animated directional transitions, and a stable default Diagnostic first view.
+- Commit hash(es): none
+### 2026-02-24 17:16:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated rubric protocol image sources in `index.html` to use existing local files in `assets/pages/rubric/` (banner + icon assets) and removed temporary `onerror` fallback handlers tied to missing requested filenames.
+- Troubleshooting suggestions: When final art files are available, swap the six rubric `<img src>` entries to the target filenames and keep current alt text/copy unchanged.
+- Resolutions/outcomes: Rubric protocol now renders fully from available repo assets without runtime fallback dependencies.
+- Commit hash(es): none
+### 2026-02-24 17:17:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated rubric protocol transition motion in `css/main.css` from short-offset slide (`36px`) to full-width directional sweep (`100%`) for enter/exit classes so view movement reads as a logical pane handoff aligned with protocol tab direction.
+- Troubleshooting suggestions: If the sweep feels too strong on specific devices, reduce translation to `72%` while keeping directionality and 400ms timing.
+- Resolutions/outcomes: Rubric view transitions now sweep fully across the content stage in the same directional logic as top toggle selection.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

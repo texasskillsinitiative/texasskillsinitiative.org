@@ -2238,67 +2238,98 @@ function softCloseModal() {
     }
 
     function initRubricActions() {
-        const cards = Array.from(document.querySelectorAll('.rubric-item[data-rubric-key]'));
-        if (!cards.length) return;
+        const root = document.querySelector('[data-rubric-protocol]');
+        if (!root) return;
+        const stage = root.querySelector('[data-rubric-stage]');
+        const toggles = Array.from(root.querySelectorAll('[data-protocol-toggle]'));
+        const views = Array.from(root.querySelectorAll('[data-protocol-view]'));
+        if (!stage || toggles.length < 2 || views.length < 2) return;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const transitionMs = 400;
+        let activeKey = 'diagnostic';
+        let isAnimating = false;
 
-        const panel = document.getElementById('rubricActionPanel');
-        const panelTitle = document.getElementById('rubricActionTitle');
-        const panelCopy = document.getElementById('rubricActionCopy');
-        const panelOutput = document.getElementById('rubricActionOutput');
-        if (!panel || !panelTitle || !panelCopy || !panelOutput) return;
-
-        const rubricProfiles = {
-            'vocational-literacy': {
-                title: 'Vocational Literacy',
-                copy: 'Map where workforce training already aligns with corridor requirements, then isolate capability evidence still needed for stage advancement.',
-                output: 'Output: Workforce capability baseline and fast-gap shortlist for intake triage.'
-            },
-            'onboarding-velocity': {
-                title: 'Onboarding Velocity',
-                copy: 'Validate whether labor and implementation pathways can move fast enough to support real industrial onboarding windows.',
-                output: 'Output: Time-to-readiness timeline with bottleneck checkpoints.'
-            },
-            'regulatory-coherence': {
-                title: 'Regulatory Coherence',
-                copy: 'Assess legal reliability, policy consistency, and investment protections that determine whether a corridor can sustain commitments.',
-                output: 'Output: Regulatory risk posture summary for corridor screening.'
-            },
-            'reliability': {
-                title: 'Reliability',
-                copy: 'Stress-test infrastructure durability across power, logistics, and operational continuity under scaled industrial load.',
-                output: 'Output: Infrastructure reliability profile and resilience notes.'
+        const viewByKey = new Map(views.map(view => [view.getAttribute('data-protocol-view'), view]));
+        const setStageHeightFor = (view) => {
+            if (!(view instanceof HTMLElement) || !(stage instanceof HTMLElement)) return;
+            const targetHeight = view.scrollHeight;
+            if (targetHeight > 0) {
+                stage.style.height = `${targetHeight}px`;
             }
         };
-
-        const setActiveCard = (card) => {
-            const key = card.getAttribute('data-rubric-key') || '';
-            const profile = rubricProfiles[key] || rubricProfiles['vocational-literacy'];
-
-            cards.forEach(item => {
-                const isActive = item === card;
-                item.classList.toggle('is-active', isActive);
-                item.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        const syncToggleState = (nextKey) => {
+            toggles.forEach((toggle) => {
+                const selected = toggle.getAttribute('data-protocol-toggle') === nextKey;
+                toggle.classList.toggle('is-active', selected);
+                toggle.setAttribute('aria-selected', selected ? 'true' : 'false');
             });
-
-            panelTitle.textContent = profile.title;
-            panelCopy.textContent = profile.copy;
-            panelOutput.textContent = profile.output;
+        };
+        const clearMotionClasses = (view) => {
+            view.classList.remove('is-enter-from-right', 'is-enter-from-left', 'is-exit-to-left', 'is-exit-to-right');
+        };
+        const finalizeView = (nextKey, currentView, nextView) => {
+            views.forEach((view) => {
+                const isActive = view === nextView;
+                view.classList.toggle('is-active', isActive);
+                view.hidden = !isActive;
+                view.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+                clearMotionClasses(view);
+            });
+            activeKey = nextKey;
+            syncToggleState(nextKey);
+            setStageHeightFor(nextView);
+            isAnimating = false;
+        };
+        const switchProtocol = (nextKey) => {
+            if (isAnimating || !nextKey || nextKey === activeKey) return;
+            const currentView = viewByKey.get(activeKey);
+            const nextView = viewByKey.get(nextKey);
+            if (!currentView || !nextView) return;
+            const forward = activeKey === 'diagnostic' && nextKey === 'deployment';
+            if (prefersReducedMotion) {
+                finalizeView(nextKey, currentView, nextView);
+                return;
+            }
+            isAnimating = true;
+            nextView.hidden = false;
+            nextView.setAttribute('aria-hidden', 'false');
+            clearMotionClasses(currentView);
+            clearMotionClasses(nextView);
+            nextView.classList.add('is-enter-from-right');
+            if (!forward) nextView.classList.replace('is-enter-from-right', 'is-enter-from-left');
+            nextView.classList.add('is-active');
+            setStageHeightFor(nextView);
+            void nextView.offsetWidth;
+            currentView.classList.add(forward ? 'is-exit-to-left' : 'is-exit-to-right');
+            nextView.classList.remove(forward ? 'is-enter-from-right' : 'is-enter-from-left');
+            window.setTimeout(() => {
+                finalizeView(nextKey, currentView, nextView);
+            }, transitionMs + 24);
         };
 
-        cards.forEach(card => {
-            card.addEventListener('click', () => {
-                setActiveCard(card);
+        toggles.forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const nextKey = toggle.getAttribute('data-protocol-toggle');
+                switchProtocol(nextKey);
             });
-            if (card.tagName !== 'BUTTON') {
-                card.addEventListener('keydown', (event) => {
-                    if (event.key !== 'Enter' && event.key !== ' ') return;
-                    event.preventDefault();
-                    setActiveCard(card);
-                });
-            }
         });
 
-        setActiveCard(cards[0]);
+        const initialView = viewByKey.get(activeKey) || views[0];
+        views.forEach((view) => {
+            const isActive = view === initialView;
+            view.classList.toggle('is-active', isActive);
+            view.hidden = !isActive;
+            view.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            clearMotionClasses(view);
+        });
+        activeKey = initialView.getAttribute('data-protocol-view') || 'diagnostic';
+        syncToggleState(activeKey);
+        setStageHeightFor(initialView);
+        window.addEventListener('resize', () => {
+            if (isAnimating) return;
+            const activeView = viewByKey.get(activeKey);
+            if (activeView) setStageHeightFor(activeView);
+        });
     }
 
     function initTeamTabs() {

@@ -401,50 +401,90 @@
 <!-- Mandate Section End -->
 <!-- Rubric Section Start -->
 <section class="section-wrap" id="rubric" role="tabpanel" aria-labelledby="tab-rubric" tabindex="-1">
-    <div class="rubric-intro">
-        <div class="instruction-box rubric-intro-box">
-            <p class="rubric-intro-title">Pre-Recommendation Protocol</p>
-            <p class="rubric-intro-copy">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+    <div class="rubric-protocol" data-rubric-protocol>
+        <div class="rubric-protocol-toggle" role="tablist" aria-label="Rubric protocol view">
+            <button
+                type="button"
+                class="rubric-protocol-segment is-active"
+                data-protocol-toggle="diagnostic"
+                role="tab"
+                aria-selected="true"
+                aria-controls="rubric-view-diagnostic"
+            >
+                Pre-Recommendation Protocol
+            </button>
+            <button
+                type="button"
+                class="rubric-protocol-segment"
+                data-protocol-toggle="deployment"
+                role="tab"
+                aria-selected="false"
+                aria-controls="rubric-view-deployment"
+            >
+                Execution Protocol
+            </button>
         </div>
-        <div class="asset-image rubric-banner">
-            <img src="assets/pages/rubric/rubric-analysis-banner.png" alt="Analysis Banner" class="rubric-banner-img">
-        </div>
-    </div>
 
-    <div class="rubric-grid">
-        <button type="button" class="rubric-item" data-rubric-key="vocational-literacy" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-vocational-literacy.png" alt="Vocational literacy rubric icon"></div>
-            <h4 class="rubric-item-title">Vocational Literacy</h4>
-            <p class="rubric-item-copy">Regional technical education alignment based on Texas standards.</p>
-            <p class="rubric-item-hint">Click for action pathway</p>
-        </button>
-        <button type="button" class="rubric-item" data-rubric-key="onboarding-velocity" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-onboarding-velocity.png" alt="Onboarding velocity rubric icon"></div>
-            <h4 class="rubric-item-title">Onboarding Velocity</h4>
-            <p class="rubric-item-copy">Targeted 100-day window for labor force integration and site-readiness metrics.</p>
-            <p class="rubric-item-hint">Click for action pathway</p>
-        </button>
-        <button type="button" class="rubric-item" data-rubric-key="regulatory-coherence" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Regulatory coherence rubric icon"></div>
-            <h4 class="rubric-item-title">Regulatory Coherence</h4>
-            <p class="rubric-item-copy">Deep-dive audit of local property rights, FDI stability, and legal protections.</p>
-            <p class="rubric-item-hint">Click for action pathway</p>
-        </button>
-        <button type="button" class="rubric-item" data-rubric-key="reliability" aria-pressed="false">
-            <div class="asset-image rubric-icon"><img src="assets/pages/rubric/rubric-icon-reliability.png" alt="Reliability rubric icon"></div>
-            <h4 class="rubric-item-title">Reliability</h4>
-            <p class="rubric-item-copy">Stress-testing critical power grids, logistics hubs, and infrastructure stability.</p>
-            <p class="rubric-item-hint">Click for action pathway</p>
-        </button>
-    </div>
-    <div class="rubric-action-panel" id="rubricActionPanel" aria-live="polite">
-        <p class="rubric-action-eyebrow">Selected Rubric Action</p>
-        <h4 class="rubric-action-title" id="rubricActionTitle">Vocational Literacy</h4>
-        <p class="rubric-action-copy" id="rubricActionCopy">Identify where technical education supply already aligns to corridor needs, then capture evidence gaps through structured intake.</p>
-        <p class="rubric-action-output" id="rubricActionOutput">Output: Workforce capability baseline and fast-gap shortlist for evaluation.</p>
-        <div class="rubric-action-buttons">
-            <button type="button" class="btn-cta btn-cta--rubric" data-modal-open="accessModal">Open Intake</button>
-            <a class="rubric-action-link" href="#engagement">Go to Engagement</a>
+        <div class="rubric-protocol-stage" data-rubric-stage>
+            <article class="rubric-protocol-view is-active" data-protocol-view="diagnostic" id="rubric-view-diagnostic" aria-hidden="false">
+                <p class="rubric-protocol-tone">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+                <div class="rubric-diagnostic-grid">
+                    <section class="rubric-diagnostic-card">
+                        <div class="asset-image rubric-diagnostic-asset">
+                            <img src="assets/pages/rubric/rubric-analysis-banner.png" alt="Analysts reviewing corridor data on dual monitors">
+                        </div>
+                        <p class="rubric-phase-label">Phase 01</p>
+                        <h4 class="rubric-phase-title">Initial Evaluation</h4>
+                        <p class="rubric-phase-copy">Regional vetting and identification of economic potential before advancing to deeper technical stress validation.</p>
+                    </section>
+                    <section class="rubric-diagnostic-card">
+                        <div class="asset-image rubric-diagnostic-asset">
+                            <img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Texas map with data overlays and regional pins">
+                        </div>
+                        <p class="rubric-phase-label">Phase 02</p>
+                        <h4 class="rubric-phase-title">Technical Review</h4>
+                        <p class="rubric-phase-copy">Deep-dive stress tests for power, logistics, and infrastructure stability to confirm operational resilience.</p>
+                    </section>
+                </div>
+            </article>
+
+            <article class="rubric-protocol-view" data-protocol-view="deployment" id="rubric-view-deployment" aria-hidden="true" hidden>
+                <p class="rubric-protocol-tone">Done and improved streamlined execution through refined systems and disciplined delivery sequencing.</p>
+                <div class="rubric-deployment-grid">
+                    <section class="rubric-deploy-card">
+                        <div class="asset-image rubric-deploy-asset">
+                            <img src="assets/pages/rubric/rubric-icon-vocational-literacy.png" alt="Execution action card visual">
+                        </div>
+                        <p class="rubric-phase-label">Phase 03 - The Input</p>
+                        <h4 class="rubric-phase-title">Vocational Literacy</h4>
+                        <p class="rubric-phase-copy">Regional technical education alignment based on Texas standards.</p>
+                    </section>
+                    <section class="rubric-deploy-card">
+                        <div class="asset-image rubric-deploy-asset">
+                            <img src="assets/pages/rubric/rubric-icon-onboarding-velocity.png" alt="Execution action card visual">
+                        </div>
+                        <p class="rubric-phase-label">Phase 03 - The Input</p>
+                        <h4 class="rubric-phase-title">Onboarding Velocity</h4>
+                        <p class="rubric-phase-copy">Targeted 100-day window for labor force integration.</p>
+                    </section>
+                    <section class="rubric-deploy-card">
+                        <div class="asset-image rubric-deploy-asset">
+                            <img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Execution action card visual">
+                        </div>
+                        <p class="rubric-phase-label">Phase 04 - Refined Systems</p>
+                        <h4 class="rubric-phase-title">Regulatory Coherence</h4>
+                        <p class="rubric-phase-copy">Deep-dive audit of property rights and FDI stability.</p>
+                    </section>
+                    <section class="rubric-deploy-card">
+                        <div class="asset-image rubric-deploy-asset">
+                            <img src="assets/pages/rubric/rubric-icon-reliability.png" alt="Execution action card visual">
+                        </div>
+                        <p class="rubric-phase-label">Phase 04 - Refined Systems</p>
+                        <h4 class="rubric-phase-title">Reliability</h4>
+                        <p class="rubric-phase-copy">Stress-testing critical power grids and infrastructure stability.</p>
+                    </section>
+                </div>
+            </article>
         </div>
     </div>
 </section>

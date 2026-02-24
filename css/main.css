@@ -1207,6 +1207,121 @@
             transition: border-color var(--motion-base) var(--motion-ease-standard), color var(--motion-base) var(--motion-ease-standard), background var(--motion-base) var(--motion-ease-standard);
         }
         .rubric-action-link:hover { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+        .rubric-protocol { display: grid; gap: 16px; }
+        .rubric-protocol-toggle {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
+            background: color-mix(in srgb, var(--card-bg) 90%, transparent);
+        }
+        .rubric-protocol-segment {
+            appearance: none;
+            border: 0;
+            border-bottom: 2px solid transparent;
+            background: transparent;
+            color: color-mix(in srgb, var(--page-text-main) 72%, var(--page-text-dim));
+            min-height: 52px;
+            padding: 0 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.66rem;
+            letter-spacing: 0.9px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.24s ease, color 0.24s ease, text-shadow 0.24s ease, background 0.24s ease;
+        }
+        .rubric-protocol-segment:hover {
+            color: color-mix(in srgb, var(--accent) 76%, var(--page-text-main));
+            background: color-mix(in srgb, var(--accent) 5%, transparent);
+        }
+        .rubric-protocol-segment.is-active {
+            border-bottom-color: var(--accent);
+            color: color-mix(in srgb, var(--accent) 86%, var(--page-text-main));
+            text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 38%, transparent);
+        }
+        .rubric-protocol-stage {
+            position: relative;
+            overflow: hidden;
+            min-height: 520px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
+            background: color-mix(in srgb, var(--card-bg) 94%, transparent);
+        }
+        .rubric-protocol-view {
+            position: absolute;
+            inset: 0;
+            padding: 18px;
+            opacity: 0;
+            transform: translateX(0);
+            pointer-events: none;
+            will-change: transform, opacity;
+            transition: transform 400ms ease-in-out, opacity 400ms ease-in-out;
+        }
+        .rubric-protocol-view.is-active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 2;
+        }
+        .rubric-protocol-view.is-enter-from-right { transform: translateX(100%); opacity: 0; z-index: 3; }
+        .rubric-protocol-view.is-enter-from-left { transform: translateX(-100%); opacity: 0; z-index: 3; }
+        .rubric-protocol-view.is-exit-to-left { transform: translateX(-100%); opacity: 0; z-index: 1; }
+        .rubric-protocol-view.is-exit-to-right { transform: translateX(100%); opacity: 0; z-index: 1; }
+        .rubric-protocol-tone {
+            margin: 0 0 14px 0;
+            padding: 12px 14px;
+            border-left: 2px solid color-mix(in srgb, var(--accent) 70%, transparent);
+            background: color-mix(in srgb, var(--accent) 7%, transparent);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: color-mix(in srgb, var(--page-text-main) 90%, var(--accent));
+        }
+        .rubric-diagnostic-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .rubric-diagnostic-card,
+        .rubric-deploy-card {
+            border: 1px solid color-mix(in srgb, var(--frame-border) 90%, transparent);
+            background: color-mix(in srgb, var(--card-bg) 96%, transparent);
+            padding: 12px;
+            display: grid;
+            gap: 8px;
+        }
+        .rubric-diagnostic-asset,
+        .rubric-deploy-asset {
+            border-color: color-mix(in srgb, var(--accent) 20%, var(--frame-border));
+            min-height: 140px;
+        }
+        .rubric-diagnostic-asset img,
+        .rubric-deploy-asset img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 1;
+        }
+        .rubric-phase-label {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.62rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: color-mix(in srgb, var(--accent) 70%, var(--page-text-main));
+        }
+        .rubric-phase-title {
+            margin: 0;
+            font-size: 0.98rem;
+            color: var(--page-text-main);
+        }
+        .rubric-phase-copy {
+            margin: 0;
+            font-size: 0.84rem;
+            line-height: 1.46;
+            color: color-mix(in srgb, var(--page-text-main) 86%, var(--page-text-dim));
+        }
+        .rubric-deployment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
         .workflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 40px 0; }
         .workflow-step {
             background: var(--card-bg);
@@ -1837,6 +1952,11 @@
             .mandate-card-lead { margin-bottom: 20px; font-size: 1.08rem; }
             .mandate-points { gap: 18px; padding-top: 20px; }
             .rubric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+            .rubric-protocol-toggle { grid-template-columns: 1fr; }
+            .rubric-protocol-segment { min-height: 48px; }
+            .rubric-protocol-stage { min-height: 760px; }
+            .rubric-diagnostic-grid,
+            .rubric-deployment-grid { grid-template-columns: 1fr; }
             .btn-cta--rubric { min-height: 44px; }
             .header-actions { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 8px; }
             .btn-portal--primary { width: min(100%, 170px); }
@@ -1946,6 +2066,17 @@
             .rubric-intro-title { font-size: 1rem; }
             .rubric-intro-copy { font-size: 0.88rem; line-height: 1.45; }
             .rubric-grid { grid-template-columns: 1fr; }
+            .rubric-protocol-segment {
+                min-height: 46px;
+                font-size: 0.6rem;
+                letter-spacing: 0.7px;
+                padding: 0 10px;
+            }
+            .rubric-protocol-view { padding: 12px; }
+            .rubric-protocol-tone { font-size: 0.82rem; padding: 10px 12px; }
+            .rubric-protocol-stage { min-height: 820px; }
+            .rubric-diagnostic-asset,
+            .rubric-deploy-asset { min-height: 118px; }
             .rubric-item { padding: 16px; }
             .rubric-item-copy { font-size: 0.84rem; }
             .rubric-action-panel { padding: 16px; }
