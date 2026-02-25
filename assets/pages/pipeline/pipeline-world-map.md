@@ -131,6 +131,7 @@
 # - apply style-only (pipe): @set_name|color|blink|phase
 # - apply style-only (equals): @set_name=|color|blink|phase
 
+##OVERRIDE-SECTION##
 #Single Points
 #0|0|0|pink|rapid
 #1|1|yellow|slow
@@ -185,33 +186,25 @@ $texas={
 20|35|
 }
 
-#texas numbers off by one? 20|35| printing to 21|36|
-#@texas|6b7385|accent|blend
-#@texas=|22d3ee|67e8f9|blend|sync
-#@texas=|22d3ee|67e8f9|blend|async
 @texas=|var(--map-texas-color-1)|var(--map-texas-color-2)|blend|async
 
+##TOGGLE-SECTION##
+# category_descriptions
+# format: Toggle Category|Category Description|Category Color
+# category color is optional; if present, all marker rows using "accent" in that category inherit it.
+Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|#A3E635
+Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|#C084FC
+Technical Review|Corridors under deep technical, risk, and feasibility review.|#FFC94A
+Reference Model|Operating benchmark corridors used as comparative calibration references.|#F97316
+
 # toggles
-# toggles: Toggle Category|Category Description|Title|x|y|shape|color|size
-# toggles (legacy still supported): Toggle Category|Title|x|y|shape|color|size
+# format: Toggle Category|Title|x|y|shape|color|size
 # legacy trailing blink column is accepted but ignored.
 # UI note: category buttons are generated from Toggle Category labels and can show/hide each category.
 # UI note: category button border/text color follows the category marker color.
-# UI note: category descriptions are metadata only; UI category text is generated from real-world location titles listed per category.
-# shape: circle or square, color: accent or CSS color
-# accent resolves by Toggle Category token first, then falls back to var(--map-accent):
-# - Initial Evaluation -> var(--map-toggle-initial-evaluation)
-# - Structured Intake -> var(--map-toggle-structured-intake)
-# - Technical Review -> var(--map-toggle-technical-review)
-# - Reference Model -> var(--map-toggle-reference-model)
+# shape: circle or square, color: accent or CSS color.
 # x/y integer coordinates are centered on the target grid cell.
 
-#Established|Rome|56|28|circle|accent|4|slow
-#Established|Temple|44|28|circle|accent|4|slow
-#Latin America Regions|Belton|62|58|circle|accent|4|slow
-#Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
-
-Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|1x1|0|0|circle|#A3E635|1|slow
 Initial Evaluation|Ho Chi Minh City, Vietnam|143|45|circle|accent|1|slow
 Initial Evaluation|Hai Phong, Vietnam|142|38|circle|accent|1|slow
 Initial Evaluation|Da Nang, Vietnam|143|41|circle|accent|1|slow
@@ -226,16 +219,19 @@ Initial Evaluation|Chennai, India|128|41|circle|accent|1|slow
 Initial Evaluation|Wroclaw, Poland|88|18|circle|accent|1|slow
 Initial Evaluation|Tangier, Morocco|75|29|circle|accent|1|slow
 Initial Evaluation|Dubai, UAE|112|35|circle|accent|1|slow
-Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|Guatemala City, Guatemala|23|42|circle|#FFC94A|1|slow
+
+Structured Intake|Guatemala City, Guatemala|23|42|circle|accent|1|slow
 Structured Intake|San Salvador, El Salvador|24|42|circle|accent|1|slow
 Structured Intake|San José, Costa Rica|28|46|circle|accent|1|slow
 Structured Intake|Panama City, Panama|30|46|circle|accent|1|slow
 Structured Intake|Monterrey, Mexico|18|34|circle|accent|1|slow
-Technical Review|Corridors under deep technical, risk, and feasibility review.|Nassau, Bahamas|32|34|circle|#C084FC|1|slow
+
+Technical Review|Nassau, Bahamas|32|34|circle|accent|1|slow
 Technical Review|San Juan, Puerto Rico|35|39|circle|accent|1|slow
 Technical Review|Kingston, Jamaica|32|34|circle|accent|1|slow
 Technical Review|Medellín, Colombia|32|47|circle|accent|1|slow
-Reference Model|Operating benchmark corridors used as comparative calibration references.|Houston, United States (Texas)|23|32|circle|#F97316|1|slow
+
+Reference Model|Houston, United States (Texas)|23|32|circle|accent|1|slow
 Reference Model|Dallas–Fort Worth, United States (Texas)|23|29|circle|accent|1|slow
 Reference Model|San Antonio, United States (Texas)|21|31|circle|accent|1|slow
 

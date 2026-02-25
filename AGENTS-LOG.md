@@ -1352,4 +1352,9 @@
 - Troubleshooting suggestions: If a category appears gold unexpectedly, set an explicit non-`accent` color token on that category’s first MD row so inherited `accent` rows pick up your chosen color.
 - Resolutions/outcomes: Category colors are no longer hard-pushed to red in CSS; first-row MD colors can now drive category identity without CSS collision.
 - Commit hash(es): none
+### 2026-02-24 18:52:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented normalized pipeline map metadata/marker schema and removed legacy category-color logic. In `js/main.js`, added parser mode for `# category_descriptions` and moved category description/color sourcing to that section; simplified toggle parsing to point-only rows (`Category|Title|x|y|shape|color|size`) and removed legacy in-row category-description + first-row color anchoring code paths. In `css/main.css`, removed unused `--map-toggle-*` variables. In `assets/pages/pipeline/pipeline-world-map.md`, migrated to `# category_descriptions` + clean `# toggles` rows and corrected category row labels.
+- Troubleshooting suggestions: Keep category labels in `# category_descriptions` exactly matching toggle category labels (case/spacing) so description and accent inheritance map correctly.
+- Resolutions/outcomes: Category metadata is now cleanly separated from point rows, MD is the single source of truth for category descriptions/colors, and legacy variable/parser paths are removed.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

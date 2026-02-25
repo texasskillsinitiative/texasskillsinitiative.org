@@ -4931,6 +4931,7 @@ function softCloseModal() {
             const rows = [];
             const overrides = [];
             const overrideCoordinateSets = new Map();
+            const categoryDescriptionLines = [];
             const toggleLines = [];
             let mode = 'rows';
             const isBinaryRow = (value) => /^[01]+$/.test(value);
@@ -4941,6 +4942,16 @@ function softCloseModal() {
                 if (!colorToken) return '';
                 if (colorToken === 'accent') return 'var(--map-accent)';
                 // Accept bare hex tokens (e.g. "6b7385") in addition to "#6b7385".
+                if (/^[0-9a-f]{3}$/i.test(trimmed) || /^[0-9a-f]{4}$/i.test(trimmed) || /^[0-9a-f]{6}$/i.test(trimmed) || /^[0-9a-f]{8}$/i.test(trimmed)) {
+                    return `#${trimmed}`;
+                }
+                return trimmed;
+            };
+            const resolveToggleColor = (rawColor) => {
+                const trimmed = (rawColor || '').trim();
+                if (!trimmed) return '';
+                const colorToken = trimmed.toLowerCase();
+                if (colorToken === 'accent') return 'accent';
                 if (/^[0-9a-f]{3}$/i.test(trimmed) || /^[0-9a-f]{4}$/i.test(trimmed) || /^[0-9a-f]{6}$/i.test(trimmed) || /^[0-9a-f]{8}$/i.test(trimmed)) {
                     return `#${trimmed}`;
                 }
@@ -5162,6 +5173,10 @@ function softCloseModal() {
                         mode = 'overrides';
                         continue;
                     }
+                    if (/^#\s*category_descriptions\s*$/i.test(line)) {
+                        mode = 'category_descriptions';
+                        continue;
+                    }
                     if (/^#\s*toggles\s*$/i.test(line)) {
                         mode = 'toggles';
                         continue;
@@ -5187,6 +5202,10 @@ function softCloseModal() {
                     continue;
                 }
                 if (isToggleRow(line)) {
+                    if (mode === 'category_descriptions') {
+                        categoryDescriptionLines.push(line);
+                        continue;
+                    }
                     if (mode === 'overrides') {
                         const parts = line.split('|').map(part => part.trim());
                         const x = Number(parts[0]);
@@ -5247,38 +5266,49 @@ function softCloseModal() {
                 };
             });
             if (toggleLines.length) {
+                const categoryMetaBySlug = new Map();
+                categoryDescriptionLines.forEach(line => {
+                    const parts = line.split('|').map(part => part.trim());
+                    if (parts.length < 2) {
+                        console.warn(`[map] invalid category description in ${label}: "${line}"`);
+                        return;
+                    }
+                    const buttonLabel = parts[0] || '';
+                    if (!buttonLabel) {
+                        console.warn(`[map] empty category label in ${label}: "${line}"`);
+                        return;
+                    }
+                    const description = parts[1] || '';
+                    const categoryColor = resolveToggleColor(parts[2] || '');
+                    categoryMetaBySlug.set(slugify(buttonLabel), {
+                        description,
+                        color: categoryColor && categoryColor !== 'accent' ? categoryColor : ''
+                    });
+                });
                 // Toggle markers authored with integer grid coordinates should center on cells.
                 const resolveToggleCoordinate = (value) => (Number.isInteger(value) ? value + 0.5 : value);
                 const toggleMarkers = toggleLines.map(line => {
                     const parts = line.split('|').map(part => part.trim());
-                    const hasCategoryDescriptionAndTitle = parts.length >= 8
-                        && Number.isFinite(Number(parts[3]))
-                        && Number.isFinite(Number(parts[4]));
-                    const hasCategoryAndTitle = parts.length >= 7
-                        && Number.isFinite(Number(parts[2]))
-                        && Number.isFinite(Number(parts[3]))
-                        && !hasCategoryDescriptionAndTitle;
+                    if (parts.length < 7) {
+                        console.warn(`[map] invalid toggle in ${label}: "${line}"`);
+                        return null;
+                    }
                     const buttonLabel = parts[0] || 'Toggle';
-                    const description = hasCategoryDescriptionAndTitle ? (parts[1] || '') : '';
-                    const label = hasCategoryDescriptionAndTitle
-                        ? (parts[2] || buttonLabel)
-                        : (hasCategoryAndTitle ? (parts[1] || buttonLabel) : buttonLabel);
-                    const rawX = Number(hasCategoryDescriptionAndTitle ? parts[3] : (hasCategoryAndTitle ? parts[2] : parts[1]));
-                    const rawY = Number(hasCategoryDescriptionAndTitle ? parts[4] : (hasCategoryAndTitle ? parts[3] : parts[2]));
+                    const categoryMeta = categoryMetaBySlug.get(slugify(buttonLabel)) || null;
+                    const description = categoryMeta ? categoryMeta.description : '';
+                    const label = parts[1] || buttonLabel;
+                    const rawX = Number(parts[2]);
+                    const rawY = Number(parts[3]);
                     const x = resolveToggleCoordinate(rawX);
                     const y = resolveToggleCoordinate(rawY);
-                    const shapeRaw = hasCategoryDescriptionAndTitle
-                        ? parts[5]
-                        : (hasCategoryAndTitle ? parts[4] : parts[3]);
-                    const colorRaw = hasCategoryDescriptionAndTitle
-                        ? parts[6]
-                        : (hasCategoryAndTitle ? parts[5] : parts[4]);
+                    const shapeRaw = parts[4];
+                    const colorRaw = parts[5];
                     const shape = (shapeRaw || 'circle').toLowerCase();
-                    const colorTokenRaw = (colorRaw || 'accent').trim() || 'accent';
-                    const colorToken = colorTokenRaw.toLowerCase();
-                    const size = Number(hasCategoryDescriptionAndTitle
-                        ? parts[7]
-                        : (hasCategoryAndTitle ? parts[6] : parts[5])) || 4;
+                    const markerColorToken = resolveToggleColor(colorRaw || 'accent');
+                    const size = Number(parts[6]) || 4;
+                    const color = markerColorToken === 'accent'
+                        ? (categoryMeta && categoryMeta.color ? categoryMeta.color : 'var(--map-accent)')
+                        : (markerColorToken || 'var(--map-accent)');
                     return {
                         buttonLabel,
                         description,
@@ -5287,37 +5317,27 @@ function softCloseModal() {
                         y,
                         shape: shape === 'square' ? 'square' : 'circle',
                         size,
-                        colorToken,
-                        colorValue: colorTokenRaw,
+                        color,
                         targetClass: `overlay-${slugify(buttonLabel)}`
                     };
-                }).filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
+                }).filter(item => item && Number.isFinite(item.x) && Number.isFinite(item.y));
 
                 const toggleGroupsMap = new Map();
                 const toggleGroups = [];
                 toggleMarkers.forEach(marker => {
                     let group = toggleGroupsMap.get(marker.targetClass);
                     if (!group) {
-                        const categoryColorToken = `--map-toggle-${slugify(marker.buttonLabel)}`;
-                        const fallbackCategoryColor = `var(${categoryColorToken}, var(--map-accent))`;
-                        const groupAccentColor = marker.colorToken === 'accent'
-                            ? fallbackCategoryColor
-                            : marker.colorValue;
                         group = {
                             targetClass: marker.targetClass,
                             buttonLabel: marker.buttonLabel,
                             description: marker.description || '',
-                            markers: [],
-                            accentColor: groupAccentColor
+                            markers: []
                         };
                         toggleGroupsMap.set(marker.targetClass, group);
                         toggleGroups.push(group);
                     } else if (!group.description && marker.description) {
                         group.description = marker.description;
                     }
-                    const resolvedMarkerColor = marker.colorToken === 'accent'
-                        ? group.accentColor
-                        : marker.colorValue;
                     group.markers.push({
                         buttonLabel: marker.buttonLabel,
                         description: marker.description,
@@ -5326,7 +5346,7 @@ function softCloseModal() {
                         y: marker.y,
                         shape: marker.shape,
                         size: marker.size,
-                        color: resolvedMarkerColor,
+                        color: marker.color,
                         targetClass: marker.targetClass
                     });
                 });
