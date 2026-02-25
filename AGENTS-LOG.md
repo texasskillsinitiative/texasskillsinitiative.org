@@ -215,7 +215,12 @@
 - Commit hash(es): none
 
 ### 2026-02-16 10:50:22 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Detected active tail marker at session start (`[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`), treated prior run as unclean exit, and resumed from current working tree per user direction (restart Option 1 behavior).
+- Actions taken: Detected active tail marker at session start (`### 2026-02-24 21:24:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied mobile-only forced title line breaks for pipeline title (Texas Skills Initiative / Global / Pipeline) using .pipeline-map-title-break-mobile in js/main.js and css/main.css, and added two user-requested items to STATUS.md as possible pre-1.0 options without implementation work.
+- Troubleshooting suggestions: If mobile line breaks appear too tall, reduce .pipeline-map-title-box line-height or mobile title font size slightly while keeping break elements block-level.
+- Resolutions/outcomes: Mobile title now forces the requested breakpoints; pre-1.0 logo-click animation and transparent/blur-nav ideas are tracked as optional planned notes only.
+- Commit hash(es): none
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`), treated prior run as unclean exit, and resumed from current working tree per user direction (restart Option 1 behavior).
 - Troubleshooting suggestions: If repository state appears inconsistent before next packet, run `git status` and `git log --oneline -n 5` first, then continue from the current `STATUS.md` map item.
 - Resolutions/outcomes: Recovery condition acknowledged and documented; active session continued without workspace reset.
 - Commit hash(es): none
@@ -1402,4 +1407,50 @@
 - Troubleshooting suggestions: If you want helper visibility restored on full section reset, reinitialize `helperDismissed` during map teardown/rebuild and remove `is-dismissed` before first render.
 - Resolutions/outcomes: Helper text disappears after first toggle activation without shifting nearby map objects.
 - Commit hash(es): none
+### 2026-02-24 20:27:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a desktop-only pipeline title box above the map frame in `js/main.js` + `css/main.css`, kept width tied to the map container/frame lane, initialized it with helper onboarding copy, and switched it to a persistent standard title after first category activation.
+- Troubleshooting suggestions: If title copy needs to be changed globally, update `helperHeadline` and `standardHeadline` constants in `js/main.js` where the title box is created.
+- Resolutions/outcomes: Desktop now has a stable title strip under category toggles that transitions from helper guidance to standard map title without affecting mobile layout.
+- Commit hash(es): none
+### 2026-02-24 20:30:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Extended pipeline title-strip behavior to mobile in `css/main.css` by allowing `.pipeline-map-title-box` to render on handheld viewports, matched title-strip visual treatment to map-frame border/background tokens, hid legacy helper text globally, and wired title-strip category flash reactions in `js/main.js` so button activations trigger synchronized title-box flash using the active category color.
+- Troubleshooting suggestions: If handheld spacing feels tight, reduce title box `min-height` or bottom margin; if flash should run longer/shorter, tune the title flash timeout (`2200ms`) in `js/main.js`.
+- Resolutions/outcomes: Mobile now gets the same title-strip concept and reactive category feedback as desktop, with consistent map-frame styling.
+- Commit hash(es): none
+### 2026-02-24 20:32:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned title-strip UX in `css/main.css` + `js/main.js`: reduced spacing above map frame, centered/strengthened title typography, replaced title-strip click flash with dedicated non-opacity border/glow animation (`mapTitleCategoryFlash`) so the full box does not fade out, and added helper-mode dim text pulse (`mapTitleHelperPulse`) synchronized to the guidance cadence before first activation.
+- Troubleshooting suggestions: If pulse intensity is too subtle/strong, adjust `mapTitleHelperPulse` color/text-shadow mixes while keeping the 2s cycle aligned with guidance.
+- Resolutions/outcomes: Title box now reads as a stable title element, remains visible through interactions, and presents a synchronized pulsing helper state on initial load.
+- Commit hash(es): none
+### 2026-02-24 20:35:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated title-strip final-state behavior in `js/main.js`/`css/main.css` by changing standard title to `Pipeline`, reducing title-to-map spacing (`1px`), and aligning steady-state title-strip border/background to map-frame defaults (no persistent gold outline/background after activation).
+- Troubleshooting suggestions: If you want title copy to vary by viewport/section later, split `standardHeadline` into per-context constants before title initialization.
+- Resolutions/outcomes: Title strip now sits closer to the map and keeps the same baseline frame-edge styling in normal state while still supporting interaction flash.
+- Commit hash(es): none
+### 2026-02-24 20:38:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated title-strip copy in `js/main.js` to `Texas Skills Initiative Global Pipeline` and changed title-strip category flash wiring to reuse the exact map-frame flash class/timing path (`map-frame-category-flash-active` with ~10.12s lifecycle and `mapFrameCategoryFlash` curve), removing the separate short title-only flash path.
+- Troubleshooting suggestions: If title flash still appears subtle on a specific device, increase shared flash color mix in `@keyframes mapFrameCategoryFlash` (single source now affects both map frame and title strip).
+- Resolutions/outcomes: Title-strip click animation now matches map flash duration/style/length and no longer runs a separate shorter effect.
+- Commit hash(es): none
+### 2026-02-24 20:58:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased title strip font sizing while preserving box dimensions, and changed title content rendering to dual-layer mode in `js/main.js` + `css/main.css` so initial state shows dimmed base title with pulsing helper text overlay until first category activation.
+- Troubleshooting suggestions: If helper overlay appears too dominant, reduce `.pipeline-map-title-helper` opacity or pulse shadow strength; if base title is too faint, raise `.pipeline-map-title-main` default opacity.
+- Resolutions/outcomes: Initial title box now keeps content visible in dimmed form and presents a slight helper pulse on top without resizing the box.
+- Commit hash(es): none
+### 2026-02-24 20:59:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated title strip typography effects in `css/main.css`: wired category-color title-text glow animation on press (`mapTitleTextFlash` keyed by `--map-frame-category-flash-color`) and changed helper overlay to left-justified italic styling.
+- Troubleshooting suggestions: If glow is too strong/weak, tune `mapTitleTextFlash` `10%` text-shadow/color mix values.
+- Resolutions/outcomes: Title text now reacts with button color logic on press, and helper text reads as left-justified italic guidance.
+- Commit hash(es): none
+### 2026-02-24 21:07:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved pipeline helper copy from title strip to a dedicated top-of-map overlay inside `.pipeline-map-frame` (`.pipeline-map-helper-overlay`), removed helper rendering from title content composition, and kept helper pulse synchronized with the button guidance timing variable.
+- Troubleshooting suggestions: If helper overlay overlaps map points too aggressively, adjust `top/left/right` inset values in `.pipeline-map-helper-overlay` or reduce helper font size slightly.
+- Resolutions/outcomes: Title strip stays cleaner while helper guidance now appears across the map area and still dismisses on first category activation.
+- Commit hash(es): none
+### 2026-02-24 21:24:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied mobile-only forced title line breaks for pipeline title (Texas Skills Initiative / Global / Pipeline) using .pipeline-map-title-break-mobile in js/main.js and css/main.css, and added two user-requested items to STATUS.md as possible pre-1.0 options without implementation work.
+- Troubleshooting suggestions: If mobile line breaks appear too tall, reduce .pipeline-map-title-box line-height or mobile title font size slightly while keeping break elements block-level.
+- Resolutions/outcomes: Mobile title now forces the requested breakpoints; pre-1.0 logo-click animation and transparent/blur-nav ideas are tracked as optional planned notes only.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+

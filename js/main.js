@@ -3594,7 +3594,7 @@ function softCloseModal() {
             if (suffix) {
                 const suffixSpan = document.createElement('span');
                 suffixSpan.className = 'map-control-phase-suffix';
-                suffixSpan.textContent = ` ${suffix}`;
+                suffixSpan.textContent = suffix;
                 buttonNode.appendChild(suffixSpan);
             }
         };
@@ -3676,6 +3676,59 @@ function softCloseModal() {
                 }
                 helper.textContent = 'Select a category to display map markers and details.';
             }
+            let desktopTitleBox = null;
+            const helperHeadline = 'Select a category to display map markers and details.';
+            let mapTopHelper = null;
+            const ensureMapTopHelper = () => {
+                if (!frame) return null;
+                let helperNode = frame.querySelector('.pipeline-map-helper-overlay');
+                if (!helperNode) {
+                    helperNode = document.createElement('p');
+                    helperNode.className = 'pipeline-map-helper-overlay';
+                    frame.appendChild(helperNode);
+                }
+                helperNode.textContent = helperHeadline;
+                return helperNode;
+            };
+            const ensureDesktopTitleContent = () => {
+                if (!desktopTitleBox) return;
+                let main = desktopTitleBox.querySelector('[data-map-title-main]');
+                if (!main) {
+                    main = document.createElement('span');
+                    main.className = 'pipeline-map-title-main';
+                    main.setAttribute('data-map-title-main', 'true');
+                    desktopTitleBox.appendChild(main);
+                }
+                main.textContent = '';
+                main.appendChild(document.createTextNode('Texas Skills Initiative'));
+                const breakOne = document.createElement('br');
+                breakOne.className = 'pipeline-map-title-break-mobile';
+                main.appendChild(breakOne);
+                main.appendChild(document.createTextNode(' Global'));
+                const breakTwo = document.createElement('br');
+                breakTwo.className = 'pipeline-map-title-break-mobile';
+                main.appendChild(breakTwo);
+                main.appendChild(document.createTextNode(' Pipeline'));
+            };
+            const setDesktopTitleMode = (isTitleMode) => {
+                if (!desktopTitleBox) return;
+                ensureDesktopTitleContent();
+                desktopTitleBox.classList.toggle('is-title-mode', Boolean(isTitleMode));
+            };
+            if (mapShell) {
+                desktopTitleBox = mapShell.querySelector('.pipeline-map-title-box');
+                if (!desktopTitleBox) {
+                    desktopTitleBox = document.createElement('p');
+                    desktopTitleBox.className = 'pipeline-map-title-box';
+                    if (frame && frame.parentNode === mapShell) {
+                        mapShell.insertBefore(desktopTitleBox, frame);
+                    } else {
+                        mapShell.appendChild(desktopTitleBox);
+                    }
+                }
+                setDesktopTitleMode(false);
+            }
+            mapTopHelper = ensureMapTopHelper();
             let desktopInlineControls = null;
             if (mapShell) {
                 desktopInlineControls = mapShell.querySelector('.pipeline-map-inline-controls-desktop');
@@ -3693,6 +3746,7 @@ function softCloseModal() {
                 desktopInlineControls.innerHTML = '';
             }
             if (mapShell && frame && frame.parentNode === mapShell) {
+                if (desktopTitleBox) mapShell.insertBefore(desktopTitleBox, frame);
                 if (desktopInlineControls) mapShell.insertBefore(desktopInlineControls, frame);
                 if (helper) mapShell.insertBefore(helper, frame);
             }
@@ -4783,11 +4837,19 @@ function softCloseModal() {
             let helperDismissed = false;
             const dismissHelperCopy = () => {
                 helperDismissed = true;
+                setDesktopTitleMode(true);
+                if (mapTopHelper) {
+                    mapTopHelper.classList.add('is-dismissed');
+                }
                 if (!helper) return;
                 helper.classList.add('is-dismissed');
                 helper.classList.remove('is-empty');
             };
             const updateHelperCopy = () => {
+                if (mapTopHelper && !helperDismissed) {
+                    mapTopHelper.classList.remove('is-dismissed');
+                    mapTopHelper.textContent = helperHeadline;
+                }
                 if (!helper) return;
                 if (helperDismissed) {
                     helper.classList.add('is-dismissed');
@@ -4836,6 +4898,7 @@ function softCloseModal() {
                 }, revealDelayMs);
             };
             let frameFlashTimerId = 0;
+            let titleFlashTimerId = 0;
             const triggerFrameCategoryFlash = (targetClass, sourceControls) => {
                 if (!frame) return;
                 const sourceControl = Array.from(sourceControls || []).find(control => control.getAttribute('data-map-target') === targetClass);
@@ -4853,6 +4916,19 @@ function softCloseModal() {
                     frame.classList.remove('map-frame-category-flash-active');
                     frameFlashTimerId = 0;
                 }, 10120);
+                if (desktopTitleBox) {
+                    desktopTitleBox.style.setProperty('--map-frame-category-flash-color', flashColor || 'var(--accent)');
+                    desktopTitleBox.classList.remove('map-frame-category-flash-active');
+                    void desktopTitleBox.offsetWidth;
+                    desktopTitleBox.classList.add('map-frame-category-flash-active');
+                    if (titleFlashTimerId) {
+                        window.clearTimeout(titleFlashTimerId);
+                    }
+                    titleFlashTimerId = window.setTimeout(() => {
+                        desktopTitleBox.classList.remove('map-frame-category-flash-active');
+                        titleFlashTimerId = 0;
+                    }, 10120);
+                }
             };
             const setCategoryState = (targetClass, nextState, options = {}) => {
                 overlays.forEach(overlay => {
