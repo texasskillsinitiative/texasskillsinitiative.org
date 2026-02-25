@@ -1307,4 +1307,24 @@
 - Troubleshooting suggestions: If mobile now feels too slow, reduce only `max-height` to `0.9s` while keeping frame flash at `1.1s` so color fade remains synchronized.
 - Resolutions/outcomes: Mobile button activation opens more gently and frame color fade now runs in the same cadence as desktop counterpart timing.
 - Commit hash(es): none
+### 2026-02-24 18:04:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented deferred activation path for pipeline `@texas` override-set dots. In `js/main.js`, override-set usage now preserves `sourceSet`, `createDot` tags `texas` overrides for deferred reveal and temporarily holds blink class/delay assignment, and `applyMdToggleData` now reveals deferred Texas dots only after initial map-load readiness (`mapGlowInitialRevealDone` gate) using one quick block fade, then applies pending blink behavior. Added matching deferred-dot fade CSS in `css/main.css`.
+- Troubleshooting suggestions: If Texas dots still appear too early on a specific device, increase deferred reveal delay from `280ms` or move `revealDeferredOverrideSet()` slightly later in the ready callback chain.
+- Resolutions/outcomes: Initial pipeline map renders as if no Texas override is active, then Texas override points fade in together post-load and continue with configured async blend behavior.
+- Commit hash(es): none
+### 2026-02-24 18:07:38 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected deferred Texas override behavior in `js/main.js` to be first-load only: reveal trigger is no longer skipped when overlays are already active, and a frame-level primed flag (`data-map-texas-override-primed`) is set after first deferred reveal so any subsequent map render/visit applies `@texas` overrides immediately (no defer). Also keyed defer eligibility per override style (`deferLoad`) so non-first renders keep normal override timing.
+- Troubleshooting suggestions: If any session still defers on revisit, verify the same `.pipeline-map-frame` instance persists and that `data-map-texas-override-primed="true"` is present after first reveal.
+- Resolutions/outcomes: First load starts from base map and then activates Texas override block; remaining visits/renders load Texas overrides together with normal map draw.
+- Commit hash(es): none
+### 2026-02-24 18:10:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected deferred Texas override visual behavior to avoid blank map holes during first-load defer. In `js/main.js`, deferred dots now keep base terrain fill initially (store pending override color/blink metadata) and apply override fill/class at reveal time; in `css/main.css`, deferred-dot transition now animates `fill` instead of forcing hidden `opacity: 0`.
+- Troubleshooting suggestions: If you want the reveal to read stronger, increase deferred fill transition from `0.28s` to `0.36s` while keeping first-load-only defer semantics unchanged.
+- Resolutions/outcomes: First map draw appears normal with no blank points; after load, Texas override points switch into override state cleanly and then run configured blink behavior.
+- Commit hash(es): none
+### 2026-02-24 18:12:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined first-load Texas block activation effect. In `js/main.js`, deferred Texas dots now run a staged entry sequence: reveal gate delay, flash-entry class application, then delayed handoff to normal blink classes/phase timing. In `css/main.css`, added `mapTexasOverrideEntry` keyframes and `.map-dot--texas-entry` to produce a short flash then settle to target override fill.
+- Troubleshooting suggestions: If the flash feels too strong, lower flash mix from `46%` to ~`36%` or reduce entry duration from `0.44s` to `0.34s` while keeping delayed blink handoff.
+- Resolutions/outcomes: Texas deferred block now visibly flashes in as one group before fading/settling into the existing override runtime behavior.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

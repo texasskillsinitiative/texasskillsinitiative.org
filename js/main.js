@@ -3470,12 +3470,22 @@ function softCloseModal() {
             const classes = ['map-dot'];
             if (isLand) classes.push('is-land');
             if (overrideStyle) {
+                const overrideSet = typeof overrideStyle.sourceSet === 'string' ? overrideStyle.sourceSet.toLowerCase() : '';
+                const deferOverrideReveal = overrideSet === 'texas' && overrideStyle.deferLoad === true;
                 const hasColor = Boolean(overrideStyle.color);
                 const hasColor2 = Boolean(overrideStyle.color2);
                 const hasBlink = Boolean(overrideStyle.blink);
+                if (deferOverrideReveal) {
+                    classes.push('map-dot--deferred-load');
+                    dot.dataset.mapDeferredOverride = overrideSet;
+                }
                 if (hasColor) {
-                    classes.push('map-dot--override');
-                    dot.style.fill = overrideStyle.color;
+                    if (deferOverrideReveal) {
+                        dot.dataset.mapPendingOverrideColor = overrideStyle.color;
+                    } else {
+                        classes.push('map-dot--override');
+                        dot.style.fill = overrideStyle.color;
+                    }
                     flashFrom = overrideStyle.color;
                     flashMid = hasColor2 ? overrideStyle.color : `color-mix(in srgb, ${overrideStyle.color} 76%, #ffffff)`;
                     flashTo = hasColor2 ? overrideStyle.color2 : `color-mix(in srgb, ${overrideStyle.color} 58%, #ffffff)`;
@@ -3487,27 +3497,36 @@ function softCloseModal() {
                 if (hasBlink) {
                     const resolvedBlinkMode = resolveBlinkMode(overrideStyle.blink);
                     if (resolvedBlinkMode) {
+                        let blinkClass = '';
                         if ((resolvedBlinkMode === 'glow' || resolvedBlinkMode === 'blend') && hasColor) {
                             const glowFrom = hasColor2 ? overrideStyle.color : baseFill;
                             const glowTo = hasColor2 ? overrideStyle.color2 : overrideStyle.color;
                             dot.style.setProperty('--map-dot-glow-from', glowFrom);
                             dot.style.setProperty('--map-dot-glow-to', glowTo);
-                            classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                            blinkClass = `map-dot--blink-${resolvedBlinkMode}`;
                         } else if (resolvedBlinkMode === 'glow' || resolvedBlinkMode === 'blend') {
                             if (hasColor2) {
                                 dot.style.setProperty('--map-dot-glow-from', baseFill);
                                 dot.style.setProperty('--map-dot-glow-to', overrideStyle.color2);
-                                classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                                blinkClass = `map-dot--blink-${resolvedBlinkMode}`;
                             } else {
-                                classes.push('map-dot--blink-fade');
+                                blinkClass = 'map-dot--blink-fade';
                             }
                         } else {
-                            classes.push(`map-dot--blink-${resolvedBlinkMode}`);
+                            blinkClass = `map-dot--blink-${resolvedBlinkMode}`;
                         }
                         const phaseMode = overrideStyle.phase || 'sync';
+                        let blinkDelay = '';
                         if (phaseMode === 'async') {
                             const delaySec = resolveAsyncBlinkDelay(resolvedBlinkMode, gridX, gridY);
-                            dot.style.setProperty('--map-dot-blink-delay', `-${delaySec.toFixed(3)}s`);
+                            blinkDelay = `-${delaySec.toFixed(3)}s`;
+                        }
+                        if (deferOverrideReveal) {
+                            if (blinkClass) dot.dataset.mapPendingBlinkClass = blinkClass;
+                            if (blinkDelay) dot.dataset.mapPendingBlinkDelay = blinkDelay;
+                        } else {
+                            if (blinkClass) classes.push(blinkClass);
+                            if (blinkDelay) dot.style.setProperty('--map-dot-blink-delay', blinkDelay);
                         }
                     }
                 }
@@ -4705,6 +4724,44 @@ function softCloseModal() {
             const categoryPopups = frame
                 ? frame.querySelectorAll('.map-category-popup[data-map-popup-target]')
                 : [];
+            let deferredOverrideRevealDone = false;
+            const revealDeferredOverrideSet = () => {
+                if (deferredOverrideRevealDone) return;
+                const deferredDots = Array.from(map.querySelectorAll('.map-dot--deferred-load[data-map-deferred-override="texas"]'));
+                deferredOverrideRevealDone = true;
+                if (frame) frame.dataset.mapTexasOverridePrimed = 'true';
+                if (!deferredDots.length) return;
+                const revealDelayMs = 280;
+                const entryFlashMs = 440;
+                window.setTimeout(() => {
+                    deferredDots.forEach(dot => {
+                        const pendingOverrideColor = dot.dataset.mapPendingOverrideColor;
+                        if (pendingOverrideColor) {
+                            dot.style.setProperty('--map-texas-entry-target', pendingOverrideColor);
+                            dot.style.setProperty('--map-texas-entry-flash', `color-mix(in srgb, ${pendingOverrideColor} 46%, #ffffff)`);
+                            dot.style.fill = pendingOverrideColor;
+                            dot.classList.add('map-dot--override');
+                        }
+                        dot.classList.add('map-dot--texas-entry');
+                        dot.classList.remove('map-dot--deferred-load');
+                    });
+                    window.setTimeout(() => {
+                        deferredDots.forEach(dot => {
+                            const pendingBlinkClass = dot.dataset.mapPendingBlinkClass;
+                            const pendingBlinkDelay = dot.dataset.mapPendingBlinkDelay;
+                            if (pendingBlinkClass) dot.classList.add(pendingBlinkClass);
+                            if (pendingBlinkDelay) dot.style.setProperty('--map-dot-blink-delay', pendingBlinkDelay);
+                            dot.classList.remove('map-dot--texas-entry');
+                            dot.style.removeProperty('--map-texas-entry-target');
+                            dot.style.removeProperty('--map-texas-entry-flash');
+                            delete dot.dataset.mapPendingOverrideColor;
+                            delete dot.dataset.mapPendingBlinkClass;
+                            delete dot.dataset.mapPendingBlinkDelay;
+                            delete dot.dataset.mapDeferredOverride;
+                        });
+                    }, entryFlashMs);
+                }, revealDelayMs);
+            };
             let frameFlashTimerId = 0;
             const triggerFrameCategoryFlash = (targetClass, sourceControls) => {
                 if (!frame) return;
@@ -4809,7 +4866,7 @@ function softCloseModal() {
                     setDesktopCategoryState(firstToggleGroup.targetClass, true, { flashFrame: true });
                 };
                 const activateFirstToggleWhenReady = () => {
-                    if (hasActiveOverlayForViewport()) return;
+                    const shouldAutoActivateFirst = !hasActiveOverlayForViewport();
                     const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
                     const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
                     const startupStillPopulating = Boolean(
@@ -4818,16 +4875,17 @@ function softCloseModal() {
                         && (startupMode === 'sprinkle' || sweepEnabled)
                     );
                     if (!startupStillPopulating) {
-                        activateFirstForViewport();
+                        revealDeferredOverrideSet();
+                        if (shouldAutoActivateFirst) activateFirstForViewport();
                         return;
                     }
                     let pollCount = 0;
                     const maxPolls = 500;
                     const pollReadyState = () => {
-                        if (hasActiveOverlayForViewport()) return;
                         const isReady = !frame || frame.dataset.mapGlowInitialRevealDone === 'true';
                         if (isReady || pollCount >= maxPolls) {
-                            activateFirstForViewport();
+                            revealDeferredOverrideSet();
+                            if (!hasActiveOverlayForViewport()) activateFirstForViewport();
                             return;
                         }
                         pollCount += 1;
@@ -5074,6 +5132,7 @@ function softCloseModal() {
                     overrides.push({
                         x,
                         y,
+                        sourceSet: setName,
                         ...parsedPayload
                     });
                 });
@@ -5140,8 +5199,10 @@ function softCloseModal() {
             if (inferredHeight !== height) return false;
 
             const resolvedRows = rows.map(row => row.split(''));
+            const frame = map.closest('.pipeline-map-frame');
+            const shouldDeferTexasOverride = !(frame && frame.dataset.mapTexasOverridePrimed === 'true');
             const overrideStyleByCell = new Map();
-            overrides.forEach(({ x, y, hasValue, value, color, color2, blink, phase }) => {
+            overrides.forEach(({ x, y, hasValue, value, color, color2, blink, phase, sourceSet }) => {
                 if (!Number.isInteger(x) || !Number.isInteger(y)) return;
                 if (x < 0 || y < 0 || x >= width || y >= height) {
                     const valueLabel = hasValue ? value : '-';
@@ -5153,7 +5214,9 @@ function softCloseModal() {
                     resolvedRows[y][x] = value;
                 }
                 if (color || color2 || blink) {
-                    overrideStyleByCell.set(key, { color, color2, blink, phase: phase || 'sync' });
+                    const normalizedSourceSet = (sourceSet || '').toLowerCase();
+                    const deferLoad = normalizedSourceSet === 'texas' && shouldDeferTexasOverride;
+                    overrideStyleByCell.set(key, { color, color2, blink, phase: phase || 'sync', sourceSet: normalizedSourceSet, deferLoad });
                 } else {
                     overrideStyleByCell.delete(key);
                 }

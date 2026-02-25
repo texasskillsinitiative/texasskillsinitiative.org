@@ -1007,6 +1007,12 @@
         .map-dot { fill: var(--map-dot-water); opacity: 0.95; }
         .map-dot.is-land { fill: var(--map-dot-land); }
         .map-dot.map-dot--override { opacity: 1; }
+        .map-dot.map-dot--deferred-load {
+            transition: fill 0.28s cubic-bezier(0.2, 0.62, 0.22, 1);
+        }
+        .map-dot.map-dot--texas-entry {
+            animation: mapTexasOverrideEntry 0.44s cubic-bezier(0.2, 0.62, 0.22, 1) both;
+        }
         .map-dot.map-dot--blink-slow { animation: mapDotPulseSlow 2.8s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-dot.map-dot--blink-rapid { animation: mapDotPulseRapid 1.2s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
         .map-dot.map-dot--blink-fade { animation: mapDotPulseFade 3.4s infinite; animation-delay: var(--map-dot-blink-delay, 0s); }
@@ -1096,6 +1102,20 @@
             100% {
                 fill: var(--map-dot-hover-flash-runtime-from, var(--map-dot-hover-flash-from, var(--map-dot-base-fill)));
                 filter: var(--map-dot-hover-flash-runtime-filter-end, none);
+            }
+        }
+        @keyframes mapTexasOverrideEntry {
+            0% {
+                fill: var(--map-texas-entry-flash, #b7f2ff);
+                filter: drop-shadow(0 0 1.8px color-mix(in srgb, var(--map-texas-entry-flash, #b7f2ff) 62%, transparent));
+            }
+            56% {
+                fill: var(--map-texas-entry-flash, #b7f2ff);
+                filter: drop-shadow(0 0 1.2px color-mix(in srgb, var(--map-texas-entry-flash, #b7f2ff) 46%, transparent));
+            }
+            100% {
+                fill: var(--map-texas-entry-target, var(--map-dot-base-fill));
+                filter: none;
             }
         }
         @keyframes mapControlPulse {
