@@ -3704,11 +3704,7 @@ function softCloseModal() {
                 const breakOne = document.createElement('br');
                 breakOne.className = 'pipeline-map-title-break-mobile';
                 main.appendChild(breakOne);
-                main.appendChild(document.createTextNode(' Global'));
-                const breakTwo = document.createElement('br');
-                breakTwo.className = 'pipeline-map-title-break-mobile';
-                main.appendChild(breakTwo);
-                main.appendChild(document.createTextNode(' Pipeline'));
+                main.appendChild(document.createTextNode(' Global Pipeline'));
             };
             const setDesktopTitleMode = (isTitleMode) => {
                 if (!desktopTitleBox) return;

@@ -220,6 +220,11 @@
 - Troubleshooting suggestions: If mobile line breaks appear too tall, reduce .pipeline-map-title-box line-height or mobile title font size slightly while keeping break elements block-level.
 - Resolutions/outcomes: Mobile title now forces the requested breakpoints; pre-1.0 logo-click animation and transparent/blur-nav ideas are tracked as optional planned notes only.
 - Commit hash(es): none
+### 2026-02-24 21:26:13 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline title rendering in js/main.js so mobile displays exactly two lines (Texas Skills Initiative / Global Pipeline) by removing the extra mobile-only line break before Pipeline.
+- Troubleshooting suggestions: If text wraps unexpectedly on very narrow widths, slightly reduce mobile title font size or letter spacing in .pipeline-map-title-box media rules.
+- Resolutions/outcomes: Mobile title now maintains the requested two-line format without splitting Global and Pipeline.
+- Commit hash(es): pending
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`), treated prior run as unclean exit, and resumed from current working tree per user direction (restart Option 1 behavior).
 - Troubleshooting suggestions: If repository state appears inconsistent before next packet, run `git status` and `git log --oneline -n 5` first, then continue from the current `STATUS.md` map item.
 - Resolutions/outcomes: Recovery condition acknowledged and documented; active session continued without workspace reset.
@@ -1452,5 +1457,11 @@
 - Troubleshooting suggestions: If mobile line breaks appear too tall, reduce .pipeline-map-title-box line-height or mobile title font size slightly while keeping break elements block-level.
 - Resolutions/outcomes: Mobile title now forces the requested breakpoints; pre-1.0 logo-click animation and transparent/blur-nav ideas are tracked as optional planned notes only.
 - Commit hash(es): none
+### 2026-02-24 21:26:13 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline title rendering in js/main.js so mobile displays exactly two lines (Texas Skills Initiative / Global Pipeline) by removing the extra mobile-only line break before Pipeline.
+- Troubleshooting suggestions: If text wraps unexpectedly on very narrow widths, slightly reduce mobile title font size or letter spacing in .pipeline-map-title-box media rules.
+- Resolutions/outcomes: Mobile title now maintains the requested two-line format without splitting Global and Pipeline.
+- Commit hash(es): pending
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+
 
