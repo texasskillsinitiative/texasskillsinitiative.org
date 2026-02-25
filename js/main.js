@@ -2585,7 +2585,7 @@ function softCloseModal() {
             if (!frame.dataset.mapPointerDotSize) frame.dataset.mapPointerDotSize = String(mapGlowTuningDefaults.dotSize);
             if (!frame.dataset.mapPointerEase) frame.dataset.mapPointerEase = String(mapGlowTuningDefaults.easing);
             if (!frame.dataset.mapPointerLinger) frame.dataset.mapPointerLinger = String(mapGlowTuningDefaults.lingerMs);
-            if (!frame.dataset.mapPointerMode) frame.dataset.mapPointerMode = 'trail';
+            if (!frame.dataset.mapPointerMode) frame.dataset.mapPointerMode = 'flash';
             if (!frame.dataset.mapFlashCompactGlow) frame.dataset.mapFlashCompactGlow = mapFlashVisualDefaults.compactGlow ? 'true' : 'false';
             if (!frame.dataset.mapGlowForceOn) frame.dataset.mapGlowForceOn = 'false';
             if (!frame.dataset.mapGlowEnabled) frame.dataset.mapGlowEnabled = 'false';

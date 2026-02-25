@@ -1357,4 +1357,9 @@
 - Troubleshooting suggestions: Keep category labels in `# category_descriptions` exactly matching toggle category labels (case/spacing) so description and accent inheritance map correctly.
 - Resolutions/outcomes: Category metadata is now cleanly separated from point rows, MD is the single source of truth for category descriptions/colors, and legacy variable/parser paths are removed.
 - Commit hash(es): none
+### 2026-02-24 19:23:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a post-1.0 cleanup task to `STATUS.md` for legacy pointer/debug map code removal and changed pipeline map runtime defaults in `js/main.js` so pointer mode initializes to `flash` (single-dot behavior) instead of `trail` (large-circle behavior), independent of debug UI paths.
+- Troubleshooting suggestions: If any environment still shows large-circle behavior, inspect the frame dataset in DevTools for `data-map-pointer-mode` overrides on `.pipeline-map-frame` from stale cached markup/scripts.
+- Resolutions/outcomes: Single-dot hover flash mode is now the baseline default cursor behavior in normal runtime, and post-1.0 legacy cleanup is explicitly tracked.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
