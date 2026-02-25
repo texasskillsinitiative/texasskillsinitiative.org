@@ -1377,4 +1377,14 @@
 - Troubleshooting suggestions: If you later want the hint to clear on any interaction (not first-button-only), rebind `clearToggleGuidance` to all map controls instead of the first target controls.
 - Resolutions/outcomes: First-button guidance blink now persists until explicit user interaction with the first category control, matching requested behavior.
 - Commit hash(es): none
+### 2026-02-24 20:02:35 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline onboarding visual in `css/main.css` so `map-control--guided` runs continuous pulse animation (`infinite`), expanded toggle parsing in `js/main.js` to support grouped compact category blocks (`[Category]` + `Title|x|y|shape?|color?|size?`), and refactored `assets/pages/pipeline/pipeline-world-map.md` toggle rows to grouped category blocks using inherited defaults.
+- Troubleshooting suggestions: If any grouped row fails, keep category headers in square brackets and ensure compact row minimum is `Title|x|y`; optional fields can be omitted to inherit defaults.
+- Resolutions/outcomes: First-button guidance no longer appears to “expire” before click, and pipeline point definitions are now cleaner with reduced repeated category/default fields.
+- Commit hash(es): none
+### 2026-02-24 20:06:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `mapControlGuidePulse` keyframes in `css/main.css` to a discrete on/off blink cadence matching `b.b..b..b.b..b..`, switched guided animation timing to stepped infinite playback, and removed mobile/coarse-pointer suppression for `map-control--guided` while leaving reduced-motion suppression intact.
+- Troubleshooting suggestions: If cadence feels too fast/slow, adjust only animation duration (`1.6s`) while keeping 16-step percentage boundaries unchanged to preserve pattern shape.
+- Resolutions/outcomes: Guided first-button blink now follows the requested pulse pattern and runs on mobile as well.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

@@ -369,6 +369,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-24: Removed pipeline first-category auto-activation and replaced it with explicit empty-state helper guidance plus a brief first-toggle visual cue pulse so users discover controls without forced default state.
 - [Done] 2026-02-24: Added explicit section-marker parsing for pipeline map source blocks in `js/main.js` so `MAP-DATA`/`OVERRIDES`/`TOGGLE-SECTION` start-stop markers (including `##...##` forms) drive parser mode instead of single `#` header directives.
 - [Done] 2026-02-24: Updated pipeline first-toggle guidance cue to persist until the first category button is clicked (removed auto-timeout clear), preserving explicit discovery without forced activation.
+- [Done] 2026-02-24: Updated first-category guidance blink styling to continuous pulse (`infinite`) so it no longer stops after a few seconds before first click.
+- [Done] 2026-02-24: Added grouped compact toggle-row parsing in `js/main.js` (`[Category]` blocks with `Title|x|y|shape?|color?|size?`) and migrated pipeline toggle data to grouped category blocks in `assets/pages/pipeline/pipeline-world-map.md` to remove repeated category/default marker fields.
+- [Done] 2026-02-24: Retimed first-category guidance blink to requested discrete pattern (`b.b..b..b.b..b..`) and enabled guided blink on mobile/coarse-pointer viewports (reduced-motion guard still disables animation).
 - [Planned] 2026-02-24: Fully remove legacy pipeline map debug/tuning runtime code paths from `js/main.js` (currently disabled by `mapDebugUiEnabled` guard) after current UX/perf validation cycle.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).

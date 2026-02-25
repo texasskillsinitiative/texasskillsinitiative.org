@@ -1,3 +1,5 @@
+
+##MAP-DATA##
 # format: 0=land 1=water
 # rows: 181 columns x 89 rows
 # width=181 height=89
@@ -94,8 +96,9 @@
 1111111111111111111111111111111111111111100111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111110111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 1111111111111111111111111111111111111111111001111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+##/MAP-DATA##
 
-# overrides
+##OVERRIDES##
 # overrides formats:
 # - terrain + style: x|y|value|color1|blink|phase
 # - terrain + style (two colors): x|y|value|color1|color2|blink|phase
@@ -131,7 +134,7 @@
 # - apply style-only (pipe): @set_name|color|blink|phase
 # - apply style-only (equals): @set_name=|color|blink|phase
 
-##OVERRIDE-SECTION##
+#OVERRIDE-DATA#
 #Single Points
 #0|0|0|pink|rapid
 #1|1|yellow|slow
@@ -188,50 +191,64 @@ $texas={
 
 @texas=|var(--map-texas-color-1)|var(--map-texas-color-2)|blend|async
 
+#/OVERRIDE-DATA#
+##/OVERRIDES##
+
 ##TOGGLE-SECTION##
 # category_descriptions
 # format: Toggle Category|Category Description|Category Color
 # category color is optional; if present, all marker rows using "accent" in that category inherit it.
-Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|#A3E635
-Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|#C084FC
-Technical Review|Corridors under deep technical, risk, and feasibility review.|#FFC94A
-Reference Model|Operating benchmark corridors used as comparative calibration references.|#F97316
+
+01 Phase :: Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|#A3E635
+02 Phase :: Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|#C084FC
+03 Phase :: Technical Review|Corridors under deep technical, risk, and feasibility review.|#FFC94A
+04 Phase :: Refined Systems|Operating benchmark corridors used as comparative calibration references.|#F97316
 
 # toggles
-# format: Toggle Category|Title|x|y|shape|color|size
-# legacy trailing blink column is accepted but ignored.
-# UI note: category buttons are generated from Toggle Category labels and can show/hide each category.
-# UI note: category button border/text color follows the category marker color.
-# shape: circle or square, color: accent or CSS color.
-# x/y integer coordinates are centered on the target grid cell.
+# legacy full row (still supported): Toggle Category|Title|x|y|shape|color|size
+# grouped compact row: [Toggle Category], then Title|x|y|shape?|color?|size?
+# grouped defaults: shape=circle, color=accent (inherits category color), size=1
 
-Initial Evaluation|Ho Chi Minh City, Vietnam|143|45|circle|accent|1|slow
-Initial Evaluation|Hai Phong, Vietnam|142|38|circle|accent|1|slow
-Initial Evaluation|Da Nang, Vietnam|143|41|circle|accent|1|slow
-Initial Evaluation|Manila, Philippines|152|42|circle|accent|1|slow
-Initial Evaluation|Clark (Angeles), Philippines|152|41|circle|accent|1|slow
-Initial Evaluation|Cebu City, Philippines|154|45|circle|accent|1|slow
-Initial Evaluation|Davao, Philippines|154|48|circle|accent|1|slow
-Initial Evaluation|Dumaguete, Philippines|153|45|circle|accent|1|slow
-Initial Evaluation|Bangkok, Thailand|140|43|circle|accent|1|slow
-Initial Evaluation|Laem Chabang, Thailand|141|44|circle|accent|1|slow
-Initial Evaluation|Chennai, India|128|41|circle|accent|1|slow
-Initial Evaluation|Wroclaw, Poland|88|18|circle|accent|1|slow
-Initial Evaluation|Tangier, Morocco|75|29|circle|accent|1|slow
-Initial Evaluation|Dubai, UAE|112|35|circle|accent|1|slow
+[01 Phase :: Initial Evaluation]
+Ho Chi Minh City, Vietnam|143|45
+Hai Phong, Vietnam|142|38
+Da Nang, Vietnam|143|41
+Manila, Philippines|152|42
+Clark (Angeles), Philippines|152|41
+Cebu City, Philippines|154|45
+Davao, Philippines|154|48
+Dumaguete, Philippines|153|45
+Bangkok, Thailand|140|43
+Laem Chabang, Thailand|141|44
+Chennai, India|128|41
+Wroclaw, Poland|88|18
+Tangier, Morocco|75|29
+Dubai, UAE|112|35
 
-Structured Intake|Guatemala City, Guatemala|23|42|circle|accent|1|slow
-Structured Intake|San Salvador, El Salvador|24|42|circle|accent|1|slow
-Structured Intake|San José, Costa Rica|28|46|circle|accent|1|slow
-Structured Intake|Panama City, Panama|30|46|circle|accent|1|slow
-Structured Intake|Monterrey, Mexico|18|34|circle|accent|1|slow
+[02 Phase :: Structured Intake]
+Nassau, Bahamas|32|34
+San Juan, Puerto Rico|35|39
+Kingston, Jamaica|32|34
+Medellín, Colombia|32|47
 
-Technical Review|Nassau, Bahamas|32|34|circle|accent|1|slow
-Technical Review|San Juan, Puerto Rico|35|39|circle|accent|1|slow
-Technical Review|Kingston, Jamaica|32|34|circle|accent|1|slow
-Technical Review|Medellín, Colombia|32|47|circle|accent|1|slow
+[03 Phase :: Technical Review]
+Guatemala City, Guatemala|23|42
+San Salvador, El Salvador|24|42
+San José, Costa Rica|28|46
+Panama City, Panama|30|46
+Monterrey, Mexico|18|34
 
-Reference Model|Houston, United States (Texas)|23|32|circle|accent|1|slow
-Reference Model|Dallas–Fort Worth, United States (Texas)|23|29|circle|accent|1|slow
-Reference Model|San Antonio, United States (Texas)|21|31|circle|accent|1|slow
-
+[04 Phase :: Refined Systems]
+Houston, United States (Texas)|23|32
+DFW Metroplex, United States (Texas)|23|29
+San Antonio, United States (Texas)|21|31
+Starbase, United States (Texas)|20|35
+Temple, United States (Texas)|21|30
+Waco, United States (Texas)|21|30
+Burnet, United States (Texas)|20|30
+El Paso, United States (Texas)|16|30
+Baird, United States (Texas)|21|29
+Buffalo, United States (Texas)|23|30
+Commerce, United States (Texas)|24|29
+Church Point, United States (Louisianna)|25|31
+##/TOGGLE-SECTION##

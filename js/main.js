@@ -4836,6 +4836,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, mapControls);
                 }
+                if (nextState) clearToggleGuidance();
                 updateHelperCopy();
             };
             const setDesktopCategoryState = (targetClass, nextState, options = {}) => {
@@ -4859,6 +4860,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, desktopMapControls);
                 }
+                if (nextState) clearToggleGuidance();
                 updateHelperCopy();
             };
             toggleGroups.forEach(toggleGroup => {
@@ -4903,12 +4905,6 @@ function softCloseModal() {
             [firstMobileToggle, firstDesktopToggle].forEach((control) => {
                 if (control) control.classList.add('map-control--guided');
             });
-            if (firstMobileToggle) {
-                firstMobileToggle.addEventListener('click', clearToggleGuidance, { once: true });
-            }
-            if (firstDesktopToggle) {
-                firstDesktopToggle.addEventListener('click', clearToggleGuidance, { once: true });
-            }
             const runMapPostStartupReady = () => {
                 revealDeferredOverrideSet();
                 if (frame) frame.classList.remove('map-settings-pending');
@@ -4955,6 +4951,7 @@ function softCloseModal() {
             const categoryDescriptionLines = [];
             const toggleLines = [];
             let mode = 'rows';
+            let scopedToggleCategory = '';
             const isBinaryRow = (value) => /^[01]+$/.test(value);
             const isToggleRow = (value) => value.includes('|');
             const resolveOverrideColor = (rawColor) => {
@@ -5223,6 +5220,7 @@ function softCloseModal() {
                 }
                 if (hasMarker(line, ['toggle-section', 'toggle section'])) {
                     mode = 'toggles';
+                    scopedToggleCategory = '';
                     continue;
                 }
                 if (hasEndMarker(line, ['toggle-section', 'toggle section'])) {
@@ -5235,6 +5233,7 @@ function softCloseModal() {
                 }
                 if (hasMarker(line, ['toggles', 'toggle-data', 'toggle data'])) {
                     mode = 'toggles';
+                    scopedToggleCategory = '';
                     continue;
                 }
                 if (line.startsWith('#')) {
@@ -5248,6 +5247,7 @@ function softCloseModal() {
                     }
                     if (/^#\s*toggles\s*$/i.test(line)) {
                         mode = 'toggles';
+                        scopedToggleCategory = '';
                         continue;
                     }
                     const metaMatch = line.match(/width\s*=\s*(\d+)\s+height\s*=\s*(\d+)/i);
@@ -5270,6 +5270,13 @@ function softCloseModal() {
                     parseCoordinateSetUsage(line);
                     continue;
                 }
+                if (mode === 'toggles') {
+                    const categoryScopeMatch = line.match(/^\[\s*([^\]]+?)\s*\]$/);
+                    if (categoryScopeMatch) {
+                        scopedToggleCategory = categoryScopeMatch[1].trim();
+                        continue;
+                    }
+                }
                 if (isToggleRow(line)) {
                     if (mode === 'category_descriptions') {
                         categoryDescriptionLines.push(line);
@@ -5289,7 +5296,10 @@ function softCloseModal() {
                         continue;
                     }
                     mode = 'toggles';
-                    toggleLines.push(line);
+                    toggleLines.push({
+                        line,
+                        scopedCategory: scopedToggleCategory || ''
+                    });
                     continue;
                 }
                 console.warn(`[map] skipped unrecognized line in ${label}: "${line}"`);
@@ -5356,25 +5366,60 @@ function softCloseModal() {
                 });
                 // Toggle markers authored with integer grid coordinates should center on cells.
                 const resolveToggleCoordinate = (value) => (Number.isInteger(value) ? value + 0.5 : value);
-                const toggleMarkers = toggleLines.map(line => {
+                const toggleMarkers = toggleLines.map((toggleEntry) => {
+                    const line = typeof toggleEntry === 'string'
+                        ? toggleEntry
+                        : (toggleEntry && typeof toggleEntry.line === 'string' ? toggleEntry.line : '');
+                    const scopedCategory = toggleEntry && typeof toggleEntry === 'object'
+                        ? (toggleEntry.scopedCategory || '')
+                        : '';
                     const parts = line.split('|').map(part => part.trim());
-                    if (parts.length < 7) {
+                    if (!parts.length) {
                         console.warn(`[map] invalid toggle in ${label}: "${line}"`);
                         return null;
                     }
-                    const buttonLabel = parts[0] || 'Toggle';
+                    let buttonLabel = '';
+                    let markerLabel = '';
+                    let rawX = Number.NaN;
+                    let rawY = Number.NaN;
+                    let shapeRaw = 'circle';
+                    let colorRaw = 'accent';
+                    let sizeRaw = '1';
+                    const isLegacyFullRow = parts.length >= 7
+                        && Number.isFinite(Number(parts[2]))
+                        && Number.isFinite(Number(parts[3]));
+                    const isScopedCompactRow = Boolean(scopedCategory)
+                        && parts.length >= 3
+                        && Number.isFinite(Number(parts[1]))
+                        && Number.isFinite(Number(parts[2]));
+                    if (isLegacyFullRow) {
+                        buttonLabel = parts[0] || 'Toggle';
+                        markerLabel = parts[1] || buttonLabel;
+                        rawX = Number(parts[2]);
+                        rawY = Number(parts[3]);
+                        shapeRaw = parts[4] || 'circle';
+                        colorRaw = parts[5] || 'accent';
+                        sizeRaw = parts[6] || '1';
+                    } else if (isScopedCompactRow) {
+                        buttonLabel = scopedCategory;
+                        markerLabel = parts[0] || buttonLabel;
+                        rawX = Number(parts[1]);
+                        rawY = Number(parts[2]);
+                        shapeRaw = parts[3] || 'circle';
+                        colorRaw = parts[4] || 'accent';
+                        sizeRaw = parts[5] || '1';
+                    } else {
+                        console.warn(`[map] invalid toggle in ${label}: "${line}"`);
+                        return null;
+                    }
                     const categoryMeta = categoryMetaBySlug.get(slugify(buttonLabel)) || null;
                     const description = categoryMeta ? categoryMeta.description : '';
-                    const label = parts[1] || buttonLabel;
-                    const rawX = Number(parts[2]);
-                    const rawY = Number(parts[3]);
+                    const label = markerLabel;
                     const x = resolveToggleCoordinate(rawX);
                     const y = resolveToggleCoordinate(rawY);
-                    const shapeRaw = parts[4];
-                    const colorRaw = parts[5];
                     const shape = (shapeRaw || 'circle').toLowerCase();
                     const markerColorToken = resolveToggleColor(colorRaw || 'accent');
-                    const size = Number(parts[6]) || 4;
+                    const size = Number(sizeRaw) || 1;
                     const color = markerColorToken === 'accent'
                         ? (categoryMeta && categoryMeta.color ? categoryMeta.color : 'var(--map-accent)')
                         : (markerColorToken || 'var(--map-accent)');

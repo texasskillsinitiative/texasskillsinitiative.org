@@ -837,9 +837,9 @@
             opacity: 1;
         }
         .map-control--guided {
-            border-color: color-mix(in srgb, var(--map-control-color) 68%, var(--accent));
+            border-color: color-mix(in srgb, var(--map-control-color) 20%, var(--frame-border));
             opacity: 1;
-            animation: mapControlGuidePulse 0.9s ease-out 3;
+            animation: mapControlGuidePulse 2s ease-in-out infinite;
         }
         .map-control--layer-preview { --map-control-color: var(--page-text-dim); opacity: 0.85; }
         .map-control--layer-preview.is-active {
@@ -1140,16 +1140,19 @@
         }
         @keyframes mapControlGuidePulse {
             0% {
+                border-color: color-mix(in srgb, var(--map-control-color) 56%, var(--frame-border));
+                box-shadow: 0 0 0 1px color-mix(in srgb, var(--map-control-color) 32%, transparent), 0 0 9px color-mix(in srgb, var(--map-control-color) 16%, transparent);
+                background: color-mix(in srgb, var(--map-control-color) 8%, transparent);
+            }
+            50% {
+                border-color: color-mix(in srgb, var(--map-control-color) 20%, var(--frame-border));
                 box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-control-color) 0%, transparent);
                 background: color-mix(in srgb, var(--map-control-color) 0%, transparent);
-            }
-            30% {
-                box-shadow: 0 0 0 1px color-mix(in srgb, var(--map-control-color) 42%, transparent), 0 0 12px color-mix(in srgb, var(--map-control-color) 22%, transparent);
-                background: color-mix(in srgb, var(--map-control-color) 10%, transparent);
             }
             100% {
-                box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-control-color) 0%, transparent);
-                background: color-mix(in srgb, var(--map-control-color) 0%, transparent);
+                border-color: color-mix(in srgb, var(--map-control-color) 56%, var(--frame-border));
+                box-shadow: 0 0 0 1px color-mix(in srgb, var(--map-control-color) 32%, transparent), 0 0 9px color-mix(in srgb, var(--map-control-color) 16%, transparent);
+                background: color-mix(in srgb, var(--map-control-color) 8%, transparent);
             }
         }
         @keyframes mapFrameCategoryFlash {
@@ -2244,7 +2247,6 @@
                 transition: opacity 0.7s cubic-bezier(0.2, 0.62, 0.22, 1), visibility 0s linear 0.7s;
             }
             .map-control.is-active::after { animation: none; opacity: 0.28; }
-            .map-control--guided { animation: none; }
             .rubric-item:hover,
             .workflow-step:hover,
             .engagement-signal:hover,
