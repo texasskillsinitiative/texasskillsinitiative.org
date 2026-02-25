@@ -1054,6 +1054,10 @@
             transform-origin: center;
             transition: transform 0.18s ease, opacity 0.18s ease;
         }
+        .map-overlay.is-active .map-marker circle,
+        .map-overlay.is-active .map-marker rect {
+            animation: mapMarkerEntryFlash 0.64s cubic-bezier(0.2, 0.62, 0.22, 1) both;
+        }
         @media (hover: hover) and (pointer: fine) {
             .map-overlay .map-marker text {
                 opacity: 0;
@@ -1115,6 +1119,16 @@
             }
             100% {
                 fill: var(--map-texas-entry-target, var(--map-dot-base-fill));
+                filter: none;
+            }
+        }
+        @keyframes mapMarkerEntryFlash {
+            0% {
+                fill: #ffffff;
+                filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.85));
+            }
+            100% {
+                fill: var(--map-marker-target-fill, var(--map-accent));
                 filter: none;
             }
         }
@@ -2244,5 +2258,7 @@
             .map-overlay .map-marker text,
             .map-overlay .map-marker circle,
             .map-overlay .map-marker rect { transition: none; }
+            .map-overlay.is-active .map-marker circle,
+            .map-overlay.is-active .map-marker rect { animation: none; }
             .map-control.is-active::after { animation: none; opacity: 0; }
         }

@@ -3911,6 +3911,7 @@ function softCloseModal() {
                     rect.setAttribute('width', scaledSize * 2);
                     rect.setAttribute('height', scaledSize * 2);
                     rect.setAttribute('rx', Math.max(1, scaledSize * 0.35));
+                    rect.style.setProperty('--map-marker-target-fill', marker.color);
                     rect.style.fill = marker.color;
                     markerGroup.appendChild(rect);
                 } else {
@@ -3918,6 +3919,7 @@ function softCloseModal() {
                     circle.setAttribute('cx', marker.x);
                     circle.setAttribute('cy', marker.y);
                     circle.setAttribute('r', scaledSize);
+                    circle.style.setProperty('--map-marker-target-fill', marker.color);
                     circle.style.fill = marker.color;
                     markerGroup.appendChild(circle);
                 }
