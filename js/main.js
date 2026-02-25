@@ -5187,9 +5187,57 @@ function softCloseModal() {
                     });
                 });
             };
+            const isSectionStart = (lineValue, sectionName) => {
+                const escapedSection = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return new RegExp(`^(?:#{1,}\\s*)?${escapedSection}(?:\\s*#{0,})?$`, 'i').test(lineValue);
+            };
+            const isSectionEnd = (lineValue, sectionName) => {
+                const escapedSection = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return new RegExp(`^(?:#{1,}\\s*)?/\\s*${escapedSection}(?:\\s*#{0,})?$`, 'i').test(lineValue);
+            };
+            const hasMarker = (lineValue, names) => {
+                const nameList = Array.isArray(names) ? names : [names];
+                return nameList.some(name => isSectionStart(lineValue, name));
+            };
+            const hasEndMarker = (lineValue, names) => {
+                const nameList = Array.isArray(names) ? names : [names];
+                return nameList.some(name => isSectionEnd(lineValue, name));
+            };
 
             for (let lineIndex = 0; lineIndex < lines.length; lineIndex += 1) {
                 const line = lines[lineIndex];
+                if (hasMarker(line, ['map-data', 'map data'])) {
+                    mode = 'rows';
+                    continue;
+                }
+                if (hasEndMarker(line, ['map-data', 'map data'])) {
+                    mode = '';
+                    continue;
+                }
+                if (hasMarker(line, ['overrides', 'override-section', 'override-data'])) {
+                    mode = 'overrides';
+                    continue;
+                }
+                if (hasEndMarker(line, ['overrides', 'override-section', 'override-data'])) {
+                    mode = '';
+                    continue;
+                }
+                if (hasMarker(line, ['toggle-section', 'toggle section'])) {
+                    mode = 'toggles';
+                    continue;
+                }
+                if (hasEndMarker(line, ['toggle-section', 'toggle section'])) {
+                    mode = '';
+                    continue;
+                }
+                if (hasMarker(line, ['category_descriptions', 'category-descriptions', 'category descriptions'])) {
+                    mode = 'category_descriptions';
+                    continue;
+                }
+                if (hasMarker(line, ['toggles', 'toggle-data', 'toggle data'])) {
+                    mode = 'toggles';
+                    continue;
+                }
                 if (line.startsWith('#')) {
                     if (/^#\s*overrides\s*$/i.test(line)) {
                         mode = 'overrides';

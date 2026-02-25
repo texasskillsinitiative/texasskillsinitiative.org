@@ -1367,4 +1367,9 @@
 - Troubleshooting suggestions: If onboarding hint feels too subtle/strong, adjust guidance pulse duration/iterations in `.map-control--guided` and timeout in `js/main.js` (`3200ms`) together.
 - Resolutions/outcomes: Pipeline now starts with all categories off by default while still clearly guiding users to click a category; no forced initial marker load is applied.
 - Commit hash(es): none
+### 2026-02-24 19:49:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline map parser section-mode logic in `js/main.js` to support explicit start/stop markers for `MAP-DATA`, `OVERRIDES`, and `TOGGLE-SECTION` (including `##...##` variants and end markers), while keeping regular `#` note lines as comments.
+- Troubleshooting suggestions: If a section still fails to parse, verify marker spelling (`MAP-DATA`, `OVERRIDES`, `TOGGLE-SECTION`, optional `/` for end markers) and ensure coordinate/toggle row formats remain valid within each section.
+- Resolutions/outcomes: Parsing no longer depends on single `# overrides` style headers, so custom marker blocks in `pipeline-world-map.md` can drive mode selection without stripping notes.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
