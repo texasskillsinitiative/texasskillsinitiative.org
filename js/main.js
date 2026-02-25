@@ -3569,6 +3569,35 @@ function softCloseModal() {
         };
 
         const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const applyPhaseToggleLabel = (buttonNode, rawLabel) => {
+            if (!buttonNode) return;
+            const label = typeof rawLabel === 'string' ? rawLabel.trim() : '';
+            const phaseMatch = label.match(/^(\d{1,2})\s*phase\s*(::\s*.*)?$/i);
+            buttonNode.textContent = '';
+            if (!phaseMatch) {
+                buttonNode.textContent = label || 'Toggle';
+                return;
+            }
+            const phaseNumber = phaseMatch[1].padStart(2, '0');
+            const suffix = phaseMatch[2] || '';
+            const prefixWrap = document.createElement('span');
+            prefixWrap.className = 'map-control-phase-prefix';
+            const numberSpan = document.createElement('span');
+            numberSpan.className = 'map-control-phase-num';
+            numberSpan.textContent = phaseNumber;
+            const phaseSpan = document.createElement('span');
+            phaseSpan.className = 'map-control-phase-word';
+            phaseSpan.textContent = ' PHASE';
+            prefixWrap.appendChild(numberSpan);
+            prefixWrap.appendChild(phaseSpan);
+            buttonNode.appendChild(prefixWrap);
+            if (suffix) {
+                const suffixSpan = document.createElement('span');
+                suffixSpan.className = 'map-control-phase-suffix';
+                suffixSpan.textContent = ` ${suffix}`;
+                buttonNode.appendChild(suffixSpan);
+            }
+        };
         const resolveMdControls = (map) => {
             const frame = map.closest('.pipeline-map-frame');
             const sibling = frame ? frame.previousElementSibling : null;
@@ -3939,7 +3968,7 @@ function softCloseModal() {
                 btn.setAttribute('data-map-target', toggleGroup.targetClass);
                 btn.setAttribute('aria-pressed', 'false');
                 btn.style.setProperty('--map-control-color', representativeColor);
-                btn.textContent = toggleGroup.buttonLabel;
+                applyPhaseToggleLabel(btn, toggleGroup.buttonLabel);
                 controls.appendChild(btn);
                 const locationSummary = locationSummaryByTarget.get(toggleGroup.targetClass) || 'No mapped locations listed.';
                 const popupText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
@@ -3971,7 +4000,7 @@ function softCloseModal() {
                     desktopInlineButton.setAttribute('data-map-target', toggleGroup.targetClass);
                     desktopInlineButton.setAttribute('aria-pressed', 'false');
                     desktopInlineButton.style.setProperty('--map-control-color', representativeColor);
-                    desktopInlineButton.textContent = toggleGroup.buttonLabel;
+                    applyPhaseToggleLabel(desktopInlineButton, toggleGroup.buttonLabel);
                     desktopInlineControls.appendChild(desktopInlineButton);
                 }
 
@@ -4751,12 +4780,21 @@ function softCloseModal() {
                     return mobileView ? !desktopOverlay : desktopOverlay;
                 });
             };
+            let helperDismissed = false;
+            const dismissHelperCopy = () => {
+                helperDismissed = true;
+                if (!helper) return;
+                helper.classList.add('is-dismissed');
+                helper.classList.remove('is-empty');
+            };
             const updateHelperCopy = () => {
                 if (!helper) return;
+                if (helperDismissed) {
+                    helper.classList.add('is-dismissed');
+                    return;
+                }
                 const hasActive = hasActiveOverlayForViewport();
-                helper.textContent = hasActive
-                    ? 'Click categories to toggle markers. You can leave multiple categories on at once.'
-                    : 'Select a category to display map markers and details.';
+                helper.textContent = 'Select a category to display map markers and details.';
                 helper.classList.toggle('is-empty', !hasActive);
             };
             let deferredOverrideRevealDone = false;
@@ -4836,6 +4874,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, mapControls);
                 }
+                if (nextState) dismissHelperCopy();
                 if (nextState) clearToggleGuidance();
                 updateHelperCopy();
             };
@@ -4860,6 +4899,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, desktopMapControls);
                 }
+                if (nextState) dismissHelperCopy();
                 if (nextState) clearToggleGuidance();
                 updateHelperCopy();
             };

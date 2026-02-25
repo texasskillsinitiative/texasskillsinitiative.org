@@ -372,6 +372,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-24: Updated first-category guidance blink styling to continuous pulse (`infinite`) so it no longer stops after a few seconds before first click.
 - [Done] 2026-02-24: Added grouped compact toggle-row parsing in `js/main.js` (`[Category]` blocks with `Title|x|y|shape?|color?|size?`) and migrated pipeline toggle data to grouped category blocks in `assets/pages/pipeline/pipeline-world-map.md` to remove repeated category/default marker fields.
 - [Done] 2026-02-24: Retimed first-category guidance blink to requested discrete pattern (`b.b..b..b.b..b..`) and enabled guided blink on mobile/coarse-pointer viewports (reduced-motion guard still disables animation).
+- [Done] 2026-02-24: Normalized pipeline category toggle button labels to tab-style phase format (`NN PHASE`, e.g., `03 PHASE`) for both mobile control grid and desktop inline toggle row, without changing category key matching.
+- [Done] 2026-02-24: Replaced strict label rewrite with styling-only phase emphasis on pipeline toggles: preserve full source label text (`NN Phase :: ...`), render `NN PHASE` as bold lead text with slightly larger digits, and keep `:: ...` suffix unchanged.
+- [Done] 2026-02-24: Updated pipeline helper prompt behavior to dismiss permanently after first toggle activation and hide without layout shift by reserving helper-slot height in CSS.
 - [Planned] 2026-02-24: Fully remove legacy pipeline map debug/tuning runtime code paths from `js/main.js` (currently disabled by `mapDebugUiEnabled` guard) after current UX/perf validation cycle.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).

@@ -658,10 +658,17 @@
             line-height: 1.4;
             color: var(--page-text-dim);
             opacity: 0.9;
+            min-height: calc(0.64rem * 1.4);
+            transition: opacity 0.24s ease, visibility 0s linear 0.24s;
         }
         .map-controls-helper.is-empty {
             color: color-mix(in srgb, var(--accent) 62%, var(--page-text-dim));
             opacity: 1;
+        }
+        .map-controls-helper.is-dismissed {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
         .pipeline-map-frame .map-category-popup-layer {
             position: absolute;
@@ -829,6 +836,22 @@
             transition: border-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, background 0.2s ease;
             opacity: 0.75;
             position: relative;
+        }
+        .map-control-phase-prefix {
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .map-control-phase-num {
+            font-size: 1.12em;
+            font-weight: 800;
+        }
+        .map-control-phase-word {
+            font-size: 1em;
+            font-weight: 700;
+        }
+        .map-control-phase-suffix {
+            font-weight: 500;
+            opacity: 0.92;
         }
         .map-control.is-active {
             border-color: var(--map-control-color);

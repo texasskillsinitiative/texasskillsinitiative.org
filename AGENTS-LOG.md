@@ -1387,4 +1387,19 @@
 - Troubleshooting suggestions: If cadence feels too fast/slow, adjust only animation duration (`1.6s`) while keeping 16-step percentage boundaries unchanged to preserve pattern shape.
 - Resolutions/outcomes: Guided first-button blink now follows the requested pulse pattern and runs on mobile as well.
 - Commit hash(es): none
+### 2026-02-24 20:17:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline toggle button label rendering in `js/main.js` with phase-style formatting helper so category buttons display `NN PHASE` (for example `03 PHASE`) across both mobile map controls and desktop inline toggle controls.
+- Troubleshooting suggestions: If a label does not convert to `NN PHASE`, ensure the category name begins with a numeric phase prefix (e.g., `03 Phase :: ...`).
+- Resolutions/outcomes: Toggle labels now visually align with top-tab off-state style while preserving internal category matching and data wiring.
+- Commit hash(es): none
+### 2026-02-24 20:20:38 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced phase label rewrite with styling-only rendering in `js/main.js` + `css/main.css`: toggle labels now preserve full source text, with `NN PHASE` rendered as emphasized lead segment (slightly larger digits) and the `:: ...` suffix preserved unchanged.
+- Troubleshooting suggestions: If a label does not receive phase emphasis, ensure it starts with numeric phase prefix format (`NN Phase`).
+- Resolutions/outcomes: Pipeline buttons keep full category context while matching requested tab-like emphasis for the phase prefix only.
+- Commit hash(es): none
+### 2026-02-24 20:23:58 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline helper prompt lifecycle in `js/main.js` + `css/main.css` so the select-category helper fully dismisses on first category activation and remains hidden, while preserving layout spacing using a fixed helper slot height to avoid object movement or blank-gap collapse.
+- Troubleshooting suggestions: If you want helper visibility restored on full section reset, reinitialize `helperDismissed` during map teardown/rebuild and remove `is-dismissed` before first render.
+- Resolutions/outcomes: Helper text disappears after first toggle activation without shifting nearby map objects.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
