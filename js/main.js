@@ -3645,7 +3645,7 @@ function softCloseModal() {
                         mapShell.appendChild(helper);
                     }
                 }
-                helper.textContent = 'Click a category to toggle map markers. You can leave multiple categories on at once.';
+                helper.textContent = 'Select a category to display map markers and details.';
             }
             let desktopInlineControls = null;
             if (mapShell) {
@@ -4741,6 +4741,24 @@ function softCloseModal() {
             const categoryPopups = frame
                 ? frame.querySelectorAll('.map-category-popup[data-map-popup-target]')
                 : [];
+            const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
+            const isDesktopOverlay = (overlay) => Array.from(overlay.classList).some(cls => cls.endsWith('--desktop'));
+            const hasActiveOverlayForViewport = () => {
+                const mobileView = isMobileViewport();
+                return Array.from(overlays).some(overlay => {
+                    if (!overlay.classList.contains('is-active')) return false;
+                    const desktopOverlay = isDesktopOverlay(overlay);
+                    return mobileView ? !desktopOverlay : desktopOverlay;
+                });
+            };
+            const updateHelperCopy = () => {
+                if (!helper) return;
+                const hasActive = hasActiveOverlayForViewport();
+                helper.textContent = hasActive
+                    ? 'Click categories to toggle markers. You can leave multiple categories on at once.'
+                    : 'Select a category to display map markers and details.';
+                helper.classList.toggle('is-empty', !hasActive);
+            };
             let deferredOverrideRevealDone = false;
             const revealDeferredOverrideSet = () => {
                 if (deferredOverrideRevealDone) return;
@@ -4818,6 +4836,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, mapControls);
                 }
+                updateHelperCopy();
             };
             const setDesktopCategoryState = (targetClass, nextState, options = {}) => {
                 const desktopTargetClass = `${targetClass}--desktop`;
@@ -4840,6 +4859,7 @@ function softCloseModal() {
                 if (nextState && options.flashFrame !== false) {
                     triggerFrameCategoryFlash(targetClass, desktopMapControls);
                 }
+                updateHelperCopy();
             };
             toggleGroups.forEach(toggleGroup => {
                 setCategoryState(toggleGroup.targetClass, false, { flashFrame: false });
@@ -4863,61 +4883,63 @@ function softCloseModal() {
                     setDesktopCategoryState(target, nextState, { flashFrame: nextState });
                 });
             });
-            const firstToggleGroup = toggleGroups[0];
-            if (firstToggleGroup) {
-                const isMobileViewport = () => window.matchMedia('(max-width: 768px)').matches;
-                const isDesktopOverlay = (overlay) => Array.from(overlay.classList).some(cls => cls.endsWith('--desktop'));
-                const hasActiveOverlayForViewport = () => {
-                    const mobileView = isMobileViewport();
-                    return Array.from(overlays).some(overlay => {
-                        if (!overlay.classList.contains('is-active')) return false;
-                        const desktopOverlay = isDesktopOverlay(overlay);
-                        return mobileView ? !desktopOverlay : desktopOverlay;
-                    });
-                };
-                const activateFirstForViewport = () => {
-                    if (isMobileViewport()) {
-                        setCategoryState(firstToggleGroup.targetClass, true, { flashFrame: true });
+            updateHelperCopy();
+            window.addEventListener('resize', updateHelperCopy);
+            const firstToggleTarget = toggleGroups[0] ? toggleGroups[0].targetClass : '';
+            const firstMobileToggle = firstToggleTarget
+                ? Array.from(mapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
+                : null;
+            const firstDesktopToggle = firstToggleTarget
+                ? Array.from(desktopMapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
+                : null;
+            let guidanceCleared = false;
+            const clearToggleGuidance = () => {
+                if (guidanceCleared) return;
+                guidanceCleared = true;
+                [firstMobileToggle, firstDesktopToggle].forEach((control) => {
+                    if (control) control.classList.remove('map-control--guided');
+                });
+            };
+            [firstMobileToggle, firstDesktopToggle].forEach((control) => {
+                if (control) control.classList.add('map-control--guided');
+            });
+            mapControls.forEach(control => {
+                control.addEventListener('click', clearToggleGuidance, { once: true });
+            });
+            desktopMapControls.forEach(control => {
+                control.addEventListener('click', clearToggleGuidance, { once: true });
+            });
+            window.setTimeout(clearToggleGuidance, 3200);
+            const runMapPostStartupReady = () => {
+                revealDeferredOverrideSet();
+                if (frame) frame.classList.remove('map-settings-pending');
+            };
+            const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
+            const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
+            const startupStillPopulating = Boolean(
+                frame
+                && frame.dataset.mapGlowInitialRevealDone !== 'true'
+                && (startupMode === 'sprinkle' || sweepEnabled)
+            );
+            if (!startupStillPopulating) {
+                runMapPostStartupReady();
+            } else {
+                let pollCount = 0;
+                const maxPolls = 500;
+                const pollReadyState = () => {
+                    const isReady = !frame || frame.dataset.mapGlowInitialRevealDone === 'true';
+                    if (isReady || pollCount >= maxPolls) {
+                        runMapPostStartupReady();
                         return;
                     }
-                    setDesktopCategoryState(firstToggleGroup.targetClass, true, { flashFrame: true });
-                };
-                const activateFirstToggleWhenReady = () => {
-                    const shouldAutoActivateFirst = !hasActiveOverlayForViewport();
-                    const startupMode = frame && frame.dataset.mapGlowStartupMode === 'sprinkle' ? 'sprinkle' : 'sweep';
-                    const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
-                    const startupStillPopulating = Boolean(
-                        frame
-                        && frame.dataset.mapGlowInitialRevealDone !== 'true'
-                        && (startupMode === 'sprinkle' || sweepEnabled)
-                    );
-                    if (!startupStillPopulating) {
-                        revealDeferredOverrideSet();
-                        if (shouldAutoActivateFirst) activateFirstForViewport();
-                        return;
-                    }
-                    let pollCount = 0;
-                    const maxPolls = 500;
-                    const pollReadyState = () => {
-                        const isReady = !frame || frame.dataset.mapGlowInitialRevealDone === 'true';
-                        if (isReady || pollCount >= maxPolls) {
-                            revealDeferredOverrideSet();
-                            if (!hasActiveOverlayForViewport()) activateFirstForViewport();
-                            return;
-                        }
-                        pollCount += 1;
-                        window.setTimeout(pollReadyState, 40);
-                    };
-                    pollReadyState();
+                    pollCount += 1;
+                    window.setTimeout(pollReadyState, 40);
                 };
                 window.requestAnimationFrame(() => {
                     window.requestAnimationFrame(() => {
-                        activateFirstToggleWhenReady();
-                        if (frame) frame.classList.remove('map-settings-pending');
+                        pollReadyState();
                     });
                 });
-            } else if (frame) {
-                frame.classList.remove('map-settings-pending');
             }
         };
 

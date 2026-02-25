@@ -1362,4 +1362,9 @@
 - Troubleshooting suggestions: If any environment still shows large-circle behavior, inspect the frame dataset in DevTools for `data-map-pointer-mode` overrides on `.pipeline-map-frame` from stale cached markup/scripts.
 - Resolutions/outcomes: Single-dot hover flash mode is now the baseline default cursor behavior in normal runtime, and post-1.0 legacy cleanup is explicitly tracked.
 - Commit hash(es): none
+### 2026-02-24 19:31:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline toggle onboarding in `js/main.js` and `css/main.css` by removing first-category auto-activation, adding viewport-aware empty-state helper copy updates, preserving startup-ready/deferred-override sequencing without forced category enablement, and introducing a short first-toggle guidance pulse (`map-control--guided`) that clears on first user click or timeout.
+- Troubleshooting suggestions: If onboarding hint feels too subtle/strong, adjust guidance pulse duration/iterations in `.map-control--guided` and timeout in `js/main.js` (`3200ms`) together.
+- Resolutions/outcomes: Pipeline now starts with all categories off by default while still clearly guiding users to click a category; no forced initial marker load is applied.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

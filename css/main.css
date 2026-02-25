@@ -659,6 +659,10 @@
             color: var(--page-text-dim);
             opacity: 0.9;
         }
+        .map-controls-helper.is-empty {
+            color: color-mix(in srgb, var(--accent) 62%, var(--page-text-dim));
+            opacity: 1;
+        }
         .pipeline-map-frame .map-category-popup-layer {
             position: absolute;
             inset: 0;
@@ -831,6 +835,11 @@
             color: var(--map-control-color);
             background: color-mix(in srgb, var(--map-control-color) 10%, transparent);
             opacity: 1;
+        }
+        .map-control--guided {
+            border-color: color-mix(in srgb, var(--map-control-color) 68%, var(--accent));
+            opacity: 1;
+            animation: mapControlGuidePulse 0.9s ease-out 3;
         }
         .map-control--layer-preview { --map-control-color: var(--page-text-dim); opacity: 0.85; }
         .map-control--layer-preview.is-active {
@@ -1128,6 +1137,20 @@
             0% { opacity: 0.22; transform: scale(1); }
             68% { opacity: 0; transform: scale(1.045); }
             100% { opacity: 0; transform: scale(1.045); }
+        }
+        @keyframes mapControlGuidePulse {
+            0% {
+                box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-control-color) 0%, transparent);
+                background: color-mix(in srgb, var(--map-control-color) 0%, transparent);
+            }
+            30% {
+                box-shadow: 0 0 0 1px color-mix(in srgb, var(--map-control-color) 42%, transparent), 0 0 12px color-mix(in srgb, var(--map-control-color) 22%, transparent);
+                background: color-mix(in srgb, var(--map-control-color) 10%, transparent);
+            }
+            100% {
+                box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-control-color) 0%, transparent);
+                background: color-mix(in srgb, var(--map-control-color) 0%, transparent);
+            }
         }
         @keyframes mapFrameCategoryFlash {
             0% {
@@ -2221,6 +2244,7 @@
                 transition: opacity 0.7s cubic-bezier(0.2, 0.62, 0.22, 1), visibility 0s linear 0.7s;
             }
             .map-control.is-active::after { animation: none; opacity: 0.28; }
+            .map-control--guided { animation: none; }
             .rubric-item:hover,
             .workflow-step:hover,
             .engagement-signal:hover,
@@ -2253,4 +2277,5 @@
             .map-overlay.is-active .map-marker circle,
             .map-overlay.is-active .map-marker rect { animation: none; }
             .map-control.is-active::after { animation: none; opacity: 0; }
+            .map-control--guided { animation: none; }
         }

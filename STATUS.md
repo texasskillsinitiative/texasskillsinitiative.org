@@ -366,6 +366,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-24: Removed legacy category-color variable dependency and legacy toggle parsing paths: deleted `--map-toggle-*` CSS vars in `css/main.css` and removed old in-row category description/first-row anchoring parser logic in `js/main.js`.
 - [Done] 2026-02-24: Matched mobile pipeline category open/fade timing to desktop cadence by slowing mobile description reveal/collapse transitions and increasing mobile frame category-flash duration to `1.1s` (timing-only adjustment; no content/logic changes).
 - [Done] 2026-02-24: Improved pipeline map readability by increasing desktop popup text size and mobile category-description text size; synced desktop popup measurement/render font baselines in `js/main.js` so larger popup copy retains stable zone-constrained placement.
+- [Done] 2026-02-24: Removed pipeline first-category auto-activation and replaced it with explicit empty-state helper guidance plus a brief first-toggle visual cue pulse so users discover controls without forced default state.
 - [Planned] 2026-02-24: Fully remove legacy pipeline map debug/tuning runtime code paths from `js/main.js` (currently disabled by `mapDebugUiEnabled` guard) after current UX/perf validation cycle.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
