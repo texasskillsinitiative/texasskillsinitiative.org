@@ -1372,4 +1372,9 @@
 - Troubleshooting suggestions: If a section still fails to parse, verify marker spelling (`MAP-DATA`, `OVERRIDES`, `TOGGLE-SECTION`, optional `/` for end markers) and ensure coordinate/toggle row formats remain valid within each section.
 - Resolutions/outcomes: Parsing no longer depends on single `# overrides` style headers, so custom marker blocks in `pipeline-world-map.md` can drive mode selection without stripping notes.
 - Commit hash(es): none
+### 2026-02-24 19:52:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted pipeline first-toggle onboarding cue in `js/main.js` so `map-control--guided` no longer auto-clears on timeout and now clears only when the first category toggle is clicked (mobile or desktop control lane).
+- Troubleshooting suggestions: If you later want the hint to clear on any interaction (not first-button-only), rebind `clearToggleGuidance` to all map controls instead of the first target controls.
+- Resolutions/outcomes: First-button guidance blink now persists until explicit user interaction with the first category control, matching requested behavior.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

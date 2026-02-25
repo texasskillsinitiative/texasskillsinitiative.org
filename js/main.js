@@ -4903,13 +4903,12 @@ function softCloseModal() {
             [firstMobileToggle, firstDesktopToggle].forEach((control) => {
                 if (control) control.classList.add('map-control--guided');
             });
-            mapControls.forEach(control => {
-                control.addEventListener('click', clearToggleGuidance, { once: true });
-            });
-            desktopMapControls.forEach(control => {
-                control.addEventListener('click', clearToggleGuidance, { once: true });
-            });
-            window.setTimeout(clearToggleGuidance, 3200);
+            if (firstMobileToggle) {
+                firstMobileToggle.addEventListener('click', clearToggleGuidance, { once: true });
+            }
+            if (firstDesktopToggle) {
+                firstDesktopToggle.addEventListener('click', clearToggleGuidance, { once: true });
+            }
             const runMapPostStartupReady = () => {
                 revealDeferredOverrideSet();
                 if (frame) frame.classList.remove('map-settings-pending');
