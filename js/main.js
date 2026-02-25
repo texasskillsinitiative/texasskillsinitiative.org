@@ -5274,14 +5274,11 @@ function softCloseModal() {
                         ? parts[6]
                         : (hasCategoryAndTitle ? parts[5] : parts[4]);
                     const shape = (shapeRaw || 'circle').toLowerCase();
-                    const colorToken = (colorRaw || 'accent').toLowerCase();
+                    const colorTokenRaw = (colorRaw || 'accent').trim() || 'accent';
+                    const colorToken = colorTokenRaw.toLowerCase();
                     const size = Number(hasCategoryDescriptionAndTitle
                         ? parts[7]
                         : (hasCategoryAndTitle ? parts[6] : parts[5])) || 4;
-                    const categoryColorToken = `--map-toggle-${slugify(buttonLabel)}`;
-                    const color = colorToken === 'accent'
-                        ? `var(${categoryColorToken}, var(--map-accent))`
-                        : colorToken;
                     return {
                         buttonLabel,
                         description,
@@ -5290,7 +5287,8 @@ function softCloseModal() {
                         y,
                         shape: shape === 'square' ? 'square' : 'circle',
                         size,
-                        color,
+                        colorToken,
+                        colorValue: colorTokenRaw,
                         targetClass: `overlay-${slugify(buttonLabel)}`
                     };
                 }).filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
@@ -5300,18 +5298,37 @@ function softCloseModal() {
                 toggleMarkers.forEach(marker => {
                     let group = toggleGroupsMap.get(marker.targetClass);
                     if (!group) {
+                        const categoryColorToken = `--map-toggle-${slugify(marker.buttonLabel)}`;
+                        const fallbackCategoryColor = `var(${categoryColorToken}, var(--map-accent))`;
+                        const groupAccentColor = marker.colorToken === 'accent'
+                            ? fallbackCategoryColor
+                            : marker.colorValue;
                         group = {
                             targetClass: marker.targetClass,
                             buttonLabel: marker.buttonLabel,
                             description: marker.description || '',
-                            markers: []
+                            markers: [],
+                            accentColor: groupAccentColor
                         };
                         toggleGroupsMap.set(marker.targetClass, group);
                         toggleGroups.push(group);
                     } else if (!group.description && marker.description) {
                         group.description = marker.description;
                     }
-                    group.markers.push(marker);
+                    const resolvedMarkerColor = marker.colorToken === 'accent'
+                        ? group.accentColor
+                        : marker.colorValue;
+                    group.markers.push({
+                        buttonLabel: marker.buttonLabel,
+                        description: marker.description,
+                        label: marker.label,
+                        x: marker.x,
+                        y: marker.y,
+                        shape: marker.shape,
+                        size: marker.size,
+                        color: resolvedMarkerColor,
+                        targetClass: marker.targetClass
+                    });
                 });
 
                 const controls = resolveMdControls(map);

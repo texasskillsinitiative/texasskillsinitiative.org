@@ -1337,4 +1337,19 @@
 - Troubleshooting suggestions: If the tail still feels too long, reduce duration to ~`1.9s` while preserving `20%` peak to keep the same fade-in/fade-out ratio.
 - Resolutions/outcomes: Frame flash now fades out significantly slower while maintaining fast entry; selecting a different category still overrides/restarts the active flash immediately.
 - Commit hash(es): none
+### 2026-02-24 18:31:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline category color mapping to remove blue from `Initial Evaluation` by changing `--map-toggle-initial-evaluation` in `css/main.css` for both theme blocks (dark and light variants) to red tones.
+- Troubleshooting suggestions: If you want a less aggressive red, swap to a warmer amber/crimson while keeping it non-blue so it remains distinct from Texas override effects.
+- Resolutions/outcomes: `Initial Evaluation` markers/toggle accents no longer use blue, reducing color collision with the Texas override blue treatment.
+- Commit hash(es): none
+### 2026-02-24 18:35:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline toggle marker color resolution in `js/main.js` to be category-block anchored from MD: for each category group, the first row defines group accent color (explicit color token if present, otherwise fallback CSS var), and all subsequent rows using `accent` inherit that anchored group color.
+- Troubleshooting suggestions: To set a category color from MD, place the desired color token on the first row for that category and leave remaining rows as `accent`.
+- Resolutions/outcomes: Category color reference is now driven by the first entry of each category block in `pipeline-world-map.md`, restoring MD-first control for category color mapping.
+- Commit hash(es): none
+### 2026-02-24 18:37:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed temporary CSS red fallback for `Initial Evaluation` by updating `--map-toggle-initial-evaluation` to `var(--accent)` in both theme variable blocks of `css/main.css`, keeping MD first-row category color as the intended authority.
+- Troubleshooting suggestions: If a category appears gold unexpectedly, set an explicit non-`accent` color token on that category’s first MD row so inherited `accent` rows pick up your chosen color.
+- Resolutions/outcomes: Category colors are no longer hard-pushed to red in CSS; first-row MD colors can now drive category identity without CSS collision.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

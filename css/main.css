@@ -23,7 +23,7 @@
             --img-placeholder: #161f30;
             --status-green: #10b981;
             --map-accent: var(--accent);
-            --map-toggle-initial-evaluation: #38bdf8;
+            --map-toggle-initial-evaluation: var(--accent);
             --map-toggle-structured-intake: #f59e0b;
             --map-toggle-technical-review: #22c55e;
             --map-toggle-reference-model: #f472b6;
@@ -50,7 +50,7 @@
             --accent-soft: color-mix(in srgb, var(--accent) 10%, transparent);
             --img-placeholder: #e2e8f0;
             --map-accent: #2f66ff;
-            --map-toggle-initial-evaluation: #1d4ed8;
+            --map-toggle-initial-evaluation: var(--accent);
             --map-toggle-structured-intake: #b45309;
             --map-toggle-technical-review: #15803d;
             --map-toggle-reference-model: #be185d;

@@ -35,7 +35,7 @@
 1111111110000000000000000000000000011111111111111111111111111111111111111100001111111110111101100000000000001100000000000000000000000000000000000000011101111110111111111111111111111
 1111111111000000000000000000000000011111111111111111111111111111111111111111111000000111111111111111000000000000000000000000000000000000000000000000111100111000111111111111111111111
 1111111111000000000000000000000000111111111111111111111111111111111111111110000000000111111111111111000000000000000000000000000000000000000000000000011111101111111111111111111111111
-1111111111100000000000000000000001111111101111111111111111111111111111111100000000000001111111111111000000000000000000000000000000000000000000000000011111101111111111111111111111111
+1111111111100000000000000000000001111111111111111111111111111111111111111100000000000001111111111111000000000000000000000000000000000000000000000000011111101111111111111111111111111
 1111111111101000000000000000000011111111111111111111111111111111111111111100000000000000111000011110000000000000000000000000000000000000000000000000001111111111111111111111111111111
 1111111111101000000000001011110111111111111111111111111111111111111111111000000000000000000000000000000000001000000000000000000000000000000000000000000111111111111111111111111111111
 1111111111101000000000111111110111111111111111111111111111111111111111110000000000000000000000000000000000001100000000000000000000000000000000000000000111111111111111111111111111111
@@ -211,7 +211,7 @@ $texas={
 #Latin America Regions|Belton|62|58|circle|accent|4|slow
 #Southeast Asia Regions|Ft. Hood|132|38|square|accent|4|rapid
 
-Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|1x1|0|0|circle|accent|1|slow
+Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|1x1|0|0|circle|#A3E635|1|slow
 Initial Evaluation|Ho Chi Minh City, Vietnam|143|45|circle|accent|1|slow
 Initial Evaluation|Hai Phong, Vietnam|142|38|circle|accent|1|slow
 Initial Evaluation|Da Nang, Vietnam|143|41|circle|accent|1|slow
@@ -226,16 +226,16 @@ Initial Evaluation|Chennai, India|128|41|circle|accent|1|slow
 Initial Evaluation|Wroclaw, Poland|88|18|circle|accent|1|slow
 Initial Evaluation|Tangier, Morocco|75|29|circle|accent|1|slow
 Initial Evaluation|Dubai, UAE|112|35|circle|accent|1|slow
-Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|Guatemala City, Guatemala|23|42|circle|accent|1|slow
+Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|Guatemala City, Guatemala|23|42|circle|#FFC94A|1|slow
 Structured Intake|San Salvador, El Salvador|24|42|circle|accent|1|slow
 Structured Intake|San José, Costa Rica|28|46|circle|accent|1|slow
 Structured Intake|Panama City, Panama|30|46|circle|accent|1|slow
 Structured Intake|Monterrey, Mexico|18|34|circle|accent|1|slow
-Technical Review|Corridors under deep technical, risk, and feasibility review.|Nassau, Bahamas|32|34|circle|accent|1|slow
+Technical Review|Corridors under deep technical, risk, and feasibility review.|Nassau, Bahamas|32|34|circle|#C084FC|1|slow
 Technical Review|San Juan, Puerto Rico|35|39|circle|accent|1|slow
 Technical Review|Kingston, Jamaica|32|34|circle|accent|1|slow
 Technical Review|Medellín, Colombia|32|47|circle|accent|1|slow
-Reference Model|Operating benchmark corridors used as comparative calibration references.|Houston, United States (Texas)|23|32|circle|accent|1|slow
+Reference Model|Operating benchmark corridors used as comparative calibration references.|Houston, United States (Texas)|23|32|circle|#F97316|1|slow
 Reference Model|Dallas–Fort Worth, United States (Texas)|23|29|circle|accent|1|slow
 Reference Model|San Antonio, United States (Texas)|21|31|circle|accent|1|slow
 
