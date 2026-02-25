@@ -357,6 +357,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-24: Scoped deferred `@texas` override activation to first-load only by persisting a frame-level primed flag after reveal; subsequent map visits/renders now load Texas overrides immediately with the map.
 - [Done] 2026-02-24: Fixed first-load deferred Texas override rendering artifacts by keeping base map dots visible during defer (no hidden/blank cells) and transitioning to override color/action state at reveal time.
 - [Done] 2026-02-24: Added first-load Texas override entry flash pass before normal override behavior: deferred Texas dots now flash-in as a block and then settle into configured blink/phase logic.
+- [Done] 2026-02-24: Increased mobile pipeline category marker dot size to 2x for button-revealed overlays while keeping desktop marker sizing unchanged.
 - [Done] 2026-02-24: Matched mobile pipeline category open/fade timing to desktop cadence by slowing mobile description reveal/collapse transitions and increasing mobile frame category-flash duration to `1.1s` (timing-only adjustment; no content/logic changes).
 - [Done] 2026-02-24: Improved pipeline map readability by increasing desktop popup text size and mobile category-description text size; synced desktop popup measurement/render font baselines in `js/main.js` so larger popup copy retains stable zone-constrained placement.
 - [Planned] 2026-02-24: Fully remove legacy pipeline map debug/tuning runtime code paths from `js/main.js` (currently disabled by `mapDebugUiEnabled` guard) after current UX/perf validation cycle.

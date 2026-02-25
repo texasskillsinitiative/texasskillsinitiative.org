@@ -3900,6 +3900,35 @@ function softCloseModal() {
             const areaPlacementByTargetClass = new Map(
                 areaAssignments.map(entry => [popupRequests[entry.requestIdx].targetClass, { area: entry.area, slotIndex: entry.slotIndex }])
             );
+            const appendOverlayMarker = (overlayNode, marker, sizeScale = 1) => {
+                const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                markerGroup.setAttribute('class', 'map-marker');
+                const scaledSize = marker.size * sizeScale;
+                if (marker.shape === 'square') {
+                    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    rect.setAttribute('x', marker.x - scaledSize);
+                    rect.setAttribute('y', marker.y - scaledSize);
+                    rect.setAttribute('width', scaledSize * 2);
+                    rect.setAttribute('height', scaledSize * 2);
+                    rect.setAttribute('rx', Math.max(1, scaledSize * 0.35));
+                    rect.style.fill = marker.color;
+                    markerGroup.appendChild(rect);
+                } else {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', marker.x);
+                    circle.setAttribute('cy', marker.y);
+                    circle.setAttribute('r', scaledSize);
+                    circle.style.fill = marker.color;
+                    markerGroup.appendChild(circle);
+                }
+
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', marker.x + (scaledSize * 2));
+                label.setAttribute('y', marker.y + (scaledSize * 1.8));
+                label.textContent = normalizeLocationLabel(marker.label) || marker.label;
+                markerGroup.appendChild(label);
+                overlayNode.appendChild(markerGroup);
+            };
             toggleGroups.forEach(toggleGroup => {
                 const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
                 const btn = document.createElement('button');
@@ -3911,11 +3940,27 @@ function softCloseModal() {
                 btn.textContent = toggleGroup.buttonLabel;
                 controls.appendChild(btn);
                 const locationSummary = locationSummaryByTarget.get(toggleGroup.targetClass) || 'No mapped locations listed.';
+                const popupText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
+                    ? toggleGroup.description.trim()
+                    : locationSummary;
+                const mobileDescriptionText = popupText
+                    ? `${popupText}\nLocations: ${locationSummary}`
+                    : `Locations: ${locationSummary}`;
                 const categoryDescription = document.createElement('p');
                 categoryDescription.className = 'map-category-description';
                 categoryDescription.setAttribute('data-map-description-target', toggleGroup.targetClass);
                 categoryDescription.style.setProperty('--map-description-color', representativeColor);
-                categoryDescription.textContent = locationSummary;
+                categoryDescription.textContent = '';
+                const mobileDescriptionLead = document.createElement('span');
+                mobileDescriptionLead.className = 'map-category-description-lead';
+                mobileDescriptionLead.textContent = popupText || '';
+                const mobileDescriptionLocations = document.createElement('span');
+                mobileDescriptionLocations.className = 'map-category-description-locations';
+                mobileDescriptionLocations.textContent = `Locations: ${locationSummary}`;
+                if (mobileDescriptionLead.textContent) {
+                    categoryDescription.appendChild(mobileDescriptionLead);
+                }
+                categoryDescription.appendChild(mobileDescriptionLocations);
                 controls.appendChild(categoryDescription);
                 if (desktopInlineControls) {
                     const desktopInlineButton = document.createElement('button');
@@ -3934,43 +3979,13 @@ function softCloseModal() {
                 desktopGroup.setAttribute('class', `map-overlay ${toggleGroup.targetClass}--desktop`);
 
                 toggleGroup.markers.forEach(marker => {
-                    const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                    markerGroup.setAttribute('class', 'map-marker');
-                    if (marker.shape === 'square') {
-                        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        rect.setAttribute('x', marker.x - marker.size);
-                        rect.setAttribute('y', marker.y - marker.size);
-                        rect.setAttribute('width', marker.size * 2);
-                        rect.setAttribute('height', marker.size * 2);
-                        rect.setAttribute('rx', Math.max(1, marker.size * 0.35));
-                        rect.style.fill = marker.color;
-                        markerGroup.appendChild(rect);
-                    } else {
-                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circle.setAttribute('cx', marker.x);
-                        circle.setAttribute('cy', marker.y);
-                        circle.setAttribute('r', marker.size);
-                        circle.style.fill = marker.color;
-                        markerGroup.appendChild(circle);
-                    }
-
-                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    label.setAttribute('x', marker.x + (marker.size * 2));
-                    label.setAttribute('y', marker.y + (marker.size * 1.8));
-                    label.textContent = normalizeLocationLabel(marker.label) || marker.label;
-                    markerGroup.appendChild(label);
-                    group.appendChild(markerGroup);
-
-                    const desktopMarkerGroup = markerGroup.cloneNode(true);
-                    desktopGroup.appendChild(desktopMarkerGroup);
+                    appendOverlayMarker(group, marker, 2);
+                    appendOverlayMarker(desktopGroup, marker, 1);
                 });
                 overlayFragment.appendChild(group);
                 overlayFragment.appendChild(desktopGroup);
 
                 if (popupLayer) {
-                    const popupText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
-                        ? toggleGroup.description.trim()
-                        : locationSummary;
                     const areaPlacement = areaPlacementByTargetClass.get(toggleGroup.targetClass) || null;
                     const popupAnchor = resolveAreaPopupPlacement(
                         popupText,

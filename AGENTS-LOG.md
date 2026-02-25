@@ -1327,4 +1327,9 @@
 - Troubleshooting suggestions: If the flash feels too strong, lower flash mix from `46%` to ~`36%` or reduce entry duration from `0.44s` to `0.34s` while keeping delayed blink handoff.
 - Resolutions/outcomes: Texas deferred block now visibly flashes in as one group before fading/settling into the existing override runtime behavior.
 - Commit hash(es): none
+### 2026-02-24 18:14:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased mobile map marker prominence in `js/main.js` by splitting overlay marker construction into a helper and applying `sizeScale=2` for mobile category overlays (`targetClass`) while preserving desktop overlay markers (`targetClass--desktop`) at `sizeScale=1`.
+- Troubleshooting suggestions: If mobile labels feel too offset with larger dots, reduce label offset multipliers in the helper (`x: size*2`, `y: size*1.8`) without changing marker radius scaling.
+- Resolutions/outcomes: Button-revealed map dots on mobile now render at 2x size; desktop marker sizing remains unchanged.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
