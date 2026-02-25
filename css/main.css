@@ -944,10 +944,10 @@
             z-index: 3;
         }
         .pipeline-map-frame.map-frame-category-flash-active::before {
-            animation: mapFrameCategoryFlash 1.1s cubic-bezier(0.2, 0.62, 0.22, 1);
+            animation: mapFrameCategoryFlash 10s cubic-bezier(0.2, 0.62, 0.22, 1);
         }
         .pipeline-map-frame.map-frame-category-flash-active .map-frame-gap-flash-layer {
-            animation: mapFrameCategoryGapFlash 1.1s cubic-bezier(0.2, 0.62, 0.22, 1);
+            animation: mapFrameCategoryGapFlash 10s cubic-bezier(0.2, 0.62, 0.22, 1);
         }
         .pipeline-map-frame::after {
             content: "";
@@ -1129,7 +1129,7 @@
                 border-color: transparent;
                 box-shadow: 0 0 0 0 transparent;
             }
-            42% {
+            10% {
                 opacity: 0.78;
                 border-color: color-mix(in srgb, var(--map-frame-category-flash-color) 52%, transparent);
                 box-shadow: 0 0 0 1px color-mix(in srgb, var(--map-frame-category-flash-color) 26%, transparent), 0 0 8px color-mix(in srgb, var(--map-frame-category-flash-color) 18%, transparent);
@@ -1145,7 +1145,7 @@
                 opacity: 0;
                 border-color: transparent;
             }
-            42% {
+            10% {
                 opacity: 0.72;
                 border-color: color-mix(in srgb, var(--map-frame-category-flash-color) 18%, transparent);
             }
@@ -2210,7 +2210,7 @@
             .mobile-nav-drawer { transition-duration: 0.34s; }
             .pipeline-map-frame::before { animation: none; opacity: 0; }
             .pipeline-map-frame.map-frame-category-flash-active::before,
-            .pipeline-map-frame.map-frame-category-flash-active .map-frame-gap-flash-layer { animation-duration: 1.1s; }
+            .pipeline-map-frame.map-frame-category-flash-active .map-frame-gap-flash-layer { animation-duration: 10s; }
             .map-overlay {
                 transition: opacity 0.7s cubic-bezier(0.2, 0.62, 0.22, 1), visibility 0s linear 0.7s;
             }

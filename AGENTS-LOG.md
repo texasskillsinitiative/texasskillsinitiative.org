@@ -1332,4 +1332,9 @@
 - Troubleshooting suggestions: If mobile labels feel too offset with larger dots, reduce label offset multipliers in the helper (`x: size*2`, `y: size*1.8`) without changing marker radius scaling.
 - Resolutions/outcomes: Button-revealed map dots on mobile now render at 2x size; desktop marker sizing remains unchanged.
 - Commit hash(es): none
+### 2026-02-24 18:22:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retimed pipeline frame category-flash to produce slower fade-out with similar fade-in timing. In `css/main.css`, increased frame/gap flash duration from `1.1s` to `2.31s` and moved keyframe peak from `42%` to `20%` (fade-out now consumes ~80% of the cycle). Updated mobile override duration to `2.31s` and aligned JS flash cleanup timeout in `js/main.js` from `1200ms` to `2420ms` so the effect is not cut early.
+- Troubleshooting suggestions: If the tail still feels too long, reduce duration to ~`1.9s` while preserving `20%` peak to keep the same fade-in/fade-out ratio.
+- Resolutions/outcomes: Frame flash now fades out significantly slower while maintaining fast entry; selecting a different category still overrides/restarts the active flash immediately.
+- Commit hash(es): none
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

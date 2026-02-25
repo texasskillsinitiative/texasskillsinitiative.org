@@ -4794,7 +4794,7 @@ function softCloseModal() {
                 frameFlashTimerId = window.setTimeout(() => {
                     frame.classList.remove('map-frame-category-flash-active');
                     frameFlashTimerId = 0;
-                }, 1200);
+                }, 10120);
             };
             const setCategoryState = (targetClass, nextState, options = {}) => {
                 overlays.forEach(overlay => {
