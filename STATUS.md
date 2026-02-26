@@ -149,6 +149,11 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Accessibility follow-up baseline: added skip-link navigation, improved landmark/label semantics (primary nav + mobile drawer `aria-labelledby`), aligned inactive team-panel default `aria-hidden` states, and removed redundant custom key handling on native rubric buttons.
 - [Planned] Accessibility follow-up final: manual assistive-technology pass on physical screen readers (TalkBack/VoiceOver) plus targeted light-theme contrast spot checks.
 - [Done] Link check across internal and legal pages completed (automated href/anchor audit; no missing local files/fragments).
+- [Done] Core site sections navigable.
+- [Done] Transitioned pipeline map to fully interactive MD-driven mode.
+- [Done] Accessibility/QA pass on rubric and navigation.
+- [Done] Form functionality end-to-end verified (Confirmed 2026-02-25).
+- [Done] Premium visual refinements (Glassmorphism Nav, Logo Interaction) implemented.
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
 - [Done] Replace draft founder letter in `index.html` with final approved copy.
@@ -392,7 +397,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
 
 ## Active Focus
-- Delivery target: TBD (owner-defined for Milestone 1.0 closure).
+- Delivery target: 2026-02-26 (pushed forward by one day per owner request).
 - Priority 1: close remaining Milestone `1.0` launch gates using packet-backed evidence in `STATUS.md` + `AGENTS-LOG.md`.
 - Priority 2: complete final owner confirmation items (authorization + production submission-path verification) for launch decision.
 - Priority 3: keep governance updates aligned with `PACKETS.md` packet ownership and `PRODUCT-PRD-BLUEPRINT.md` MVP scope.

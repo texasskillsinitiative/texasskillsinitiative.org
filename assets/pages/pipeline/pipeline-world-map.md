@@ -225,7 +225,7 @@ Wroclaw, Poland|88|18
 Tangier, Morocco|75|29
 Dubai, UAE|112|35
 
-[02 Phase :: Structured Intake]
+[02 Phase :: Collaborative Discovery]
 Nassau, Bahamas|32|34
 San Juan, Puerto Rico|35|39
 Kingston, Jamaica|32|34

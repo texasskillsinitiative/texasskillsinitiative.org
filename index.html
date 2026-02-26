@@ -406,6 +406,7 @@
             <button
                 type="button"
                 class="rubric-protocol-segment is-active"
+                id="rubric-protocol-tab-diagnostic"
                 data-protocol-toggle="diagnostic"
                 role="tab"
                 aria-selected="true"
@@ -416,6 +417,7 @@
             <button
                 type="button"
                 class="rubric-protocol-segment"
+                id="rubric-protocol-tab-deployment"
                 data-protocol-toggle="deployment"
                 role="tab"
                 aria-selected="false"
@@ -426,62 +428,55 @@
         </div>
 
         <div class="rubric-protocol-stage" data-rubric-stage>
-            <article class="rubric-protocol-view is-active" data-protocol-view="diagnostic" id="rubric-view-diagnostic" aria-hidden="false">
-                <p class="rubric-protocol-tone">TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued.</p>
+            <article class="rubric-protocol-view is-active" data-protocol-view="diagnostic" id="rubric-view-diagnostic" role="tabpanel" aria-labelledby="rubric-protocol-tab-diagnostic" aria-hidden="false" tabindex="0">
+                <p class="rubric-protocol-tone">Focus: From independent research to collaborative discovery. TSI conducts a rigorous technical and regulatory vetting process before any formal industrial recommendation is issued. This stage focuses on the diagnostic "Engine Room" where raw regional data is vetted against industrial benchmarks.</p>
                 <div class="rubric-diagnostic-grid">
                     <section class="rubric-diagnostic-card">
+                        <p class="rubric-phase-label">01 Phase - Initial Evaluation</p>
                         <div class="asset-image rubric-diagnostic-asset">
-                            <img src="assets/pages/rubric/rubric-analysis-banner.png" alt="Analysts reviewing corridor data on dual monitors">
+                            <img src="assets/pages/rubric/rubric-phase-01.png" alt="Analysts reviewing corridor data on dual monitors">
                         </div>
-                        <p class="rubric-phase-label">Phase 01</p>
                         <h4 class="rubric-phase-title">Initial Evaluation</h4>
-                        <p class="rubric-phase-copy">Regional vetting and identification of economic potential before advancing to deeper technical stress validation.</p>
+                        <p class="rubric-phase-copy">Our work begins long before the first meeting. We conduct an independent, high-fidelity audit of regional assets and workforce data to identify latent strengths. Analyzing regional intelligence and institutional knowledge to evaluate and prepare a custom foundation for partnership.</p>
                     </section>
                     <section class="rubric-diagnostic-card">
+                        <p class="rubric-phase-label">02 Phase - Collaborative Discovery</p>
                         <div class="asset-image rubric-diagnostic-asset">
-                            <img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Texas map with data overlays and regional pins">
+                            <img src="assets/pages/rubric/rubric-phase-02.png" alt="Texas map with data overlays and regional pins">
                         </div>
-                        <p class="rubric-phase-label">Phase 02</p>
-                        <h4 class="rubric-phase-title">Technical Review</h4>
-                        <p class="rubric-phase-copy">Deep-dive stress tests for power, logistics, and infrastructure stability to confirm operational resilience.</p>
+                        <h4 class="rubric-phase-title">Collaborative Discovery</h4>
+                        <p class="rubric-phase-copy">This is where the partnership begins. We bring our experience to your table, beginning a rigorous dialogue to verify the stability of your legal and technical infrastructure. A collaborative stress test of property rights, FDI stability, and infrastructure reliability to ensure a secure environment for growth.</p>
                     </section>
                 </div>
             </article>
-
-            <article class="rubric-protocol-view" data-protocol-view="deployment" id="rubric-view-deployment" aria-hidden="true" hidden>
-                <p class="rubric-protocol-tone">Done and improved streamlined execution through refined systems and disciplined delivery sequencing.</p>
+            <article class="rubric-protocol-view" data-protocol-view="deployment" id="rubric-view-deployment" role="tabpanel" aria-labelledby="rubric-protocol-tab-deployment" aria-hidden="true" tabindex="0" hidden>
+                <p class="rubric-protocol-tone">Focus: Streamlining systems and empowering the local workforce. These stages represent the "Action Pathways" where vetting is transformed into streamlined, operational reality.</p>
                 <div class="rubric-deployment-grid">
                     <section class="rubric-deploy-card">
+                        <p class="rubric-phase-label">Phase 03 - Structured Implementation</p>
                         <div class="asset-image rubric-deploy-asset">
-                            <img src="assets/pages/rubric/rubric-icon-vocational-literacy.png" alt="Execution action card visual">
+                            <img src="assets/pages/rubric/rubric-phase-03-vocational-literacy.png" alt="Vocational literacy training workshop illustration">
                         </div>
-                        <p class="rubric-phase-label">Phase 03 - The Input</p>
                         <h4 class="rubric-phase-title">Vocational Literacy</h4>
-                        <p class="rubric-phase-copy">Regional technical education alignment based on Texas standards.</p>
-                    </section>
-                    <section class="rubric-deploy-card">
+                        <p class="rubric-phase-copy">We partner with educators and experts around the globe to translate regional potential into "Vocational Literacy" that meets global standards.</p>
                         <div class="asset-image rubric-deploy-asset">
-                            <img src="assets/pages/rubric/rubric-icon-onboarding-velocity.png" alt="Execution action card visual">
+                            <img src="assets/pages/rubric/rubric-phase-03-onboarding-velocity.png" alt="Onboarding velocity timeline visualization">
                         </div>
-                        <p class="rubric-phase-label">Phase 03 - The Input</p>
                         <h4 class="rubric-phase-title">Onboarding Velocity</h4>
-                        <p class="rubric-phase-copy">Targeted 100-day window for labor force integration.</p>
+                        <p class="rubric-phase-copy">A collaborative 100-day framework designed to bridge the gap between training and active productivity.</p>
                     </section>
                     <section class="rubric-deploy-card">
-                        <div class="asset-image rubric-deploy-asset">
-                            <img src="assets/pages/rubric/rubric-icon-regulatory-coherence.png" alt="Execution action card visual">
-                        </div>
                         <p class="rubric-phase-label">Phase 04 - Refined Systems</p>
-                        <h4 class="rubric-phase-title">Regulatory Coherence</h4>
-                        <p class="rubric-phase-copy">Deep-dive audit of property rights and FDI stability.</p>
-                    </section>
-                    <section class="rubric-deploy-card">
                         <div class="asset-image rubric-deploy-asset">
-                            <img src="assets/pages/rubric/rubric-icon-reliability.png" alt="Execution action card visual">
+                            <img src="assets/pages/rubric/rubric-phase-04-reliability.png" alt="Refined deployment logistics planning board">
                         </div>
-                        <p class="rubric-phase-label">Phase 04 - Refined Systems</p>
-                        <h4 class="rubric-phase-title">Reliability</h4>
-                        <p class="rubric-phase-copy">Stress-testing critical power grids and infrastructure stability.</p>
+                        <h4 class="rubric-phase-title">Refined Deployment</h4>
+                        <p class="rubric-phase-copy">Verifying that logistics and supply chain continuity are tuned to support a high-performance workforce.</p>
+                        <div class="asset-image rubric-deploy-asset">
+                            <img src="assets/pages/rubric/rubric-icon-reliability.png" alt="Systemic reliability network concept graphic">
+                        </div>
+                        <h4 class="rubric-phase-title">Systemic Reliability</h4>
+                        <p class="rubric-phase-copy">The finalized, improved regional model—a plug-and-play asset for the global industrial pipeline.</p>
                     </section>
                 </div>
             </article>
@@ -501,7 +496,7 @@
                 </svg>
             </div>
             <div class="instruction-box pipeline-note">
-                This map reflects live corridor intelligence by evaluation stage. Markers indicate current analytical posture and readiness signals, not deployment commitments.
+                This map reflects the active reach of our collaborative partnerships. Each marker represents a region currently undergoing our Pre-Recommendation Protocol or deploying a Refined System. We leverage local institutional knowledge to ensure every regional project is optimized for the global industrial pipeline.
             </div>
         </div>
     </div>
@@ -689,7 +684,7 @@
 
         <p class="overview-copy overview-copy--sweep-underline">
             <span class="overview-copy-line">At <span class="text-main-strong overview-phrase">Texas Skills Initiative</span>, we leverage the</span>
-            <span class="overview-copy-line">power of <span class="text-main-strong overview-phrase">Texas' Tested</span> economic engines to</span>
+            <span class="overview-copy-line">power of <span class="text-main-strong overview-phrase">Texas Tested</span> economic engines to</span>
             <span class="overview-copy-line">design <span class="text-main-strong overview-phrase">one-of-a-kind</span> development pipelines. Providing</span>
             <span class="overview-copy-line">engineered and <span class="text-main-strong overview-phrase">exclusively crafted</span> solutions</span>
             <span class="overview-copy-line">tailored to the needs of <span class="text-accent text-accent-strong overview-copy-emph overview-phrase">YOUR growth region.</span></span>
