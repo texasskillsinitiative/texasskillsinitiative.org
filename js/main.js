@@ -166,6 +166,7 @@ function _021026_resetConcierge(form) {
     buttons.forEach(button => {
         button.classList.remove('is-active');
         button.classList.remove('is-hidden');
+        button.classList.remove('is-suggested');
         button.setAttribute('aria-pressed', 'false');
     });
     if (grid) grid.classList.remove('is-collapsed');
@@ -310,6 +311,15 @@ function toggleModal(modalId, show) {
         if (!getOpenModals().length) {
             document.body.style.overflow = '';
         }
+
+        // Reset suggestions when closing access modal
+        if (modalId === 'accessModal') {
+            const form = document.getElementById('stakeholderForm');
+            if (form) {
+                form.querySelectorAll('.concierge-btn').forEach(btn => btn.classList.remove('is-suggested'));
+            }
+        }
+
         const restoreTarget = _modalFocusRestore.get(modalId);
         if (restoreTarget && typeof restoreTarget.focus === 'function') {
             restoreTarget.focus();
@@ -703,18 +713,46 @@ function initModalTriggers() {
     document.querySelectorAll('[data-modal-open]').forEach(button => {
         button.addEventListener('click', () => {
             const modalId = button.getAttribute('data-modal-open');
+            // Reset suggestions if opening via generic trigger
+            if (modalId === 'accessModal') {
+                const form = document.getElementById('stakeholderForm');
+                if (form) {
+                    form.querySelectorAll('.concierge-btn').forEach(btn => btn.classList.remove('is-suggested'));
+                }
+            }
             if (modalId) toggleModal(modalId, true);
         });
     });
 
-    document.querySelectorAll('[data-modal-close]').forEach(button => {
-        button.addEventListener('click', () => {
-            const modalId = button.getAttribute('data-modal-close');
-            if (!modalId) return;
-            if (modalId === 'accessModal') {
-                requestCloseAccessModal();
-                return;
+    // --- Team Profile Modal Logic ---
+    const teamGrid = document.querySelector('.team-grid');
+    const teamModal = document.getElementById('teamProfileModal');
+    const modalTarget = document.getElementById('modalProfileTarget');
+
+    if (teamGrid && teamModal) {
+        teamGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.team-card');
+            if (!card) return;
+
+            const memberId = card.dataset.member;
+            const content = document.getElementById(`profile-content-${memberId}`);
+
+            if (content && modalTarget) {
+                modalTarget.innerHTML = content.innerHTML;
+                teamModal.removeAttribute('hidden');
+                document.body.style.overflow = 'hidden';
+
+                // Re-trigger reveal animations if any
+                const reveals = modalTarget.querySelectorAll('.reveal-text');
+                reveals.forEach(r => r.classList.add('is-revealed'));
             }
+        });
+    }
+
+    // Global modal close logic (if not already handled)
+    document.querySelectorAll('[data-modal-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modalId = btn.getAttribute('data-modal-close');
             toggleModal(modalId, false);
         });
     });
@@ -1773,9 +1811,12 @@ initGlobalDebugMenu();
 let pipelineMapInitialized = false;
 const ensurePipelineMapInitialized = () => {
     if (pipelineMapInitialized) return;
-    initPipelineMap();
     pipelineMapInitialized = true;
-    window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
+    // Defer slightly to allow tab transition to start smoothly
+    setTimeout(() => {
+        initPipelineMap();
+        window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
+    }, 250);
 };
 
 // Theme Toggle & Animations (Keep your existing code here)
@@ -2380,7 +2421,38 @@ function initRubricActions() {
     });
     activeKey = initialView.getAttribute('data-protocol-view') || 'diagnostic';
     syncToggleState(activeKey);
-    setStageHeightFor(initialView);
+
+    // Initial height calculation
+    const calcInitialHeight = () => {
+        const v = viewByKey.get(activeKey) || views.find(v => v.classList.contains('is-active')) || views[0];
+        if (v) {
+            // Force a layout recalculation before measuring
+            void v.offsetHeight;
+            setStageHeightFor(v);
+        }
+    };
+
+    // Calculate immediately
+    calcInitialHeight();
+
+    // Recalculate after a short delay for any late layout shifts (e.g. following secondary renders)
+    window.setTimeout(calcInitialHeight, 150);
+    window.setTimeout(calcInitialHeight, 600); // Second pass for slower renders
+
+    // Also recalibrate when images within the views load
+    views.forEach(view => {
+        view.querySelectorAll('img').forEach(img => {
+            if (img.complete) {
+                // If already complete, still pulse a refresh in case layout hasn't settled
+                requestAnimationFrame(calcInitialHeight);
+            } else {
+                img.addEventListener('load', calcInitialHeight);
+                // Also catch error cases to avoid being stuck on wrong height
+                img.addEventListener('error', calcInitialHeight);
+            }
+        });
+    });
+
     window.addEventListener('resize', () => {
         if (isAnimating) return;
         const activeView = viewByKey.get(activeKey);
@@ -2694,13 +2766,23 @@ function initPipelineMap() {
         const sweepEnabled = frame && frame.dataset.mapGlowEnabled !== 'false';
         const forceOn = frame && frame.dataset.mapGlowForceOn === 'true';
         const allowMotion = forceOn || !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        const resolveInitialRevealBypass = () => {
+            if (frame && frame.dataset.mapGlowInitialRevealDone !== 'true') {
+                frame.dataset.mapGlowInitialRevealDone = 'true';
+                frame.dispatchEvent(new CustomEvent('mapInitialRevealComplete'));
+            }
+        };
+
         if (!allowMotion) {
             stopColumnGlow(map, true);
+            resolveInitialRevealBypass();
             return;
         }
         const grid = mapDotGrid.get(map);
         if (!grid || !Number.isFinite(grid.width) || grid.width <= 0 || !Number.isFinite(grid.height) || grid.height <= 0) {
             stopColumnGlow(map, true);
+            resolveInitialRevealBypass();
             return;
         }
         const maxOpacity = clampNumber(frame && frame.dataset.mapGlowMaxOpacity, 0.1, 1, mapColumnGlowDefaults.maxOpacity);
@@ -2769,13 +2851,14 @@ function initPipelineMap() {
         const useSprinkleStartup = shouldRunInitialReveal && startupMode === 'sprinkle';
         if (!sweepEnabled && !useSprinkleStartup) {
             stopColumnGlow(map, true);
+            resolveInitialRevealBypass();
             return;
         }
         if (!sweepEnabled && useSprinkleStartup) {
             stopColumnGlow(map, true);
             const dots = grid.dots;
             if (!Array.isArray(dots) || !dots.length) {
-                if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                resolveInitialRevealBypass();
                 return;
             }
             const order = buildSprinkleOrder(dots.length, startupSprinkleSeed);
@@ -2949,7 +3032,10 @@ function initPipelineMap() {
             map.style.webkitClipPath = clipValue;
             if (revealedColumns >= grid.width) {
                 runtime.initialRevealActive = false;
-                if (frame) frame.dataset.mapGlowInitialRevealDone = 'true';
+                if (frame) {
+                    frame.dataset.mapGlowInitialRevealDone = 'true';
+                    frame.dispatchEvent(new CustomEvent('mapInitialRevealComplete'));
+                }
                 map.style.clipPath = '';
                 map.style.webkitClipPath = '';
                 if (runtime.timerId) {
@@ -2986,6 +3072,7 @@ function initPipelineMap() {
                         runtime.sprinkleTimerId = 0;
                     }
                     runtime.sprinkleDotsHidden = false;
+                    if (frame) frame.dispatchEvent(new CustomEvent('mapInitialRevealComplete'));
                     if (typeof onComplete === 'function') onComplete();
                 }
             };
@@ -3576,20 +3663,113 @@ function initPipelineMap() {
         }
 
         dotGroup.innerHTML = '';
+        // Hide during rendering to preserve reveal effect
+        dotGroup.style.opacity = '0';
+
+        // Show initializing overlay and mark state
+        const frame = map.closest('.pipeline-map-frame');
+        let overlay = null;
+        const initStartTime = Date.now();
+        const minInitDuration = 1200; // 1.2s minimum to ensure readability
+
+        if (frame) {
+            frame.classList.add('is-initializing');
+            overlay = document.createElement('div');
+            overlay.className = 'map-initializing-overlay';
+            overlay.textContent = 'Map Initializing';
+            frame.appendChild(overlay);
+        }
+
         const radius = 0.42;
-        const dots = new Array(width * height);
-        for (let y = 0; y < height; y += 1) {
-            for (let x = 0; x < width; x += 1) {
+        const totalCells = width * height;
+        const dots = new Array(totalCells);
+        const chunkSize = 400; // Small batch size for peak responsiveness
+        let currentIndex = 0;
+
+        const renderChunk = () => {
+            const fragment = document.createDocumentFragment();
+            const end = Math.min(currentIndex + chunkSize, totalCells);
+
+            for (let i = currentIndex; i < end; i += 1) {
+                const x = i % width;
+                const y = Math.floor(i / width);
                 const dotState = resolveDotState(x, y);
                 const isLand = typeof dotState === 'object' ? !!dotState.isLand : !!dotState;
                 const overrideStyle = typeof dotState === 'object' ? (dotState.overrideStyle || null) : null;
                 const dot = createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle, x, y);
-                dotGroup.appendChild(dot);
-                dots[(y * width) + x] = dot;
+                fragment.appendChild(dot);
+                dots[i] = dot;
             }
-        }
-        mapDotGrid.set(map, { width, height, dots });
-        syncColumnGlowForMap(map);
+
+            dotGroup.appendChild(fragment);
+            currentIndex = end;
+
+            if (currentIndex < totalCells) {
+                requestAnimationFrame(renderChunk);
+            } else {
+                mapDotGrid.set(map, { width, height, dots });
+
+                const finalize = () => {
+                    // Remove loading overlay and clear initializing state
+                    if (frame) frame.classList.remove('is-initializing');
+
+                    if (overlay) {
+                        overlay.classList.add('is-hidden');
+                        setTimeout(() => overlay.remove(), 600);
+                    }
+
+                    // Setup listener for the end of the startup reveal animation
+                    if (frame) {
+                        const onRevealDone = () => {
+                            frame.removeEventListener('mapInitialRevealComplete', onRevealDone);
+
+                            // Reveal helper text "Select a Phase..." ONLY after map is fully revealed
+                            const helper = frame.querySelector('.pipeline-map-helper-overlay');
+                            if (helper) {
+                                helper.classList.remove('is-hidden');
+                            }
+
+                            // Start button pulsing to guide the user
+                            const mapShell = map.closest('.pipeline-map');
+                            if (mapShell) {
+                                const controls = mapShell.querySelectorAll('.map-control[data-map-target]');
+                                controls.forEach(btn => {
+                                    btn.classList.add('map-control--guided');
+                                    btn.addEventListener('click', () => {
+                                        controls.forEach(b => b.classList.remove('map-control--guided'));
+                                        if (helper) helper.classList.add('is-hidden');
+                                    }, { once: true });
+                                });
+                            }
+                        };
+
+                        if (frame.dataset.mapGlowInitialRevealDone === 'true') {
+                            onRevealDone();
+                        } else {
+                            frame.addEventListener('mapInitialRevealComplete', onRevealDone);
+                            // Failsafe heavily delayed timeout
+                            setTimeout(onRevealDone, 2800);
+                        }
+                    }
+
+                    // Start the sweep/sprinkle animation after overlay begins fading
+                    setTimeout(() => {
+                        dotGroup.style.opacity = '';
+                        syncColumnGlowForMap(map);
+                    }, 100);
+                };
+
+                // Enforce minimum duration
+                const elapsed = Date.now() - initStartTime;
+                if (elapsed < minInitDuration) {
+                    setTimeout(finalize, minInitDuration - elapsed);
+                } else {
+                    finalize();
+                }
+            }
+        };
+
+        requestAnimationFrame(renderChunk);
     };
 
     const slugify = (value) => value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -3698,10 +3878,10 @@ function initPipelineMap() {
                     mapShell.appendChild(helper);
                 }
             }
-            helper.textContent = 'Select a category to display map markers and details.';
+            helper.textContent = 'Select a phase to display map markers and details.';
         }
         let desktopTitleBox = null;
-        const helperHeadline = 'Select a category to display map markers and details.';
+        const helperHeadline = 'Select a phase to display map markers and details.';
         let mapTopHelper = null;
         const ensureMapTopHelper = () => {
             if (!frame) return null;
@@ -3712,6 +3892,11 @@ function initPipelineMap() {
                 frame.appendChild(helperNode);
             }
             helperNode.textContent = helperHeadline;
+
+            // Helper text stays hidden until initial reveal is complete
+            if (frame.dataset.mapGlowInitialRevealDone !== 'true') {
+                helperNode.classList.add('is-hidden');
+            }
             return helperNode;
         };
         const ensureDesktopTitleContent = () => {
@@ -5847,4 +6032,43 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initWOWRefinements);
 } else {
     initWOWRefinements();
+}
+// Initialise persona card interactions to open the access modal
+function initPersonaInteractions() {
+    const cards = document.querySelectorAll('.persona-card');
+    const suggestMap = {
+        government: ['government', 'education'],
+        industry: ['private-sector', 'small-business', 'professional'],
+        education: ['education', 'student'],
+        community: ['small-business', 'professional', 'student']
+    };
+
+    cards.forEach(card => {
+        const persona = card.dataset.persona;
+        card.addEventListener('click', () => {
+            const form = document.getElementById('stakeholderForm');
+            if (form) {
+                // Clear any previous suggestions
+                form.querySelectorAll('.concierge-btn').forEach(btn => {
+                    btn.classList.remove('is-suggested');
+                });
+
+                // Apply new suggestions
+                const suggestions = suggestMap[persona] || [];
+                suggestions.forEach(track => {
+                    const btn = form.querySelector(`.concierge-btn[data-concierge-track="${track}"]`);
+                    if (btn) btn.classList.add('is-suggested');
+                });
+            }
+
+            // Open the modal normally (original view)
+            toggleModal('accessModal', true);
+        });
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPersonaInteractions);
+} else {
+    initPersonaInteractions();
 }
