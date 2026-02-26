@@ -201,7 +201,7 @@ $texas={
 
 01 Phase :: Initial Evaluation|Early-screen corridor candidates that passed baseline eligibility checks.|#A3E635
 02 Phase :: Structured Intake|Corridors in active stakeholder intake and market-readiness validation.|#FFC94A
-03 Phase :: Technical Review|Corridors under deep technical, risk, and feasibility review.|#38BDF8
+03 Phase :: Technical Review|Corridors under deep technical, risk, and feasibility review.|#C084FC
 04 Phase :: Refined Systems|Operating benchmark corridors used as comparative calibration references.|#F97316
 
 # toggles
