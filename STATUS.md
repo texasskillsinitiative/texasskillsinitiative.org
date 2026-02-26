@@ -6,7 +6,7 @@ Next step: complete remaining Milestone 1.0 launch gates (validation evidence + 
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
 Target date: TBD (owner-defined)
 Latest verification: expanded Playwright launch-readiness checks on 2026-02-20 (local static server + browser run): section/tab routing, modal dialog semantics (`role="dialog"`, `aria-modal`, `aria-hidden`), modal keyboard behavior (focus trap + Escape close + focus restore), mobile nav drawer behavior (hamburger open/close, backdrop click close, outside-pointer close, Escape close, focus trap, hash-link close, connect-button handoff to access modal), overview viewport-fit behavior at `390x844` / `360x740` / `412x915` (content remains visible on first screen), mobile tap-target spot checks at `390px` (`#mobileNavToggle`, `#mobileNavClose`, drawer links/CTA, rubric action controls, access-form action buttons), mobile map-control density/map-first checks (`tmp-map-check.js`) after handheld control layout changes, asset-path rollout regression checks after naming-convention migration (`tmp-smoke-core.js`, `tmp-map-check.js`, `tmp-mobile-nav-check.js`), Apps Script backend hardening checks (`node --check` for `form-backend/*.js`, config-secret scan for previous spreadsheet/script IDs), production form endpoint reachability check (`GET https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec` => `{\"ok\":true}`), snapshot backup run via `scripts/create_prelaunch_snapshot.ps1` (`snapshot/e55ca66_2026-02-20_11-09-29` + `.zip`), mobile motion guardrail regression checks at `1024/900/768/600/480/390/360` (no overflow/console regressions after coarse-pointer/small-viewport animation reductions), skip-link + landmark behavior, access submit flow checks (3s trap, submit lockout, success transition), map startup/toggle/default-state checks (sprinkle startup, sweep-off default, hotkey gating), ARIA reference audit (`aria-controls`/`aria-labelledby`), console error capture, and responsive overflow matrix at `1024/900/768/600/480/390/360`.
-Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
+Primary scope reference: `PRODUCT-PRD-ARCHITECTURE.md`.
 
 ## Milestone 0.1 - Core Site Foundation
 - [Done] Main single-page site architecture with hash-tab sections (`index.html`).
@@ -154,6 +154,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Accessibility/QA pass on rubric and navigation.
 - [Done] Form functionality end-to-end verified (Confirmed 2026-02-25).
 - [Done] Premium visual refinements (Glassmorphism Nav, Logo Interaction) implemented.
+- [Done] Engagement Section Overhaul: Migrated to Strategic Partnership tone with Persona Cards and Signal Flow visuals.
 
 ## Milestone 0.7 - Content + Compliance Sign-off (`LAUNCH_TODO.md`)
 - [Done] Replace draft founder letter in `index.html` with final approved copy.
@@ -175,8 +176,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Documented required Codex launch mode in `AGENTS.md` (`codex -a never -s danger-full-access`) for low-interruption autonomous execution.
 - [Done] Updated clean-exit commit policy in `AGENTS.md` to be conditional on `STATUS.md` status transitions during the session.
 - [Done] Documented repository-root execution scope in `AGENTS.md` (`C:\dev\tsi\tsi-site-repo` default; non-repo access only by explicit request/permission).
-- [Done] Added product blueprint source-of-truth alignment and risk reclassification guidance in `AGENTS.md`.
-- [Done] Added `PRODUCT-PRD-BLUEPRINT.md` to define approved scope, MVP boundaries, and deferred work.
+- [Done] Added product strategy source-of-truth alignment and risk reclassification guidance in `AGENTS.md`.
+- [Done] Added `PRODUCT-PRD-ARCHITECTURE.md` to define approved scope, MVP boundaries, and deferred work.
 - [Blocked] Codex execution-permissions profile alignment in local `~/.codex/config.toml` (write denied by ACL in current runtime).
 - [Blocked] Local ACL cleanup for blocked file operations (`temp`, `.git` index write restrictions); requires elevated OS terminal with ownership privileges.
 
@@ -392,7 +393,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
-- [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
+- [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-ARCHITECTURE.md` (Section 5).
 - [Planned] Milestone closure requires packet-backed completion evidence in this file and `AGENTS-LOG.md` without scope expansion.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
 
@@ -400,11 +401,11 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - Delivery target: 2026-02-26 (pushed forward by one day per owner request).
 - Priority 1: close remaining Milestone `1.0` launch gates using packet-backed evidence in `STATUS.md` + `AGENTS-LOG.md`.
 - Priority 2: complete final owner confirmation items (authorization + production submission-path verification) for launch decision.
-- Priority 3: keep governance updates aligned with `PACKETS.md` packet ownership and `PRODUCT-PRD-BLUEPRINT.md` MVP scope.
+- Priority 3: keep governance updates aligned with `PACKETS.md` packet ownership and `PRODUCT-PRD-ARCHITECTURE.md` MVP scope.
 
 ## Update Policy
 - Use this file as the planning roadmap and progress tracker.
-- Keep scope aligned with `PRODUCT-PRD-BLUEPRINT.md`.
+- Keep scope aligned with `PRODUCT-PRD-ARCHITECTURE.md`.
 - Reclassify active risk entries after validation/user confirmation (`Remove`, `Downgrade`, `Keep`, `Escalate`) before starting the next work cycle.
 - Update statuses (`[Done]`, `[Planned]`, `[Blocked]`) when milestones materially change.
 - Do not mark an item `[Done]` without verifiable repo evidence (diff, behavior check, or commit).
