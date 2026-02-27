@@ -1502,7 +1502,7 @@
 - Resolutions/outcomes: Error-state snapshot staged for commit with branch/log context captured.
 - Commit hash(es): pending
 ### 2026-02-27 02:22:07 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Created forensic checkpoint commit 54dc3e9 capturing interrupted error-state artifacts, then stabilized pipeline mobile map tab integration in js/main.js/css/main.css and committed recovery patch c593a6.
+- Actions taken: Created forensic checkpoint commit 54dc3e9 capturing interrupted error-state artifacts, then stabilized pipeline mobile map tab integration in js/main.js/css/main.css and committed recovery patch bc593a6.
 - Troubleshooting suggestions: If mobile map behavior still desyncs, verify tab-panel state by checking .pipeline-map-tab.is-map-active against corresponding .map-overlay.is-active entries during toggles.
 - Resolutions/outcomes: Error state is preserved in history and partial pipeline implementation is now normalized to shared category-state handling with helper/loading visibility restored.
 - Commit hash(es): 54dc3e9, bc593a6
