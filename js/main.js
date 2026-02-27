@@ -2672,6 +2672,42 @@ function initPipelineMap() {
             frame.style.setProperty('--map-pointer-active-opacity', String(mapGlowTuningDefaults.activeOpacity));
         }
     };
+    const setPipelineInteractionLock = (map, isLocked) => {
+        if (!map) return;
+        const mapShell = map.closest('.pipeline-map');
+        if (!mapShell) return;
+        const shouldLock = Boolean(isLocked);
+        mapShell.classList.toggle('is-preload-locked', shouldLock);
+        mapShell.setAttribute('data-map-preload-lock', shouldLock ? 'true' : 'false');
+        const interactiveButtons = mapShell.querySelectorAll(
+            '.map-control[data-map-target], .pipeline-map-tab, .pipeline-map-tab-locations-toggle'
+        );
+        interactiveButtons.forEach((button) => {
+            if (!(button instanceof HTMLElement)) return;
+            button.setAttribute('aria-disabled', shouldLock ? 'true' : 'false');
+            if (button instanceof HTMLButtonElement) {
+                button.disabled = shouldLock;
+            }
+        });
+    };
+    const setPipelineDesktopInteractionLock = (map, isLocked) => {
+        if (!map) return;
+        const mapShell = map.closest('.pipeline-map');
+        if (!mapShell) return;
+        const shouldLock = Boolean(isLocked);
+        mapShell.classList.toggle('is-desktop-preload-locked', shouldLock);
+        mapShell.setAttribute('data-map-desktop-preload-lock', shouldLock ? 'true' : 'false');
+        const desktopButtons = mapShell.querySelectorAll(
+            '.map-control[data-map-target], .pipeline-map-inline-controls-desktop .map-control--desktop'
+        );
+        desktopButtons.forEach((button) => {
+            if (!(button instanceof HTMLElement)) return;
+            button.setAttribute('aria-disabled', shouldLock ? 'true' : 'false');
+            if (button instanceof HTMLButtonElement) {
+                button.disabled = shouldLock;
+            }
+        });
+    };
     const stopColumnGlow = (map, removeLayer = false) => {
         const runtime = mapColumnGlowRuntimes.get(map);
         if (runtime) {
@@ -3618,6 +3654,8 @@ function initPipelineMap() {
     const renderDots = (map, width, height, resolveDotState) => {
         const dotGroup = map.querySelector('[data-dot-grid]');
         if (!dotGroup) return;
+        setPipelineInteractionLock(map, true);
+        setPipelineDesktopInteractionLock(map, true);
 
         map.setAttribute('viewBox', `0 0 ${width} ${height}`);
         const ocean = map.querySelector('.map-ocean');
@@ -3638,6 +3676,8 @@ function initPipelineMap() {
 
         if (frame) {
             frame.classList.add('is-initializing');
+            frame.dataset.mapTexasOverrideReady = 'false';
+            frame.dataset.mapTexasOverrideStartTs = '0';
             overlay = document.createElement('div');
             overlay.className = 'map-initializing-overlay';
             overlay.textContent = 'Map Initializing';
@@ -3684,8 +3724,64 @@ function initPipelineMap() {
 
                     // Setup listener for the end of the startup reveal animation
                     if (frame) {
+                        let revealCompletionHandled = false;
+                        let revealFallbackTimer = 0;
                         const onRevealDone = () => {
+                            if (revealCompletionHandled) return;
+                            revealCompletionHandled = true;
                             frame.removeEventListener('mapInitialRevealComplete', onRevealDone);
+                            if (revealFallbackTimer) {
+                                window.clearTimeout(revealFallbackTimer);
+                                revealFallbackTimer = 0;
+                            }
+                            setPipelineInteractionLock(map, false);
+                            const shouldDelayDesktopUnlock = window.matchMedia('(min-width: 769px)').matches;
+                            if (shouldDelayDesktopUnlock && frame) {
+                                setPipelineDesktopInteractionLock(map, true);
+                                let desktopUnlockHandled = false;
+                                let desktopUnlockFallbackTimer = 0;
+                                let desktopUnlockPollTimer = 0;
+                                const texasMinDisplayMs = 1000;
+                                const isTexasVisualLoadComplete = () => {
+                                    const texasReady = frame.dataset.mapTexasOverrideReady === 'true';
+                                    const texasStartTs = Number(frame.dataset.mapTexasOverrideStartTs || '0');
+                                    const texasElapsedLongEnough = texasStartTs > 0
+                                        ? (Date.now() - texasStartTs) >= texasMinDisplayMs
+                                        : true;
+                                    const hasPendingTexasDots = map.querySelector('.map-dot--deferred-load[data-map-deferred-override="texas"]');
+                                    const hasActiveTexasEntry = map.querySelector('.map-dot--texas-entry');
+                                    return texasReady && texasElapsedLongEnough && !hasPendingTexasDots && !hasActiveTexasEntry;
+                                };
+                                const releaseDesktopLock = () => {
+                                    if (desktopUnlockHandled) return;
+                                    desktopUnlockHandled = true;
+                                    frame.removeEventListener('mapTexasOverrideComplete', releaseDesktopLock);
+                                    frame.removeEventListener('mapTexasOverrideStarted', pollForTexasCompletion);
+                                    if (desktopUnlockPollTimer) {
+                                        window.clearTimeout(desktopUnlockPollTimer);
+                                        desktopUnlockPollTimer = 0;
+                                    }
+                                    if (desktopUnlockFallbackTimer) {
+                                        window.clearTimeout(desktopUnlockFallbackTimer);
+                                        desktopUnlockFallbackTimer = 0;
+                                    }
+                                    setPipelineDesktopInteractionLock(map, false);
+                                };
+                                const pollForTexasCompletion = () => {
+                                    if (desktopUnlockHandled) return;
+                                    if (isTexasVisualLoadComplete()) {
+                                        releaseDesktopLock();
+                                        return;
+                                    }
+                                    desktopUnlockPollTimer = window.setTimeout(pollForTexasCompletion, 80);
+                                };
+                                frame.addEventListener('mapTexasOverrideStarted', pollForTexasCompletion);
+                                frame.addEventListener('mapTexasOverrideComplete', pollForTexasCompletion);
+                                pollForTexasCompletion();
+                                desktopUnlockFallbackTimer = window.setTimeout(releaseDesktopLock, 7000);
+                            } else {
+                                setPipelineDesktopInteractionLock(map, false);
+                            }
 
                             // Reveal helper text "Select a Phase..." ONLY after map is fully revealed
                             const helper = frame.querySelector('.pipeline-map-helper-overlay');
@@ -3713,8 +3809,11 @@ function initPipelineMap() {
                         } else {
                             frame.addEventListener('mapInitialRevealComplete', onRevealDone);
                             // Failsafe heavily delayed timeout
-                            setTimeout(onRevealDone, 2800);
+                            revealFallbackTimer = window.setTimeout(onRevealDone, 2800);
                         }
+                    } else {
+                        setPipelineInteractionLock(map, false);
+                        setPipelineDesktopInteractionLock(map, false);
                     }
 
                     // Start the sweep/sprinkle animation after overlay begins fading
@@ -4413,8 +4512,6 @@ function initPipelineMap() {
             const closeAllLocationOverlays = () => {
                 allPhasePanes.forEach((pane) => {
                     pane.classList.remove('is-locations-open');
-                    const toggle = pane.querySelector('.pipeline-map-tab-locations-toggle');
-                    if (toggle) toggle.textContent = 'View Locations';
                 });
             };
             let selectedTabKey = '__map__';
@@ -4525,7 +4622,6 @@ function initPipelineMap() {
                     const nextOpen = !phasePane.classList.contains('is-locations-open');
                     closeAllLocationOverlays();
                     phasePane.classList.toggle('is-locations-open', nextOpen);
-                    locationsToggle.textContent = nextOpen ? 'Hide Locations' : 'View Locations';
                 });
 
                 contentCol.appendChild(phasePane);
@@ -4600,9 +4696,13 @@ function initPipelineMap() {
             tabPanel.appendChild(tabCol);
             tabPanel.appendChild(contentCol);
 
-            // Insert before frame
+            // Insert after frame so mobile order is: title -> map -> tab panel
             if (frame && frame.parentNode === mapShell) {
-                mapShell.insertBefore(tabPanel, frame);
+                if (frame.nextSibling) {
+                    mapShell.insertBefore(tabPanel, frame.nextSibling);
+                } else {
+                    mapShell.appendChild(tabPanel);
+                }
             } else {
                 mapShell.appendChild(tabPanel);
             }
@@ -5344,6 +5444,11 @@ function initPipelineMap() {
         }
 
         const mapControls = controls.querySelectorAll('.map-control[data-map-target]');
+        setPipelineInteractionLock(map, frame && frame.dataset.mapGlowInitialRevealDone !== 'true');
+        setPipelineDesktopInteractionLock(
+            map,
+            frame && (frame.dataset.mapGlowInitialRevealDone !== 'true' || frame.dataset.mapTexasOverrideReady !== 'true')
+        );
         const desktopMapControls = desktopInlineControls
             ? desktopInlineControls.querySelectorAll('.map-control[data-map-target]')
             : [];
@@ -5400,10 +5505,22 @@ function initPipelineMap() {
             const deferredDots = Array.from(map.querySelectorAll('.map-dot--deferred-load[data-map-deferred-override="texas"]'));
             deferredOverrideRevealDone = true;
             if (frame) frame.dataset.mapTexasOverridePrimed = 'true';
-            if (!deferredDots.length) return;
+            const markTexasOverrideReady = () => {
+                if (!frame) return;
+                frame.dataset.mapTexasOverrideReady = 'true';
+                frame.dispatchEvent(new CustomEvent('mapTexasOverrideComplete'));
+            };
+            if (!deferredDots.length) {
+                markTexasOverrideReady();
+                return;
+            }
             const revealDelayMs = 280;
             const entryFlashMs = 440;
             window.setTimeout(() => {
+                if (frame) {
+                    frame.dataset.mapTexasOverrideStartTs = String(Date.now());
+                    frame.dispatchEvent(new CustomEvent('mapTexasOverrideStarted'));
+                }
                 deferredDots.forEach(dot => {
                     const pendingOverrideColor = dot.dataset.mapPendingOverrideColor;
                     if (pendingOverrideColor) {
@@ -5429,6 +5546,7 @@ function initPipelineMap() {
                         delete dot.dataset.mapPendingBlinkDelay;
                         delete dot.dataset.mapDeferredOverride;
                     });
+                    markTexasOverrideReady();
                 }, entryFlashMs);
             }, revealDelayMs);
         };

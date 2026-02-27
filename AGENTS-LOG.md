@@ -1666,6 +1666,34 @@
 - Actions taken: Shifted mobile pane insets to asymmetric left/right values (larger left content margin), updated related overlay/button offsets to match, and revised helper overlay behavior/styling so text remains empty/hidden until reveal completion, then appears with darker background + bolder pulse treatment.
 - Troubleshooting suggestions: Fine-tune only `--pipeline-pane-inline-inset-left` for additional left breathing room; keep right inset unchanged to preserve button alignment.
 - Resolutions/outcomes: Right-pane text now has more left margin, and helper copy is now deferred until map reveal complete with stronger readability/visual emphasis.
+### 2026-02-27 13:20:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated mobile tab-panel insertion order in `js/main.js` to place the unified tab panel after the map frame instead of before it.
+- Troubleshooting suggestions: If mobile ordering shifts again, verify DOM insertion point around `.pipeline-map-frame` and any subsequent JS-generated nodes.
+- Resolutions/outcomes: Mobile pipeline visual order now matches requested sequence: title, map, then new tab feature.
+### 2026-02-27 13:22:47 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added explicit mobile ordering on `.pipeline-map-tab-panel` (`order: 3`) in CSS to ensure visual placement below the map frame despite existing container order rules.
+- Troubleshooting suggestions: If sequence still appears wrong, inspect computed `order` values for `.pipeline-map-title-box`, `.pipeline-map-frame`, and `.pipeline-map-tab-panel` in mobile devtools.
+- Resolutions/outcomes: Tab panel is now forced to render after the map in mobile visual flow.
+### 2026-02-27 13:26:33 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted mobile locations overlay behavior in `js/main.js` and `css/main.css` so the toggle label stays `View Locations` (removed dynamic `Hide Locations` text swap/reset) and overlay stacking renders above the toggle button.
+- Troubleshooting suggestions: If the toggle ever appears above the popup on specific breakpoints, inspect computed stacking contexts on `.pipeline-map-tab-pane`, `.pipeline-map-tab-locations-toggle`, and `.pipeline-map-tab-locations-overlay`, then keep overlay z-index higher than the toggle.
+- Resolutions/outcomes: `View Locations` remains static and the popup box now covers the button while open, matching requested behavior.
+### 2026-02-27 13:34:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented a pre-reveal interaction lock in `js/main.js` (`setPipelineInteractionLock`) and applied lock styling in `css/main.css` so pipeline desktop controls and mobile tab panel are dimmed/non-interactive while startup map reveal runs. Lock is set at map render start, re-applied after controls mount, and released on `mapInitialRevealComplete` (with guarded fallback timer/bypass handling).
+- Troubleshooting suggestions: If controls remain locked unexpectedly, inspect `.pipeline-map[data-map-preload-lock]` and `frame.dataset.mapGlowInitialRevealDone`; if reveal events are delayed on slow devices, increase fallback timeout from `2800ms`.
+- Resolutions/outcomes: User input on button/tab sections is now ignored before initial map animation completes, with clear visual dimming during that interval.
+### 2026-02-27 13:38:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added desktop-specific post-reveal hold in `js/main.js` by introducing `setPipelineDesktopInteractionLock`, setting `mapTexasOverrideReady` lifecycle flags, and dispatching a new `mapTexasOverrideComplete` event at the end of deferred Texas override reveal. Updated unlock flow so desktop controls stay locked after `mapInitialRevealComplete` until Texas override completion (with a guarded fallback timeout).
+- Troubleshooting suggestions: If desktop unlock still feels early/late, tune the fallback timeout (`2200ms`) or verify deferred Texas dots are present and finishing through `mapTexasOverrideComplete`.
+- Resolutions/outcomes: Desktop controls now remain dimmed/disabled until Texas fully finishes loading, while mobile continues to unlock on initial reveal completion.
+### 2026-02-27 13:42:03 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined desktop unlock gating in `js/main.js` to wait for concrete Texas visual completion by polling for absence of deferred/entry Texas dot classes and only then releasing desktop lock; retained event hook and increased fallback timeout to `7000ms`.
+- Troubleshooting suggestions: If unlock still appears early, inspect runtime for lingering/rapidly recycled Texas classes and confirm `frame.dataset.mapTexasOverrideReady` reaches `true` only at the intended endpoint.
+- Resolutions/outcomes: Desktop controls now remain locked until Texas override visuals finish rendering, reducing early unlock behavior.
+### 2026-02-27 13:50:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented start-anchored desktop unlock delay in `js/main.js` by setting `mapTexasOverrideStartTs` and dispatching `mapTexasOverrideStarted` when deferred Texas entry begins, then gating desktop unlock on both visual completion and minimum elapsed time (`1000ms`) since start.
+- Troubleshooting suggestions: If timing still feels early/late, adjust only `texasMinDisplayMs` and keep completion checks unchanged.
+- Resolutions/outcomes: Desktop unlock timing is now tied to when Texas override actually starts, avoiding pre-start timer drift.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 

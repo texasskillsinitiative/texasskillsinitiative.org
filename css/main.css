@@ -1496,6 +1496,21 @@
             gap: 10px;
         }
 
+        .pipeline-map.is-preload-locked .pipeline-map-controls[data-map-controls="md"] .map-control[data-map-target],
+        .pipeline-map.is-preload-locked .pipeline-map-inline-controls-desktop .map-control--desktop,
+        .pipeline-map.is-preload-locked .pipeline-map-tab-panel {
+            opacity: 0.48;
+            filter: saturate(0.65);
+            pointer-events: none;
+        }
+
+        .pipeline-map.is-desktop-preload-locked .pipeline-map-controls[data-map-controls="md"] .map-control[data-map-target],
+        .pipeline-map.is-desktop-preload-locked .pipeline-map-inline-controls-desktop .map-control--desktop {
+            opacity: 0.48;
+            filter: saturate(0.65);
+            pointer-events: none;
+        }
+
         .pipeline-map-controls[data-map-controls="md"] {
             display: none;
             grid-template-columns: 196px minmax(0, 1fr);
@@ -6390,6 +6405,7 @@
         display: grid;
         grid-template-columns: 96px 1fr;
         gap: 0;
+        order: 3;
         margin: 0 10px 1.5rem 10px;
         background: var(--surface-2);
         border: 1px solid var(--frame-border);
@@ -6629,7 +6645,7 @@
         text-transform: uppercase;
         padding: 7px 10px;
         cursor: pointer;
-        z-index: 2;
+        z-index: 1;
     }
 
     .pipeline-map-tab-locations-overlay {
@@ -6643,6 +6659,7 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
+        z-index: 3;
     }
 
     .pipeline-map-tab-pane.is-locations-open .pipeline-map-tab-locations-overlay {
