@@ -1650,6 +1650,14 @@
 - Actions taken: Removed `.pipeline-map-tab-pane { min-height: 100%; }` after it introduced excessive pane height; retained only bottom padding reserve for pinned location button.
 - Troubleshooting suggestions: If button overlap reappears, tune `padding-bottom` only instead of reintroducing pane min-height constraints.
 - Resolutions/outcomes: Pane height returns to normal while `View Locations` remains bottom-right anchored.
+### 2026-02-27 13:02:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added mobile-only suppression for legacy pipeline control lanes by extending the unified-tab-panel hide rule to include `.pipeline-map-inline-controls-desktop` in addition to `.pipeline-map-controls`.
+- Troubleshooting suggestions: If any legacy controls still appear, check for additional non-standard control containers outside `.pipeline-map-main`.
+- Resolutions/outcomes: Mobile pipeline now presents only the unified two-column tab interface with legacy button lanes fully hidden.
+### 2026-02-27 13:09:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed mobile legacy-control suppression selector to target `.pipeline-map` container (instead of non-existent `.pipeline-map-main`) for both `.pipeline-map-controls` and `.pipeline-map-inline-controls-desktop`.
+- Troubleshooting suggestions: If old controls still render, inspect container class hierarchy in runtime DOM and keep hide selectors aligned to the mounted section wrapper.
+- Resolutions/outcomes: Old mobile phase button stack is now correctly suppressed in the active layout container.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 

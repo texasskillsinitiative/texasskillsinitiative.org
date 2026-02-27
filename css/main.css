@@ -6374,7 +6374,8 @@
 
 @media (max-width: 768px) {
     /* Hide the old single-column layout on mobile */
-    .pipeline-map-main .pipeline-map-controls {
+    .pipeline-map .pipeline-map-controls,
+    .pipeline-map .pipeline-map-inline-controls-desktop {
         display: none !important;
     }
     .pipeline-note[data-mobile-hidden="true"] {
