@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-02-24
+Last updated: 2026-02-27
 Current milestone: 1.0
 Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
@@ -198,6 +198,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-02-27: Captured interrupted mixed working-tree state as forensic checkpoint commit `54dc3e9` (`chore(checkpoint): capture interrupted error state before recovery`) including tracked/untracked artifacts for deterministic replay before recovery.
+- [Done] 2026-02-27: Stabilized pipeline mobile tab-panel recovery in `js/main.js` and `css/main.css` by restoring missing helper/loading CSS states (`.pipeline-map-helper-overlay.is-hidden`, `.map-initializing-overlay*`), routing mobile phase-tab toggles through shared `setCategoryState`, and syncing first-toggle guidance clearing for the new tab control path.
 - [Done] 2026-02-24: Optimized desktop pipeline-map initialization path in `js/main.js` by disabling legacy hidden map-debug/tuning UI construction and reducing popup footprint candidate search breadth (fewer width/font probe combinations), targeting faster first render on `#pipeline`.
 - [Done] 2026-02-24: Added tab/hash transition scroll stabilization in `js/main.js` (`stabilizeViewportTop`) to enforce top-of-page positioning after section switches and initial activation, addressing intermittent slight downward offset after navigation.
 - [Done] 2026-02-24: Updated first-load Overview auto-handoff timing to pause for 3 seconds after sequence completion, then fade out (`0.6s`) before routing to `#mandate`; preserved one-time guard and active-hash safety check.

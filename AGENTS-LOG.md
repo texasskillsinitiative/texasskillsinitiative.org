@@ -230,6 +230,11 @@
 - Troubleshooting suggestions: Preserve this checkpoint hash before cleanup so any regression can be replayed with exact temp/diff artifacts.
 - Resolutions/outcomes: Error-state snapshot staged for commit with branch/log context captured.
 - Commit hash(es): pending
+### 2026-02-27 02:22:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Created forensic checkpoint commit 54dc3e9 capturing interrupted error-state artifacts, then stabilized pipeline mobile map tab integration in js/main.js/css/main.css and committed recovery patch c593a6.
+- Troubleshooting suggestions: If mobile map behavior still desyncs, verify tab-panel state by checking .pipeline-map-tab.is-map-active against corresponding .map-overlay.is-active entries during toggles.
+- Resolutions/outcomes: Error state is preserved in history and partial pipeline implementation is now normalized to shared category-state handling with helper/loading visibility restored.
+- Commit hash(es): 54dc3e9, bc593a6
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`), treated prior run as unclean exit, and resumed from current working tree per user direction (restart Option 1 behavior).
 - Troubleshooting suggestions: If repository state appears inconsistent before next packet, run `git status` and `git log --oneline -n 5` first, then continue from the current `STATUS.md` map item.
 - Resolutions/outcomes: Recovery condition acknowledged and documented; active session continued without workspace reset.
@@ -1496,5 +1501,11 @@
 - Troubleshooting suggestions: Preserve this checkpoint hash before cleanup so any regression can be replayed with exact temp/diff artifacts.
 - Resolutions/outcomes: Error-state snapshot staged for commit with branch/log context captured.
 - Commit hash(es): pending
+### 2026-02-27 02:22:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Created forensic checkpoint commit 54dc3e9 capturing interrupted error-state artifacts, then stabilized pipeline mobile map tab integration in js/main.js/css/main.css and committed recovery patch c593a6.
+- Troubleshooting suggestions: If mobile map behavior still desyncs, verify tab-panel state by checking .pipeline-map-tab.is-map-active against corresponding .map-overlay.is-active entries during toggles.
+- Resolutions/outcomes: Error state is preserved in history and partial pipeline implementation is now normalized to shared category-state handling with helper/loading visibility restored.
+- Commit hash(es): 54dc3e9, bc593a6
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+
 
