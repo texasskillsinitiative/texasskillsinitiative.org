@@ -2607,42 +2607,6 @@ function initPipelineMap() {
             }
         }
     };
-    let mapTestsToastTimer = 0;
-    const showMapTestsToggleNotice = (visible) => {
-        let toast = document.getElementById('mapTestsToggleToast');
-        if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'mapTestsToggleToast';
-            toast.className = 'map-tests-toggle-toast';
-            toast.setAttribute('role', 'status');
-            toast.setAttribute('aria-live', 'polite');
-            document.body.appendChild(toast);
-        }
-        toast.textContent = visible
-            ? 'Map test settings shown'
-            : 'Map test settings hidden';
-        toast.classList.add('is-visible');
-        if (mapTestsToastTimer) {
-            window.clearTimeout(mapTestsToastTimer);
-            mapTestsToastTimer = 0;
-        }
-        mapTestsToastTimer = window.setTimeout(() => {
-            toast.classList.remove('is-visible');
-            mapTestsToastTimer = 0;
-        }, 1200);
-    };
-    let mapTestsVisible = false;
-    const syncMapTestsVisibility = () => {
-        document.querySelectorAll('[data-map-tests], [data-test-settings]').forEach(node => {
-            node.hidden = !mapTestsVisible;
-            node.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
-            node.style.display = mapTestsVisible ? '' : 'none';
-        });
-    };
-    const setMapTestsVisible = (nextVisible) => {
-        mapTestsVisible = Boolean(nextVisible);
-        syncMapTestsVisibility();
-    };
     const applyFlashPresetToFrame = (frame, presetId) => {
         if (!frame) return mapFlashPresetDefaults.presetId;
         const preset = mapFlashPresetDefaults.presets[presetId] || mapFlashPresetDefaults.presets[mapFlashPresetDefaults.presetId];
@@ -3851,7 +3815,72 @@ function initPipelineMap() {
         });
         const locations = Array.from(unique);
         if (!locations.length) return 'No mapped locations listed.';
-        return locations.join(', ');
+        const resolveGroupLabel = (countryToken) => {
+            const country = (countryToken || '').trim();
+            if (!country) return '';
+            const usStateMatch = country.match(/^United States\s*\(([^)]+)\)$/i);
+            if (usStateMatch) {
+                return `${usStateMatch[1].trim()} (US)`;
+            }
+            return country;
+        };
+        const isUsCountryToken = (value) => /^(usa|u\.s\.a\.|us|u\.s\.|united states)$/i.test((value || '').trim());
+        const groupedByCountry = new Map();
+        const ungrouped = [];
+        locations.forEach((entry) => {
+            const tokens = entry.split(',').map(part => part.trim()).filter(Boolean);
+            if (tokens.length < 2) {
+                ungrouped.push(entry);
+                return;
+            }
+            let city = '';
+            let groupLabel = '';
+            if (tokens.length >= 3 && isUsCountryToken(tokens[tokens.length - 1])) {
+                const stateToken = tokens[tokens.length - 2];
+                city = tokens.slice(0, -2).join(', ').trim();
+                groupLabel = stateToken ? `${stateToken} (US)` : 'US';
+            } else {
+                city = tokens.slice(0, -1).join(', ').trim();
+                groupLabel = resolveGroupLabel(tokens[tokens.length - 1]);
+            }
+            if (!city || !groupLabel) {
+                ungrouped.push(entry);
+                return;
+            }
+            let citySet = groupedByCountry.get(groupLabel);
+            if (!citySet) {
+                citySet = new Set();
+                groupedByCountry.set(groupLabel, citySet);
+            }
+            citySet.add(city);
+        });
+        const groupedSegments = Array.from(groupedByCountry.entries())
+            .map(([country, citySet]) => `${country}: ${Array.from(citySet).sort((a, b) => a.localeCompare(b)).join(', ')}`);
+        const allSegments = [...groupedSegments, ...ungrouped.sort((a, b) => a.localeCompare(b))];
+        return allSegments.join('  |  ');
+    };
+    const compactLocationSummary = (summaryText, maxCitiesPerGroup = 4) => {
+        const summary = typeof summaryText === 'string' ? summaryText.trim() : '';
+        if (!summary || /^No mapped locations listed\.$/i.test(summary)) {
+            return summary || 'No mapped locations listed.';
+        }
+        return summary
+            .split(/\s+\|\s+/)
+            .map((segment) => {
+                const idx = segment.indexOf(':');
+                if (idx === -1) return segment;
+                const group = segment.slice(0, idx).trim();
+                const cityText = segment.slice(idx + 1).trim();
+                if (!group || !cityText) return segment;
+                const cities = cityText.split(/\s*,\s*/).filter(Boolean);
+                if (cities.length <= maxCitiesPerGroup) {
+                    return `${group}: ${cities.join(', ')}`;
+                }
+                const shown = cities.slice(0, maxCitiesPerGroup).join(', ');
+                const hiddenCount = cities.length - maxCitiesPerGroup;
+                return `${group}: ${shown}, +${hiddenCount} more`;
+            })
+            .join('  |  ');
     };
     const applyMdToggleData = (toggleGroups, map, controls) => {
         if (!map || !controls) return;
@@ -3956,23 +3985,6 @@ function initPipelineMap() {
             if (helper) mapShell.insertBefore(helper, frame);
         }
         const mapDebugUiEnabled = false;
-        let testsDock = null;
-        if (mapDebugUiEnabled) {
-            testsDock = mapShell ? mapShell.querySelector('[data-map-tests]') : null;
-            if (!testsDock && mapShell) {
-                testsDock = document.createElement('div');
-                testsDock.className = 'pipeline-map-tests';
-                testsDock.setAttribute('data-map-tests', 'true');
-                mapShell.insertBefore(testsDock, controls);
-            }
-            if (testsDock) {
-                testsDock.innerHTML = '';
-                testsDock.hidden = !mapTestsVisible;
-                testsDock.setAttribute('aria-hidden', mapTestsVisible ? 'false' : 'true');
-                testsDock.style.display = mapTestsVisible ? '' : 'none';
-            }
-        }
-
         map.querySelectorAll('.map-overlay').forEach(node => node.remove());
         const overlayFragment = document.createDocumentFragment();
         let popupLayer = null;
@@ -4230,6 +4242,7 @@ function initPipelineMap() {
             applyPhaseToggleLabel(btn, toggleGroup.buttonLabel);
             controls.appendChild(btn);
             const locationSummary = locationSummaryByTarget.get(toggleGroup.targetClass) || 'No mapped locations listed.';
+            const compactLocationText = compactLocationSummary(locationSummary, 4);
             const popupText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
                 ? toggleGroup.description.trim()
                 : locationSummary;
@@ -4246,7 +4259,7 @@ function initPipelineMap() {
             mobileDescriptionLead.textContent = popupText || '';
             const mobileDescriptionLocations = document.createElement('span');
             mobileDescriptionLocations.className = 'map-category-description-locations';
-            mobileDescriptionLocations.textContent = `Locations: ${locationSummary}`;
+            mobileDescriptionLocations.textContent = `Locations: ${compactLocationText}`;
             if (mobileDescriptionLead.textContent) {
                 categoryDescription.appendChild(mobileDescriptionLead);
             }
@@ -4311,11 +4324,17 @@ function initPipelineMap() {
             // Grab the "This map reflects..." text from the pipeline-note box
             const pipelineNote = mapShell.querySelector('.pipeline-note');
             const pipelineNoteText = pipelineNote ? pipelineNote.textContent.trim() : '';
+            const pipelineNoteMobileMapText = (() => {
+                if (!pipelineNoteText) return '';
+                const sentences = pipelineNoteText.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [];
+                if (!sentences.length) return pipelineNoteText;
+                return sentences.slice(0, 2).join(' ').trim();
+            })();
             // Mark it so mobile CSS can hide it (desktop sees it unchanged)
             if (pipelineNote) pipelineNote.setAttribute('data-mobile-hidden', 'true');
 
             const tabPanel = document.createElement('div');
-            tabPanel.className = 'pipeline-map-tab-panel';
+            tabPanel.className = 'pipeline-map-tab-panel is-map-pane-active';
 
             const tabCol = document.createElement('div');
             tabCol.className = 'pipeline-map-tab-col';
@@ -4323,7 +4342,7 @@ function initPipelineMap() {
             tabCol.setAttribute('aria-label', 'Map phases');
 
             const contentCol = document.createElement('div');
-            contentCol.className = 'pipeline-map-tab-content';
+            contentCol.className = 'pipeline-map-tab-content is-map-pane-active';
 
             // ── MAP tab (non-activating, always returns to default view) ──
             const mapTab = document.createElement('button');
@@ -4332,29 +4351,38 @@ function initPipelineMap() {
             mapTab.setAttribute('role', 'tab');
             mapTab.setAttribute('data-tab-key', '__map__');
             mapTab.setAttribute('aria-pressed', 'false');
-            mapTab.textContent = 'MAP';
+            mapTab.setAttribute('aria-label', 'Map overview');
+            const mapTabLabel = document.createElement('span');
+            mapTabLabel.className = 'pipeline-map-tab-map-label';
+            mapTabLabel.textContent = 'MAP';
+            mapTab.appendChild(mapTabLabel);
             tabCol.appendChild(mapTab);
 
             // MAP default pane — shows the pipeline-note text
             const mapPane = document.createElement('div');
             mapPane.className = 'pipeline-map-tab-pane is-active';
             mapPane.setAttribute('data-tab-key', '__map__');
-            if (pipelineNoteText) {
+            if (pipelineNoteMobileMapText) {
                 const mapPaneText = document.createElement('p');
                 mapPaneText.className = 'pipeline-map-tab-pane-text';
-                mapPaneText.textContent = pipelineNoteText;
+                mapPaneText.textContent = pipelineNoteMobileMapText;
                 mapPane.appendChild(mapPaneText);
             }
             contentCol.appendChild(mapPane);
 
-            // Helper to build a compact phase label: number on top, PHASE below
+            // Helper to build a compact phase label: number on top, PHASE below.
+            // Also returns right-pane title text that excludes the phase prefix.
             const buildCompactPhaseLabel = (buttonNode, rawLabel) => {
                 const label = typeof rawLabel === 'string' ? rawLabel.trim() : '';
+                const normalizedLabel = label || 'Toggle';
                 const phaseMatch = label.match(/^(\d{1,2})\s*phase(\s*::\s*.*)?$/i);
                 buttonNode.textContent = '';
                 if (!phaseMatch) {
-                    buttonNode.textContent = label || 'Toggle';
-                    return label;
+                    buttonNode.textContent = normalizedLabel;
+                    return {
+                        fullLabel: normalizedLabel,
+                        paneTitle: normalizedLabel.toUpperCase()
+                    };
                 }
                 const phaseNumber = phaseMatch[1].padStart(2, '0');
                 const numSpan = document.createElement('span');
@@ -4365,27 +4393,72 @@ function initPipelineMap() {
                 wordSpan.textContent = 'PHASE';
                 buttonNode.appendChild(numSpan);
                 buttonNode.appendChild(wordSpan);
-                return label;
+                const rawSuffix = (phaseMatch[2] || '').trim();
+                const suffixText = rawSuffix
+                    ? rawSuffix.replace(/^::\s*/i, '').trim()
+                    : '';
+                return {
+                    fullLabel: normalizedLabel,
+                    paneTitle: suffixText ? `:: ${suffixText.toUpperCase()}` : normalizedLabel.toUpperCase()
+                };
             };
 
             // ── One tab + pane per toggle group ──
             const allPhaseTabs = [];
             const allPhasePanes = [];
+            const closeAllLocationOverlays = () => {
+                allPhasePanes.forEach((pane) => {
+                    pane.classList.remove('is-locations-open');
+                    const toggle = pane.querySelector('.pipeline-map-tab-locations-toggle');
+                    if (toggle) toggle.textContent = 'View Locations';
+                });
+            };
+            let selectedTabKey = '__map__';
+            const isMobilePhaseMapActive = (tabKey) => {
+                if (!tabKey || tabKey === '__map__') return false;
+                const overlay = Array.from(map.querySelectorAll('.map-overlay'))
+                    .find(n => n.classList.contains(tabKey) && !Array.from(n.classList).some(c => c.endsWith('--desktop')));
+                return Boolean(overlay && overlay.classList.contains('is-active'));
+            };
 
             // updateContentPane: show only the pane for `key` in right column
             const updateContentPane = (key) => {
+                selectedTabKey = key;
                 [mapPane, ...allPhasePanes].forEach(p => {
                     p.classList.toggle('is-active', p.getAttribute('data-tab-key') === key);
+                    p.classList.remove('is-locations-open');
                 });
+                closeAllLocationOverlays();
                 // Highlight which tab "owns" the right column (separate from map-active state)
                 [mapTab, ...allPhaseTabs].forEach(t => {
-                    t.classList.toggle('is-content-active', t.getAttribute('data-tab-key') === key);
+                    const tabKey = t.getAttribute('data-tab-key');
+                    const isSelected = tabKey === key;
+                    const isSelectedAndMapOn = tabKey === '__map__'
+                        ? isSelected
+                        : (isSelected && isMobilePhaseMapActive(tabKey));
+                    t.classList.toggle('is-content-selected', isSelected);
+                    t.classList.toggle('is-content-active', isSelectedAndMapOn);
                 });
+                const activeTab = [mapTab, ...allPhaseTabs].find(t => t.getAttribute('data-tab-key') === key) || mapTab;
+                const activeTabColor = activeTab && activeTab.classList.contains('pipeline-map-tab--map')
+                    ? 'var(--accent)'
+                    : ((activeTab && activeTab.style.getPropertyValue('--map-tab-color').trim()) || 'var(--accent)');
+                const isSelectedMapOn = key === '__map__' ? true : isMobilePhaseMapActive(key);
+                tabPanel.style.setProperty('--pipeline-pane-border-color', activeTabColor);
+                contentCol.style.setProperty('--pipeline-pane-border-color', activeTabColor);
+                tabPanel.classList.toggle('has-content-active', Boolean(key));
+                contentCol.classList.toggle('has-content-active', Boolean(key));
+                contentCol.classList.toggle('is-selected-map-on', isSelectedMapOn);
+                contentCol.classList.toggle('is-selected-map-off', !isSelectedMapOn);
+                const isMapPaneActive = key === '__map__';
+                tabPanel.classList.toggle('is-map-pane-active', isMapPaneActive);
+                contentCol.classList.toggle('is-map-pane-active', isMapPaneActive);
             };
 
             toggleGroups.forEach(toggleGroup => {
                 const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
                 const locationSummary = locationSummaryByTarget.get(toggleGroup.targetClass) || 'No mapped locations listed.';
+                const compactLocationText = compactLocationSummary(locationSummary, 4);
                 const descriptionText = (typeof toggleGroup.description === 'string' && toggleGroup.description.trim())
                     ? toggleGroup.description.trim()
                     : locationSummary;
@@ -4399,7 +4472,9 @@ function initPipelineMap() {
                 phaseTab.setAttribute('data-tab-key', toggleGroup.targetClass);
                 phaseTab.setAttribute('data-map-target', toggleGroup.targetClass);
                 phaseTab.style.setProperty('--map-tab-color', representativeColor);
-                const fullLabel = buildCompactPhaseLabel(phaseTab, toggleGroup.buttonLabel);
+                const labelParts = buildCompactPhaseLabel(phaseTab, toggleGroup.buttonLabel);
+                const fullLabel = labelParts.fullLabel;
+                phaseTab.setAttribute('aria-label', fullLabel);
                 tabCol.appendChild(phaseTab);
                 allPhaseTabs.push(phaseTab);
 
@@ -4413,7 +4488,7 @@ function initPipelineMap() {
                 const titleEl = document.createElement('p');
                 titleEl.className = 'pipeline-map-tab-pane-title';
                 titleEl.style.setProperty('--map-tab-color', representativeColor);
-                titleEl.textContent = fullLabel.toUpperCase();
+                titleEl.textContent = labelParts.paneTitle;
                 phasePane.appendChild(titleEl);
 
                 if (descriptionText && descriptionText !== locationSummary) {
@@ -4422,10 +4497,32 @@ function initPipelineMap() {
                     leadEl.textContent = descriptionText;
                     phasePane.appendChild(leadEl);
                 }
-                const locEl = document.createElement('p');
-                locEl.className = 'pipeline-map-tab-pane-locations';
-                locEl.textContent = `Locations: ${locationSummary}`;
-                phasePane.appendChild(locEl);
+                const locationsToggle = document.createElement('button');
+                locationsToggle.type = 'button';
+                locationsToggle.className = 'pipeline-map-tab-locations-toggle';
+                locationsToggle.textContent = 'View Locations';
+                phasePane.appendChild(locationsToggle);
+
+                const locationsOverlay = document.createElement('div');
+                locationsOverlay.className = 'pipeline-map-tab-locations-overlay';
+                const locationsCard = document.createElement('div');
+                locationsCard.className = 'pipeline-map-tab-locations-card';
+                const locationsText = document.createElement('p');
+                locationsText.className = 'pipeline-map-tab-locations-text';
+                locationsText.textContent = locationSummary.replace(/\s+\|\s+/g, '\n');
+                locationsCard.appendChild(locationsText);
+                locationsOverlay.appendChild(locationsCard);
+                locationsOverlay.addEventListener('click', (event) => {
+                    if (event.target !== locationsOverlay) return;
+                    closeAllLocationOverlays();
+                });
+                phasePane.appendChild(locationsOverlay);
+                locationsToggle.addEventListener('click', () => {
+                    const nextOpen = !phasePane.classList.contains('is-locations-open');
+                    closeAllLocationOverlays();
+                    phasePane.classList.toggle('is-locations-open', nextOpen);
+                    locationsToggle.textContent = nextOpen ? 'Hide Locations' : 'View Locations';
+                });
 
                 contentCol.appendChild(phasePane);
                 allPhasePanes.push(phasePane);
@@ -4433,20 +4530,63 @@ function initPipelineMap() {
                 // ── Phase tab click: toggle map independently, update right column to this tab ──
                 phaseTab.addEventListener('click', () => {
                     const key = toggleGroup.targetClass;
-                    const overlay = Array.from(map.querySelectorAll('.map-overlay'))
-                        .find(n => n.classList.contains(key) && !Array.from(n.classList).some(c => c.endsWith('--desktop')));
-                    if (overlay) {
-                        const isMapActive = overlay.classList.contains('is-active');
+                    const isSelected = selectedTabKey === key;
+                    const isMapActive = isMobilePhaseMapActive(key);
+                    if (isSelected) {
                         const nextState = !isMapActive;
                         setCategoryState(key, nextState, { flashFrame: nextState });
-                        phaseTab.classList.toggle('is-map-active', nextState);
-                        phaseTab.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                        updateContentPane(key);
+                        return;
                     }
-
-                    // Always update the right column to show THIS tab's content (last-tapped wins)
+                    if (isMapActive) {
+                        // Re-select only; keep points on and avoid re-triggering flashes.
+                        updateContentPane(key);
+                        return;
+                    }
+                    // First-time activation from fully inactive state.
+                    setCategoryState(key, true, { flashFrame: true });
                     updateContentPane(key);
                 });
             });
+
+            const syncMobileTabPanelSizing = () => {
+                if (!window.matchMedia('(max-width: 768px)').matches) {
+                    tabPanel.style.removeProperty('--pipeline-tab-panel-height');
+                    tabPanel.style.removeProperty('--pipeline-map-tab-map-height');
+                    tabPanel.style.removeProperty('--pipeline-phase-tab-min-height');
+                    return;
+                }
+                const panes = [mapPane, ...allPhasePanes];
+                const contentStyle = window.getComputedStyle(contentCol);
+                const padTop = parseFloat(contentStyle.paddingTop) || 0;
+                const padBottom = parseFloat(contentStyle.paddingBottom) || 0;
+                let maxPaneHeight = 0;
+                panes.forEach((pane) => {
+                    const prevDisplay = pane.style.display;
+                    const prevPosition = pane.style.position;
+                    const prevVisibility = pane.style.visibility;
+                    const prevPointerEvents = pane.style.pointerEvents;
+                    pane.style.display = 'flex';
+                    pane.style.position = 'absolute';
+                    pane.style.visibility = 'hidden';
+                    pane.style.pointerEvents = 'none';
+                    maxPaneHeight = Math.max(maxPaneHeight, Math.ceil(pane.scrollHeight));
+                    pane.style.display = prevDisplay;
+                    pane.style.position = prevPosition;
+                    pane.style.visibility = prevVisibility;
+                    pane.style.pointerEvents = prevPointerEvents;
+                });
+                const panelHeight = Math.max(200, Math.ceil(maxPaneHeight + padTop + padBottom));
+                const phaseCount = Math.max(1, allPhaseTabs.length);
+                const mapTabHeight = 30;
+                const phaseMinVisibleHeight = 48;
+                const minPanelHeightForTabs = mapTabHeight + (phaseCount * phaseMinVisibleHeight);
+                const normalizedPanelHeight = Math.max(panelHeight, minPanelHeightForTabs);
+                const phaseHeight = Math.max(phaseMinVisibleHeight, (normalizedPanelHeight - mapTabHeight) / phaseCount);
+                tabPanel.style.setProperty('--pipeline-tab-panel-height', `${normalizedPanelHeight}px`);
+                tabPanel.style.setProperty('--pipeline-map-tab-map-height', `${Math.round(mapTabHeight)}px`);
+                tabPanel.style.setProperty('--pipeline-phase-tab-min-height', `${Math.floor(phaseHeight)}px`);
+            };
 
             // MAP tab click: just restores the MAP pane in right column; doesn't affect map state
             mapTab.addEventListener('click', () => {
@@ -4463,9 +4603,21 @@ function initPipelineMap() {
                 mapShell.appendChild(tabPanel);
             }
 
-            // Pulse first phase tab as guidance
-            if (allPhaseTabs[0]) {
-                allPhaseTabs[0].classList.add('map-control--guided');
+            // Ensure MAP pane/tab active styles are synchronized on initial load.
+            updateContentPane('__map__');
+
+            syncMobileTabPanelSizing();
+            window.addEventListener('resize', syncMobileTabPanelSizing);
+            window.requestAnimationFrame(syncMobileTabPanelSizing);
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent) {
+                mainContent.addEventListener('pointerdown', (event) => {
+                    const target = event.target;
+                    if (!(target instanceof Element)) return;
+                    if (target.closest('.pipeline-map-tab-locations-card')) return;
+                    if (target.closest('.pipeline-map-tab-locations-toggle')) return;
+                    closeAllLocationOverlays();
+                });
             }
         }
 
@@ -5389,18 +5541,15 @@ function initPipelineMap() {
         const firstDesktopToggle = firstToggleTarget
             ? Array.from(desktopMapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
             : null;
-        const firstTabToggle = (mapShell && firstToggleTarget)
-            ? mapShell.querySelector(`.pipeline-map-tab[data-map-target="${firstToggleTarget}"]`)
-            : null;
         let guidanceCleared = false;
         const clearToggleGuidance = () => {
             if (guidanceCleared) return;
             guidanceCleared = true;
-            [firstMobileToggle, firstDesktopToggle, firstTabToggle].forEach((control) => {
+            [firstMobileToggle, firstDesktopToggle].forEach((control) => {
                 if (control) control.classList.remove('map-control--guided');
             });
         };
-        [firstMobileToggle, firstDesktopToggle, firstTabToggle].forEach((control) => {
+        [firstMobileToggle, firstDesktopToggle].forEach((control) => {
             if (control) control.classList.add('map-control--guided');
         });
         const runMapPostStartupReady = () => {
@@ -6023,9 +6172,8 @@ function initPipelineMap() {
             renderFromImage(map, mapSrc, mapSrc);
         }
     });
-    syncMapTestsVisibility();
     const scanLocalAreas = () => {
-        const candidates = Array.from(document.querySelectorAll('[data-map-tests], [data-test-settings], [data-local-debug-area]'));
+        const candidates = Array.from(document.querySelectorAll('[data-local-debug-area], .pipeline-map'));
         const areas = [];
         const seen = new Set();
         candidates.forEach((node) => {
@@ -6062,45 +6210,8 @@ function initPipelineMap() {
     };
 
     const debugBridge = window.__tsiDebugBridge || {};
-    debugBridge.getMapTestsVisible = () => mapTestsVisible;
-    debugBridge.setMapTestsVisible = (nextVisible, options = {}) => {
-        const opts = options && typeof options === 'object' ? options : {};
-        setMapTestsVisible(Boolean(nextVisible));
-        if (opts.notify) {
-            showMapTestsToggleNotice(mapTestsVisible);
-        }
-        return mapTestsVisible;
-    };
     debugBridge.scanLocalAreas = scanLocalAreas;
-    debugBridge.syncMapTestsVisibility = syncMapTestsVisibility;
     window.__tsiDebugBridge = debugBridge;
-
-    if (!window.__tsiMapTestsObserverBound && typeof MutationObserver === 'function') {
-        const testSettingsObserver = new MutationObserver((mutations) => {
-            let shouldSync = false;
-            for (let i = 0; i < mutations.length; i += 1) {
-                const added = mutations[i].addedNodes;
-                for (let j = 0; j < added.length; j += 1) {
-                    const node = added[j];
-                    if (!(node instanceof HTMLElement)) continue;
-                    if (
-                        node.matches('[data-map-tests], [data-test-settings]')
-                        || node.querySelector('[data-map-tests], [data-test-settings]')
-                    ) {
-                        shouldSync = true;
-                        break;
-                    }
-                }
-                if (shouldSync) break;
-            }
-            if (shouldSync) {
-                syncMapTestsVisibility();
-                window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
-            }
-        });
-        testSettingsObserver.observe(document.body, { childList: true, subtree: true });
-        window.__tsiMapTestsObserverBound = true;
-    }
 }
 
 function initHoldToClear() {

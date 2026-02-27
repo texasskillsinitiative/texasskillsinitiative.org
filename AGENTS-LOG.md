@@ -1506,6 +1506,150 @@
 - Troubleshooting suggestions: If mobile map behavior still desyncs, verify tab-panel state by checking .pipeline-map-tab.is-map-active against corresponding .map-overlay.is-active entries during toggles.
 - Resolutions/outcomes: Error state is preserved in history and partial pipeline implementation is now normalized to shared category-state handling with helper/loading visibility restored.
 - Commit hash(es): 54dc3e9, bc593a6
+### 2026-02-27 04:45:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Embedded the globe animation behind the overview hero, refreshed rubric/engagement imagery with the new compressed assets, built `portal.html` plus the portal-form hook, optimized pipeline transitions for reduced entropy, and pruned unused map-test code across CSS/JS.
+- Troubleshooting suggestions: Validate the portal submission fires a JSON `{ok:true}` response and ensure the pipeline map helper remains hidden until category toggles fire.
+- Resolutions/outcomes: Funnel-ready portal page is live, the new visuals are deployed, and map telemetry is cleaner.
+### 2026-02-27 05:06:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed pipeline mobile button usability by widening mobile tab lane width, increasing min tap targets (52px/48px), adding mobile tap behavior/focus states, and restoring `mapDebugUiEnabled` declaration to prevent runtime faults in `initPipelineMap`.
+- Troubleshooting suggestions: Verify at `768px` and `600px` widths that MAP + phase tabs remain fully tappable and that no hidden overlay blocks pointer input.
+- Resolutions/outcomes: Pipeline mobile buttons are now touch-safe and runtime-safe without changing desktop control behavior.
+### 2026-02-27 05:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Aligned mobile pipeline phase-tab inactive styling with the map-control inactive baseline (border tint model, text sizing/letter spacing, uppercase treatment, opacity) and kept changes scoped to mobile media rules only.
+- Troubleshooting suggestions: If inactive tabs appear too heavy in light theme, reduce border mix strength from `25%` to `18%` in the mobile `.pipeline-map-tab` rule.
+- Resolutions/outcomes: Mobile tab visuals now read as consistent inactive category buttons while desktop controls remain untouched.
+### 2026-02-27 05:26:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated mobile tab styling so the left-side 3px indicator remains visible for inactive tabs using a subdued shaded tint, while preserving stronger active indicator coloring.
+- Troubleshooting suggestions: If the inactive stripe is still too subtle/strong, tune the left-border mix from `20%` up/down in `.pipeline-map-tab`.
+- Resolutions/outcomes: Mobile phase tabs now keep a persistent visual lane marker without changing desktop behavior.
+### 2026-02-27 05:35:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added mobile-only tab-panel sizing sync to compute tallest right-pane content, lock panel/column height, keep MAP tab slightly shorter, and distribute remaining left-column height evenly across phase tabs.
+- Troubleshooting suggestions: If content wraps more after copy edits, the sizing pass auto-recalculates on resize; force a refresh if stale layout appears after hot reload.
+- Resolutions/outcomes: Mobile pipeline tab panel no longer reflows height when switching tabs, and phase-tab lanes stay evenly distributed beneath a smaller MAP lane.
+### 2026-02-27 09:11:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned mobile pipeline tab visuals/sizing by increasing MAP label font size to match phase number text and setting fixed MAP lane height to 36px in CSS/JS, while keeping right-pane-height locking and even phase distribution logic.
+- Troubleshooting suggestions: If MAP lane should be tighter/looser, change only the single `mapTabHeight` constant in `js/main.js` and matching CSS fallback var in `.pipeline-map-tab--map`.
+- Resolutions/outcomes: MAP label readability is aligned with phase numeric emphasis and MAP lane height remains independently fixed instead of dynamically derived from total panel height.
+### 2026-02-27 09:19:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added mobile map-pane state class toggling in `js/main.js` and applied mandate-style active MAP tab treatment in `css/main.css` (`var(--accent-soft)` background with accent left edge), extended that accent background into the right content pane, and removed the center divider seam while MAP pane is active.
+- Troubleshooting suggestions: If the MAP-pane blend needs stronger/lighter contrast, tune `var(--accent-soft)` or override only `.pipeline-map-tab-content.is-map-pane-active` background mix.
+- Resolutions/outcomes: Active MAP tab now visually matches the mandate box tone, right content area inherits the same tone, and no border appears between the active MAP tab and content.
+### 2026-02-27 09:23:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ensured mobile pipeline MAP tab is truly active by default on load by invoking shared pane-state sync (`updateContentPane('__map__')`) after tab-panel insertion in `js/main.js`.
+- Troubleshooting suggestions: Keep initial state wiring through `updateContentPane` (not only pre-set classes) so future class-based MAP styling changes are consistently applied at startup.
+- Resolutions/outcomes: MAP tab now initializes with active visual state (including gold left-bar treatment and MAP-pane background/linkage classes) without desktop behavior changes.
+### 2026-02-27 09:26:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed mobile MAP tab label rendering by replacing plain text node with a dedicated span class and adding number-scale typography, plus hardened initial MAP active visuals by setting `is-map-pane-active` classes at construction and reinforcing MAP-active selector styling.
+- Troubleshooting suggestions: If you want the MAP label even larger, tune only `.pipeline-map-tab-map-label` font-size; keep phase tab text rules unchanged to preserve hierarchy.
+- Resolutions/outcomes: MAP label now matches the phase-number scale and the MAP left accent bar reliably initializes in gold active state.
+### 2026-02-27 09:30:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed mobile MAP accent rendering by replacing `border-color` shorthand with side-specific border color rules so left accent remains gold, and removed mobile-tab guided-class assignment (`map-control--guided`) for Phase 01 on load to restore proper inactive appearance.
+- Troubleshooting suggestions: If the left bar still appears muted in a specific theme, increase contrast by darkening only `--accent` or lowering the top/bottom border mix percentage in MAP-active rules.
+- Resolutions/outcomes: MAP tab now keeps the intended gold active left bar on load, and Phase 01 no longer starts with bright guided highlight artifacts in mobile tab view.
+### 2026-02-27 09:34:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Eliminated mobile MAP-active center seam by removing actual tab-column divider width (`border-right: 0`) during MAP-pane-active state and applying a `-1px` right overlap on active MAP tab styling.
+- Troubleshooting suggestions: If a seam still appears on specific DPR/browser combos, increase active MAP overlap from `-1px` to `-2px` in `.pipeline-map-tab-panel.is-map-pane-active .pipeline-map-tab--map`.
+- Resolutions/outcomes: Active MAP tab surface now visually blends into the right content background with no center-line break.
+### 2026-02-27 09:40:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Extended MAP-active border continuity into right content by adding matching inset top/bottom accent-border lines on `.pipeline-map-tab-content.is-map-pane-active`.
+- Troubleshooting suggestions: If border continuity should be stronger/subtler, tune the shared color-mix percentage (`22%`) in both MAP tab and MAP content active selectors.
+- Resolutions/outcomes: MAP-active tab border style now carries across into content area for a unified active panel look.
+### 2026-02-27 09:43:38 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added right-edge accent inset line to MAP-active content pane and neutralized panel right border color in MAP-pane-active state to avoid apparent double-thickness edge.
+- Troubleshooting suggestions: If right edge still reads heavy on some displays, lower inset mix strength on the new `inset -1px 0` stroke.
+- Resolutions/outcomes: Right edge now uses a single 1px MAP-active accent stroke consistent with tab border weight.
+### 2026-02-27 09:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned MAP-active border continuity by adding visual-weight parity on the MAP tab (inset top/bottom accent strokes) and adding a mobile divider continuation line below MAP tab (`.pipeline-map-tab-col::after` in MAP-pane-active state).
+- Troubleshooting suggestions: If the continuation line is too noticeable, reduce its color-mix percentage from `22%` to `16-18%`.
+- Resolutions/outcomes: MAP tab border now reads closer to right-pane border weight and the MAP/Phase split point carries the accent line downward without breaking continuity.
+### 2026-02-27 09:58:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented real-border-only MAP-active mobile edge rendering in `css/main.css`: removed pseudo seam continuation (`.pipeline-map-tab-col::after`), removed MAP overlap/inset shadow hacks, and converted MAP-active content edge styling to explicit real borders (top/bottom/right) with left edge suppressed for clean center join.
+- Troubleshooting suggestions: If any residual seam appears on specific devices, inspect computed border colors for panel vs content and keep only one owner for each edge.
+- Resolutions/outcomes: MAP-active tab/content border alignment now uses one geometry model, reducing DPR-dependent thickness mismatch artifacts.
+### 2026-02-27 10:01:03 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added MAP-pane-active right-edge accent border to inactive phase tabs (`.pipeline-map-tab:not(.pipeline-map-tab--map)`) so content-border styling visually runs flush against the inactive tab edge.
+- Troubleshooting suggestions: If the seam feels too pronounced, reduce the right-edge border mix strength from `22%` to `16-18%`.
+- Resolutions/outcomes: Border continuity now meets the right side of inactive tabs while preserving no-border join between active MAP tab and content row.
+### 2026-02-27 10:01:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed rounded corners from the mobile pipeline tab panel by setting `.pipeline-map-tab-panel` border radius to `0` in the mobile tab-panel rule block.
+- Troubleshooting suggestions: If any residual rounding appears, check for parent/container radius rules outside the mobile block and normalize those to `0` as needed.
+- Resolutions/outcomes: Pipeline tab panel now renders with square corners in mobile view.
+### 2026-02-27 10:04:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Generalized mobile MAP-only border-continuity behavior to all active tabs by updating `updateContentPane` to set active pane color/class state (`--pipeline-pane-border-color`, `has-content-active`) and switching CSS edge rules from `is-map-pane-active` to `has-content-active` for border flow ownership.
+- Troubleshooting suggestions: If border tone feels too saturated on specific phase colors, reduce the shared mix strength (`22%`) in the new `has-content-active` border rules.
+- Resolutions/outcomes: Phase tabs now inherit the same border-flow logic as MAP (inactive-tab right edge continuity plus active content top/bottom/right edge styling) while MAP keeps its distinct accent-soft background.
+### 2026-02-27 10:08:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Matched mobile active tab styling to desktop active map-button visual language by adding active border-color shift, tint background glow, and pulsing ring pseudo-element for `.pipeline-map-tab.is-content-active`; preserved MAP-specific content continuity styling and updated MAP active text to accent color.
+- Troubleshooting suggestions: If glow intensity is too strong, reduce the active tab box-shadow and `::after` border mix strengths in the mobile tab rules.
+- Resolutions/outcomes: Mobile active tabs now visually align with desktop active button behavior while retaining mobile panel continuity requirements.
+### 2026-02-27 10:13:47 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reverted the previous mobile active-tab desktop-glow/border mimic changes in `css/main.css` (removed active ring pseudo-element, removed border-color glow shift, restored prior active text/background treatment).
+- Troubleshooting suggestions: If you later want a lighter active emphasis, reintroduce only subtle background tint without pulse ring or border-color override.
+- Resolutions/outcomes: Mobile tab active visuals are back to the pre-mimic state, while border continuity infrastructure remains in place.
+### 2026-02-27 10:16:16 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added desktop-matching active background tint to mobile active tabs by changing `.pipeline-map-tab.is-content-active` background to `color-mix(in srgb, var(--map-tab-color, var(--accent)) 10%, transparent)`.
+- Troubleshooting suggestions: If tint reads too weak/strong per phase color, tune only the mix percentage from `10%`.
+- Resolutions/outcomes: Active mobile tabs now gain the same style family of tinted active background as desktop buttons without reintroducing glow-ring/border changes.
+### 2026-02-27 11:23:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented mobile 5-state tab behavior in `js/main.js` by introducing explicit selected-tab tracking and map-active checks, then updated phase-tab click logic for: selected-tab toggle on/off, re-select-only for map-active non-selected tabs, and first-time activation from fully inactive state. Added CSS state class support in `css/main.css` for selected-map-off styling (`.is-content-selected:not(.is-content-active)`) and updated border-continuity selector to key off content selection.
+- Troubleshooting suggestions: If any state reads incorrectly during rapid tapping, verify class combinations on each tab (`is-content-selected`, `is-content-active`, `is-map-active`) in mobile devtools while tapping through the five scenarios.
+- Resolutions/outcomes: Mobile tabs now follow the requested selection vs map-visibility separation with persistent selected indicator behavior when map points are hidden.
+### 2026-02-27 11:36:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added right-pane background state binding in mobile tab panel by toggling `is-selected-map-on`/`is-selected-map-off` classes from `updateContentPane` and applying matching content backgrounds in CSS (phase color tint when map-on; neutral surface when map-off).
+- Troubleshooting suggestions: If pane tint should be stronger/weaker, adjust only the `10%` mix value in `.pipeline-map-tab-content.is-selected-map-on`.
+- Resolutions/outcomes: Right content area now visually matches selected tab state across active-visible vs inactive-visible states while preserving MAP-pane-specific accent background behavior.
+### 2026-02-27 11:40:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed right-pane phase title derivation in `js/main.js` so compact tab labels remain `NN PHASE` while pane titles use only the suffix after `::` (normalized to `:: SUFFIX`); added fallback to full uppercase label when no suffix exists.
+- Troubleshooting suggestions: If a title unexpectedly shows full label, verify source label includes `::` separator after the phase prefix.
+- Resolutions/outcomes: Right-pane titles now exclude phase prefix text and mirror requested suffix-only format.
+### 2026-02-27 11:46:38 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `buildLocationSummary` in `js/main.js` to group normalized location labels by country and emit grouped summaries (`Country: City, City`) with semicolon separators; retained fallback handling for non-city/country labels.
+- Troubleshooting suggestions: If grouped output needs a different delimiter/format, adjust the final join in `buildLocationSummary` without touching marker parsing.
+- Resolutions/outcomes: Location readouts now avoid repeated country names while preserving unique city listings across pipeline UI surfaces.
+### 2026-02-27 11:49:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined grouped location formatter for compact readability by sorting grouped cities, switching group delimiter to ` | `, and adding US-state extraction so labels with `United States (State)` group under `State (US)`.
+- Troubleshooting suggestions: If delimiter density feels high on narrow screens, change `buildLocationSummary` separator from ` | ` to `; `.
+- Resolutions/outcomes: Grouped location strings are denser and easier to scan, and US entries now group by state when present.
+### 2026-02-27 11:53:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed grouped-location parsing for three-part US labels (`City, State, USA`) by detecting US country tokens and regrouping as `State (US): City`; city text now strips repeated state token from each entry.
+- Troubleshooting suggestions: If other country formats include three-part patterns in future, extend token parser rules before fallback split logic.
+- Resolutions/outcomes: Phase 4 no longer repeats `Texas` for every city; entries now roll up under one state heading.
+### 2026-02-27 11:59:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `compactLocationSummary` in `js/main.js` and switched mobile-facing location text surfaces to compact mode (max 4 cities per group, then `+N more`) while retaining grouped labels.
+- Troubleshooting suggestions: If you want more/less detail, change the compact limit argument (`4`) at the call sites.
+- Resolutions/outcomes: Location lists remain grouped but are less dense/word-jumble-like in constrained panes.
+### 2026-02-27 12:26:31 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced static mobile phase-pane location line with interactive `View Locations` overlay flow in `js/main.js` and added corresponding mobile overlay/toggle styles in `css/main.css`; implemented toggle, close button, outside-click dismiss, and auto-close on tab switches.
+- Troubleshooting suggestions: If overlay should reveal full untruncated details, keep it fed from full `locationSummary` (current behavior) and avoid compact formatter in overlay text path.
+- Resolutions/outcomes: Location details are now on-demand via button, with a dimmed-pane overlay presentation that improves readability without permanently increasing pane height.
+### 2026-02-27 12:32:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the location overlay title node/rendering in `js/main.js`, deleted the now-unused title style block in `css/main.css`, and updated mobile tab-panel sizing math to enforce a minimum panel height based on fixed MAP lane + minimum phase lanes so all tabs stay fully visible.
+- Troubleshooting suggestions: If you need tighter/looser tab-stack fit, adjust `phaseMinVisibleHeight` in `syncMobileTabPanelSizing`.
+- Resolutions/outcomes: Location overlay now opens without heading text, outside-click dismiss remains enabled, and tab stack no longer risks clipping in shorter content states.
+### 2026-02-27 12:43:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reduced MAP lane size in both JS and CSS (`mapTabHeight` and map-tab fallback height/padding), added `box-sizing: border-box` to mobile tabs for stable min-height calculations, and expanded overlay close behavior by wiring pointerdown dismissal on `#mainContent` (ignoring popup card/toggle targets).
+- Troubleshooting suggestions: If MAP lane still feels tall/short, tune `mapTabHeight` in `syncMobileTabPanelSizing` and the `.pipeline-map-tab--map` fallback/padding together.
+- Resolutions/outcomes: Bottom-tab clipping risk is reduced and location overlays now close when clicking anywhere in the page content area outside the popup card.
+### 2026-02-27 12:46:33 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed small-screen CSS override conflict by adding explicit `.pipeline-map-tab--map` sizing/padding override inside `@media (max-width: 600px)` so the generic `.pipeline-map-tab { min-height: 48px; }` rule no longer enlarges MAP tab and breaks panel-height assumptions.
+- Troubleshooting suggestions: If future breakpoint rules touch `.pipeline-map-tab` height/padding, mirror MAP-specific overrides in the same breakpoint to keep lane math consistent.
+- Resolutions/outcomes: MAP tab now remains visibly smaller at small widths and bottom-tab clipping caused by map-lane inflation is removed.
+### 2026-02-27 12:49:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restored lower border on final mobile tab row by replacing `.pipeline-map-tab:last-child { border-bottom: none; }` with a standard color-mix border-bottom rule.
+- Troubleshooting suggestions: If the final tab border appears too heavy/light against panel edge, tune only the color-mix percentage in that last-child border rule.
+- Resolutions/outcomes: Bottom tab now renders its lower colored border in all states.
+### 2026-02-27 12:51:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed location-overlay close button rendering from `js/main.js` and deleted the corresponding CSS class block; repositioned `.pipeline-map-tab-locations-toggle` to bottom-right by switching to `align-self: flex-end` and `margin-top: auto`.
+- Troubleshooting suggestions: If button position drifts with future pane content changes, keep phase pane as flex column and retain `margin-top: auto` on the toggle.
+- Resolutions/outcomes: Location popup now exits via outside click only, and `View Locations` sits at the bottom-right of the right pane.
+### 2026-02-27 12:56:27 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Converted `View Locations` placement from flow-based alignment to pinned layout by setting `.pipeline-map-tab-locations-toggle` absolute at pane bottom-right and adding pane bottom padding/min-height safeguards in `.pipeline-map-tab-pane`.
+- Troubleshooting suggestions: If offsets need tuning for small screens, adjust `right/bottom` and matching pane `padding-bottom` together.
+- Resolutions/outcomes: `View Locations` now stays anchored to the bottom-right corner of the pane area regardless of copy length above it.
+### 2026-02-27 12:57:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed `.pipeline-map-tab-pane { min-height: 100%; }` after it introduced excessive pane height; retained only bottom padding reserve for pinned location button.
+- Troubleshooting suggestions: If button overlap reappears, tune `padding-bottom` only instead of reintroducing pane min-height constraints.
+- Resolutions/outcomes: Pane height returns to normal while `View Locations` remains bottom-right anchored.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 
