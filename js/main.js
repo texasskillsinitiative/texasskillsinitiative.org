@@ -4331,6 +4331,7 @@ function initPipelineMap() {
             mapTab.className = 'pipeline-map-tab pipeline-map-tab--map is-content-active';
             mapTab.setAttribute('role', 'tab');
             mapTab.setAttribute('data-tab-key', '__map__');
+            mapTab.setAttribute('aria-pressed', 'false');
             mapTab.textContent = 'MAP';
             tabCol.appendChild(mapTab);
 
@@ -4346,8 +4347,6 @@ function initPipelineMap() {
             }
             contentCol.appendChild(mapPane);
 
-            // Track which pane is currently shown in the right column (independent of map activation)
-            let contentPaneKey = '__map__';
             // Helper to build a compact phase label: number on top, PHASE below
             const buildCompactPhaseLabel = (buttonNode, rawLabel) => {
                 const label = typeof rawLabel === 'string' ? rawLabel.trim() : '';
@@ -4375,7 +4374,6 @@ function initPipelineMap() {
 
             // updateContentPane: show only the pane for `key` in right column
             const updateContentPane = (key) => {
-                contentPaneKey = key;
                 [mapPane, ...allPhasePanes].forEach(p => {
                     p.classList.toggle('is-active', p.getAttribute('data-tab-key') === key);
                 });
@@ -4435,39 +4433,14 @@ function initPipelineMap() {
                 // ── Phase tab click: toggle map independently, update right column to this tab ──
                 phaseTab.addEventListener('click', () => {
                     const key = toggleGroup.targetClass;
-                    const isMapActive = (() => {
-                        const overlay = Array.from(map.querySelectorAll('.map-overlay'))
-                            .find(n => n.classList.contains(key) && !Array.from(n.classList).some(c => c.endsWith('--desktop')));
-                        return overlay ? overlay.classList.contains('is-active') : false;
-                    })();
-
-                    // Toggle map overlay independently (additive / independent per tab)
                     const overlay = Array.from(map.querySelectorAll('.map-overlay'))
                         .find(n => n.classList.contains(key) && !Array.from(n.classList).some(c => c.endsWith('--desktop')));
                     if (overlay) {
+                        const isMapActive = overlay.classList.contains('is-active');
                         const nextState = !isMapActive;
-                        overlay.classList.toggle('is-active', nextState);
-                        // Keep hidden controls in sync for any downstream logic
-                        Array.from(controls.querySelectorAll(`.map-control[data-map-target="${key}"]`))
-                            .forEach(c => { c.classList.toggle('is-active', nextState); c.setAttribute('aria-pressed', nextState ? 'true' : 'false'); });
+                        setCategoryState(key, nextState, { flashFrame: nextState });
                         phaseTab.classList.toggle('is-map-active', nextState);
                         phaseTab.setAttribute('aria-pressed', nextState ? 'true' : 'false');
-                        if (nextState) {
-                            if (typeof triggerFrameCategoryFlash === 'function') {
-                                triggerFrameCategoryFlash(key, controls.querySelectorAll('.map-control[data-map-target]'));
-                            }
-                            if (typeof dismissHelperCopy === 'function') dismissHelperCopy();
-                            if (typeof clearToggleGuidance === 'function') clearToggleGuidance();
-                            const guidedBtn = tabPanel.querySelector('.pipeline-map-tab.map-control--guided');
-                            if (guidedBtn) guidedBtn.classList.remove('map-control--guided');
-                        } else {
-                            // If toggling OFF, also sync the mobile hidden control to not active
-                            const activeOverlays = Array.from(map.querySelectorAll('.map-overlay.is-active'));
-                            // Optional: if no map layers left active, can show the helper text again
-                            if (activeOverlays.length === 0 && typeof updateHelperCopy === 'function') {
-                                // updateHelperCopy();
-                            }
-                        }
                     }
 
                     // Always update the right column to show THIS tab's content (last-tapped wins)
@@ -5346,6 +5319,13 @@ function initPipelineMap() {
                     description.classList.toggle('is-active', nextState);
                 }
             });
+            if (mapShell) {
+                const mobileTab = mapShell.querySelector(`.pipeline-map-tab[data-map-target="${targetClass}"]`);
+                if (mobileTab) {
+                    mobileTab.classList.toggle('is-map-active', nextState);
+                    mobileTab.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                }
+            }
             if (nextState && options.flashFrame !== false) {
                 triggerFrameCategoryFlash(targetClass, mapControls);
             }
@@ -5409,15 +5389,18 @@ function initPipelineMap() {
         const firstDesktopToggle = firstToggleTarget
             ? Array.from(desktopMapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
             : null;
+        const firstTabToggle = (mapShell && firstToggleTarget)
+            ? mapShell.querySelector(`.pipeline-map-tab[data-map-target="${firstToggleTarget}"]`)
+            : null;
         let guidanceCleared = false;
         const clearToggleGuidance = () => {
             if (guidanceCleared) return;
             guidanceCleared = true;
-            [firstMobileToggle, firstDesktopToggle].forEach((control) => {
+            [firstMobileToggle, firstDesktopToggle, firstTabToggle].forEach((control) => {
                 if (control) control.classList.remove('map-control--guided');
             });
         };
-        [firstMobileToggle, firstDesktopToggle].forEach((control) => {
+        [firstMobileToggle, firstDesktopToggle, firstTabToggle].forEach((control) => {
             if (control) control.classList.add('map-control--guided');
         });
         const runMapPostStartupReady = () => {

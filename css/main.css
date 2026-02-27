@@ -1608,6 +1608,11 @@
             animation: none;
         }
 
+        .pipeline-map-helper-overlay.is-hidden {
+            opacity: 0;
+            animation: none;
+        }
+
         @media (min-width: 769px) {
             .pipeline-map-title-box {
                 justify-content: flex-start;
@@ -2028,6 +2033,45 @@
             position: relative;
             overflow: hidden;
             isolation: isolate;
+        }
+
+        .map-initializing-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            background: rgba(11, 18, 32, 0.8);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .map-initializing-overlay::after {
+            content: "";
+            width: 12px;
+            height: 12px;
+            border: 1px solid var(--accent);
+            border-top-color: transparent;
+            border-radius: 50%;
+            margin-left: 12px;
+            animation: mapInitSpinner 0.8s linear infinite;
+        }
+
+        @keyframes mapInitSpinner {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .map-initializing-overlay.is-hidden {
+            opacity: 0;
         }
 
         [data-theme="light"] .pipeline-map-frame {
