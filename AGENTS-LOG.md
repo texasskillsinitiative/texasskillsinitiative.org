@@ -1658,6 +1658,14 @@
 - Actions taken: Fixed mobile legacy-control suppression selector to target `.pipeline-map` container (instead of non-existent `.pipeline-map-main`) for both `.pipeline-map-controls` and `.pipeline-map-inline-controls-desktop`.
 - Troubleshooting suggestions: If old controls still render, inspect container class hierarchy in runtime DOM and keep hide selectors aligned to the mounted section wrapper.
 - Resolutions/outcomes: Old mobile phase button stack is now correctly suppressed in the active layout container.
+### 2026-02-27 13:13:25 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Introduced shared pane inline inset variable in mobile pipeline right pane and applied it consistently to content padding, `View Locations` right offset, and overlay padding.
+- Troubleshooting suggestions: If spacing still feels tight/loose, adjust only `--pipeline-pane-inline-inset` in `.pipeline-map-tab-content`.
+- Resolutions/outcomes: Text and button edges now align to a common horizontal margin baseline.
+### 2026-02-27 13:17:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Shifted mobile pane insets to asymmetric left/right values (larger left content margin), updated related overlay/button offsets to match, and revised helper overlay behavior/styling so text remains empty/hidden until reveal completion, then appears with darker background + bolder pulse treatment.
+- Troubleshooting suggestions: Fine-tune only `--pipeline-pane-inline-inset-left` for additional left breathing room; keep right inset unchanged to preserve button alignment.
+- Resolutions/outcomes: Right-pane text now has more left margin, and helper copy is now deferred until map reveal complete with stronger readability/visual emphasis.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 

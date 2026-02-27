@@ -1616,14 +1616,17 @@
             z-index: 6;
             margin: 0;
             pointer-events: none;
-            color: color-mix(in srgb, var(--page-text-main) 42%, var(--accent));
+            color: color-mix(in srgb, var(--page-text-main) 78%, var(--accent));
             font-size: 0.74rem;
-            font-style: italic;
-            font-weight: 400;
+            font-style: normal;
+            font-weight: 650;
             line-height: 1.3;
             text-align: left;
+            padding: 7px 10px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 78%, transparent);
+            background: color-mix(in srgb, #000000 62%, var(--card-bg));
             animation: mapTitleHelperPulse var(--map-guide-pulse-ms, 2s) ease-in-out infinite;
-            opacity: 0.78;
+            opacity: 0.9;
             transition: opacity 0.24s ease;
         }
 
@@ -6517,7 +6520,10 @@
     }
 
     .pipeline-map-tab-content {
-        padding: 1rem;
+        --pipeline-pane-inline-inset-left: 14px;
+        --pipeline-pane-inline-inset-right: 10px;
+        --pipeline-pane-block-inset: 10px;
+        padding: 1rem var(--pipeline-pane-inline-inset-right) 1rem var(--pipeline-pane-inline-inset-left);
         background: var(--surface-2);
         display: flex;
         flex-direction: column;
@@ -6612,7 +6618,7 @@
 
     .pipeline-map-tab-locations-toggle {
         position: absolute;
-        right: 10px;
+        right: var(--pipeline-pane-inline-inset-right, 10px);
         bottom: 10px;
         border: 1px solid color-mix(in srgb, var(--map-tab-color, var(--accent)) 28%, var(--frame-border));
         background: color-mix(in srgb, var(--map-tab-color, var(--accent)) 8%, transparent);
@@ -6633,7 +6639,7 @@
         display: flex;
         align-items: flex-start;
         justify-content: flex-start;
-        padding: 10px;
+        padding: var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-right, 10px) var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-left, 14px);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;

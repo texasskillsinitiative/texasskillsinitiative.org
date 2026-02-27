@@ -431,6 +431,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-27: Corrected right-pane height regression by removing `.pipeline-map-tab-pane { min-height: 100%; }` while keeping bottom padding reserve for the pinned `View Locations` button.
 - [Done] 2026-02-27: Removed legacy pipeline button lanes on mobile by hiding both `.pipeline-map-controls` and `.pipeline-map-inline-controls-desktop` under the mobile unified tab-panel breakpoint.
 - [Done] 2026-02-27: Corrected mobile legacy-button hide selector from `.pipeline-map-main` to `.pipeline-map` so old phase button stack is fully suppressed in the actual pipeline layout container.
+- [Done] 2026-02-27: Normalized right-pane horizontal inset alignment by sharing a single inline inset token across content padding, `View Locations` pinned offset, and locations overlay padding to remove uneven text/button edge spacing.
+- [Done] 2026-02-27: Increased left inset for mobile right-pane tab content and aligned overlay/button inset variables to that asymmetry for improved content breathing room.
+- [Done] 2026-02-27: Updated pipeline helper overlay timing/style so helper text is populated only after startup reveal completion, with darker backing, bolder typography, and gentle pulse emphasis.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.

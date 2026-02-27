@@ -3691,6 +3691,7 @@ function initPipelineMap() {
                             const helper = frame.querySelector('.pipeline-map-helper-overlay');
                             if (helper) {
                                 helper.classList.remove('is-hidden');
+                                helper.textContent = 'Select a phase to display map markers and details.';
                             }
 
                             // Start button pulsing to guide the user
@@ -3920,11 +3921,14 @@ function initPipelineMap() {
                 helperNode.className = 'pipeline-map-helper-overlay';
                 frame.appendChild(helperNode);
             }
-            helperNode.textContent = helperHeadline;
+            helperNode.textContent = '';
 
             // Helper text stays hidden until initial reveal is complete
             if (frame.dataset.mapGlowInitialRevealDone !== 'true') {
                 helperNode.classList.add('is-hidden');
+            } else {
+                helperNode.classList.remove('is-hidden');
+                helperNode.textContent = helperHeadline;
             }
             return helperNode;
         };
@@ -5371,8 +5375,15 @@ function initPipelineMap() {
         };
         const updateHelperCopy = () => {
             if (mapTopHelper && !helperDismissed) {
+                const mapRevealDone = frame && frame.dataset.mapGlowInitialRevealDone === 'true';
                 mapTopHelper.classList.remove('is-dismissed');
-                mapTopHelper.textContent = helperHeadline;
+                if (mapRevealDone) {
+                    mapTopHelper.classList.remove('is-hidden');
+                    mapTopHelper.textContent = helperHeadline;
+                } else {
+                    mapTopHelper.classList.add('is-hidden');
+                    mapTopHelper.textContent = '';
+                }
             }
             if (!helper) return;
             if (helperDismissed) {
