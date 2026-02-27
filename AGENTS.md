@@ -15,7 +15,7 @@ This file defines recommended autonomous behavior for this repository.
 - `STATUS.md` is the primary roadmap and progress tracker for this repository.
 - `AGENTS-LOG.md` is the running session log for actions, troubleshooting notes, and resolutions.
 - `PACKETS.md` defines concurrent work boundaries to prevent overlap/cross-contamination.
-- `PRODUCT-PRD-ARCHITECTURE.md` is the product-scope reference for what is in-scope now vs deferred.
+- `PRODUCT-PRD-BLUEPRINT.md` is the product-scope reference for what is in-scope now vs deferred.
 - Do not infer scope from deleted or legacy docs.
 
 ## 2) Scope Discipline
