@@ -1702,6 +1702,67 @@
 - Actions taken: Fixed desktop tab-panel state wiring in `js/main.js` by switching tab state checks/click toggles to viewport-aware overlay targets and routing desktop tab clicks to `setDesktopCategoryState`; also synced desktop control interactions back into tab `is-map-active` classes. Added desktop-only right-pane/tab state styles in `css/main.css` to mirror mobile state coloring (`is-selected-map-on/off`, `has-content-active`, `is-map-pane-active`).
 - Troubleshooting suggestions: If desktop tab color still appears inconsistent, inspect active overlay class target (`overlay-...--desktop`) and ensure selected tab key matches the active desktop overlay.
 - Resolutions/outcomes: Desktop tab logic now matches mobile interaction model and uses desktop marker overlays, restoring expected dot scale and right-pane color behavior.
+### 2026-02-27 14:18:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented desktop-only `View Locations` behavior change: added inline locations text node to tab panes, updated click handler to reveal inline text on desktop (no popup), left-justified desktop toggle placement, and suppressed desktop overlay rendering while keeping mobile media-query behavior intact.
+- Troubleshooting suggestions: If desktop location text should collapse again on second click, switch the desktop click handler from `add('is-locations-inline-visible')` to `toggle(...)`.
+- Resolutions/outcomes: Desktop now shows locations inline below pane text after click with left-justified button, and mobile retains existing popup overlay behavior.
+### 2026-02-27 14:29:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied targeted map-frame geometry fix in `css/main.css` by adding `box-sizing: border-box` to `.pipeline-map-frame` so padding/border are included in aspect-ratio sizing.
+- Troubleshooting suggestions: If any side still appears uneven on specific DPR devices, next step is to normalize frame border width to whole pixels (`1px`) to reduce half-pixel rounding artifacts.
+- Resolutions/outcomes: Bottom-edge inset mismatch is reduced by aligning frame sizing math across all four sides.
+### 2026-02-27 14:31:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `.pipeline-map-frame svg` sizing in `css/main.css` to `height: 100%` with `max-height: 100%` (instead of `height: auto`) so SVG fills the frame content box and avoids bottom-row clipping from auto-height rounding.
+- Troubleshooting suggestions: If clipping persists on specific zoom/DPR combinations, normalize frame border from `0.5px` to `1px` for more stable pixel snapping.
+- Resolutions/outcomes: Map bottom-row clipping should be reduced with deterministic height fitting.
+### 2026-02-27 14:33:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reverted `.pipeline-map-frame { box-sizing: border-box; }` in `css/main.css` after confirming it caused left/right guttering with the full-height SVG fit.
+- Troubleshooting suggestions: If minor side imbalance remains, next controlled step is to tune only frame padding (`8px` -> `7px`) rather than reintroducing border-box sizing.
+- Resolutions/outcomes: Side blank gutters introduced by the prior frame-sizing adjustment are removed while preserving the SVG bottom-clip fix.
+### 2026-02-27 14:36:04 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented render-level edge-bleed fix in `js/main.js` by expanding map `viewBox` with `viewInset = 0.5` and matching ocean bounds (`x/y/width/height`) to prevent viewport-edge clipping of right/bottom dot rows.
+- Troubleshooting suggestions: If any edge still clips at specific zoom levels, increase `viewInset` slightly (for example `0.6`) before touching frame layout CSS again.
+- Resolutions/outcomes: Edge clipping mitigation moved from frame-box sizing to SVG viewport bounds, avoiding the prior left/right gutter side effect.
+
+### 2026-02-27 14:38:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior unclean session close on startup ($marker persisted at EOF) and initiated recovery logging per AGENTS.md.
+- Troubleshooting suggestions: Resume with packet-scoped ownership, verify git status, then continue from the latest pending STATUS.md item.
+- Resolutions/outcomes: Recovery condition acknowledged; active session marker retained at EOF for the current session.
+
+### 2026-02-27 15:02:11 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Claimed overview-responsive packet work on branch `packet-overview-responsive-wireframe`; updated `css/main.css` overview-only blocks to improve animated wireframe behavior across viewports (responsive iframe sizing/offset variables, breakpoint-specific opacity/scale tuning, and overlay scrim for text contrast).
+- Troubleshooting suggestions: If the background appears too dominant on specific phones, reduce `--overview-animation-opacity` in the `@media (max-width: 600px)` overview block before adjusting typography scale.
+- Resolutions/outcomes: Overview animated background now scales/positions more predictably between desktop and mobile while preserving reduced-motion fallback and avoiding pipeline/map logic changes.
+
+### 2026-02-27 15:10:42 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Performed a second overview-only CSS tuning pass in `css/main.css` to refine animation balance at key viewport edges (adjusted base/tablet/mobile variable values and added micro-breakpoint overrides for `max-width: 420px` and short landscape devices).
+- Troubleshooting suggestions: If copy contrast drops on very small Android devices, first increase `--overview-animation-scrim-top` by `+0.02` in the `@media (max-width: 420px)` block before lowering animation opacity further.
+- Resolutions/outcomes: Responsive behavior is now more controlled on narrow/tall and short/landscape phone layouts while retaining the same overview animation architecture.
+### 2026-02-27 14:49:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented the approved map recovery validation path: added a temporary desktop-only passive comparison map in `index.html` (`data-map-compare`, `data-map-passive`, `data-map-geometry-mode="monday-0223"`), added persistent compare-glow and desktop-only visibility rules in `css/main.css`, and added geometry-mode/passive-runtime branching in `js/main.js` so Monday geometry is isolated to the comparison map while passive rendering skips primary lock/helper/toggle lifecycle.
+- Troubleshooting suggestions: If compare-map framing still differs on a specific monitor/zoom, tune compare-only SVG fit (`.pipeline-map-frame[data-map-compare="true"] svg`) or increase compare `viewInset` slightly without changing primary-map geometry.
+- Resolutions/outcomes: Desktop now has a non-interactive Monday-logic comparison map below the current map for visual validation, with primary map behavior and mobile view preserved.
+
+### 2026-02-27 14:59:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied a visibility-first overview update in `css/main.css`: raised animation opacity/reduced scrim strength across desktop/mobile breakpoints and replaced the `prefers-reduced-motion` `display: none` rule with reduced-opacity rendering.
+- Troubleshooting suggestions: If the background is still too faint on your device, increase `--overview-animation-opacity` in the active breakpoint block by `+0.05` before changing size/offset values.
+- Resolutions/outcomes: Overview wireframe is now intentionally visible in normal and reduced-motion environments without changing section structure or pipeline logic.
+### 2026-02-27 15:01:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a third desktop-only passive comparison map in `index.html` with `data-map-geometry-mode="feb19-e8a21b9"` and updated geometry-mode branching in `js/main.js` so both `monday-0223` and `feb19-e8a21b9` run legacy no-inset rendering.
+- Troubleshooting suggestions: If the third map appears visually identical to the Monday comparison (expected for geometry), keep both for verification now and remove one once baseline confidence is established.
+- Resolutions/outcomes: Pipeline now includes two passive desktop comparison maps (Monday + Feb 19 modes) below the active map for direct visual verification.
+
+### 2026-02-27 15:02:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Switched overview animation to temporary full-brightness test mode in `css/main.css` (opacity `1` at base/tablet/mobile/reduced-motion and scrim overlay disabled via `.overview-hero::after { display: none; }`).
+- Troubleshooting suggestions: After visual validation, restore readable production levels by re-enabling scrim and lowering opacity per breakpoint in one follow-up patch.
+- Resolutions/outcomes: Overview wireframe should now render at maximum visible intensity for immediate host-side confirmation.
+
+### 2026-02-27 15:05:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated overview background fill behavior in `css/main.css` by switching `.overview-animation` and its `iframe` from section-sized absolute positioning to fixed viewport positioning (`100vw` x `100svh`) for full-screen test visibility.
+- Troubleshooting suggestions: If you want this only when `#overview` is active, next step is to toggle a scoped class on section activation and bind fullscreen mode to that class only.
+- Resolutions/outcomes: Overview wireframe now fills the visible screen area for easier visual verification.
+
+### 2026-02-27 15:10:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Patched `assets/pages/overview/globe-3.7.2-west.html` to remove fixed-square constraints (`max-width: 400px`, `400x400` SVG sizing), switch to viewport fill (`100vw` x `100svh`), and add resize-driven projection/viewBox recalculation so globe rendering scales with screen dimensions.
+- Troubleshooting suggestions: If you want less cropping while keeping full-bleed fill, reduce intro/target zoom values (`startZoom`, `targetZoom`) rather than reintroducing fixed dimensions.
+- Resolutions/outcomes: Globe animation now fills full background area on desktop and mobile instead of rendering in a small square window.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-
-

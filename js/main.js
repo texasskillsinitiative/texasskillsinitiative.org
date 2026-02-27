@@ -3654,14 +3654,33 @@ function initPipelineMap() {
     const renderDots = (map, width, height, resolveDotState) => {
         const dotGroup = map.querySelector('[data-dot-grid]');
         if (!dotGroup) return;
-        setPipelineInteractionLock(map, true);
-        setPipelineDesktopInteractionLock(map, true);
+        const isPassiveMap = map.dataset.mapPassive === 'true';
+        if (!isPassiveMap) {
+            setPipelineInteractionLock(map, true);
+            setPipelineDesktopInteractionLock(map, true);
+        }
 
-        map.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        const geometryModeRaw = (map.dataset.mapGeometryMode || '').trim().toLowerCase();
+        const useLegacyNoInsetGeometry = geometryModeRaw === 'monday-0223' || geometryModeRaw === 'feb19-e8a21b9';
+        const viewInset = useLegacyNoInsetGeometry ? 0 : 0.5;
+        if (viewInset > 0) {
+            map.setAttribute('viewBox', `${-viewInset} ${-viewInset} ${width + (viewInset * 2)} ${height + (viewInset * 2)}`);
+        } else {
+            map.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        }
         const ocean = map.querySelector('.map-ocean');
         if (ocean) {
-            ocean.setAttribute('width', width);
-            ocean.setAttribute('height', height);
+            if (viewInset > 0) {
+                ocean.setAttribute('x', String(-viewInset));
+                ocean.setAttribute('y', String(-viewInset));
+                ocean.setAttribute('width', String(width + (viewInset * 2)));
+                ocean.setAttribute('height', String(height + (viewInset * 2)));
+            } else {
+                ocean.removeAttribute('x');
+                ocean.removeAttribute('y');
+                ocean.setAttribute('width', String(width));
+                ocean.setAttribute('height', String(height));
+            }
         }
 
         dotGroup.innerHTML = '';
@@ -3674,7 +3693,7 @@ function initPipelineMap() {
         const initStartTime = Date.now();
         const minInitDuration = 1200; // 1.2s minimum to ensure readability
 
-        if (frame) {
+        if (frame && !isPassiveMap) {
             frame.classList.add('is-initializing');
             frame.dataset.mapTexasOverrideReady = 'false';
             frame.dataset.mapTexasOverrideStartTs = '0';
@@ -3715,11 +3734,19 @@ function initPipelineMap() {
 
                 const finalize = () => {
                     // Remove loading overlay and clear initializing state
-                    if (frame) frame.classList.remove('is-initializing');
+                    if (frame && !isPassiveMap) frame.classList.remove('is-initializing');
 
                     if (overlay) {
                         overlay.classList.add('is-hidden');
                         setTimeout(() => overlay.remove(), 600);
+                    }
+
+                    if (isPassiveMap) {
+                        setTimeout(() => {
+                            dotGroup.style.opacity = '';
+                            syncColumnGlowForMap(map);
+                        }, 100);
+                        return;
                     }
 
                     // Setup listener for the end of the startup reveal animation
@@ -4600,6 +4627,10 @@ function initPipelineMap() {
                     leadEl.textContent = descriptionText;
                     phasePane.appendChild(leadEl);
                 }
+                const locationsInline = document.createElement('p');
+                locationsInline.className = 'pipeline-map-tab-pane-locations-inline';
+                locationsInline.textContent = `Locations: ${locationSummary.replace(/\s+\|\s+/g, '; ')}`;
+                phasePane.appendChild(locationsInline);
                 const locationsToggle = document.createElement('button');
                 locationsToggle.type = 'button';
                 locationsToggle.className = 'pipeline-map-tab-locations-toggle';
@@ -4621,6 +4652,10 @@ function initPipelineMap() {
                 });
                 phasePane.appendChild(locationsOverlay);
                 locationsToggle.addEventListener('click', () => {
+                    if (isDesktopViewport()) {
+                        phasePane.classList.add('is-locations-inline-visible');
+                        return;
+                    }
                     const nextOpen = !phasePane.classList.contains('is-locations-open');
                     closeAllLocationOverlays();
                     phasePane.classList.toggle('is-locations-open', nextOpen);
@@ -6134,6 +6169,10 @@ function initPipelineMap() {
                 overrideStyle
             };
         });
+        if (map.dataset.mapPassive === 'true') {
+            map.querySelectorAll('.map-overlay').forEach(node => node.remove());
+            return true;
+        }
         if (toggleLines.length) {
             const categoryMetaBySlug = new Map();
             categoryDescriptionLines.forEach(line => {

@@ -263,27 +263,43 @@
         .overview-hero {
             position: relative;
             isolation: isolate;
+            overflow: hidden;
+            --overview-animation-size: clamp(980px, 132vmax, 1680px);
+            --overview-animation-shift-x: 0px;
+            --overview-animation-shift-y: -2svh;
+            --overview-animation-opacity: 1;
+            --overview-animation-scrim-top: 0;
+            --overview-animation-scrim-bottom: 0;
+        }
+
+        .overview-hero::after {
+            display: none;
         }
 
         .overview-animation {
-            position: absolute;
+            position: fixed;
             inset: 0;
+            overflow: hidden;
             pointer-events: none;
             z-index: 0;
-            opacity: 0.35;
+            opacity: var(--overview-animation-opacity, 0.34);
         }
 
         .overview-animation iframe {
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100svh;
             border: 0;
             background: transparent;
             display: block;
+            transform: none;
         }
 
         @media (prefers-reduced-motion: reduce) {
             .overview-animation {
-                display: none;
+                opacity: 1;
             }
         }
 
@@ -2077,6 +2093,22 @@
             isolation: isolate;
         }
 
+        .pipeline-map-frame[data-map-compare="true"] {
+            margin-top: 8px;
+            pointer-events: none;
+        }
+
+        .pipeline-map-frame--compare-glow::before {
+            opacity: 1;
+            border-color: color-mix(in srgb, var(--accent) 48%, transparent);
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 34%, transparent), 0 0 22px color-mix(in srgb, var(--accent) 18%, transparent);
+        }
+
+        .pipeline-map-frame--compare-glow .map-frame-gap-flash-layer {
+            opacity: 0.44;
+            border-color: color-mix(in srgb, var(--accent) 18%, transparent);
+        }
+
         .map-initializing-overlay {
             position: absolute;
             inset: 0;
@@ -2225,10 +2257,16 @@
 
         .pipeline-map-frame svg {
             width: 100%;
-            height: auto;
+            height: 100%;
+            max-height: 100%;
             display: block;
             position: relative;
             z-index: 2;
+        }
+
+        .pipeline-map-frame[data-map-compare="true"] svg {
+            height: auto;
+            max-height: none;
         }
 
         .map-ocean {
@@ -5682,6 +5720,14 @@
                 font-size: 2rem;
             }
 
+            .overview-hero {
+                --overview-animation-size: 160vmax;
+                --overview-animation-shift-y: -3svh;
+                --overview-animation-opacity: 1;
+                --overview-animation-scrim-top: 0;
+                --overview-animation-scrim-bottom: 0;
+            }
+
             .engagement-framing {
                 grid-template-columns: 1fr;
                 gap: 14px;
@@ -5948,6 +5994,10 @@
                 gap: 10px;
             }
 
+            .pipeline-map-frame[data-map-compare="true"] {
+                display: none;
+            }
+
             .pipeline-map-frame {
                 order: 1;
             }
@@ -6039,10 +6089,38 @@
 
             .overview-hero {
                 padding: clamp(8px, 2.2svh, 16px) 14px clamp(10px, 2.8svh, 20px);
+                --overview-animation-size: 184vmax;
+                --overview-animation-shift-x: -5vw;
+                --overview-animation-shift-y: -5svh;
+                --overview-animation-opacity: 1;
+                --overview-animation-scrim-top: 0;
+                --overview-animation-scrim-bottom: 0;
             }
 
             .overview-content {
                 width: min(100%, 620px);
+            }
+
+            @media (max-width: 420px) {
+                .overview-hero {
+                    --overview-animation-size: 194vmax;
+                    --overview-animation-shift-x: -8vw;
+                    --overview-animation-shift-y: -6svh;
+                    --overview-animation-opacity: 1;
+                    --overview-animation-scrim-top: 0;
+                    --overview-animation-scrim-bottom: 0;
+                }
+            }
+
+            @media (max-height: 480px) and (orientation: landscape) {
+                .overview-hero {
+                    --overview-animation-size: 142vmax;
+                    --overview-animation-shift-x: 0px;
+                    --overview-animation-shift-y: -2svh;
+                    --overview-animation-opacity: 1;
+                    --overview-animation-scrim-top: 0;
+                    --overview-animation-scrim-bottom: 0;
+                }
             }
 
             .pipeline-map--raised {
@@ -6565,7 +6643,7 @@
         flex-direction: column;
         gap: 0.75rem;
         position: relative;
-        padding-bottom: 44px;
+        padding-bottom: 0;
     }
 
     .pipeline-map-tab-pane.is-active {
@@ -6592,10 +6670,20 @@
         color: var(--page-text-main);
     }
 
+    .pipeline-map-tab-pane-locations-inline {
+        margin: 0;
+        display: none;
+        font-size: 0.82rem;
+        line-height: 1.45;
+        color: var(--page-text-dim);
+    }
+
+    .pipeline-map-tab-pane.is-locations-inline-visible .pipeline-map-tab-pane-locations-inline {
+        display: block;
+    }
+
     .pipeline-map-tab-locations-toggle {
-        position: absolute;
-        right: var(--pipeline-pane-inline-inset-right, 10px);
-        bottom: 10px;
+        position: static;
         border: 1px solid color-mix(in srgb, var(--map-tab-color, var(--accent)) 28%, var(--frame-border));
         background: color-mix(in srgb, var(--map-tab-color, var(--accent)) 8%, transparent);
         color: var(--page-text-main);
@@ -6605,21 +6693,12 @@
         text-transform: uppercase;
         padding: 7px 10px;
         cursor: pointer;
-        z-index: 1;
+        align-self: flex-start;
+        margin-top: auto;
     }
 
     .pipeline-map-tab-locations-overlay {
-        position: absolute;
-        inset: 0;
-        background: color-mix(in srgb, var(--surface-2) 72%, #000000);
-        display: flex;
-        align-items: flex-start;
-        justify-content: flex-start;
-        padding: var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-right, 10px) var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-left, 14px);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        z-index: 3;
+        display: none !important;
     }
 
     .pipeline-map-tab-pane.is-locations-open .pipeline-map-tab-locations-overlay {
