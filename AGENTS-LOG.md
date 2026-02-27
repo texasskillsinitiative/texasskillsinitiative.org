@@ -1694,6 +1694,14 @@
 - Actions taken: Implemented start-anchored desktop unlock delay in `js/main.js` by setting `mapTexasOverrideStartTs` and dispatching `mapTexasOverrideStarted` when deferred Texas entry begins, then gating desktop unlock on both visual completion and minimum elapsed time (`1000ms`) since start.
 - Troubleshooting suggestions: If timing still feels early/late, adjust only `texasMinDisplayMs` and keep completion checks unchanged.
 - Resolutions/outcomes: Desktop unlock timing is now tied to when Texas override actually starts, avoiding pre-start timer drift.
+### 2026-02-27 13:59:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added desktop visibility/styles for `.pipeline-map-tab-panel` in `css/main.css` under `@media (min-width: 769px)` and changed tab-panel insertion point in `js/main.js` to insert before `.pipeline-map-frame` so desktop order is title, desktop buttons, tab panel, then map.
+- Troubleshooting suggestions: If desktop spacing feels tight, adjust desktop tab-panel margin in the new `@media (min-width: 769px)` block without touching the mobile `@media (max-width: 768px)` rules.
+- Resolutions/outcomes: Desktop now shows both existing controls and the mobile-style tab field, with the tab field placed between desktop buttons and the map, and mobile behavior remains governed by existing mobile media rules.
+### 2026-02-27 14:13:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed desktop tab-panel state wiring in `js/main.js` by switching tab state checks/click toggles to viewport-aware overlay targets and routing desktop tab clicks to `setDesktopCategoryState`; also synced desktop control interactions back into tab `is-map-active` classes. Added desktop-only right-pane/tab state styles in `css/main.css` to mirror mobile state coloring (`is-selected-map-on/off`, `has-content-active`, `is-map-pane-active`).
+- Troubleshooting suggestions: If desktop tab color still appears inconsistent, inspect active overlay class target (`overlay-...--desktop`) and ensure selected tab key matches the active desktop overlay.
+- Resolutions/outcomes: Desktop tab logic now matches mobile interaction model and uses desktop marker overlays, restoring expected dot scale and right-pane color behavior.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 

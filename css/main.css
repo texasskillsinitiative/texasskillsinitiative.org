@@ -6390,6 +6390,261 @@
     display: none;
 }
 
+@media (min-width: 769px) {
+    .pipeline-map-tab-panel {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: 0;
+        margin: 0 0 1rem;
+        background: var(--surface-2);
+        border: 1px solid var(--frame-border);
+        border-radius: 0;
+        overflow: hidden;
+    }
+
+    .pipeline-map-tab-col {
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid var(--frame-border);
+        background: var(--surface-1);
+        height: var(--pipeline-tab-panel-height, auto);
+        min-height: var(--pipeline-tab-panel-height, auto);
+    }
+
+    .pipeline-map-tab {
+        appearance: none;
+        border: 1px solid color-mix(in srgb, var(--map-tab-color, var(--map-accent)) 25%, var(--frame-border));
+        border-left: 3px solid color-mix(in srgb, var(--map-tab-color, var(--map-accent)) 20%, var(--frame-border));
+        border-right: 0;
+        background: transparent;
+        padding: 12px 8px;
+        min-height: var(--pipeline-phase-tab-min-height, 48px);
+        width: 100%;
+        color: var(--page-text-main);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.2;
+        opacity: 0.75;
+        flex: 1 1 0;
+        box-sizing: border-box;
+    }
+
+    .pipeline-map-tab--map {
+        flex: 0 0 var(--pipeline-map-tab-map-height, 30px);
+        min-height: var(--pipeline-map-tab-map-height, 30px);
+        padding: 4px 6px;
+    }
+
+    .pipeline-map-tab-map-label {
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        line-height: 1;
+        color: inherit;
+    }
+
+    .pipeline-map-tab:last-child {
+        border-bottom: 1px solid color-mix(in srgb, var(--map-tab-color, var(--map-accent)) 25%, var(--frame-border));
+    }
+
+    .pipeline-map-tab-num {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: inherit;
+    }
+
+    .pipeline-map-tab-word {
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        margin-top: 2px;
+        color: inherit;
+    }
+
+    .pipeline-map-tab.is-map-active {
+        color: var(--map-tab-color, var(--accent));
+        text-shadow: 0 0 12px color-mix(in srgb, var(--map-tab-color, var(--accent)) 60%, transparent);
+        opacity: 1;
+    }
+
+    .pipeline-map-tab.is-content-active {
+        background: color-mix(in srgb, var(--map-tab-color, var(--accent)) 10%, transparent);
+        border-left: 3px solid var(--map-tab-color, var(--accent));
+        box-shadow: none;
+        color: var(--page-text-main);
+        opacity: 1;
+    }
+
+    .pipeline-map-tab.is-content-selected:not(.is-content-active) {
+        background: transparent;
+        border-left: 3px solid var(--map-tab-color, var(--accent));
+        box-shadow: none;
+        color: var(--page-text-main);
+        text-shadow: none;
+        opacity: 1;
+    }
+
+    .pipeline-map-tab.is-map-active.is-content-active {
+        color: var(--map-tab-color, var(--accent));
+    }
+
+    .pipeline-map-tab--map.is-content-active {
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+        border-top-color: color-mix(in srgb, var(--accent) 22%, var(--frame-border));
+        border-bottom-color: color-mix(in srgb, var(--accent) 22%, var(--frame-border));
+        border-left-color: var(--accent);
+        border-right: 0;
+        color: var(--page-text-main);
+    }
+
+    .pipeline-map-tab-content {
+        --pipeline-pane-inline-inset-left: 14px;
+        --pipeline-pane-inline-inset-right: 10px;
+        --pipeline-pane-block-inset: 10px;
+        padding: 1rem var(--pipeline-pane-inline-inset-right) 1rem var(--pipeline-pane-inline-inset-left);
+        background: var(--surface-2);
+        display: flex;
+        flex-direction: column;
+        min-height: var(--pipeline-tab-panel-height, 200px);
+    }
+
+    .pipeline-map-tab-content.is-selected-map-on {
+        background: color-mix(in srgb, var(--pipeline-pane-border-color, var(--accent)) 10%, transparent);
+    }
+
+    .pipeline-map-tab-content.is-selected-map-off {
+        background: var(--surface-2);
+    }
+
+    .pipeline-map-tab-panel.has-content-active .pipeline-map-tab-col {
+        border-right: 0;
+    }
+
+    .pipeline-map-tab-panel.has-content-active .pipeline-map-tab:not(.is-content-selected) {
+        border-right: 1px solid color-mix(in srgb, var(--pipeline-pane-border-color, var(--accent)) 22%, var(--frame-border));
+    }
+
+    .pipeline-map-tab-content.has-content-active {
+        border-top: 1px solid color-mix(in srgb, var(--pipeline-pane-border-color, var(--accent)) 22%, var(--frame-border));
+        border-bottom: 1px solid color-mix(in srgb, var(--pipeline-pane-border-color, var(--accent)) 22%, var(--frame-border));
+        border-right: 1px solid color-mix(in srgb, var(--pipeline-pane-border-color, var(--accent)) 22%, var(--frame-border));
+        border-left: 0;
+    }
+
+    .pipeline-map-tab-content.is-map-pane-active {
+        background: var(--accent-soft);
+    }
+
+    .pipeline-map-tab-panel.has-content-active {
+        border-right-color: transparent;
+    }
+
+    .pipeline-map-tab-panel.is-map-pane-active .pipeline-map-tab--map {
+        border-left: 4px solid var(--accent);
+        background: var(--accent-soft);
+        border-top-color: color-mix(in srgb, var(--accent) 22%, var(--frame-border));
+        border-bottom-color: color-mix(in srgb, var(--accent) 22%, var(--frame-border));
+        border-left-color: var(--accent);
+        border-right: 0;
+        color: var(--page-text-main);
+        opacity: 1;
+    }
+
+    .pipeline-map-tab-pane {
+        display: none;
+        flex-direction: column;
+        gap: 0.75rem;
+        position: relative;
+        padding-bottom: 44px;
+    }
+
+    .pipeline-map-tab-pane.is-active {
+        display: flex;
+        animation: mapPaneFadeIn 0.24s ease forwards;
+    }
+
+    .pipeline-map-tab-pane-title {
+        margin: 0;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        color: var(--map-tab-color, var(--accent));
+        border-bottom: 1px solid color-mix(in srgb, var(--map-tab-color, var(--accent)) 20%, transparent);
+        padding-bottom: 6px;
+    }
+
+    .pipeline-map-tab-pane-text,
+    .pipeline-map-tab-pane-lead {
+        margin: 0;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: var(--page-text-main);
+    }
+
+    .pipeline-map-tab-locations-toggle {
+        position: absolute;
+        right: var(--pipeline-pane-inline-inset-right, 10px);
+        bottom: 10px;
+        border: 1px solid color-mix(in srgb, var(--map-tab-color, var(--accent)) 28%, var(--frame-border));
+        background: color-mix(in srgb, var(--map-tab-color, var(--accent)) 8%, transparent);
+        color: var(--page-text-main);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 7px 10px;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .pipeline-map-tab-locations-overlay {
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--surface-2) 72%, #000000);
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-right, 10px) var(--pipeline-pane-block-inset, 10px) var(--pipeline-pane-inline-inset-left, 14px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        z-index: 3;
+    }
+
+    .pipeline-map-tab-pane.is-locations-open .pipeline-map-tab-locations-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .pipeline-map-tab-locations-card {
+        width: 100%;
+        max-height: 100%;
+        overflow: auto;
+        border: 1px solid color-mix(in srgb, var(--map-tab-color, var(--accent)) 35%, var(--frame-border));
+        background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+        padding: 10px;
+    }
+
+    .pipeline-map-tab-locations-text {
+        margin: 0;
+        white-space: pre-line;
+        font-size: 0.8rem;
+        line-height: 1.4;
+        color: var(--page-text-main);
+    }
+}
+
 @media (max-width: 768px) {
     /* Hide the old single-column layout on mobile */
     .pipeline-map .pipeline-map-controls,

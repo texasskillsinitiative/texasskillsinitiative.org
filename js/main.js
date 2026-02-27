@@ -4515,10 +4515,12 @@ function initPipelineMap() {
                 });
             };
             let selectedTabKey = '__map__';
-            const isMobilePhaseMapActive = (tabKey) => {
+            const isDesktopViewport = () => !window.matchMedia('(max-width: 768px)').matches;
+            const isPhaseMapActiveForViewport = (tabKey) => {
                 if (!tabKey || tabKey === '__map__') return false;
+                const targetClass = isDesktopViewport() ? `${tabKey}--desktop` : tabKey;
                 const overlay = Array.from(map.querySelectorAll('.map-overlay'))
-                    .find(n => n.classList.contains(tabKey) && !Array.from(n.classList).some(c => c.endsWith('--desktop')));
+                    .find(n => n.classList.contains(targetClass));
                 return Boolean(overlay && overlay.classList.contains('is-active'));
             };
 
@@ -4536,7 +4538,7 @@ function initPipelineMap() {
                     const isSelected = tabKey === key;
                     const isSelectedAndMapOn = tabKey === '__map__'
                         ? isSelected
-                        : (isSelected && isMobilePhaseMapActive(tabKey));
+                        : (isSelected && isPhaseMapActiveForViewport(tabKey));
                     t.classList.toggle('is-content-selected', isSelected);
                     t.classList.toggle('is-content-active', isSelectedAndMapOn);
                 });
@@ -4544,7 +4546,7 @@ function initPipelineMap() {
                 const activeTabColor = activeTab && activeTab.classList.contains('pipeline-map-tab--map')
                     ? 'var(--accent)'
                     : ((activeTab && activeTab.style.getPropertyValue('--map-tab-color').trim()) || 'var(--accent)');
-                const isSelectedMapOn = key === '__map__' ? true : isMobilePhaseMapActive(key);
+                const isSelectedMapOn = key === '__map__' ? true : isPhaseMapActiveForViewport(key);
                 tabPanel.style.setProperty('--pipeline-pane-border-color', activeTabColor);
                 contentCol.style.setProperty('--pipeline-pane-border-color', activeTabColor);
                 tabPanel.classList.toggle('has-content-active', Boolean(key));
@@ -4631,10 +4633,17 @@ function initPipelineMap() {
                 phaseTab.addEventListener('click', () => {
                     const key = toggleGroup.targetClass;
                     const isSelected = selectedTabKey === key;
-                    const isMapActive = isMobilePhaseMapActive(key);
+                    const isMapActive = isPhaseMapActiveForViewport(key);
+                    const setPhaseMapState = (nextState, options) => {
+                        if (isDesktopViewport()) {
+                            setDesktopCategoryState(key, nextState, options);
+                        } else {
+                            setCategoryState(key, nextState, options);
+                        }
+                    };
                     if (isSelected) {
                         const nextState = !isMapActive;
-                        setCategoryState(key, nextState, { flashFrame: nextState });
+                        setPhaseMapState(nextState, { flashFrame: nextState });
                         updateContentPane(key);
                         return;
                     }
@@ -4644,7 +4653,7 @@ function initPipelineMap() {
                         return;
                     }
                     // First-time activation from fully inactive state.
-                    setCategoryState(key, true, { flashFrame: true });
+                    setPhaseMapState(true, { flashFrame: true });
                     updateContentPane(key);
                 });
             });
@@ -4696,13 +4705,10 @@ function initPipelineMap() {
             tabPanel.appendChild(tabCol);
             tabPanel.appendChild(contentCol);
 
-            // Insert after frame so mobile order is: title -> map -> tab panel
+            // Insert before frame so desktop order is: title -> desktop buttons -> tab panel -> map.
+            // Mobile visual order remains controlled by CSS `order`.
             if (frame && frame.parentNode === mapShell) {
-                if (frame.nextSibling) {
-                    mapShell.insertBefore(tabPanel, frame.nextSibling);
-                } else {
-                    mapShell.appendChild(tabPanel);
-                }
+                mapShell.insertBefore(tabPanel, frame);
             } else {
                 mapShell.appendChild(tabPanel);
             }
@@ -4712,6 +4718,7 @@ function initPipelineMap() {
 
             syncMobileTabPanelSizing();
             window.addEventListener('resize', syncMobileTabPanelSizing);
+            window.addEventListener('resize', () => updateContentPane(selectedTabKey));
             window.requestAnimationFrame(syncMobileTabPanelSizing);
             const mainContent = document.getElementById('mainContent');
             if (mainContent) {
@@ -5627,6 +5634,13 @@ function initPipelineMap() {
                     control.setAttribute('aria-pressed', nextState ? 'true' : 'false');
                 }
             });
+            if (mapShell) {
+                const mobileTab = mapShell.querySelector(`.pipeline-map-tab[data-map-target="${targetClass}"]`);
+                if (mobileTab) {
+                    mobileTab.classList.toggle('is-map-active', nextState);
+                    mobileTab.setAttribute('aria-pressed', nextState ? 'true' : 'false');
+                }
+            }
             categoryPopups.forEach(popup => {
                 if (popup.getAttribute('data-map-popup-target') === desktopTargetClass) {
                     popup.classList.toggle('is-active', nextState);
