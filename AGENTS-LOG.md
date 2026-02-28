@@ -1818,4 +1818,180 @@
 - Actions taken: Removed a second startup reveal path in `js/main.js` that explicitly unhid and repopulated `.pipeline-map-helper-overlay` text after map load.
 - Troubleshooting suggestions: If any helper text still appears on-map, hard refresh cache to ensure latest `js/main.js` is loaded; only tab-pane helper text should remain.
 - Resolutions/outcomes: Map overlay helper text is now suppressed consistently on both desktop and mobile.
+### 2026-02-28 10:40:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Rebuilt the overview globe scene runtime in `assets/pages/overview/globe-3.7.2-west.html` with a staged Texas-first reveal sequence and nonlinear `slow -> fast -> slow` intro zoom, added dual post-intro behavior modes (`orbit` and `cockpit`) via query parameter, and switched `index.html` overview iframe source to `?mode=orbit` as the baseline.
+- Troubleshooting suggestions: To test the alternate camera path without code edits, open `assets/pages/overview/globe-3.7.2-west.html?mode=cockpit`; if motion feels too strong on low-end devices, reduce `cockpitDrift` before changing intro duration.
+- Resolutions/outcomes: Overview now starts as a single-color field, reveals Texas first, then expands into full country/detail rendering with full-frame viewport coverage and reduced per-device runtime load.
+### 2026-02-28 10:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Disabled overview dots by default while preserving particle-generation logic behind `particles=on`, added local data assets (`assets/pages/overview/data/land-110m.json`, `countries-110m.json`, `us-states-10m.json`), and implemented source toggle routing in globe runtime (`source=local|cdn`) with automatic fallback. Updated overview iframe URL to `?mode=orbit&source=local&particles=off`.
+- Troubleshooting suggestions: For CDN force-test use `?source=cdn`; for future particle experiments add `&particles=on` without touching code.
+- Resolutions/outcomes: Default overview path now avoids remote atlas dependency and removes dots visually while keeping both CDN loading and particle capability available on demand.
+### 2026-02-28 11:05:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added camera orientation controls to overview globe (`pitch` + `roll` query params) and applied them to cockpit intro/post-intro rotation. Set cockpit defaults toward the requested straight-down/north-oriented feel using `cockpitStartPitch=-90` and `cockpitStartRoll=-90` with smooth interpolation.
+- Troubleshooting suggestions: For fast visual tuning, adjust only one axis at a time (first `roll`, then `pitch`) using URL params before changing drift/zoom.
+- Resolutions/outcomes: Cockpit view can now be tuned directly to match target perspective without code changes.
+### 2026-02-28 11:10:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `yaw` query-parameter support to overview globe camera control and integrated it into intro/post-intro rotation logic. Implemented late-intro yaw blending to preserve Texas-first reveal before transitioning to user heading.
+- Troubleshooting suggestions: Use moderate yaw values first (e.g., `-45` to `45`) before extreme values to avoid losing intended Texas reveal emphasis.
+- Resolutions/outcomes: Globe camera now supports full heading + tilt + bank tuning through `yaw`, `pitch`, and `roll`.
+### 2026-02-28 11:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added explicit in-file helper text block to `globe-3.7.2-west.html` documenting camera params and sequence-template structure, and added optional `help=on` console hint for quick orientation tuning.
+- Troubleshooting suggestions: Use `help=on` only during setup/debug; remove it in normal runs to keep console clean.
+- Resolutions/outcomes: Orientation/sequence guidance now lives with the runtime code for repeatable tuning without external notes.
+### 2026-02-28 11:24:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed globe angle semantics so `pitch` and `roll` are interpreted as relative deltas by default (`angles=relative`) from the straight-down baseline, and added `angles=absolute` support for direct raw-angle control.
+- Troubleshooting suggestions: If a movement feels too large in relative mode, switch temporarily to `angles=absolute` to isolate target values, then convert back to relative deltas.
+- Resolutions/outcomes: Camera controls now match requested relative-motion intent while preserving explicit absolute control when needed.
+### 2026-02-28 11:36:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Created `assets/pages/overview/globe-3.7.3-west.html` as a standalone animation tuning harness and added on-page control inputs for `yaw`, `pitch`, `roll`, `angle mode (relative|absolute)`, `zoom`, and `rotation speed` with live updates during animation playback.
+- Troubleshooting suggestions: For deterministic camera framing tests, set speed to `0` after intro, then tune yaw/pitch/roll/zoom before reintroducing drift.
+- Resolutions/outcomes: Orientation and motion parameters are now directly editable in-browser without touching main site wiring.
+### 2026-02-28 11:44:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected yaw control behavior in `globe-3.7.3-west.html` by introducing persistent drift accumulation and recalculating post-intro longitude each frame as `texasAnchor + yawOffset + driftAccumulator`.
+- Troubleshooting suggestions: If yaw still appears static while testing, temporarily set rotation speed to `0` to isolate heading response independent of drift.
+- Resolutions/outcomes: Yaw control now updates continuously after intro instead of only at transition handoff.
+### 2026-02-28 11:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `globe-3.7.3-west.html` relative-angle reference frame to true straight-down-over-Texas baseline (`pitch=-31`, `roll=0`) and decoupled it from cinematic cockpit-start values.
+- Troubleshooting suggestions: For clean heading validation, keep `Pitch=0`, `Roll=0`, `Speed=0` in relative mode, then adjust `Yaw`.
+- Resolutions/outcomes: Relative yaw now behaves predictably without pole-singularity lock effects from prior baseline.
+### 2026-02-28 12:04:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added new standalone `assets/pages/overview/globe-3.7.4-west.html` using `geoSatellite` perspective projection and preserved local/CDN atlas toggles; implemented live on-page controls for yaw/pitch/roll, angle mode, distance, camera tilt, and rotation speed.
+- Troubleshooting suggestions: In this perspective rig, keep `Distance >= 1.01`; use `Speed=0` while framing, then raise speed once orientation is locked.
+- Resolutions/outcomes: New test harness supports off-center camera behavior that orthographic mode cannot provide.
+### 2026-02-28 12:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Created `assets/pages/overview/globe-3.8.0-webgl.html` as a Three.js baseline prototype with real camera-space orientation controls (yaw/pitch/roll), relative/absolute mode, true camera distance control, rotation speed, and replayable Texas-first intro scaffold.
+- Troubleshooting suggestions: If texture CDN is blocked, fallback material still renders; for deterministic framing set speed to `0` and replay intro.
+- Resolutions/outcomes: WebGL path is now available for cinematic camera behavior not achievable in the pure SVG/D3 projection stack.
+### 2026-02-28 12:26:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed hard center-lock in `globe-3.8.0-webgl.html` by adding `Look Offset X/Y/Z` controls and applying camera aim to a local-offset look target instead of fixed origin.
+- Troubleshooting suggestions: To verify decoupled aiming immediately, set `Speed=0` and `Look Offset Y=0.2` (or `X=0.2`) and observe horizon/target shift without changing distance.
+- Resolutions/outcomes: Camera can now look away from Earth center while preserving independent orientation and distance controls.
+### 2026-02-28 12:33:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added requested filename alias `assets/pages/overview/globe-v3.7e.html` (copied from existing `globe-3.7e-west.html`) and updated `index.html` overview iframe to use `globe-v3.7e.html?mode=orbit&source=local&particles=off`.
+- Troubleshooting suggestions: If browser still shows prior background asset, hard refresh to clear cached iframe source.
+- Resolutions/outcomes: Overview now uses the explicitly requested `globe-v3.7e.html` asset path.
+### 2026-02-28 12:43:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added automatic intro motion profile directly to `assets/pages/overview/globe-v3.7e.html`: initializes at high zoom, runs `slow -> fast -> slow` zoom-out over `introDurationMs`, then transitions to gentle roll using `postIntroRollDegPerSec`.
+- Troubleshooting suggestions: Tune only `introStartZoom`, `introEndZoom`, `introDurationMs`, and `postIntroRollDegPerSec` in the `OPT` block for pacing changes; keep `lockOnTexas=true` for center stability.
+- Resolutions/outcomes: Requested position/zoom behavior now runs in the active 3.7e overview background file without changing site wiring.
+### 2026-02-28 12:49:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Audited and removed intro control contention in `globe-v3.7e.html` by gating legacy wheel-zoom handler behind new `userWheelZoomEnabled` flag (default `false`) and moving intro progression state to dedicated runtime variable (`introActive`) instead of mutating config.
+- Troubleshooting suggestions: If manual zoom testing is needed later, set `userWheelZoomEnabled=true`; keep it `false` for production background to avoid accidental touchpad/wheel interference.
+- Resolutions/outcomes: Intro now has a single zoom authority path (`slow -> fast -> slow`), then cleanly hands off to gentle roll.
+### 2026-02-28 12:58:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied anti-pan hardening to `globe-v3.7e.html` by replacing fixed `2000x2000` canvas with viewport sizing + explicit viewBox, updating Texas anchor latitude to `31`, and disabling SVG pointer interaction. Updated `index.html` iframe source with `v=20260228a` cache-bust token.
+- Troubleshooting suggestions: If drift still appears after this patch, confirm with a hard refresh first; then we can add an on-screen center crosshair to verify true anchor lock versus perceived feature drift.
+- Resolutions/outcomes: Background should now render with stable Texas-centered framing and no user-input pan influence.
+### 2026-02-28 13:06:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced `assets/pages/overview/globe-v3.7e.html` with a minimal `v3.7.min` implementation containing only essential globe rendering and motion primitives (Texas-centered camera lock, intro zoom curve, post-intro gentle roll, responsive sizing, and local/CDN atlas loading fallback).
+- Troubleshooting suggestions: If further jitter appears, reduce `introStartZoom` and/or `postIntroRollDegPerSec` before reintroducing any optional visual systems.
+- Resolutions/outcomes: Competing and heavy legacy subsystems were removed; intro and steady-state animation paths are now singular and deterministic.
+### 2026-02-28 13:14:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added load-profile gating to `globe-v3.7e.html` so atlas fetch/render can be constrained to `texas-only`, `regional`, or `global` via query param (`profile`), with optional deferred countries promotion after intro (`promoteToGlobalAfterIntro`).
+- Troubleshooting suggestions: Use `?profile=texas-only` for maximum intro performance checks, then step up to `regional`/`global` only if visual scope requires it.
+- Resolutions/outcomes: Overview background can now avoid unnecessary data/model work based on expected in-frame content.
+### 2026-02-28 13:20:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Switched default overview profile to `texas-only` in `globe-v3.7e.html` and updated `index.html` iframe source query to include `profile=texas-only` plus cache-bust token `v=20260228b`.
+- Troubleshooting suggestions: If you still see prior land/country lines after deploy, hard refresh once to invalidate cached iframe URL.
+- Resolutions/outcomes: Active Overview now loads/render targets just sphere/graticule/Texas path by default, matching requested globe+Texas-only behavior.
+### 2026-02-28 13:25:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned overview intro for faster/leaner rendering in `globe-v3.7e.html` by reducing intro duration to `4200ms` and deferring graticule draw until intro completion.
+- Troubleshooting suggestions: If intro still feels too long, reduce `introDurationMs` further in `300-500ms` increments before changing zoom endpoints.
+- Resolutions/outcomes: Faster zoom-out now runs with less early visual complexity, improving startup smoothness while preserving post-intro framing.
+### 2026-02-28 13:31:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated active overview runtime `globe-v3.7e.html` to disable post-intro roll (`postIntroRollDegPerSec: 0`) and enable deferred countries load after intro (`promoteToGlobalAfterIntro: true`) while retaining `texas-only` initial profile. Bumped iframe cache token in `index.html` to `v=20260228c`.
+- Troubleshooting suggestions: If countries do not appear after intro due to cached iframe, hard-refresh once to load the new URL token.
+- Resolutions/outcomes: Intro now settles without ongoing roll, then country outlines are loaded in after zoom-out.
+### 2026-02-28 13:39:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Hardened post-intro country reveal in `globe-v3.7e.html` by adding deferred countries load fallback (`local -> cdn`), making stroke presentation visibly stronger on load, and animating countries opacity in over ~1.2s after intro completion. Updated iframe cache token to `v=20260228d`.
+- Troubleshooting suggestions: If no visible reveal appears, verify intro is completing (zoom reaches endpoint) and then watch for ~1s country fade-in immediately afterward.
+- Resolutions/outcomes: Country-load phase now has a clear visual transition instead of silently drawing with faint lines.
+### 2026-02-28 13:47:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Resolved partial-country-line output by changing deferred countries render from `topojson.mesh` borders to full `topojson.feature` country outlines and bundling deferred land+countries load together after intro. Updated iframe cache token to `v=20260228e`.
+- Troubleshooting suggestions: If any regions still appear incomplete, verify the profile is still `texas-only` at startup and let intro finish to trigger full deferred load.
+- Resolutions/outcomes: Post-intro geography should now display complete country/coast outlines rather than isolated shared-border segments.
+### 2026-02-28 13:55:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased country-visibility tuning in `globe-v3.7e.html` by reducing final zoom (wider frame), adding faint land fill, and strengthening country stroke opacity/width both at baseline and deferred reveal. Updated iframe cache token to `v=20260228f`.
+- Troubleshooting suggestions: If countries still feel faint on your display, next step is raising land fill to `0.05` and countries stroke alpha to `0.62` after intro.
+- Resolutions/outcomes: Post-intro country outlines should now be clearly visible in normal viewing conditions.
+### 2026-02-28 10:08:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced `globe-v3.7e.html` runtime with strict staged atlas-loading flow: load `states` first (Texas-only intro), run full nonlinear zoom-out, then fetch/fade `land`, then fetch/fade `countries` (per-stage local->cdn fallback). Removed mixed legacy conditional paths and undefined `countriesMesh` branch from active runtime. Updated overview iframe URL in `index.html` to `globe-v3.7e.html?...&v=20260228g`.
+- Troubleshooting suggestions: If sequence appears unchanged, hard-refresh once to ensure iframe query token `v=20260228g` is loaded; if local atlas files are missing/corrupt, fallback source automatically switches to CDN per stage.
+- Resolutions/outcomes: Overview loader now follows deterministic order requested: Texas prefetch -> intro complete -> land fade-in -> countries fade-in.
+### 2026-02-28 10:22:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refactored `assets/pages/overview/globe-v3.7e.html` to a timeline/keyframe execution model using a single `TIMELINE` sequence and marker-based dependencies (`introComplete`, `landReady`, `landFadeComplete`, `countriesReady`). Replaced hardcoded deferred-sequence logic with generic timeline processing (`processTimeline`) and one-shot fetch steps (`runFetchStep`) while keeping visual/output behavior unchanged.
+- Troubleshooting suggestions: Future sequencing edits should be made in the `TIMELINE` array only (timings, order, dependencies) before touching render or projection logic.
+- Resolutions/outcomes: Current behavior is now defined declaratively per element in sequence and can be tuned as timeline/keyframes without rewiring runtime control flow.
+### 2026-02-28 10:31:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a single centralized `SEQUENCE` config block in `assets/pages/overview/globe-v3.7e.html` and rewired `TIMELINE` step fields (`id`, `at`, `duration`, `ease`, markers, opacity ranges) to reference it directly.
+- Troubleshooting suggestions: For timing-only changes, adjust values under `SEQUENCE` first; only modify `TIMELINE` structure when adding/removing step types.
+- Resolutions/outcomes: All sequence timing/easing/order knobs now live in one edit zone, with runtime logic unchanged.
+### 2026-02-28 10:38:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Flattened sequence controls from nested `SEQUENCE` object to single-line `SEQ` definitions in `assets/pages/overview/globe-v3.7e.html` and updated `TIMELINE` references accordingly.
+- Troubleshooting suggestions: For simple tuning, edit only `const SEQ = { ... }`; if `at` references a marker string, ensure the referenced marker name matches an earlier step `completeMarker`.
+- Resolutions/outcomes: Sequence tuning now matches requested style: one basic definitions area with line-by-line variables and no helper functions.
+### 2026-02-28 10:43:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `centerLon` and `centerLat` to the flat `SEQ` definitions block in `assets/pages/overview/globe-v3.7e.html` and switched runtime anchor variables to use `SEQ` center values.
+- Troubleshooting suggestions: Keep longitude in `[-180, 180]` and latitude in `[-90, 90]` to avoid disorienting center locks.
+- Resolutions/outcomes: Globe center position is now tunable from the same one-block control surface as sequence timing/fade settings.
+### 2026-02-28 10:51:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Consolidated sequence/camera controls by removing duplicate intro/zoom/roll/fade fields from `OPT` and wiring runtime defaults/fallbacks to `SEQ` (`zoom init`, `post-intro roll`, and fallback scale).
+- Troubleshooting suggestions: Edit only `SEQ` for behavior tuning; keep `OPT` for visual stroke/fill styling.
+- Resolutions/outcomes: No cross-search needed for timing/position behavior; one top block controls it.
+### 2026-02-28 11:04:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced split `OPT/SEQ` control surfaces with a single flat `CFG` block and added explicit lon/lat graticule generation controls (`graticuleReveal*`, `graticuleStroke*`) wired into timeline state and render fade behavior.
+- Troubleshooting suggestions: To delay lon/lat line generation, increase `graticuleRevealAt` dependency (marker) or `graticuleRevealDurationMs`; to hide lines set `graticuleRevealTo: 0`.
+- Resolutions/outcomes: Every active visual element in the overview sequence (sphere, graticule, Texas, land, countries) now has editable variables in one basic top block.
+### 2026-02-28 11:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `CFG` section toggles (`enableSphere`, `enableTexas`, `enableGraticule`, `enableLand`, `enableCountries`) and render mode controls (`sphere/texas/graticule/land/countriesRenderMode`) with accepted values `border|fill|both|none`; wired timeline construction/fetch/startup/render paths to honor disabled sections.
+- Troubleshooting suggestions: If `countries` is enabled while `land` is disabled, keep `countriesFetchAt` as `landFadeComplete` only if you intentionally want countries blocked; runtime now auto-falls back to intro marker in this combo for continuity.
+- Resolutions/outcomes: You can now disable entire sequence sections and switch each element between border/fill rendering from the single `CFG` block without code-path edits.
+### 2026-02-28 11:33:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added countries reveal-mode toggle in `assets/pages/overview/globe-v3.7e.html` with `countriesRevealMode` (`single` or `groups`), plus grouped reveal controls (`countriesGroupCount`, `countriesGroupStaggerMs`). Implemented random country feature grouping on fetch and per-group staggered fade updates while keeping single-block countries fade path unchanged.
+- Troubleshooting suggestions: For stronger group separation, increase `countriesGroupStaggerMs`; if group transitions feel too long, reduce `countriesFadeDurationMs` first before lowering group count.
+- Resolutions/outcomes: Countries can now render as one block (current behavior) or in randomized multi-group fades using the same top control block.
+### 2026-02-28 11:44:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added per-stage camera tween controls in `assets/pages/overview/globe-v3.7e.html` for intro/texas/graticule/land/countries (`CamEnabled`, lon/lat/roll/zoom from->to, and ease), wired through timeline into projection offsets.
+- Troubleshooting suggestions: Keep all `*CamEnabled` flags false until needed; enable one stage at a time to validate movement interactions with existing reveal timings.
+- Resolutions/outcomes: Stage-specific rotation/position/zoom motion is now configurable in `CFG` and remains inert by default.
+### 2026-02-28 11:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added per-stage persistence flags and reset timing (`intro/texas/graticule/land/countries CamPersist + CamResetDurationMs`) and wired automatic reset tweens when persistence is disabled.
+- Troubleshooting suggestions: Set `*CamPersist: true` to keep stage offsets; set `false` with a short `*CamResetDurationMs` for temporary movement that smoothly returns to baseline.
+- Resolutions/outcomes: Each stage now has an explicit place to choose persistent vs temporary camera movement in the same control block.
+### 2026-02-28 11:58:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added inline helper text comments directly above the stage camera config fields in `assets/pages/overview/globe-v3.7e.html`, documenting additive offset logic, units, persistence behavior, and stage-duration mapping.
+- Troubleshooting suggestions: Keep comments in sync when adding new stage camera fields so tuning remains one-stop and self-describing.
+- Resolutions/outcomes: Camera section is now self-explanatory without needing to inspect runtime functions.
+### 2026-02-28 12:07:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added infinite persistent-motion controls in `assets/pages/overview/globe-v3.7e.html` (`persistentMotionEnabled`, `persistentMotionStartMarker`, and per-second lon/lat/roll/zoom rates) and wired them into per-frame camera offset accumulation after marker activation.
+- Troubleshooting suggestions: Keep `persistentRollDegPerSec` at `0` if you want globe rotation without camera roll; use only `persistentLonDegPerSec` for east/west globe spin.
+- Resolutions/outcomes: You can now start a behavior once and keep it running indefinitely until another offset sequence overrides it.
+### 2026-02-28 12:14:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded helper comments in the `CFG` control sections of `assets/pages/overview/globe-v3.7e.html` to document section toggles, render modes, marker dependencies, fetch/fade staging, and persistent-motion usage.
+- Troubleshooting suggestions: Keep marker-name comments aligned with active marker keys if custom marker strings are introduced later.
+- Resolutions/outcomes: Tuning surface is now more self-describing by section without inspecting runtime internals.
+### 2026-02-28 12:27:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added region-priority grouped countries reveal path in `assets/pages/overview/globe-v3.7e.html` with new controls (`countriesGroupStrategy`, `countriesRegionOrderCsv`, `countriesRegionDelayMs`), centroid-based region assignment, ordered regional buckets with intra-region randomness, and per-group region-phase delays.
+- Troubleshooting suggestions: If a continent appears too early, increase `countriesRegionDelayMs` or move it later in `countriesRegionOrderCsv`; switch `countriesGroupStrategy` back to `random` for original behavior.
+- Resolutions/outcomes: Countries can now build out gradually with controllable geographic sequencing (for example Americas first, then Asia, then Africa/Europe).
+### 2026-02-28 12:39:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added longitude-based grouped countries sequencing in `assets/pages/overview/globe-v3.7e.html` (`countriesGroupStrategy: longitude`) with configurable band definitions/order (`countriesLongitudeBandsCsv`, `countriesLongitudeOrderCsv`) and shared per-phase delay (`countriesGroupPhaseDelayMs`).
+- Troubleshooting suggestions: To co-load Oceania with West Asia, keep them in the same longitude band in `countriesLongitudeBandsCsv`; adjust `countriesLongitudeOrderCsv` to shift that band earlier/later.
+- Resolutions/outcomes: Reveal order can now be driven by visibility-oriented longitude chunks instead of continent buckets.
+### 2026-02-28 12:46:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned active longitude-group defaults in `assets/pages/overview/globe-v3.7e.html` to improve observable phased rollout (`countriesGroupPhaseDelayMs=1200`, `countriesGroupCount=12`, `countriesGroupStaggerMs=260`, `countriesFadeDurationMs=450`).
+- Troubleshooting suggestions: If phases still overlap too much, increase `countriesGroupPhaseDelayMs`; if buildout feels too slow, reduce `countriesGroupCount` before lowering delay.
+- Resolutions/outcomes: Longitude-chunk sequencing should now present clearer phase separation while retaining gradual random-in-group behavior.
+### 2026-02-28 12:55:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Diagnosed no-output issue and fixed invalid countries grouping conditional chain in `assets/pages/overview/globe-v3.7e.html` (`else if` ordering for `region|longitude|random` strategy branch).
+- Troubleshooting suggestions: If output still appears blank, hard-refresh to clear cached iframe script and verify no console syntax errors remain.
+- Resolutions/outcomes: Script parse error removed; globe rendering pipeline can execute again.
+### 2026-02-28 13:08:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added longitude-visibility gated phase starts for grouped countries in `assets/pages/overview/globe-v3.7e.html` with new controls (`countriesLongitudeVisibilityGate`, `countriesLongitudeVisibilityThresholdDeg`, `countriesLongitudePhaseGapMs`) and phase-anchor tracking so phase 0 starts immediately while later phases wait for partial on-screen visibility.
+- Troubleshooting suggestions: If later phases still appear too early, reduce `countriesLongitudeVisibilityThresholdDeg`; if they feel stuck, increase it slightly or reduce spin speed.
+- Resolutions/outcomes: Initial `-180:-20` chunk loads first with random-in-group behavior, and subsequent longitude chunks are deferred until they rotate partway into view.
+### 2026-02-28 13:16:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Switched longitude gate behavior to midpoint-start triggering with new `countriesLongitudeVisibilityGateMode` and active mode `band-start-midpoint`; tightened gate threshold (`4deg`) and adjusted overview final zoom to `introZoomTo=1.45` for a slightly wider frame.
+- Troubleshooting suggestions: If phase starts feel too strict at high spin rates, raise `countriesLongitudeVisibilityThresholdDeg` modestly (`6-10`).
+- Resolutions/outcomes: Next section now begins when its start longitude reaches screen midpoint, and camera framing is slightly zoomed out.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
