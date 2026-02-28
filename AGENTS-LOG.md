@@ -1994,4 +1994,9 @@
 - Actions taken: Switched longitude gate behavior to midpoint-start triggering with new `countriesLongitudeVisibilityGateMode` and active mode `band-start-midpoint`; tightened gate threshold (`4deg`) and adjusted overview final zoom to `introZoomTo=1.45` for a slightly wider frame.
 - Troubleshooting suggestions: If phase starts feel too strict at high spin rates, raise `countriesLongitudeVisibilityThresholdDeg` modestly (`6-10`).
 - Resolutions/outcomes: Next section now begins when its start longitude reaches screen midpoint, and camera framing is slightly zoomed out.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-28 15:51:30 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed clean-exit protocol after overview globe pipeline packet; verified final repository state with `git status --short` and `git log --oneline -n 3`.
+- Troubleshooting suggestions: If reopening this packet later, continue from `assets/pages/overview/globe-v3.7e.html` CFG controls (`countriesGroupStrategy`, longitude bands/order, visibility gate) and validate behavior with a hard refresh.
+- Resolutions/outcomes: Session closed with packet commit `3254901` recorded; active-session tail marker removed for clean close.
+- Commit hash(es): `3254901`
+[AGENTS-LOG-TAIL] CLEAN_CLOSE_2026-02-28T15:51:30-06:00
