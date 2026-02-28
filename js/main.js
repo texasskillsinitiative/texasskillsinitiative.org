@@ -2697,9 +2697,7 @@ function initPipelineMap() {
         const shouldLock = Boolean(isLocked);
         mapShell.classList.toggle('is-desktop-preload-locked', shouldLock);
         mapShell.setAttribute('data-map-desktop-preload-lock', shouldLock ? 'true' : 'false');
-        const desktopButtons = mapShell.querySelectorAll(
-            '.map-control[data-map-target], .pipeline-map-inline-controls-desktop .map-control--desktop'
-        );
+        const desktopButtons = mapShell.querySelectorAll('.map-control[data-map-target]');
         desktopButtons.forEach((button) => {
             if (!(button instanceof HTMLElement)) return;
             button.setAttribute('aria-disabled', shouldLock ? 'true' : 'false');
@@ -3654,33 +3652,16 @@ function initPipelineMap() {
     const renderDots = (map, width, height, resolveDotState) => {
         const dotGroup = map.querySelector('[data-dot-grid]');
         if (!dotGroup) return;
-        const isPassiveMap = map.dataset.mapPassive === 'true';
-        if (!isPassiveMap) {
-            setPipelineInteractionLock(map, true);
-            setPipelineDesktopInteractionLock(map, true);
-        }
+        setPipelineInteractionLock(map, true);
+        setPipelineDesktopInteractionLock(map, true);
 
-        const geometryModeRaw = (map.dataset.mapGeometryMode || '').trim().toLowerCase();
-        const useLegacyNoInsetGeometry = geometryModeRaw === 'monday-0223' || geometryModeRaw === 'feb19-e8a21b9';
-        const viewInset = useLegacyNoInsetGeometry ? 0 : 0.5;
-        if (viewInset > 0) {
-            map.setAttribute('viewBox', `${-viewInset} ${-viewInset} ${width + (viewInset * 2)} ${height + (viewInset * 2)}`);
-        } else {
-            map.setAttribute('viewBox', `0 0 ${width} ${height}`);
-        }
+        map.setAttribute('viewBox', `0 0 ${width} ${height}`);
         const ocean = map.querySelector('.map-ocean');
         if (ocean) {
-            if (viewInset > 0) {
-                ocean.setAttribute('x', String(-viewInset));
-                ocean.setAttribute('y', String(-viewInset));
-                ocean.setAttribute('width', String(width + (viewInset * 2)));
-                ocean.setAttribute('height', String(height + (viewInset * 2)));
-            } else {
-                ocean.removeAttribute('x');
-                ocean.removeAttribute('y');
-                ocean.setAttribute('width', String(width));
-                ocean.setAttribute('height', String(height));
-            }
+            ocean.removeAttribute('x');
+            ocean.removeAttribute('y');
+            ocean.setAttribute('width', String(width));
+            ocean.setAttribute('height', String(height));
         }
 
         dotGroup.innerHTML = '';
@@ -3693,7 +3674,7 @@ function initPipelineMap() {
         const initStartTime = Date.now();
         const minInitDuration = 1200; // 1.2s minimum to ensure readability
 
-        if (frame && !isPassiveMap) {
+        if (frame) {
             frame.classList.add('is-initializing');
             frame.dataset.mapTexasOverrideReady = 'false';
             frame.dataset.mapTexasOverrideStartTs = '0';
@@ -3704,6 +3685,7 @@ function initPipelineMap() {
         }
 
         const radius = 0.42;
+        const dotCenterYOffset = 0.47;
         const totalCells = width * height;
         const dots = new Array(totalCells);
         const chunkSize = 400; // Small batch size for peak responsiveness
@@ -3719,7 +3701,7 @@ function initPipelineMap() {
                 const dotState = resolveDotState(x, y);
                 const isLand = typeof dotState === 'object' ? !!dotState.isLand : !!dotState;
                 const overrideStyle = typeof dotState === 'object' ? (dotState.overrideStyle || null) : null;
-                const dot = createDot(x + 0.5, y + 0.5, isLand, radius, overrideStyle, x, y);
+                const dot = createDot(x + 0.5, y + dotCenterYOffset, isLand, radius, overrideStyle, x, y);
                 fragment.appendChild(dot);
                 dots[i] = dot;
             }
@@ -3734,19 +3716,11 @@ function initPipelineMap() {
 
                 const finalize = () => {
                     // Remove loading overlay and clear initializing state
-                    if (frame && !isPassiveMap) frame.classList.remove('is-initializing');
+                    if (frame) frame.classList.remove('is-initializing');
 
                     if (overlay) {
                         overlay.classList.add('is-hidden');
                         setTimeout(() => overlay.remove(), 600);
-                    }
-
-                    if (isPassiveMap) {
-                        setTimeout(() => {
-                            dotGroup.style.opacity = '';
-                            syncColumnGlowForMap(map);
-                        }, 100);
-                        return;
                     }
 
                     // Setup listener for the end of the startup reveal animation
@@ -3810,13 +3784,6 @@ function initPipelineMap() {
                                 setPipelineDesktopInteractionLock(map, false);
                             }
 
-                            // Reveal helper text "Select a Phase..." ONLY after map is fully revealed
-                            const helper = frame.querySelector('.pipeline-map-helper-overlay');
-                            if (helper) {
-                                helper.classList.remove('is-hidden');
-                                helper.textContent = 'Select a phase to display map markers and details.';
-                            }
-
                             // Start button pulsing to guide the user
                             const mapShell = map.closest('.pipeline-map');
                             if (mapShell) {
@@ -3825,7 +3792,6 @@ function initPipelineMap() {
                                     btn.classList.add('map-control--guided');
                                     btn.addEventListener('click', () => {
                                         controls.forEach(b => b.classList.remove('map-control--guided'));
-                                        if (helper) helper.classList.add('is-hidden');
                                     }, { once: true });
                                 });
                             }
@@ -4049,23 +4015,17 @@ function initPipelineMap() {
             }
             helperNode.textContent = '';
 
-            // Helper text stays hidden until initial reveal is complete
-            if (frame.dataset.mapGlowInitialRevealDone !== 'true') {
-                helperNode.classList.add('is-hidden');
-            } else {
-                helperNode.classList.remove('is-hidden');
-                helperNode.textContent = helperHeadline;
-            }
+            helperNode.classList.add('is-hidden');
             return helperNode;
         };
-        const ensureDesktopTitleContent = () => {
-            if (!desktopTitleBox) return;
-            let main = desktopTitleBox.querySelector('[data-map-title-main]');
+        const applyPipelineTitleContent = (targetNode) => {
+            if (!targetNode) return;
+            let main = targetNode.querySelector('[data-map-title-main]');
             if (!main) {
                 main = document.createElement('span');
                 main.className = 'pipeline-map-title-main';
                 main.setAttribute('data-map-title-main', 'true');
-                desktopTitleBox.appendChild(main);
+                targetNode.appendChild(main);
             }
             main.textContent = '';
             main.appendChild(document.createTextNode('Texas Skills Initiative'));
@@ -4076,42 +4036,10 @@ function initPipelineMap() {
         };
         const setDesktopTitleMode = (isTitleMode) => {
             if (!desktopTitleBox) return;
-            ensureDesktopTitleContent();
             desktopTitleBox.classList.toggle('is-title-mode', Boolean(isTitleMode));
         };
-        if (mapShell) {
-            desktopTitleBox = mapShell.querySelector('.pipeline-map-title-box');
-            if (!desktopTitleBox) {
-                desktopTitleBox = document.createElement('p');
-                desktopTitleBox.className = 'pipeline-map-title-box';
-                if (frame && frame.parentNode === mapShell) {
-                    mapShell.insertBefore(desktopTitleBox, frame);
-                } else {
-                    mapShell.appendChild(desktopTitleBox);
-                }
-            }
-            setDesktopTitleMode(false);
-        }
         mapTopHelper = ensureMapTopHelper();
-        let desktopInlineControls = null;
-        if (mapShell) {
-            desktopInlineControls = mapShell.querySelector('.pipeline-map-inline-controls-desktop');
-            if (!desktopInlineControls) {
-                desktopInlineControls = document.createElement('div');
-                desktopInlineControls.className = 'pipeline-map-inline-controls-desktop';
-                desktopInlineControls.setAttribute('role', 'group');
-                desktopInlineControls.setAttribute('aria-label', 'Desktop map category toggles');
-                if (frame && frame.parentNode === mapShell) {
-                    mapShell.insertBefore(desktopInlineControls, frame);
-                } else {
-                    mapShell.appendChild(desktopInlineControls);
-                }
-            }
-            desktopInlineControls.innerHTML = '';
-        }
         if (mapShell && frame && frame.parentNode === mapShell) {
-            if (desktopTitleBox) mapShell.insertBefore(desktopTitleBox, frame);
-            if (desktopInlineControls) mapShell.insertBefore(desktopInlineControls, frame);
             if (helper) mapShell.insertBefore(helper, frame);
         }
         const mapDebugUiEnabled = false;
@@ -4395,17 +4323,6 @@ function initPipelineMap() {
             }
             categoryDescription.appendChild(mobileDescriptionLocations);
             controls.appendChild(categoryDescription);
-            if (desktopInlineControls) {
-                const desktopInlineButton = document.createElement('button');
-                desktopInlineButton.type = 'button';
-                desktopInlineButton.className = 'map-control map-control--desktop';
-                desktopInlineButton.setAttribute('data-map-target', toggleGroup.targetClass);
-                desktopInlineButton.setAttribute('aria-pressed', 'false');
-                desktopInlineButton.style.setProperty('--map-control-color', representativeColor);
-                applyPhaseToggleLabel(desktopInlineButton, toggleGroup.buttonLabel);
-                desktopInlineControls.appendChild(desktopInlineButton);
-            }
-
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             group.setAttribute('class', `map-overlay ${toggleGroup.targetClass}`);
             const desktopGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -4454,10 +4371,11 @@ function initPipelineMap() {
             // Grab the "This map reflects..." text from the pipeline-note box
             const pipelineNote = mapShell.querySelector('.pipeline-note');
             const pipelineNoteText = pipelineNote ? pipelineNote.textContent.trim() : '';
+            const mapOverviewFallback = 'This map reflects the active reach of our collaborative partnerships. Every point mirrors a region engaged with one of the four disciplined phases below.';
             const pipelineNoteMobileMapText = (() => {
-                if (!pipelineNoteText) return '';
+                if (!pipelineNoteText) return mapOverviewFallback;
                 const sentences = pipelineNoteText.match(/[^.!?]+[.!?]+(?:\s|$)|[^.!?]+$/g) || [];
-                if (!sentences.length) return pipelineNoteText;
+                if (!sentences.length) return pipelineNoteText || mapOverviewFallback;
                 return sentences.slice(0, 2).join(' ').trim();
             })();
             // Mark it so mobile CSS can hide it (desktop sees it unchanged)
@@ -4492,12 +4410,21 @@ function initPipelineMap() {
             const mapPane = document.createElement('div');
             mapPane.className = 'pipeline-map-tab-pane is-active';
             mapPane.setAttribute('data-tab-key', '__map__');
+            const mapPaneTitle = document.createElement('p');
+            mapPaneTitle.className = 'pipeline-map-title-box pipeline-map-tab-pane-map-title is-title-mode';
+            applyPipelineTitleContent(mapPaneTitle);
+            mapPane.appendChild(mapPaneTitle);
+            desktopTitleBox = mapPaneTitle;
             if (pipelineNoteMobileMapText) {
                 const mapPaneText = document.createElement('p');
                 mapPaneText.className = 'pipeline-map-tab-pane-text';
                 mapPaneText.textContent = pipelineNoteMobileMapText;
                 mapPane.appendChild(mapPaneText);
             }
+            const mapPaneHelper = document.createElement('p');
+            mapPaneHelper.className = 'pipeline-map-tab-pane-helper';
+            mapPaneHelper.textContent = helperHeadline;
+            mapPane.appendChild(mapPaneHelper);
             contentCol.appendChild(mapPane);
 
             // Helper to build a compact phase label: number on top, PHASE below.
@@ -4520,7 +4447,7 @@ function initPipelineMap() {
                 numSpan.textContent = phaseNumber;
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'pipeline-map-tab-word';
-                wordSpan.textContent = 'PHASE';
+                wordSpan.textContent = 'PHASE TAB';
                 buttonNode.appendChild(numSpan);
                 buttonNode.appendChild(wordSpan);
                 const rawSuffix = (phaseMatch[2] || '').trim();
@@ -4558,6 +4485,7 @@ function initPipelineMap() {
                     p.classList.toggle('is-active', p.getAttribute('data-tab-key') === key);
                     p.classList.remove('is-locations-open');
                 });
+                mapPaneHelper.classList.toggle('is-hidden', key !== '__map__');
                 closeAllLocationOverlays();
                 // Highlight which tab "owns" the right column (separate from map-active state)
                 [mapTab, ...allPhaseTabs].forEach(t => {
@@ -4583,6 +4511,10 @@ function initPipelineMap() {
                 const isMapPaneActive = key === '__map__';
                 tabPanel.classList.toggle('is-map-pane-active', isMapPaneActive);
                 contentCol.classList.toggle('is-map-pane-active', isMapPaneActive);
+                if (mapTopHelper) {
+                    mapTopHelper.classList.add('is-hidden');
+                    mapTopHelper.textContent = '';
+                }
             };
 
             toggleGroups.forEach(toggleGroup => {
@@ -5491,8 +5423,8 @@ function initPipelineMap() {
             map,
             frame && (frame.dataset.mapGlowInitialRevealDone !== 'true' || frame.dataset.mapTexasOverrideReady !== 'true')
         );
-        const desktopMapControls = desktopInlineControls
-            ? desktopInlineControls.querySelectorAll('.map-control[data-map-target]')
+        const desktopMapControls = mapShell
+            ? mapShell.querySelectorAll('.pipeline-map-tab[data-map-target]')
             : [];
         const overlays = map.querySelectorAll('.map-overlay');
         const categoryDescriptions = controls.querySelectorAll('.map-category-description[data-map-description-target]');
@@ -5522,15 +5454,9 @@ function initPipelineMap() {
         };
         const updateHelperCopy = () => {
             if (mapTopHelper && !helperDismissed) {
-                const mapRevealDone = frame && frame.dataset.mapGlowInitialRevealDone === 'true';
                 mapTopHelper.classList.remove('is-dismissed');
-                if (mapRevealDone) {
-                    mapTopHelper.classList.remove('is-hidden');
-                    mapTopHelper.textContent = helperHeadline;
-                } else {
-                    mapTopHelper.classList.add('is-hidden');
-                    mapTopHelper.textContent = '';
-                }
+                mapTopHelper.classList.add('is-hidden');
+                mapTopHelper.textContent = '';
             }
             if (!helper) return;
             if (helperDismissed) {
@@ -5712,24 +5638,7 @@ function initPipelineMap() {
         });
         updateHelperCopy();
         window.addEventListener('resize', updateHelperCopy);
-        const firstToggleTarget = toggleGroups[0] ? toggleGroups[0].targetClass : '';
-        const firstMobileToggle = firstToggleTarget
-            ? Array.from(mapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
-            : null;
-        const firstDesktopToggle = firstToggleTarget
-            ? Array.from(desktopMapControls).find(control => control.getAttribute('data-map-target') === firstToggleTarget)
-            : null;
-        let guidanceCleared = false;
-        const clearToggleGuidance = () => {
-            if (guidanceCleared) return;
-            guidanceCleared = true;
-            [firstMobileToggle, firstDesktopToggle].forEach((control) => {
-                if (control) control.classList.remove('map-control--guided');
-            });
-        };
-        [firstMobileToggle, firstDesktopToggle].forEach((control) => {
-            if (control) control.classList.add('map-control--guided');
-        });
+        const clearToggleGuidance = () => {};
         const runMapPostStartupReady = () => {
             revealDeferredOverrideSet();
             if (frame) frame.classList.remove('map-settings-pending');
@@ -6169,10 +6078,6 @@ function initPipelineMap() {
                 overrideStyle
             };
         });
-        if (map.dataset.mapPassive === 'true') {
-            map.querySelectorAll('.map-overlay').forEach(node => node.remove());
-            return true;
-        }
         if (toggleLines.length) {
             const categoryMetaBySlug = new Map();
             categoryDescriptionLines.forEach(line => {

@@ -1773,3 +1773,49 @@
 - Commit hash(es):  b0e22d.
 - Push result: not pushed (not requested).
 [AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-02-27 15:12:40 -06:00
+### 2026-02-27 15:35:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed rollback packet for pipeline map recovery: removed temporary compare maps from `index.html`, removed compare-only geometry/passive branches from `js/main.js`, restored primary `renderDots` geometry to `viewBox 0 0 width height` with direct ocean bounds, and restored `.pipeline-map-frame svg` sizing in `css/main.css` to `height: auto`.
+- Troubleshooting suggestions: If any residual edge clipping remains, apply one minimal guard on the single primary path only (avoid reintroducing multi-map diagnostics).
+- Resolutions/outcomes: Pipeline map runtime is back to a single-map baseline aligned with Feb 19 geometry behavior.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-27 15:39:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied a targeted map-dot rendering nudge in `js/main.js` by changing dot center Y offset from `0.5` to `0.47` (`dotCenterYOffset`) to avoid residual bottom-edge clipping caused by device-pixel rounding.
+- Troubleshooting suggestions: If clipping is still visible on specific DPR/zoom combos, adjust only `dotCenterYOffset` in small increments (`0.46` to `0.48`) before changing frame or SVG geometry again.
+- Resolutions/outcomes: Bottom-row map dots should render fully without reintroducing left/right gutter artifacts.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-27 15:41:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied frame-geometry fix in `css/main.css` by setting `.pipeline-map-frame` padding to `0` (base and small-screen override), removing content-box ratio distortion that clips the bottom row.
+- Troubleshooting suggestions: If any visual spacing is desired back around the map, reintroduce it via non-layout overlays (pseudo/border layer) rather than frame padding.
+- Resolutions/outcomes: Bottom-row clipping source shifted from frame-content distortion to true map bounds; this should resolve persistent bottom clipping where dot-offset changes did not.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-27 15:56:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added pane-content typewriter rendering in `js/main.js` by introducing `runPaneTypewriter`/`clearPaneTyping` over `.pipeline-map-tab-pane-text` and `.pipeline-map-tab-pane-lead`, triggered on active pane changes in `updateContentPane`.
+- Troubleshooting suggestions: Adjust `charDelayMs` (`14`) and `lineDelayMs` (`120`) in `runPaneTypewriter` for faster/slower typing cadence; title and locations button intentionally excluded from animation selectors.
+- Resolutions/outcomes: Tab body content now reveals one character at a time on pane switch while title bar and `View Locations` behavior remain unchanged.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-27 17:17:16 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed tab-pane typewriter runtime from `js/main.js`, restored immediate text rendering, and added map-tab helper copy node (`.pipeline-map-tab-pane-helper`) that toggles visibility by selected tab in `updateContentPane`.
+- Troubleshooting suggestions: If helper text should persist across non-map tabs later, remove `mapPaneHelper.classList.toggle('is-hidden', key !== "__map__")` and style accordingly.
+- Resolutions/outcomes: Tab content now loads normally; helper text appears in MAP tab pane and disappears when other tabs are selected, while title and `View Locations` behavior remain unchanged.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-02-27 17:20:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated shared unified-tab compact label builder in `js/main.js` to render `PHASE TAB` instead of `PHASE` (`.pipeline-map-tab-word`).
+- Troubleshooting suggestions: If label wraps on narrow widths, reduce `.pipeline-map-tab-word` letter-spacing/font-size in mobile media block to keep two-line tab density.
+- Resolutions/outcomes: Phase-tab text now includes the requested `TAB` suffix on both desktop and mobile tab panels.
+### 2026-02-27 17:34:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed legacy desktop inline pipeline button-lane generation in `js/main.js` by deleting `.pipeline-map-inline-controls-desktop` container creation, `.map-control--desktop` button rendering, and associated desktop lock selector references.
+- Troubleshooting suggestions: If any duplicate desktop controls still appear, hard-refresh browser cache and verify only `.pipeline-map-tab-panel` remains visible above the map on widths >= `769px`.
+- Resolutions/outcomes: Desktop pipeline interaction now routes through the unified tab panel without the older desktop button row; mobile logic remains unchanged.
+### 2026-02-27 17:47:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated pipeline title placement by removing standalone `.pipeline-map-title-box` injection above the map in `js/main.js`, creating that same styled title element at the top of the MAP tab pane (`.pipeline-map-tab-pane-map-title`), and wiring desktop flash behavior to the in-pane title node. Also hid `.pipeline-note` on desktop via `@media (min-width: 769px)` while keeping mobile hidden behavior intact.
+- Troubleshooting suggestions: If title styling ever diverges between pane and legacy styles, keep `.pipeline-map-title-box` as the single source of truth and only scope visibility by breakpoint classes.
+- Resolutions/outcomes: Desktop now shows “Texas Skills Initiative Global Pipeline” at the top of map-tab content, the old standalone title box is removed, and the text box below the map no longer appears on desktop.
+### 2026-02-27 17:55:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the legacy pipeline note box markup from `index.html` so it cannot briefly render on mobile, added MAP-pane overview fallback copy in `js/main.js` when `.pipeline-note` is absent, removed auto-application of first-tab guided highlight classes in pipeline tab state logic, and changed `.pipeline-map-tab:focus-visible` outline from white-mixed accent to pure `var(--accent)` in `css/main.css`.
+- Troubleshooting suggestions: If any residual bright edge remains only during active keyboard navigation, capture whether the tab is focused (not just selected), since `:focus-visible` is still intentionally enabled for accessibility.
+- Resolutions/outcomes: Old note box no longer exists in DOM, mobile flash path is removed, and phase-tab highlight no longer uses the white-tinted outline style.
+### 2026-02-27 18:02:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed a second startup reveal path in `js/main.js` that explicitly unhid and repopulated `.pipeline-map-helper-overlay` text after map load.
+- Troubleshooting suggestions: If any helper text still appears on-map, hard refresh cache to ensure latest `js/main.js` is loaded; only tab-pane helper text should remain.
+- Resolutions/outcomes: Map overlay helper text is now suppressed consistently on both desktop and mobile.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
