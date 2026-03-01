@@ -17,6 +17,8 @@
         },
         "files.watcherExclude": {
             "**/global-ai-invisible/**": true
-        }
+        },
+        "liveServer.settings.multiRootWorkspaceName": "TSI Site Repo",
+        "liveServer.settings.port": 5501
     }
 }

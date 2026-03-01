@@ -1770,7 +1770,7 @@
 - Actions taken: Completed clean-close checkpoint workflow on branch packet-overview-responsive-wireframe, committed combined parallel WIP, and executed final repository checks.
 - Troubleshooting suggestions: For strict parallel isolation next cycle, run each agent in a separate worktree/clone and host on separate ports.
 - Resolutions/outcomes: Clean close completed with combined commit captured; active session marker cleared.
-- Commit hash(es):  b0e22d.
+- Commit hash(es): b0e22d.
 - Push result: not pushed (not requested).
 [AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-02-27 15:12:40 -06:00
 ### 2026-02-27 15:35:59 -06:00 | Agent: Codex | Version: GPT-5
@@ -1999,4 +1999,35 @@
 - Troubleshooting suggestions: If reopening this packet later, continue from `assets/pages/overview/globe-v3.7e.html` CFG controls (`countriesGroupStrategy`, longitude bands/order, visibility gate) and validate behavior with a hard refresh.
 - Resolutions/outcomes: Session closed with packet commit `3254901` recorded; active-session tail marker removed for clean close.
 - Commit hash(es): `3254901`
-[AGENTS-LOG-TAIL] CLEAN_CLOSE_2026-02-28T15:51:30-06:00
+
+### 2026-02-28 16:04:37 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Imported Portal V2 additive bundle from `C:\dev\tsi\tsi-site-repo-wt-20260227-154014` into this worktree via direct file checkout (`portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, `portal-internship.html`, `css/portal-expansion.css`, `js/portal-intake-v2.js`, `form-backend/portal_v2_config.js`, `form-backend/portal_v2_apps_script_webapp.js`, `PORTAL-V2-README.md`).
+- Troubleshooting suggestions: Keep prototype files (`portal-investor.html`, `js/portal-intake.js`) out of staged commits during v2 integration to avoid dual-runtime drift; wire `index.html` links in a separate commit for lower blast radius.
+- Resolutions/outcomes: Portal V2 package is now present in target worktree and syntax checks pass for imported JS/backend files.
+
+
+### 2026-02-28 17:00:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated footer bottom-bar links in `index.html` (`.footer-legal`) to include Portal V2 access links: `portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, and `portal-internship.html`.
+- Troubleshooting suggestions: If footer wrapping becomes dense on smaller widths, shorten labels first (for example `Opportunity`), or split footer links into two rows in a dedicated follow-up packet.
+- Resolutions/outcomes: New portal routes are now directly reachable from the main site footer without modifying top navigation or modal behavior.
+
+### 2026-02-28 19:39:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Repointed the remaining engagement CTA in `index.html` from `portal.html` to `portal-hub.html` (`Visit the opportunity desk`) and removed legacy prototype files `portal-investor.html` and `js/portal-intake.js` that are not used by Portal V2 logic.
+- Troubleshooting suggestions: `portal.html` and `js/portal-form.js` still exist as legacy standalone files; keep them unlinked, or retire them in a separate cleanup packet if you want strict v2-only file inventory.
+- Resolutions/outcomes: Main-site navigation now routes only to Portal V2 pages, and obsolete prototype runtime files were removed from this worktree.
+
+### 2026-02-28 22:24:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Deleted legacy portal files `portal.html` and `js/portal-form.js`, confirmed no remaining runtime references to `portal.html`/`portal-investor.html`/`js/portal-intake.js`/`js/portal-form.js` in active HTML/JS, and executed live Portal V2 endpoint verification with JSON payloads for routes (`investment`, `press`, `employment`) plus internship with attachment payload.
+- Troubleshooting suggestions: `AGENTS-LOG.md` contains one embedded NUL byte from prior history; most editors read it, but some tools treat the file as binary. If desired, run a one-time text re-encode cleanup before long-term automation indexing.
+- Resolutions/outcomes: Portal V2 is the only active linked portal path, legacy runtime entry files were retired, and endpoint submit checks returned `{ok:true}` for tested routes/payloads.
+
+### 2026-02-28 22:31:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Sanitized `AGENTS-LOG.md` by removing one embedded NUL byte (`0x00`) and re-saving as UTF-8 text; confirmed `nul_bytes=0` post-write and normal text search behavior restored.
+- Troubleshooting suggestions: Preserve plain UTF-8 text in future log imports/merges to prevent binary-classification by CLI tools.
+- Resolutions/outcomes: Log file is now safe for human reading and agent tooling (`rg` no longer flags binary behavior).
+
+### 2026-02-28 22:36:44 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added explicit Portal V2 deployment TODOs in `STATUS.md` for (1) provisioning production Google Sheet + `PORTAL_V2_SPREADSHEET_ID`, and (2) creating/assigning route-specific Google Drive upload folders + `PORTAL_V2_*_UPLOAD_FOLDER_ID` permissions verification.
+- Troubleshooting suggestions: Complete these two TODOs before final launch sign-off so accepted portal submissions and attachments land in intended production destinations.
+- Resolutions/outcomes: Storage setup tasks are now formally tracked as planned items in the primary roadmap document.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

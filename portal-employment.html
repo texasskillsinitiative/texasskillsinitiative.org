@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employment Intake | TSI</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/portal-expansion.css">
+</head>
+<body class="portalx-page portalx-page--employment">
+    <main class="portalx-shell">
+        <header class="portalx-hero">
+            <p class="portalx-kicker">TSI Opportunity Desk</p>
+            <h1>Employment Intake</h1>
+            <p>This intake is active year-round. We currently may have no open posted positions, but applications are accepted for pipeline review.</p>
+            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
+        </header>
+        <section class="portalx-formwrap">
+            <form id="portalIntakeForm" class="portalx-form" data-portal-route="employment">
+                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
+                <div class="portalx-row"><label for="org">Current organization (optional)</label><input id="org" name="org"></div>
+                <div class="portalx-row"><label for="roleInterest">Role of interest</label><input id="roleInterest" name="employment_role_interest" required></div>
+                <div class="portalx-row"><label for="timeline">Availability timeline</label><input id="timeline" name="employment_timeline" required></div>
+                <div class="portalx-row"><label for="locPref">Location preference</label><select id="locPref" name="employment_location_pref" required><option value="">Select</option><option>Local</option><option>Hybrid</option><option>Remote</option><option>Flexible</option></select></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
+                <div class="portalx-row"><label for="message">Application summary</label><textarea id="message" name="message" required></textarea></div>
+                <div class="portalx-row"><label for="portalFile">Resume / portfolio (optional)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"><span class="portalx-help">Optional. Max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
+
+                <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+                <input type="hidden" name="handler_tier" value="2">
+                <input type="hidden" name="submission_type" value="employment">
+                <input type="hidden" name="concierge_track" value="employment_portal">
+                <input type="hidden" name="page_path" value="/portal-employment.html">
+                <div class="portalx-actions"><button type="submit" class="portalx-btn">Submit employment profile</button><span id="portalFormStatus" class="portalx-status" aria-live="polite"></span></div>
+            </form>
+        </section>
+    </main>
+    <script src="js/portal-intake-v2.js"></script>
+</body>
+</html>

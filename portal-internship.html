@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Internship Application | TSI</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/portal-expansion.css">
+</head>
+<body class="portalx-page portalx-page--internship">
+    <main class="portalx-shell">
+        <header class="portalx-hero">
+            <p class="portalx-kicker">TSI Opportunity Desk</p>
+            <h1>Internship Application</h1>
+            <p>Selective intake for local, hybrid, and remote internship pathways. Submit a complete application profile for review.</p>
+            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
+        </header>
+        <section class="portalx-formwrap">
+            <form id="portalIntakeForm" class="portalx-form" data-portal-route="internship" data-requires-file="true">
+                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
+                <div class="portalx-row"><label for="school">School / institution</label><input id="school" name="intern_school" required></div>
+                <div class="portalx-row"><label for="program">Program / major</label><input id="program" name="intern_program" required></div>
+                <div class="portalx-row"><label for="grad">Expected graduation date</label><input id="grad" type="month" name="intern_grad_date" required></div>
+                <div class="portalx-row"><label for="track">Internship track interest</label><select id="track" name="intern_track" required><option value="">Select</option><option>Research & Analysis</option><option>Program Operations</option><option>Data & Visualization</option><option>Community Engagement</option><option>Communications</option></select></div>
+                <div class="portalx-row"><label for="mode">Preferred mode</label><select id="mode" name="intern_mode" required><option value="">Select</option><option>Local</option><option>Hybrid</option><option>Remote</option><option>Flexible</option></select></div>
+                <div class="portalx-row"><label for="hours">Availability hours per week</label><input id="hours" name="intern_hours_per_week" required></div>
+                <div class="portalx-row"><label for="start">Earliest start date</label><input id="start" type="date" name="intern_start_date" required></div>
+                <div class="portalx-row"><label for="portfolio">Portfolio / GitHub / website</label><input id="portfolio" type="url" name="intern_portfolio_url"></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
+                <div class="portalx-row"><label for="message">Statement of interest</label><textarea id="message" name="message" required></textarea></div>
+                <div class="portalx-row"><label for="portalFile">Resume (required)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx" required><span class="portalx-help">Required. PDF/DOC/DOCX, max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
+
+                <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+                <input type="hidden" name="handler_tier" value="2">
+                <input type="hidden" name="submission_type" value="internship">
+                <input type="hidden" name="concierge_track" value="internship_portal">
+                <input type="hidden" name="page_path" value="/portal-internship.html">
+                <div class="portalx-actions"><button type="submit" class="portalx-btn">Submit internship application</button><span id="portalFormStatus" class="portalx-status" aria-live="polite"></span></div>
+            </form>
+        </section>
+    </main>
+    <script src="js/portal-intake-v2.js"></script>
+</body>
+</html>

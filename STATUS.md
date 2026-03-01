@@ -516,6 +516,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-28: Fixed no-output regression in `assets/pages/overview/globe-v3.7e.html` by correcting countries grouping conditional structure (`region|longitude|random`) that introduced a JS parse error.
 - [Done] 2026-02-28: Added visibility-gated longitude phase starts in `assets/pages/overview/globe-v3.7e.html` (`countriesLongitudeVisibilityGate`, `countriesLongitudeVisibilityThresholdDeg`, `countriesLongitudePhaseGapMs`) so only the first longitude chunk starts immediately and later chunks wait until partially visible.
 - [Done] 2026-02-28: Updated longitude visibility gating in `assets/pages/overview/globe-v3.7e.html` to support gate-mode selection (`countriesLongitudeVisibilityGateMode`) and set active mode to `band-start-midpoint` so each next section begins when its start longitude reaches the midpoint; also widened default framing via `introZoomTo: 1.45`.
+- [Done] 2026-02-28: Imported Portal V2 additive integration package from `C:\dev\tsi\tsi-site-repo-wt-20260227-154014` via direct file checkout (`portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, `portal-internship.html`, `css/portal-expansion.css`, `js/portal-intake-v2.js`, `form-backend/portal_v2_config.js`, `form-backend/portal_v2_apps_script_webapp.js`, `PORTAL-V2-README.md`); prototype `portal-investor.html`/`js/portal-intake.js` intentionally excluded from this packet.
+- [Done] 2026-02-28: Wired bottom-bar footer links in `index.html` to Portal V2 routes (`portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, `portal-internship.html`) to provide direct site-wide access from the footer.
+- [Done] 2026-02-28: Enforced Portal V2 as active site entry path by repointing the remaining engagement CTA in `index.html` from `portal.html` to `portal-hub.html`, and removed legacy prototype artifacts `portal-investor.html` and `js/portal-intake.js` from the working tree.
+- [Done] 2026-02-28: Retired remaining legacy portal entry/runtime files by deleting `portal.html` and `js/portal-form.js`; verified active-site links now route only to Portal V2 pages. Ran live Portal V2 endpoint checks using JSON payloads: `investment`, `press`, `employment` submissions returned `{ok:true}`, and `internship` with attachment payload also returned `{ok:true}`.
+- [Planned] 2026-02-28: Portal V2 deployment TODO - provision production Google Sheet and set `PORTAL_V2_SPREADSHEET_ID` in Apps Script Script Properties.
+- [Planned] 2026-02-28: Portal V2 deployment TODO - create/assign route-specific Google Drive upload folders (`PORTAL_V2_*_UPLOAD_FOLDER_ID`) and verify attachment write permissions.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
@@ -535,3 +541,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - Reclassify active risk entries after validation/user confirmation (`Remove`, `Downgrade`, `Keep`, `Escalate`) before starting the next work cycle.
 - Update statuses (`[Done]`, `[Planned]`, `[Blocked]`) when milestones materially change.
 - Do not mark an item `[Done]` without verifiable repo evidence (diff, behavior check, or commit).
+
+
+
+
