@@ -42,6 +42,7 @@
             --map-marker-stroke: #0b1220;
             --tab-active-bg: #18243a;
             --tab-active-bg-strong: #121d31;
+            --overview-copy-backdrop-rgb: 3, 8, 14;
         }
 
         [data-theme="light"] {
@@ -65,6 +66,7 @@
             --map-marker-stroke: #1a2636;
             --tab-active-bg: #f2f5fa;
             --tab-active-bg-strong: #e6edf7;
+            --overview-copy-backdrop-rgb: 255, 255, 255;
         }
 
         body {
@@ -308,7 +310,7 @@
         }
 
         .overview-copy {
-            color: var(--page-bg);
+            color: transparent;
             transition: color calc(var(--debug-overview-fade-ms, var(--motion-slow)) + 0.4s) var(--debug-overview-fade-ease, var(--motion-ease-soft));
             font-size: calc(1.1rem * var(--overview-fit-scale, 1) * var(--debug-overview-copy-scale, 1));
             font-weight: 500;
@@ -330,14 +332,14 @@
         }
 
         .overview-copy .overview-phrase {
-            color: var(--page-bg);
+            color: transparent;
             font-weight: inherit;
             font-size: 1.08em;
             transition: color var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow))) var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-soft)));
         }
 
         .overview-copy .overview-phrase.text-accent {
-            color: var(--page-bg);
+            color: transparent;
         }
 
         .overview-copy .overview-phrase.is-phrase-visible {
@@ -360,6 +362,35 @@
             display: block;
             margin-top: calc(6px * var(--overview-fit-scale, 1));
             white-space: nowrap;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            isolation: isolate;
+            padding: 0 calc(10px * var(--overview-fit-scale, 1));
+        }
+
+        .overview-copy-line::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            border-radius: calc(16px * var(--overview-fit-scale, 1));
+            background:
+                linear-gradient(90deg,
+                    rgba(var(--overview-copy-backdrop-rgb), 0) 0%,
+                    rgba(var(--overview-copy-backdrop-rgb), 0.68) 18%,
+                    rgba(var(--overview-copy-backdrop-rgb), 0.84) 50%,
+                    rgba(var(--overview-copy-backdrop-rgb), 0.68) 82%,
+                    rgba(var(--overview-copy-backdrop-rgb), 0) 100%);
+            filter: blur(5px);
+            opacity: 0;
+            transition: opacity var(--tsi-debug-fade-ms, var(--debug-overview-fade-ms, var(--motion-slow))) var(--tsi-debug-fade-ease, var(--debug-overview-fade-ease, var(--motion-ease-soft)));
+        }
+
+        .overview-copy.is-body-visible .overview-copy-line::before {
+            opacity: 1;
         }
 
         .overview-copy-emph {
@@ -375,20 +406,21 @@
             letter-spacing: calc(0.2em * var(--overview-fit-scale, 1));
             text-transform: uppercase;
             font-weight: 700;
-            background: transparent;
+            background: color-mix(in srgb, var(--frame-bg) 92%, #000 8%);
             color: var(--page-text-dim);
             border: 1px solid var(--frame-border);
             padding: calc(10px * var(--overview-fit-scale, 1)) calc(18px * var(--overview-fit-scale, 1));
             border-radius: 999px;
             opacity: 0;
             pointer-events: none;
-            transition: opacity var(--motion-slow) var(--motion-ease-soft), color var(--motion-base) var(--motion-ease-soft), border-color var(--motion-base) var(--motion-ease-soft);
+            transition: opacity var(--motion-slow) var(--motion-ease-soft), color var(--motion-base) var(--motion-ease-soft), border-color var(--motion-base) var(--motion-ease-soft), background-color var(--motion-base) var(--motion-ease-soft);
             text-decoration: none;
         }
 
         .overview-continue:hover {
             color: var(--page-text-main);
             border-color: var(--accent);
+            background: color-mix(in srgb, var(--frame-bg) 84%, var(--accent) 16%);
         }
 
         .overview-continue.is-visible {
@@ -3092,6 +3124,8 @@
             background-color: var(--frame-bg);
             border-top: 1px solid var(--frame-border);
             width: 100%;
+            position: relative;
+            z-index: 5;
         }
 
         .footer-layout {
@@ -3104,7 +3138,10 @@
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
-            padding: 0 50px;
+            padding: 10px 50px;
+            flex-wrap: wrap;
+            row-gap: 8px;
+            background-color: var(--frame-bg);
         }
 
         .status-pill {
@@ -5239,6 +5276,11 @@
             gap: 14px;
             font-size: 0.65rem;
             color: var(--page-text-dim);
+            flex-basis: 100%;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            padding-top: 2px;
         }
 
         .footer-legal a {

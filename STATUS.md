@@ -522,6 +522,18 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-28: Retired remaining legacy portal entry/runtime files by deleting `portal.html` and `js/portal-form.js`; verified active-site links now route only to Portal V2 pages. Ran live Portal V2 endpoint checks using JSON payloads: `investment`, `press`, `employment` submissions returned `{ok:true}`, and `internship` with attachment payload also returned `{ok:true}`.
 - [Planned] 2026-02-28: Portal V2 deployment TODO - provision production Google Sheet and set `PORTAL_V2_SPREADSHEET_ID` in Apps Script Script Properties.
 - [Planned] 2026-02-28: Portal V2 deployment TODO - create/assign route-specific Google Drive upload folders (`PORTAL_V2_*_UPLOAD_FOLDER_ID`) and verify attachment write permissions.
+- [Done] 2026-02-28: Switched Overview background runtime in `index.html` to `assets/pages/overview/globe-v4.1-desktop-stable.html` with explicit desktop mode query (`?mode=desktop&v=20260301a`) for desktop-first setup; mobile-specific tuning intentionally deferred.
+- [Done] 2026-02-28: Disabled Overview first-load auto-navigation to `#mandate` in `js/main.js` so initial load remains on Overview across globe versions; preserved existing manual `Click to continue` hash navigation behavior.
+- [Done] 2026-02-28: Updated Overview visual readability treatment in `css/main.css`: made `Click to continue` button background opaque (palette unchanged) and added a dark feathered backdrop behind small overview copy text (`.overview-copy::before`) with soft fade at the left/right ends.
+- [Done] 2026-02-28: Darkened Overview small-copy feather backdrop in `css/main.css` by raising center/edge alpha values of `.overview-copy::before` gradient while preserving the same fade profile.
+- [Done] 2026-02-28: Refined Overview copy backdrop shape in `css/main.css` from one large block to per-line feathered backplates (`.overview-copy-line::before`) so shading trims to text width; tied backdrop opacity to `.overview-copy.is-body-visible` so it fades in with final body text reveal.
+- [Done] 2026-03-01: Replaced Overview copy pre-reveal hide strategy in `css/main.css` from background-matched color to `color: transparent` (including phrase/accent phrase defaults), so text reveal remains reliable with animated globe backgrounds.
+- [Done] 2026-03-01: Fixed bottom footer navigation rendering in `css/main.css` by allowing `.footer-layout` to wrap on desktop and forcing `.footer-legal` links into a full-width wrapped row (`flex-basis: 100%`), preventing compression/overflow after Portal V2 link additions.
+- [Done] 2026-03-01: Resolved footer transparency over fixed globe layer by hardening footer surface in `css/main.css` (`footer` now positioned with positive `z-index` and `.footer-layout` has explicit `background-color: var(--frame-bg)`), restoring solid bottom bar rendering.
+- [Done] 2026-03-01: Added theme-aware Overview globe coloring for v4.1 (`assets/pages/overview/globe-v4.1-desktop-stable.html`) via `theme=light|dark` query handling and light-palette overrides; wired site theme toggle sync in `js/main.js` (`syncOverviewGlobeTheme`) so iframe theme param updates with light/dark mode.
+- [Done] 2026-03-01: Switched Overview per-line feather backdrop color in `css/main.css` from dark to white (`.overview-copy-line::before` gradient rgba values) while preserving existing trim and fade timing behavior.
+- [Done] 2026-03-01: Fixed persisted white Overview text-backing across theme switches by making line-backdrop color theme-aware in `css/main.css` (`--overview-copy-backdrop-rgb`: dark token in default theme, white token in light theme) and using that token in `.overview-copy-line::before` gradient.
+- [Done] 2026-03-01: Updated home navigation behavior split in `js/main.js`: `00` Overview tab now performs soft Overview reset/replay (including when already on Overview), while logo click performs full Overview reset/replay (`forceFull`) with viewport top stabilization; added logo accessibility label in `index.html` (`aria-label="Go to Overview"`).
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
@@ -541,6 +553,18 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - Reclassify active risk entries after validation/user confirmation (`Remove`, `Downgrade`, `Keep`, `Escalate`) before starting the next work cycle.
 - Update statuses (`[Done]`, `[Planned]`, `[Blocked]`) when milestones materially change.
 - Do not mark an item `[Done]` without verifiable repo evidence (diff, behavior check, or commit).
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

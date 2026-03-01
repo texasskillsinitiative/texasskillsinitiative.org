@@ -2030,4 +2030,64 @@
 - Actions taken: Added explicit Portal V2 deployment TODOs in `STATUS.md` for (1) provisioning production Google Sheet + `PORTAL_V2_SPREADSHEET_ID`, and (2) creating/assigning route-specific Google Drive upload folders + `PORTAL_V2_*_UPLOAD_FOLDER_ID` permissions verification.
 - Troubleshooting suggestions: Complete these two TODOs before final launch sign-off so accepted portal submissions and attachments land in intended production destinations.
 - Resolutions/outcomes: Storage setup tasks are now formally tracked as planned items in the primary roadmap document.
+
+### 2026-02-28 22:59:58 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Overview iframe source in `index.html` to the new globe asset `assets/pages/overview/globe-v4.1-desktop-stable.html` with `mode=desktop` and cache token `v=20260301a`; performed local HTTP checks (`index.html` and globe asset both `200`).
+- Troubleshooting suggestions: When you start the mobile pass, add a viewport-aware mode handoff (`desktop`/`mobile`) rather than hardwiring desktop mode in iframe query.
+- Resolutions/outcomes: Desktop now uses Globe v4.1 as the active overview background runtime; mobile optimization is explicitly deferred per request.
+
+### 2026-02-28 23:06:13 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the Overview first-load auto-advance timer path in `js/main.js` that transitioned from `#overview` to `#mandate`; retained the existing `overviewContinue` click handler so manual `Click to continue` behavior remains unchanged.
+- Troubleshooting suggestions: Optional cleanup later: remove now-unused `.overview-hero.is-auto-transition-out` CSS rule if you want to retire dead transition styling.
+- Resolutions/outcomes: Initial page load no longer auto-navigates away from Overview, and user-driven continue navigation still routes to Mandate.
+
+### 2026-02-28 23:16:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied global Overview style adjustments in `css/main.css`: made `.overview-continue` background opaque while keeping existing text/border color palette, and added dark feathered shading behind small copy text via `.overview-copy::before` gradient+blur so edges fade softly.
+- Troubleshooting suggestions: If copy shading appears too strong on light theme, lower middle alpha values in the `.overview-copy::before` gradient before reducing blur radius.
+- Resolutions/outcomes: `Click to continue` is now visually solid/opaque and overview small text has improved readability with feathered dark backing.
+
+### 2026-02-28 23:22:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased darkness of Overview copy feather backdrop in `css/main.css` by raising `.overview-copy::before` gradient alpha stops (edge and center) while keeping geometry/falloff unchanged.
+- Troubleshooting suggestions: If this now feels too heavy on light theme, reduce center alpha first before changing blur/shape.
+- Resolutions/outcomes: Small-copy backing is visibly darker with the same feathered left/right fade behavior.
+
+### 2026-02-28 23:21:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked Overview small-text backing in `css/main.css` from section-wide shading to text-trimmed line backplates (`.overview-copy-line::before` with `width: fit-content` line sizing), then wired backplate opacity to `.overview-copy.is-body-visible` so it fades in with final body text reveal.
+- Troubleshooting suggestions: If any line appears too tightly cropped, increase horizontal line padding (`.overview-copy-line` `padding-inline`) before altering gradient stops.
+- Resolutions/outcomes: Backing now follows the shape of each text line and animates in sync with the final copy reveal state.
+
+### 2026-03-01 00:21:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Overview reveal CSS in `css/main.css` to use `color: transparent` for unrevealed body/phrase/accent-phrase text instead of background-matched color, keeping existing reveal class transitions intact.
+- Troubleshooting suggestions: If any anti-aliased ghosting appears during fade-in on specific browsers, add `will-change: color` to `.overview-copy` and `.overview-phrase` as a targeted follow-up.
+- Resolutions/outcomes: Overview paragraph hide/reveal no longer depends on matching page background color, so globe backgrounds do not break text visibility behavior.
+
+### 2026-03-01 01:19:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected bottom footer-nav rendering in `css/main.css` by enabling wrap on `.footer-layout` and assigning `.footer-legal` to a dedicated full-width wrapped row (`flex-basis: 100%`, `width: 100%`, `flex-wrap: wrap`) so expanded link set no longer compresses or overflows in desktop layout.
+- Troubleshooting suggestions: If link density still feels high at 1200px widths, reduce `.footer-legal` gap from `14px` to `10-12px` before shrinking font size.
+- Resolutions/outcomes: Bottom nav/footer link bar now renders as a stable wrapped row with predictable spacing after portal-link expansion.
+
+### 2026-03-01 01:22:51 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed transparent footer rendering by updating `css/main.css` so `footer` creates a positioned stacking context (`position: relative; z-index: 5`) and `.footer-layout` paints explicit `background-color: var(--frame-bg)`, preventing fixed overview globe bleed-through.
+- Troubleshooting suggestions: If any residual bleed appears from children, apply `background-color: inherit` to footer subcontainers that visually span the row.
+- Resolutions/outcomes: Bottom footer/nav bar now renders as an opaque surface instead of appearing transparent over the globe layer.
+
+### 2026-03-01 01:28:11 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented light/dark theme support for the v4.1 overview globe by adding URL-driven theme overrides in `assets/pages/overview/globe-v4.1-desktop-stable.html` (light palette + background) and adding `syncOverviewGlobeTheme` in `js/main.js` to update iframe `theme` query param on initial load and theme-toggle changes.
+- Troubleshooting suggestions: Current behavior reloads the iframe when theme changes; if seamless no-reload theme morph is needed later, add a `postMessage` theme channel instead of query-param reload.
+- Resolutions/outcomes: Overview globe now renders with light-specific colors when site light theme is active and dark colors when dark theme is active.
+
+### 2026-03-01 01:29:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Overview line-level feather shadow color in `css/main.css` from dark to white by replacing `.overview-copy-line::before` gradient stops with white rgba values; preserved existing line-trimmed shape and reveal sync.
+- Troubleshooting suggestions: If white glow is too bright over light theme, lower center alpha first (for example `0.84 -> 0.62`) while keeping edge alphas proportional.
+- Resolutions/outcomes: Requested shadow color swap completed (black/dark -> white) without altering reveal mechanics.
+
+### 2026-03-01 01:36:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Resolved theme-switch persistence bug for Overview line backdrop by replacing hardcoded white gradient color with theme token `--overview-copy-backdrop-rgb` in `css/main.css`; set token values for both default (dark) and `[data-theme="light"]` scopes.
+- Troubleshooting suggestions: If you want different backdrop tint per theme later, adjust only `--overview-copy-backdrop-rgb` values without touching the gradient geometry/alpha curve.
+- Resolutions/outcomes: Backdrop now switches correctly with theme (no white persistence when toggling back to dark).
+
+### 2026-03-01 01:45:57 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Overview home-control behavior split in `js/main.js`: added `activateOverviewHome` + `forceFullOverviewOnActivate`, wired `#tab-overview` click to soft reset/replay, and wired `.logo-container` click to full reset/replay (`forceFull: true`) with existing pulse effect retained. Added `aria-label="Go to Overview"` to logo link in `index.html`.
+- Troubleshooting suggestions: If full logo reset should also restart globe iframe sequence later, append a cache-bust refresh to overview iframe source inside the logo click path.
+- Resolutions/outcomes: `00` and logo now have distinct, deterministic reset semantics matching requested behavior; keyboard/click accessibility labels are aligned for logo home navigation.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

@@ -1821,11 +1821,30 @@ const ensurePipelineMapInitialized = () => {
 
 // Theme Toggle & Animations (Keep your existing code here)
 const toggleSwitch = document.querySelector('#checkbox');
+const syncOverviewGlobeTheme = () => {
+    const iframe = document.querySelector('.overview-animation iframe');
+    if (!(iframe instanceof HTMLIFrameElement)) return;
+    const rawSrc = iframe.getAttribute('src');
+    if (!rawSrc || !rawSrc.includes('assets/pages/overview/globe-')) return;
+    let nextUrl;
+    try {
+        nextUrl = new URL(rawSrc, window.location.href);
+    } catch (_) {
+        return;
+    }
+    const nextTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    if (nextUrl.searchParams.get('theme') === nextTheme) return;
+    nextUrl.searchParams.set('theme', nextTheme);
+    const nextRelative = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    iframe.setAttribute('src', nextRelative);
+};
 if (toggleSwitch) {
     toggleSwitch.addEventListener('change', (e) => {
         document.documentElement.setAttribute('data-theme', e.target.checked ? 'light' : 'dark');
+        syncOverviewGlobeTheme();
     });
 }
+syncOverviewGlobeTheme();
 
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -1856,7 +1875,6 @@ if (overview) {
     const overviewTimers = [];
     let lastFitViewportWidth = window.innerWidth || 0;
     let lastFitViewportHeight = window.innerHeight || 0;
-    let didInitialOverviewAutoAdvance = false;
 
     const clearOverviewTimers = () => {
         overviewTimers.forEach(timer => window.clearTimeout(timer));
@@ -2022,25 +2040,6 @@ if (overview) {
                 const continueDelay = bodyDelay + 1.0;
                 schedule(() => {
                     overviewContinue.classList.add('is-visible');
-                    // First visual load: hold, then fade out and auto-advance to mandate once.
-                    if (!didInitialOverviewAutoAdvance) {
-                        didInitialOverviewAutoAdvance = true;
-                        const autoAdvanceHoldSeconds = 3;
-                        const autoAdvanceFadeSeconds = 0.6;
-                        window.setTimeout(() => {
-                            const currentHash = window.location.hash || '#overview';
-                            if (currentHash === '#overview') {
-                                overview.classList.add('is-auto-transition-out');
-                            }
-                        }, Math.max(0, autoAdvanceHoldSeconds * 1000));
-                        window.setTimeout(() => {
-                            const currentHash = window.location.hash || '#overview';
-                            if (currentHash === '#overview') {
-                                window.location.hash = '#mandate';
-                            }
-                            overview.classList.remove('is-auto-transition-out');
-                        }, Math.max(0, (autoAdvanceHoldSeconds + autoAdvanceFadeSeconds) * 1000));
-                    }
                 }, continueDelay);
             }
         }
@@ -2090,6 +2089,7 @@ const stabilizeViewportTop = () => {
         jumpViewportToTop();
     }, 80);
 };
+let forceFullOverviewOnActivate = false;
 
 function setActiveTabFromHash(options = {}) {
     const shouldResetScroll = options.resetScroll !== false;
@@ -2129,7 +2129,9 @@ function setActiveTabFromHash(options = {}) {
     });
 
     if (resolvedId === 'overview' && typeof window._runOverviewSequence === 'function') {
-        window._runOverviewSequence();
+        const shouldForceFull = forceFullOverviewOnActivate === true;
+        window._runOverviewSequence({ forceFull: shouldForceFull });
+        forceFullOverviewOnActivate = false;
         if (typeof window._fitOverviewToViewport === 'function') {
             window._fitOverviewToViewport();
         }
@@ -2154,6 +2156,18 @@ window.addEventListener('hashchange', () => {
 });
 setActiveTabFromHash({ resetScroll: false });
 stabilizeViewportTop();
+
+const activateOverviewHome = (options = {}) => {
+    const forceFull = options.forceFull === true;
+    forceFullOverviewOnActivate = forceFull;
+    const currentHash = window.location.hash || '#overview';
+    if (currentHash !== '#overview') {
+        window.location.hash = '#overview';
+        return;
+    }
+    setActiveTabFromHash({ resetScroll: false });
+    stabilizeViewportTop();
+};
 
 function initMobileNav() {
     const toggle = document.getElementById('mobileNavToggle');
@@ -6379,6 +6393,7 @@ function initHoldToClear() {
 function initWOWRefinements() {
     const nav = document.querySelector('nav');
     const logoContainer = document.querySelector('.logo-container');
+    const overviewTabLink = document.getElementById('tab-overview');
 
     // Nav Glassmorphism Scroll Handler
     if (nav) {
@@ -6392,12 +6407,21 @@ function initWOWRefinements() {
 
     // Logo Pulse Interaction
     if (logoContainer) {
-        logoContainer.addEventListener('click', () => {
+        logoContainer.addEventListener('click', (event) => {
+            event.preventDefault();
             if (logoContainer.classList.contains('is-pulsing')) return;
             logoContainer.classList.add('is-pulsing');
             setTimeout(() => {
                 logoContainer.classList.remove('is-pulsing');
             }, 600); // Matches CSS animation duration
+            activateOverviewHome({ forceFull: true });
+        });
+    }
+    // Overview tab (00) soft reset behavior, including when already on Overview.
+    if (overviewTabLink) {
+        overviewTabLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            activateOverviewHome({ forceFull: false });
         });
     }
 }
