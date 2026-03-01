@@ -1,4 +1,4 @@
-const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec';
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec';
 const SUBMIT_MIN_MS = 3000;
 const SUCCESS_GRACE_MS = 2000;
 const SUBMIT_MAX_MS = 30000;

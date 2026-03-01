@@ -2105,4 +2105,44 @@
 - Actions taken: Implemented Globe Lab packet: added `globe-lab.html` interactive access page, enhanced `assets/pages/overview/globe-v4.1-desktop-stable.html` with `interactive=1` runtime controls (drag rotate, wheel zoom, draw/clear canvas overlay, spin pause/resume, spin-speed slider, random jump, reset view), added small footer easter-egg link in `index.html` + `.footer-egg` style in `css/main.css`, and removed legacy overview globes (`3.7*`/`3.8*`) while retaining required `assets/pages/overview/data/*` atlas files.
 - Troubleshooting suggestions: For mobile-specific Globe Lab ergonomics later, tune pointer sensitivity and control density under a dedicated mobile query-mode instead of reusing desktop defaults.
 - Resolutions/outcomes: Users can now open an interactive/fun globe experience from a hidden footer egg link, while the main overview background remains stable and non-interactive by default.
+
+### 2026-03-01 03:00:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Per startup protocol, checked `AGENTS-LOG.md` EOF marker and detected prior unclean close condition (`[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE` still present from earlier session).
+- Troubleshooting suggestions: Resume with a clean state check first if you suspect interrupted edits (`git status`, then recent commits) before continuing packet work.
+- Resolutions/outcomes: Unclean-exit recovery note recorded; active tail marker retained as required for current live session.
+
+### 2026-03-01 03:01:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed unclean-close detection/recovery packet; validated working tree/commit context (`git status --short`, `git log --oneline -n 3`) and prepared restart options from current state.
+- Troubleshooting suggestions: Treat this session as active until requested clean-close protocol is run; avoid resetting history unless you explicitly choose restart-from-commit.
+- Resolutions/outcomes: Packet complete; repository is ready to continue from current tree and latest `STATUS.md` focus.
+
+### 2026-03-01 03:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented additive Portal V2 backend upgrade without touching legacy handler: added dashboard/unreviewed state + tab-color signal behavior to `form-backend/portal_v2_apps_script_webapp.js`, added dashboard-related script-property keys/columns in `form-backend/portal_v2_config.js`, and documented deploy + review-reset workflow in `PORTAL-V2-README.md`; updated `STATUS.md` with packet completion evidence.
+- Troubleshooting suggestions: Deploy V2 as a separate Apps Script web app endpoint and point only `js/portal-intake-v2.js` to it; if dashboard sheet header is manually changed, run `portalV2RefreshDashboard_()` once to rebuild expected columns.
+- Resolutions/outcomes: V2 now supports shared-spreadsheet route separation with visual "new data" tab cues and a central dashboard while legacy V1 backend remains unchanged.
+
+### 2026-03-01 03:33:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refactored `form-backend/portal_v2_apps_script_webapp.js` into unified route mode for production cutover: added explicit route resolver (`legacy_*` + `portal_*`), legacy-compatible validation/row mapping, route-specific target resolution (including legacy sheet overrides), and compatible dashboard/review helpers across all routes; expanded `form-backend/portal_v2_config.js` with legacy sheet/spreadsheet/upload keys and updated `PORTAL-V2-README.md` with full cutover instructions (`js/main.js` + `js/portal-intake-v2.js` endpoint alignment).
+- Troubleshooting suggestions: During cutover, point a staging clone of `js/main.js` and `js/portal-intake-v2.js` to the same new V2 endpoint first; verify one POST per legacy and portal route lands in intended tabs before changing production endpoint values.
+- Resolutions/outcomes: V2 endpoint can now replace current intake routing behavior while preserving V1 script untouched for fallback testing.
+
+### 2026-03-01 03:44:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added configurable auto-reply capability in unified V2 backend with global + per-route toggles (`PORTAL_V2_AUTO_REPLY_*`) and message controls (`SUBJECT_PREFIX`, `SIGNATURE`), and expanded Drive routing controls with legacy per-route upload-folder overrides (`PORTAL_V2_LEGACY_*_UPLOAD_FOLDER_ID`) in `form-backend/portal_v2_config.js`; updated `PORTAL-V2-README.md` and `STATUS.md` to reflect new controls and existing attachment schema coverage.
+- Troubleshooting suggestions: Enable auto-reply in two steps (`PORTAL_V2_AUTO_REPLY_ENABLED=true` plus route-specific toggle) and test with a non-owner email first to verify deliverability/spam handling.
+- Resolutions/outcomes: V2 now supports route-specific attachment storage destinations and selective submitter auto-replies without changing legacy V1 script.
+
+### 2026-03-01 03:58:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Per user-provided deployment URL, updated active frontend intake endpoints to unified V2 web app in `js/main.js` (`FORM_ENDPOINT`) and `js/portal-intake-v2.js` (`PORTAL_V2_ENDPOINT`) using `https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec`; verified references by search.
+- Troubleshooting suggestions: Run one submission per legacy and portal route immediately after deploy to confirm sheet routing (`01..07`) and attachment write behavior under live endpoint.
+- Resolutions/outcomes: Site intake traffic is now configured to flow through the new V2 backend endpoint for both legacy and portal forms.
+
+### 2026-03-01 12:57:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed live POST smoke submissions against the deployed unified V2 endpoint for all seven routes using unique emails/submission IDs to avoid rate-limit suppression; included one attachment payload test on portal internship route. Route set tested: `legacy_stakeholder`, `legacy_investor`, `legacy_employment`, `portal_investment`, `portal_press`, `portal_employment`, `portal_internship`.
+- Troubleshooting suggestions: Verify destination tabs by searching submitted IDs in the sheet (`01..07`): `smoke-legacy-stakeholder-20260301175649`, `smoke-legacy-investor-20260301175649`, `smoke-legacy-employment-20260301175649`, `smoke-portal-investment-20260301175649`, `smoke-portal-press-20260301175649`, `smoke-portal-employment-20260301175649`, `smoke-portal-internship-20260301175649`.
+- Resolutions/outcomes: Endpoint returned `{ok:true}` for all seven route submissions; network-path and backend acceptance validated end-to-end.
+
+### 2026-03-01 13:09:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented property-footprint mitigation in `form-backend/portal_v2_apps_script_webapp.js`: changed rate-limiting from `PropertiesService` to `CacheService`, prevented dashboard state property writes when `PORTAL_V2_DASHBOARD_ENABLED=false`, added maintenance utility `portalV2ClearGeneratedState()` to remove generated `portal_v2_unread_*`, `portal_v2_last_*`, and legacy `portal_v2_rl_*` keys, and force-pushed updated script to deployed `TSI Intake v2` Apps Script project.
+- Troubleshooting suggestions: After disabling dashboard mode in Script Properties, run `portalV2ClearGeneratedState` once to free property slots; avoid running `portalV2RefreshDashboard` unless dashboard mode is re-enabled.
+- Resolutions/outcomes: V2 can now run without growing Script Properties count from runtime state, preventing recurrence of the 50-property cap issue.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

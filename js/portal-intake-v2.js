@@ -1,4 +1,4 @@
-const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzDrmbMTExgcsq7-LfzYv7VLu9X5w93lDZMkXRfi0EnhPzlKL6KASMvukCGD5LvxHKD/exec';
+const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec';
 const PORTAL_V2_MAX_BYTES = 8 * 1024 * 1024;
 const PORTAL_V2_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
 
