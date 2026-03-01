@@ -31,14 +31,102 @@
       display: block;
       pointer-events: none;
     }
+    #doodle-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      pointer-events: none;
+    }
+    #globe-stage.is-interactive {
+      pointer-events: auto;
+    }
+    #globe-stage.is-draw-mode,
+    #globe-stage.is-draw-mode #doodle-canvas {
+      cursor: crosshair;
+    }
+    #globe-stage.is-draw-mode #doodle-canvas {
+      pointer-events: auto;
+    }
+    .globe-play-controls {
+      position: fixed;
+      right: 14px;
+      top: 14px;
+      z-index: 20;
+      display: none;
+      width: min(92vw, 280px);
+      background: color-mix(in srgb, #0b1220 90%, transparent);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      padding: 10px;
+      color: #e6f1ff;
+      font: 12px/1.4 "JetBrains Mono", monospace;
+      backdrop-filter: blur(8px);
+    }
+    .globe-play-controls.is-visible {
+      display: block;
+    }
+    .globe-play-controls .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .globe-play-controls .row:last-child {
+      margin-bottom: 0;
+    }
+    .globe-play-controls button {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: inherit;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .globe-play-controls button.active {
+      border-color: rgba(125, 249, 255, 0.9);
+      background: rgba(125, 249, 255, 0.18);
+    }
+    .globe-play-controls input[type="range"] {
+      width: 120px;
+      accent-color: #7df9ff;
+    }
+    .globe-play-controls .hint {
+      opacity: 0.84;
+      font-size: 11px;
+      line-height: 1.3;
+    }
   </style>
 </head>
 <body>
   <div id="globe-stage" aria-hidden="true">
     <svg id="globe-base"></svg>
     <canvas id="countries-canvas"></canvas>
+    <canvas id="doodle-canvas"></canvas>
     <svg id="globe-overlay"></svg>
   </div>
+  <aside class="globe-play-controls" id="globePlayControls" aria-hidden="true">
+    <div class="row">
+      <button type="button" id="playPauseBtn">Pause Spin</button>
+      <button type="button" id="drawToggleBtn">Draw</button>
+      <button type="button" id="clearDrawBtn">Clear Draw</button>
+    </div>
+    <div class="row">
+      <button type="button" id="zoomOutBtn">-</button>
+      <button type="button" id="zoomInBtn">+</button>
+      <button type="button" id="resetViewBtn">Reset View</button>
+      <button type="button" id="randomJumpBtn">Random Jump</button>
+    </div>
+    <div class="row">
+      <span>Spin</span>
+      <input type="range" id="spinSpeedRange" min="-60" max="60" step="1" value="-20" />
+      <span id="spinSpeedLabel">-20 deg/s</span>
+    </div>
+    <div class="hint">Drag to rotate. Wheel to zoom. Draw mode lets you sketch on the globe.</div>
+  </aside>
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
@@ -196,6 +284,7 @@
     const viewMode = modeParam === "mobile" ? "mobile" : "desktop";
     const themeParam = String(urlParams.get("theme") || "dark").toLowerCase();
     const viewTheme = themeParam === "light" ? "light" : "dark";
+    const interactiveEnabled = String(urlParams.get("interactive") || "0") === "1";
     const MODE_OVERRIDES = {
       desktop: {},
       mobile: {
@@ -347,10 +436,14 @@
       return -1;
     };
 
+    const globeStage = document.getElementById("globe-stage");
+    const playControls = document.getElementById("globePlayControls");
     const svgBase = d3.select("#globe-base");
     const svgOverlay = d3.select("#globe-overlay");
     const countriesCanvas = document.getElementById("countries-canvas");
     const countriesCtx = countriesCanvas.getContext("2d");
+    const doodleCanvas = document.getElementById("doodle-canvas");
+    const doodleCtx = doodleCanvas.getContext("2d");
 
     let width = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
     let height = Math.max(1, window.innerHeight || document.documentElement.clientHeight || 1);
@@ -445,6 +538,8 @@
       svgOverlay.attr("width", width).attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
       countriesCanvas.width = Math.max(1, Math.floor(width));
       countriesCanvas.height = Math.max(1, Math.floor(height));
+      doodleCanvas.width = Math.max(1, Math.floor(width));
+      doodleCanvas.height = Math.max(1, Math.floor(height));
       projection.translate([width / 2, height / 2]).scale(baseScale());
     };
 
@@ -470,8 +565,13 @@
     let persistentLatOffset = 0;
     let persistentRollOffset = 0;
     let persistentZoomOffset = 0;
-    const getLonSpeedDegPerSec = () => Number(CFG.persistentLonDegPerSec || 0);
-    const getViewZoom = () => Math.max(0.05, timelineState.values.zoom + persistentZoomOffset);
+    let userLonOffset = 0;
+    let userLatOffset = 0;
+    let userZoomOffset = 0;
+    let spinEnabled = true;
+    let spinSpeedDegPerSec = Number(CFG.persistentLonDegPerSec || 0);
+    const getLonSpeedDegPerSec = () => (spinEnabled ? spinSpeedDegPerSec : 0);
+    const getViewZoom = () => Math.max(0.05, timelineState.values.zoom + persistentZoomOffset + userZoomOffset);
 
     const EASING = {
       linear: (t) => t,
@@ -853,8 +953,8 @@
     let lastViewKey = "";
     let lastCountriesStaticRenderKey = "";
     const updateView = () => {
-      const viewLon = texLon + persistentLonOffset;
-      const viewLat = texLat + persistentLatOffset;
+      const viewLon = texLon + persistentLonOffset + userLonOffset;
+      const viewLat = Math.max(-88, Math.min(88, texLat + persistentLatOffset + userLatOffset));
       const viewRoll = currentRollDeg + persistentRollOffset;
       const viewZoom = getViewZoom();
       const viewKey = `${viewLon.toFixed(4)}|${viewLat.toFixed(4)}|${viewRoll.toFixed(4)}|${viewZoom.toFixed(4)}|${width}|${height}`;
@@ -959,6 +1059,181 @@
       projectionDirty = false;
     };
 
+    const initInteractive = () => {
+      if (!interactiveEnabled || !globeStage || !playControls) return;
+      globeStage.classList.add("is-interactive");
+      playControls.classList.add("is-visible");
+      playControls.setAttribute("aria-hidden", "false");
+
+      const playPauseBtn = document.getElementById("playPauseBtn");
+      const drawToggleBtn = document.getElementById("drawToggleBtn");
+      const clearDrawBtn = document.getElementById("clearDrawBtn");
+      const zoomOutBtn = document.getElementById("zoomOutBtn");
+      const zoomInBtn = document.getElementById("zoomInBtn");
+      const resetViewBtn = document.getElementById("resetViewBtn");
+      const randomJumpBtn = document.getElementById("randomJumpBtn");
+      const spinSpeedRange = document.getElementById("spinSpeedRange");
+      const spinSpeedLabel = document.getElementById("spinSpeedLabel");
+
+      let drawMode = false;
+      let drawing = false;
+      let dragging = false;
+      let lastX = 0;
+      let lastY = 0;
+      let lastDrawX = 0;
+      let lastDrawY = 0;
+
+      const setDrawMode = (active) => {
+        drawMode = active === true;
+        globeStage.classList.toggle("is-draw-mode", drawMode);
+        if (drawToggleBtn) drawToggleBtn.classList.toggle("active", drawMode);
+      };
+
+      if (doodleCtx) {
+        doodleCtx.lineCap = "round";
+        doodleCtx.lineJoin = "round";
+        doodleCtx.lineWidth = 2;
+        doodleCtx.strokeStyle = viewTheme === "light"
+          ? "rgba(2,132,199,0.9)"
+          : "rgba(125,249,255,0.92)";
+      }
+
+      const getLocalPoint = (event) => {
+        const rect = doodleCanvas.getBoundingClientRect();
+        return {
+          x: Math.max(0, Math.min(rect.width, event.clientX - rect.left)),
+          y: Math.max(0, Math.min(rect.height, event.clientY - rect.top))
+        };
+      };
+
+      if (playPauseBtn) {
+        playPauseBtn.addEventListener("click", () => {
+          spinEnabled = !spinEnabled;
+          playPauseBtn.textContent = spinEnabled ? "Pause Spin" : "Resume Spin";
+          playPauseBtn.classList.toggle("active", !spinEnabled);
+        });
+      }
+
+      if (drawToggleBtn) {
+        drawToggleBtn.addEventListener("click", () => {
+          setDrawMode(!drawMode);
+        });
+      }
+
+      if (clearDrawBtn) {
+        clearDrawBtn.addEventListener("click", () => {
+          doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+        });
+      }
+
+      if (zoomOutBtn) {
+        zoomOutBtn.addEventListener("click", () => {
+          userZoomOffset = Math.max(-0.85, userZoomOffset - 0.08);
+        });
+      }
+
+      if (zoomInBtn) {
+        zoomInBtn.addEventListener("click", () => {
+          userZoomOffset = Math.min(2.2, userZoomOffset + 0.08);
+        });
+      }
+
+      if (resetViewBtn) {
+        resetViewBtn.addEventListener("click", () => {
+          userLonOffset = 0;
+          userLatOffset = 0;
+          userZoomOffset = 0;
+          spinEnabled = true;
+          spinSpeedDegPerSec = Number(CFG.persistentLonDegPerSec || -20);
+          if (spinSpeedRange) spinSpeedRange.value = String(Math.round(spinSpeedDegPerSec));
+          if (spinSpeedLabel) spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+          if (playPauseBtn) {
+            playPauseBtn.textContent = "Pause Spin";
+            playPauseBtn.classList.remove("active");
+          }
+        });
+      }
+
+      if (randomJumpBtn) {
+        randomJumpBtn.addEventListener("click", () => {
+          userLonOffset = (Math.random() * 300) - 150;
+          userLatOffset = (Math.random() * 110) - 55;
+          userZoomOffset = (Math.random() * 0.9) - 0.15;
+        });
+      }
+
+      if (spinSpeedRange) {
+        spinSpeedRange.value = String(Math.round(spinSpeedDegPerSec));
+        spinSpeedRange.addEventListener("input", () => {
+          spinSpeedDegPerSec = Number(spinSpeedRange.value || 0);
+          if (spinSpeedLabel) spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+        });
+      }
+      if (spinSpeedLabel) {
+        spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+      }
+
+      doodleCanvas.addEventListener("pointerdown", (event) => {
+        if (!drawMode) return;
+        drawing = true;
+        const p = getLocalPoint(event);
+        lastDrawX = p.x;
+        lastDrawY = p.y;
+        doodleCanvas.setPointerCapture(event.pointerId);
+      });
+      doodleCanvas.addEventListener("pointermove", (event) => {
+        if (!drawMode || !drawing) return;
+        const p = getLocalPoint(event);
+        doodleCtx.beginPath();
+        doodleCtx.moveTo(lastDrawX, lastDrawY);
+        doodleCtx.lineTo(p.x, p.y);
+        doodleCtx.stroke();
+        lastDrawX = p.x;
+        lastDrawY = p.y;
+      });
+      const stopDraw = (event) => {
+        if (event && doodleCanvas.hasPointerCapture(event.pointerId)) {
+          doodleCanvas.releasePointerCapture(event.pointerId);
+        }
+        drawing = false;
+      };
+      doodleCanvas.addEventListener("pointerup", stopDraw);
+      doodleCanvas.addEventListener("pointercancel", stopDraw);
+      doodleCanvas.addEventListener("pointerleave", stopDraw);
+
+      globeStage.addEventListener("pointerdown", (event) => {
+        if (drawMode) return;
+        dragging = true;
+        lastX = event.clientX;
+        lastY = event.clientY;
+        globeStage.setPointerCapture(event.pointerId);
+      });
+      globeStage.addEventListener("pointermove", (event) => {
+        if (!dragging || drawMode) return;
+        const dx = event.clientX - lastX;
+        const dy = event.clientY - lastY;
+        lastX = event.clientX;
+        lastY = event.clientY;
+        const zoomFactor = Math.max(0.55, getViewZoom());
+        userLonOffset -= (dx * 0.22) / zoomFactor;
+        userLatOffset += (dy * 0.22) / zoomFactor;
+      });
+      const stopDrag = (event) => {
+        if (event && globeStage.hasPointerCapture(event.pointerId)) {
+          globeStage.releasePointerCapture(event.pointerId);
+        }
+        dragging = false;
+      };
+      globeStage.addEventListener("pointerup", stopDrag);
+      globeStage.addEventListener("pointercancel", stopDrag);
+      globeStage.addEventListener("pointerleave", stopDrag);
+
+      globeStage.addEventListener("wheel", (event) => {
+        event.preventDefault();
+        userZoomOffset = Math.max(-0.85, Math.min(2.2, userZoomOffset - (event.deltaY * 0.0015)));
+      }, { passive: false });
+    };
+
     const tick = (now) => {
       if (timelineState.startTs == null) timelineState.startTs = now;
       const elapsedMs = now - timelineState.startTs;
@@ -1021,6 +1296,7 @@
 
       try {
         setViewport();
+        initInteractive();
         updateView();
         render();
 

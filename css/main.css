@@ -5294,6 +5294,21 @@
             border-bottom-color: var(--accent);
         }
 
+        .footer-legal a.footer-egg {
+            border-bottom: none;
+            opacity: 0.45;
+            font-size: 0.72rem;
+            line-height: 1;
+            padding: 0 2px;
+            transform: translateY(-1px);
+        }
+
+        .footer-legal a.footer-egg:hover {
+            opacity: 1;
+            color: var(--accent);
+            border-bottom: none;
+        }
+
         .legal-page {
             background: var(--page-bg);
             color: var(--page-text-dim);

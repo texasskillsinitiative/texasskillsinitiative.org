@@ -2090,4 +2090,19 @@
 - Actions taken: Implemented Overview home-control behavior split in `js/main.js`: added `activateOverviewHome` + `forceFullOverviewOnActivate`, wired `#tab-overview` click to soft reset/replay, and wired `.logo-container` click to full reset/replay (`forceFull: true`) with existing pulse effect retained. Added `aria-label="Go to Overview"` to logo link in `index.html`.
 - Troubleshooting suggestions: If full logo reset should also restart globe iframe sequence later, append a cache-bust refresh to overview iframe source inside the logo click path.
 - Resolutions/outcomes: `00` and logo now have distinct, deterministic reset semantics matching requested behavior; keyboard/click accessibility labels are aligned for logo home navigation.
+
+### 2026-03-01 01:54:04 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Deleted legacy overview globe asset `assets/pages/overview/globe-3.7.2-west.html` per direction now that v4.1 is active.
+- Troubleshooting suggestions: If additional old globe variants are no longer needed, remove them in one scoped cleanup packet to keep the overview asset set minimal.
+- Resolutions/outcomes: Legacy 3.7.2 variant is removed from working tree; active overview runtime remains v4.1 desktop asset path.
+
+### 2026-03-01 01:58:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Deleted all requested legacy overview globes (`3.7*` and `3.8*`) under `assets/pages/overview/`; verified v4.1 still references local atlas files under `assets/pages/overview/data/` so subfolder retained.
+- Troubleshooting suggestions: Keep `data/` checked in unless you switch v4.1 to CDN-only atlas loading; removing it now would break local-first fallback path.
+- Resolutions/outcomes: Overview asset set is reduced to active v4.1 runtime plus required local atlas data files.
+
+### 2026-03-01 02:03:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Globe Lab packet: added `globe-lab.html` interactive access page, enhanced `assets/pages/overview/globe-v4.1-desktop-stable.html` with `interactive=1` runtime controls (drag rotate, wheel zoom, draw/clear canvas overlay, spin pause/resume, spin-speed slider, random jump, reset view), added small footer easter-egg link in `index.html` + `.footer-egg` style in `css/main.css`, and removed legacy overview globes (`3.7*`/`3.8*`) while retaining required `assets/pages/overview/data/*` atlas files.
+- Troubleshooting suggestions: For mobile-specific Globe Lab ergonomics later, tune pointer sensitivity and control density under a dedicated mobile query-mode instead of reusing desktop defaults.
+- Resolutions/outcomes: Users can now open an interactive/fun globe experience from a hidden footer egg link, while the main overview background remains stable and non-interactive by default.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

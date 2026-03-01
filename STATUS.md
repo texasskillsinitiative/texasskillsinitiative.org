@@ -534,6 +534,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-03-01: Switched Overview per-line feather backdrop color in `css/main.css` from dark to white (`.overview-copy-line::before` gradient rgba values) while preserving existing trim and fade timing behavior.
 - [Done] 2026-03-01: Fixed persisted white Overview text-backing across theme switches by making line-backdrop color theme-aware in `css/main.css` (`--overview-copy-backdrop-rgb`: dark token in default theme, white token in light theme) and using that token in `.overview-copy-line::before` gradient.
 - [Done] 2026-03-01: Updated home navigation behavior split in `js/main.js`: `00` Overview tab now performs soft Overview reset/replay (including when already on Overview), while logo click performs full Overview reset/replay (`forceFull`) with viewport top stabilization; added logo accessibility label in `index.html` (`aria-label="Go to Overview"`).
+- [Done] 2026-03-01: Removed legacy Overview globe file `assets/pages/overview/globe-3.7.2-west.html` after v4.1 desktop activation, to reduce stale variant drift.
+- [Done] 2026-03-01: Removed legacy Overview globe variants `3.7*` and `3.8*` (`globe-3.7.3-west.html`, `globe-3.7.4-west.html`, `globe-3.7e-west.html`, `globe-v3.7e.html`, `globe-3.8.0-webgl.html`) after v4.1 desktop activation; retained `assets/pages/overview/data/` because v4.1 actively loads `land/countries/us-states` atlases from that folder.
+- [Done] 2026-03-01: Added interactive globe experience via new `globe-lab.html` (desktop-first), backed by `assets/pages/overview/globe-v4.1-desktop-stable.html?interactive=1` features: drag-to-rotate, wheel zoom, draw/clear overlay, pause/resume spin, spin-speed slider, reset view, and random jump. Added subtle footer easter-egg link (`.footer-egg`) in `index.html` to access Globe Lab. Retained required local atlas subfolder `assets/pages/overview/data/` and removed legacy `3.7*`/`3.8*` globe variants.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
@@ -553,6 +556,9 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - Reclassify active risk entries after validation/user confirmation (`Remove`, `Downgrade`, `Keep`, `Escalate`) before starting the next work cycle.
 - Update statuses (`[Done]`, `[Planned]`, `[Blocked]`) when milestones materially change.
 - Do not mark an item `[Done]` without verifiable repo evidence (diff, behavior check, or commit).
+
+
+
 
 
 
