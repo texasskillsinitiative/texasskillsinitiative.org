@@ -230,7 +230,7 @@
       }
     };
     const CFG = { ...BASE_CFG, ...(MODE_OVERRIDES[viewMode] || {}) };
-    const showPerfHud = urlParams.get("hud") === "1";
+    const showPerfHud = urlParams.get("hud") !== "0";
 
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + ((b - a) * t);

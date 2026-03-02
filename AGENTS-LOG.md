@@ -1982,6 +1982,18 @@
 - Troubleshooting suggestions: On next session, run focused Globe Lab regression (desktop/mobile pipeline tab parity + diagnostics postMessage continuity after theme reload) before starting new packet work.
 - Resolutions/outcomes: Session closed cleanly with commit checkpoint `cdd17a4`; no push performed.
 - Commit hash(es): `cdd17a4`
-[AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-03-02 01:24:02 -06:00
+### 2026-03-02 02:15:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reviewed `assets/pages/overview/*-original.html` as source-of-truth and reconciled active startup runtime by copying `globe-v4.1-desktop-stable-original.html` into `globe-overview-v4.1.html` and `globe-v4.1-desktop-stable.html` to restore original first-load timing/settings and isolate overview from lab-only controls/runtime branches.
+- Troubleshooting suggestions: Hard refresh the main page and test first load from a cold tab; if startup still appears stale, append a cache-bust query update in the overview iframe src (`index.html`) and re-test.
+- Resolutions/outcomes: Overview and stable runtime hashes now match the provided original file exactly; source settings are reinstated for load animation behavior.
+### 2026-03-02 02:17:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `index.html` overview iframe URL to `?mode=desktop&v=20260302d` (removed extra lab-style params and forced cache-bust token) so browsers fetch the restored source runtime immediately.
+- Troubleshooting suggestions: If stale behavior persists, open in an incognito window and verify network response for `globe-overview-v4.1.html?v=20260302d` is fresh.
+- Resolutions/outcomes: Overview boot path now points to the exact restored source behavior with explicit cache refresh.
+### 2026-03-02 02:23:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Disabled top-left globe diagnostics HUD by default in overview/stable globe runtime files by switching HUD visibility gate to opt-in only (`?hud=1`).
+- Troubleshooting suggestions: Hard refresh the overview page; if diagnostics still appear, confirm the iframe URL does not include `hud=1`.
+- Resolutions/outcomes: Top-left diagnostic panel is removed from normal site loads while preserving optional debug access.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
 
 
