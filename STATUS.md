@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-03-01
+Last updated: 2026-03-02
 Current milestone: 1.0
 Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
@@ -59,7 +59,6 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Separated overview and lab globe runtime files (`globe-overview-v4.1.html` and `globe-lab-v4.1.html`) and rewired `index.html` / `globe-lab.html` so future Globe Lab changes do not touch Overview first-load behavior.
 - [Done] Renamed lab runtime file to `assets/pages/overview/globe-lab.html` and added a top-of-file 4.1 lineage comment; rewired root `globe-lab.html` iframe source accordingly.
 - [Done] Re-aligned overview startup behavior to the provided source-of-truth globe file (`globe-v4.1-desktop-stable-original.html`) by syncing active overview runtime settings one-to-one, preventing lab-only runtime logic from altering first-load animation.
-- [Planned] Next session: run focused Globe Lab functional review (tab/map parity desktop-mobile, diagnostics message bridge stability, draw-mode exit behavior, and override-layer drag ordering persistence).
 - [Done] Privacy policy includes retention period (24 months) and deletion request contact.
 - [Done] Privacy policy includes hosting/data-processing clarifications (GitHub Pages + Google Apps Script/Sheets flow).
 - [Done] Custom `404.html`.
@@ -390,6 +389,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-21: Added temporary operator checklist `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md` with launch-priority setup/validation tasks for investor and employment intake deployment.
 
 ## Milestone 1.0 - MVP Launch
+- [Done] 2026-03-02: Replaced site-wide logo/icon asset references with new TN branding (new favicon/app icons, updated main logo SVGs), and adjusted portal header brand icon sizing to remove padding.
+- [Done] 2026-03-02: Removed investor/employment options from the access modal, added Future Career Interest route link in the Careers hub, and fixed overview globe light-theme load by resolving the duplicate URL param declaration.
 - [Done] 2026-03-01: Updated overview first-load globe staging to use alpha-aware Texas-fill background blending (from `rgba(125,249,255,0.05)` over site background) and switch to standard background once Texas appears, removing the startup flash artifact.
 - [Done] 2026-03-01: Refined overview body-copy readability by adding a continuous block-level backdrop behind the paragraph and reducing per-line hotspot contrast to remove visible gaps between lines.
 - [Done] 2026-03-01: Standardized footer legal links to Globe Lab-style pill buttons and expanded Globe Lab controls with independent layer toggles for globe, lat/lon graticule, land, countries, states, and Texas.
@@ -597,6 +598,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
 - [Planned] 2026-03-01: Post-1.0 workflow hardening - document and enforce a local-only commit branch pattern for sensitive/ignored-path edits (`form-backend/*`) so local checkpoints can exist without accidental public push.
+- [Planned] Post-1.0: Run focused Globe Lab functional review (tab/map parity desktop-mobile, diagnostics message bridge stability, draw-mode exit behavior, and override-layer drag ordering persistence).
 - [Planned] 2026-03-02: Create and secure official TSI social accounts on Facebook, LinkedIn, X, Instagram, and TikTok.
 - [Planned] 2026-03-02: Add social-link surfacing on site (footer and/or utility-area link cluster) once official account URLs are finalized.
 - [Planned] 2026-03-02: Pre-1.0 launch task - configure DNS/hosting routing so `careers.texasskillsinitiative.com` points to the live Job Listings route (`/portal-employment.html`) in production.

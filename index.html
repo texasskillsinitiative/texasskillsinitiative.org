@@ -8,10 +8,10 @@
     <script>
         document.documentElement.classList.remove('no-js');
     </script>
-    <link rel="icon" href="assets/global/icon/tsi-favicon.svg" type="image/svg+xml">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/global/icon/tsi-favicon-32.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/global/icon/tsi-app-android-192.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/global/icon/tsi-app-apple-180.png">
+    <link rel="icon" href="assets/global/icon/tsi-logo-tn-icon-favicon.svg" type="image/svg+xml">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/global/icon/tsi-logo-tn-icon-favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/global/icon/tsi-logo-tn-icon-android.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/global/icon/tsi-logo-tn-icon-crapple.png">
     <link rel="manifest" href="site.webmanifest">
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap"
@@ -31,8 +31,8 @@
     <nav aria-label="Primary">
         <div class="nav-layout">
             <a href="#overview" class="logo-container" aria-label="Go to Overview">
-                <img src="assets/global/logo/tsi-main-dark.svg" class="logo logo-dark" alt="TSI">
-                <img src="assets/global/logo/tsi-main-light.svg" class="logo logo-light" alt="TSI">
+                <img src="assets/global/logo/tsi-logo-main-dark.svg" class="logo logo-dark" alt="TSI">
+                <img src="assets/global/logo/tsi-logo-main-light.svg" class="logo logo-light" alt="TSI">
             </a>
             <button type="button" class="nav-mobile-toggle" id="mobileNavToggle" aria-controls="mobileNavDrawer"
                 aria-expanded="false" aria-label="Open site navigation">
@@ -104,8 +104,8 @@
     <div class="modal-overlay" id="portalModal" data-modal-overlay role="dialog" aria-modal="true"
         aria-labelledby="portalModalTitle" aria-describedby="portalModalHelper" aria-hidden="true">
         <div class="modal-content">
-            <img src="assets/global/logo/tsi-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
-            <img src="assets/global/logo/tsi-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
+            <img src="assets/global/logo/tsi-logo-tn-star.svg" class="modal-logo logo logo-dark" alt="TSI">
+            <img src="assets/global/logo/tsi-logo-tn-star.svg" class="modal-logo logo logo-light" alt="TSI">
             <button type="button" class="close-modal" data-modal-close="portalModal"
                 aria-label="Close internal access modal">×</button>
             <h3 id="portalModalTitle">TSI Internal</h3>
@@ -214,8 +214,8 @@
     <div class="modal-overlay" id="accessModal" data-modal-overlay role="dialog" aria-modal="true"
         aria-labelledby="accessModalTitle" aria-describedby="accessModalIntro" aria-hidden="true">
         <div class="modal-content">
-            <img src="assets/global/logo/tsi-main-dark.svg" class="modal-logo logo logo-dark" alt="TSI">
-            <img src="assets/global/logo/tsi-main-light.svg" class="modal-logo logo logo-light" alt="TSI">
+            <img src="assets/global/logo/tsi-logo-tn-star.svg" class="modal-logo logo logo-dark" alt="TSI">
+            <img src="assets/global/logo/tsi-logo-tn-star.svg" class="modal-logo logo logo-light" alt="TSI">
             <button type="button" class="close-modal" id="accessModalClose" data-modal-close="accessModal"
                 aria-label="Close access modal">×</button>
             <h3 id="accessModalTitle">AN INVITATION TO COLLABORATE</h3>
@@ -250,11 +250,6 @@
                             <button type="button" class="concierge-btn" data-concierge-track="student"
                                 data-concierge-tier="2" data-concierge-type="stakeholder">Student & Community
                                 Perspective</button>
-                            <button type="button" class="concierge-btn" data-concierge-track="investor"
-                                data-concierge-tier="1" data-concierge-type="investor">Investor / Capital
-                                Partner</button>
-                            <button type="button" class="concierge-btn" data-concierge-track="employment"
-                                data-concierge-tier="2" data-concierge-type="employment">Employment Application</button>
                         </div>
                         <div class="concierge-back-row">
                             <button type="button" class="concierge-back" id="conciergeBackBtn"
@@ -299,51 +294,6 @@
                             <label for="focus">Area of focus</label>
                             <span class="form-helper">Discipline, program, or technical specialty</span>
                             <input type="text" id="focus" name="focus">
-                        </div>
-                    </div>
-                    <div class="concierge-fields" data-concierge-group="investor" hidden>
-                        <div class="form-field">
-                            <label for="investorStage">Investment stage / profile</label>
-                            <span class="form-helper">Optional. Example: Seed, Growth, Infrastructure, Strategic.</span>
-                            <input type="text" id="investorStage" name="investor_stage">
-                        </div>
-                        <div class="form-field">
-                            <label for="investorCheckRange">Typical check range</label>
-                            <span class="form-helper">Optional. Example: 250K-1M, 5M-20M.</span>
-                            <input type="text" id="investorCheckRange" name="investor_check_range">
-                        </div>
-                        <div class="form-field">
-                            <label for="investorThesis">Investment focus</label>
-                            <span class="form-helper">Optional. Sectors, constraints, and preferred structure.</span>
-                            <textarea id="investorThesis" name="investor_thesis"></textarea>
-                        </div>
-                    </div>
-                    <div class="concierge-fields" data-concierge-group="employment" hidden>
-                        <div class="form-field">
-                            <label for="employmentRoleInterest">Role of interest</label>
-                            <span class="form-helper">Optional. Example: Research Analyst, Program Ops, Community
-                                Partnerships.</span>
-                            <input type="text" id="employmentRoleInterest" name="employment_role_interest">
-                        </div>
-                        <div class="form-field">
-                            <label for="employmentTimeline">Availability timeline</label>
-                            <span class="form-helper">Optional. Example: immediate, 30 days, part-time.</span>
-                            <input type="text" id="employmentTimeline" name="employment_timeline">
-                        </div>
-                        <div class="form-field">
-                            <label for="employmentLocationPref">Location preference</label>
-                            <span class="form-helper">Optional. Example: remote, hybrid, relocation available.</span>
-                            <input type="text" id="employmentLocationPref" name="employment_location_pref">
-                        </div>
-                    </div>
-                    <div class="concierge-fields" data-concierge-group="attachment" hidden>
-                        <div class="form-field">
-                            <label for="applicationFile">Attachment</label>
-                            <span class="form-helper">Optional. Upload a resume, profile, or briefing deck (max
-                                8MB).</span>
-                            <input type="file" id="applicationFile" name="application_file"
-                                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg">
-                            <span class="form-error" id="fileError" role="alert"></span>
                         </div>
                     </div>
                     <div class="concierge-fields" data-concierge-group="shared" hidden>
@@ -1013,3 +963,5 @@
 </body>
 
 </html>
+
+

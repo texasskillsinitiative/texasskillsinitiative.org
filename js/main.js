@@ -16,9 +16,7 @@ const _021026_TIER_MESSAGES = {
     '2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
 };
 const _021026_SUBMISSION_MESSAGES = {
-    stakeholder: _021026_TIER_MESSAGES['2'],
-    investor: 'Thank you for your investor interest. Your request has been logged for the investment information workflow, and our team will follow up if there is strategic alignment.',
-    employment: 'Thank you for your employment application. Your submission has been logged for internal review, and we will contact you if there is a role fit.'
+    stakeholder: _021026_TIER_MESSAGES['2']
 };
 const FORM_ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
 const FORM_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
@@ -52,8 +50,6 @@ function initFooterLabels() {
 
 function normalizeSubmissionType(value) {
     const raw = String(value || '').trim().toLowerCase();
-    if (raw === 'investor' || raw.includes('investor')) return 'investor';
-    if (raw === 'employment' || raw.includes('employment')) return 'employment';
     return 'stakeholder';
 }
 
@@ -159,7 +155,6 @@ function _021026_setConciergeVisibility(form, tier, submissionType) {
                 || groupName === 'shared'
                 || groupName === (tier === '1' ? 'tier-1' : 'tier-2')
                 || groupName === nextType
-                || (groupName === 'attachment' && (nextType === 'investor' || nextType === 'employment'))
             )
         );
         group.hidden = !shouldShow;

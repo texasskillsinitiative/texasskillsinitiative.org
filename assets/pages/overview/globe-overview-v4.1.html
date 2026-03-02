@@ -61,6 +61,47 @@
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const themeParam = String(urlParams.get("theme") || "").toLowerCase();
+    let parentTheme = "";
+    try {
+      parentTheme = String(window.parent && window.parent.document
+        ? window.parent.document.documentElement.getAttribute("data-theme")
+        : "").toLowerCase();
+    } catch (_) {
+      parentTheme = "";
+    }
+    const viewTheme = themeParam === "light" || parentTheme === "light" ? "light" : "dark";
+
+    const THEME_COLORS = {
+      dark: {
+        pageBg: "#0b1220",
+        sphereStroke: "rgba(255,255,255,0.25)",
+        graticuleStroke: "rgba(255,255,255,0.10)",
+        landFill: "rgba(255,255,255,0.03)",
+        landStroke: "rgba(255,255,255,0.35)",
+        countriesStroke: "rgba(255,255,255,0.52)",
+        texasFill: "rgba(125,249,255,0.05)",
+        texasStroke: "rgba(125,249,255,1)"
+      },
+      light: {
+        pageBg: "#f1f5f9",
+        sphereStroke: "rgba(15,23,42,0.35)",
+        graticuleStroke: "rgba(15,23,42,0.18)",
+        landFill: "rgba(15,23,42,0.08)",
+        landStroke: "rgba(15,23,42,0.55)",
+        countriesStroke: "rgba(15,23,42,0.7)",
+        texasFill: "rgba(14,165,233,0.12)",
+        texasStroke: "rgba(2,132,199,1)"
+      }
+    };
+    const ACTIVE_COLORS = THEME_COLORS[viewTheme] || THEME_COLORS.dark;
+
+    document.documentElement.style.backgroundColor = ACTIVE_COLORS.pageBg;
+    document.body.style.backgroundColor = ACTIVE_COLORS.pageBg;
+    const stage = document.getElementById("globe-stage");
+    if (stage) stage.style.background = ACTIVE_COLORS.pageBg;
+
     // Single control block: edit all behavior + visual variables here.
     const BASE_CFG = {
       // Camera / motion
@@ -131,18 +172,18 @@
       // Base styling
       // Fill/stroke styles used by each render mode.
       sphereFill: "none",
-      sphereStroke: "rgba(255,255,255,0.25)",
+      sphereStroke: ACTIVE_COLORS.sphereStroke,
       sphereStrokeWidth: 1,
-      graticuleStroke: "rgba(255,255,255,0.10)",
+      graticuleStroke: ACTIVE_COLORS.graticuleStroke,
       graticuleStrokeWidth: 0.8,
-      landFill: "rgba(255,255,255,0.03)",
-      landStroke: "rgba(255,255,255,0.35)",
+      landFill: ACTIVE_COLORS.landFill,
+      landStroke: ACTIVE_COLORS.landStroke,
       landStrokeWidth: 1,
       countriesFill: "none",
-      countriesStroke: "rgba(255,255,255,0.52)",
+      countriesStroke: ACTIVE_COLORS.countriesStroke,
       countriesStrokeWidth: 1.35,
-      texasFill: "rgba(125,249,255,0.05)",
-      texasStroke: "rgba(125,249,255,1)",
+      texasFill: ACTIVE_COLORS.texasFill,
+      texasStroke: ACTIVE_COLORS.texasStroke,
       texasStrokeWidth: 1.2,
       // Intro zoom
       // Marker names are reusable in later "at" fields.
@@ -208,7 +249,6 @@
       movingFrameIntervalMs: 0,
       idleFrameIntervalMs: 33
     };
-    const urlParams = new URLSearchParams(window.location.search || "");
     const modeParam = String(urlParams.get("mode") || "desktop").toLowerCase();
     const viewMode = modeParam === "mobile" ? "mobile" : "desktop";
     const MODE_OVERRIDES = {
