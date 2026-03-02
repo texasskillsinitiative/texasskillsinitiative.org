@@ -1994,6 +1994,11 @@
 - Actions taken: Disabled top-left globe diagnostics HUD by default in overview/stable globe runtime files by switching HUD visibility gate to opt-in only (`?hud=1`).
 - Troubleshooting suggestions: Hard refresh the overview page; if diagnostics still appear, confirm the iframe URL does not include `hud=1`.
 - Resolutions/outcomes: Top-left diagnostic panel is removed from normal site loads while preserving optional debug access.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-03-02 02:29:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed clean-close protocol for this packet, verified repository state, and checkpointed overview runtime alignment + HUD default-off behavior in commit `fb87dd4`.
+- Troubleshooting suggestions: If any user still sees stale overview behavior, force a hard refresh and confirm URL cache token `v=20260302d` is present.
+- Resolutions/outcomes: Session closed with clean worktree and reproducible source-of-truth globe startup behavior.
+- Commit hash(es): `fb87dd4`
+[AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-03-02 02:29:00 -06:00
 
 
