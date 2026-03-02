@@ -1,35 +1,63 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-opportunity">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Investment Inquiry | TSI</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
     <link rel="stylesheet" href="css/portal-expansion.css">
 </head>
 <body class="portalx-page portalx-page--investment">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb is-current" href="portal-investment.html" data-tsi-label-key="investment_inquiry">Investment Inquiry</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
     <main class="portalx-shell">
         <header class="portalx-hero portalx-hero--investment">
-            <p class="portalx-kicker">TSI Opportunity Desk</p>
-            <h1>Investment Inquiry</h1>
+            <p class="portalx-kicker" data-tsi-label-key="investment_inquiry">Investment Inquiry</p>
+            <h1 data-tsi-label-key="investment_inquiry">Investment Inquiry</h1>
             <p>This channel is intended for strategic capital partners exploring long-horizon corridor alignment.</p>
-            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
         </header>
 
         <section class="portalx-formwrap">
             <form id="portalIntakeForm" class="portalx-form" data-portal-route="investment">
-                <div class="portalx-row"><label for="fullName">Full name</label><input id="fullName" name="name" required autocomplete="name"></div>
-                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
-                <div class="portalx-row"><label for="firm">Firm / family office</label><input id="firm" name="org" required></div>
-                <div class="portalx-row"><label for="title">Title</label><input id="title" name="role"></div>
-                <div class="portalx-row"><label for="stage">Capital profile</label><input id="stage" name="investment_stage" placeholder="institutional, family office, strategic, etc." required></div>
-                <div class="portalx-row"><label for="range">Typical check range</label><input id="range" name="investment_check_range" required></div>
-                <div class="portalx-row"><label for="geo">Primary geography</label><input id="geo" name="investment_geography"></div>
-                <div class="portalx-row"><label for="focus">Strategic thesis</label><textarea id="focus" name="investment_focus" required></textarea></div>
-                <div class="portalx-row"><label for="timeline">Decision timeline</label><input id="timeline" name="investment_timeline"></div>
-                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
-                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
-                <div class="portalx-row"><label for="message">Context note</label><textarea id="message" name="message" required></textarea></div>
+                <div class="portalx-row"><label for="fullName">Full name</label><input id="fullName" name="name" required autocomplete="name" placeholder="Jane Doe"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email" placeholder="name@domain.com"></div>
+                <div class="portalx-row">
+                    <label for="investorType">Investor type</label>
+                    <select id="investorType" name="investment_investor_type" required>
+                        <option value="">Select investor type</option>
+                        <option value="institutional_fund">Institutional Fund</option>
+                        <option value="family_office">Family Office</option>
+                        <option value="corporate_strategic">Corporate Strategic</option>
+                        <option value="independent_investor">Independent Investor</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="portalx-row" id="investorTypeOtherRow" hidden>
+                    <label for="investorTypeOther">Other investor type</label>
+                    <input id="investorTypeOther" name="investment_investor_type_other" placeholder="Describe investor type" disabled>
+                </div>
+                <div class="portalx-row"><label for="title">Title</label><input id="title" name="role" placeholder="Managing Partner"></div>
+                <div class="portalx-row"><label for="stage">Capital profile</label><input id="stage" name="investment_stage" placeholder="Growth equity, infrastructure, strategic, etc." required></div>
+                <div class="portalx-row"><label for="range">Typical check range</label><input id="range" name="investment_check_range" placeholder="Example: 2M-10M" required></div>
+                <div class="portalx-row"><label for="geo">Primary geography</label><input id="geo" name="investment_geography" placeholder="Texas, U.S. South, global"></div>
+                <div class="portalx-row"><label for="focus">Strategic thesis</label><textarea id="focus" name="investment_focus" required placeholder="Share sectors, themes, and constraints."></textarea></div>
+                <div class="portalx-row"><label for="timeline">Decision timeline</label><input id="timeline" name="investment_timeline" placeholder="Example: 60-90 days"></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required placeholder="Austin"></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required placeholder="United States"></div>
+                <div class="portalx-row"><label for="message">Context note</label><textarea id="message" name="message" required placeholder="Add any context that helps triage this inquiry."></textarea></div>
                 <div class="portalx-row"><label for="portalFile">Supporting memo (optional)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"><span class="portalx-help">Optional. Max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
 
                 <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
@@ -42,5 +70,8 @@
         </section>
     </main>
     <script src="js/portal-intake-v2.js"></script>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
 </body>
 </html>
+

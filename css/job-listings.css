@@ -1,0 +1,463 @@
+/* Job Listings page styles (isolated) */
+.portalx-jobs-page {
+    --jb-panel-bg: color-mix(in srgb, var(--surface-2) 94%, var(--card-bg));
+    --jb-panel-border: color-mix(in srgb, var(--frame-border) 74%, transparent);
+    --jb-title-bg: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+    --jb-title-border: color-mix(in srgb, var(--frame-border) 70%, transparent);
+    --jb-input-bg: var(--surface-2);
+    --jb-input-border: color-mix(in srgb, var(--accent) 26%, var(--frame-border));
+    --jb-btn-bg: color-mix(in srgb, var(--accent) 62%, #0c1f3d);
+    --jb-btn-bg-hover: color-mix(in srgb, var(--accent) 72%, #0c1f3d);
+    --jb-btn-border: color-mix(in srgb, var(--accent) 34%, var(--frame-border));
+    --jb-btn-text: #f4f8ff;
+    --jb-note: var(--page-text-dim);
+}
+
+.portalx-jobs-page .jobboard-hero-separator {
+    width: 100%;
+    max-width: 420px;
+    height: 1px;
+    margin: 8px 0 10px;
+    background: color-mix(in srgb, var(--frame-border) 72%, transparent);
+}
+
+.portalx-jobs-page .jobboard-hero-intro {
+    margin: 0 0 6px;
+    color: var(--page-text-main);
+    line-height: 1.45;
+}
+
+.portalx-jobs-page .jobboard-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+    padding-top: 14px;
+}
+
+.portalx-jobs-page .jobboard-alert-link {
+    display: inline-block;
+    margin: 0 0 10px;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-size: 0.94rem;
+}
+
+.portalx-jobs-page .jobboard-topbar,
+.portalx-jobs-page .jobboard-refine {
+    border: 1px solid var(--jb-panel-border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(8, 18, 32, 0.08);
+    background: var(--jb-panel-bg);
+}
+
+.portalx-jobs-page .jobboard-topbar {
+    margin: 0 0 10px;
+    padding: 0;
+}
+
+.portalx-jobs-page .jobboard-topbar__form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    align-items: stretch;
+    padding: 8px 14px 12px;
+}
+
+.portalx-jobs-page .jobboard-panel-title {
+    margin: 0;
+    width: 100%;
+    min-height: 48px;
+    padding: 11px 14px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    border: none;
+    border-bottom: 1px solid var(--jb-title-border);
+    background:
+        linear-gradient(180deg,
+            color-mix(in srgb, var(--jb-title-bg) 90%, #ffffff) 0%,
+            var(--jb-title-bg) 100%);
+    box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--jb-title-border) 70%, transparent);
+    color: var(--page-text-main);
+    font-size: 1.02rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    text-transform: none;
+}
+
+.portalx-jobs-page .jobboard-topbar__field {
+    display: grid;
+    gap: 4px;
+    margin-top: 2px;
+}
+
+.portalx-jobs-page .jobboard-topbar__field span {
+    font-size: 0.74rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.portalx-jobs-page .jobboard-topbar input,
+.portalx-jobs-page .jobboard-topbar select,
+.portalx-jobs-page .jobboard-main__sort select {
+    min-height: 38px;
+    border: 1px solid var(--jb-input-border);
+    border-radius: 5px;
+    background: var(--jb-input-bg);
+    color: var(--page-text-main);
+    padding: 8px 10px;
+    font-size: 0.92rem;
+}
+
+.portalx-jobs-page .jobboard-topbar__submit,
+.portalx-jobs-page .jobboard-sidebar__clear {
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid var(--jb-btn-border);
+    border-radius: 6px;
+    background: var(--jb-btn-bg);
+    color: var(--jb-btn-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.portalx-jobs-page .jobboard-topbar__submit {
+    justify-self: start;
+}
+
+.portalx-jobs-page .jobboard-topbar__submit:hover,
+.portalx-jobs-page .jobboard-sidebar__clear:hover {
+    border-color: color-mix(in srgb, var(--accent) 54%, var(--frame-border));
+    background: var(--jb-btn-bg-hover);
+}
+
+.portalx-jobs-page .jobboard-topbar__note {
+    margin: 8px 0 0;
+    padding: 0 14px 10px;
+    font-size: 0.8rem;
+    color: var(--jb-note);
+    line-height: 1.35;
+}
+
+.portalx-jobs-page .jobboard-refine {
+    margin: 0;
+}
+
+.portalx-jobs-page .jobboard-refine__group > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 11px 14px;
+}
+
+.portalx-jobs-page .jobboard-refine__group > summary::marker,
+.portalx-jobs-page .jobboard-refine__group > summary::-webkit-details-marker,
+.portalx-jobs-page .jobboard-refine__item > summary::-webkit-details-marker {
+    content: "";
+    display: none;
+}
+
+.portalx-jobs-page .jobboard-refine__body {
+    padding: 8px 14px 14px;
+}
+
+.portalx-jobs-page .jobboard-refine__item > summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    font-size: 0.94rem;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    color: var(--page-text-main);
+}
+
+.portalx-jobs-page .jobboard-refine__item > summary::before {
+    content: "+";
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--accent) 40%, var(--frame-bg));
+    color: var(--page-text-main);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.portalx-jobs-page .jobboard-refine__item[open] > summary::before {
+    content: "-";
+}
+
+.portalx-jobs-page .jobboard-refine__panel {
+    margin: 4px 0 8px 26px;
+    padding-bottom: 4px;
+}
+
+.portalx-jobs-page .jobboard-refine__empty {
+    margin-top: 4px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--surface-2) 92%, var(--card-bg));
+    border: 1px solid color-mix(in srgb, var(--frame-border) 72%, transparent);
+    color: var(--page-text-main);
+    font-size: 0.9rem;
+}
+
+.portalx-jobs-page .jobboard-sidebar__clear {
+    margin-top: 14px;
+    width: 100%;
+}
+
+.portalx-jobs-page .jobboard-main__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 12px;
+}
+
+.portalx-jobs-page .jobboard-main__count {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--page-text-main);
+}
+
+.portalx-jobs-page .jobboard-main__filtered {
+    margin: 6px 0 0;
+    color: var(--page-text-main);
+}
+
+.portalx-jobs-page .jobboard-main__filtered span {
+    border: 1px solid color-mix(in srgb, var(--accent) 48%, var(--frame-border));
+    border-radius: 20px;
+    padding: 2px 10px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+.portalx-jobs-page .jobboard-main__sort {
+    display: grid;
+    gap: 4px;
+    min-width: 150px;
+}
+
+.portalx-jobs-page .jobboard-main__sort span {
+    font-size: 0.84rem;
+    color: var(--page-text-main);
+}
+
+.portalx-jobs-page .jobboard-listings-slot {
+    margin-top: 12px;
+    margin-bottom: 4px;
+    min-height: 56px;
+    border-top: 1px solid color-mix(in srgb, var(--frame-border) 74%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.portalx-jobs-page .jobboard-listings-slot__note {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--page-text-main);
+    line-height: 1.4;
+}
+
+.portalx-jobs-page .jobboard-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid color-mix(in srgb, var(--frame-border) 74%, transparent);
+}
+
+.portalx-jobs-page .jobboard-list > li {
+    padding: 14px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--frame-border) 74%, transparent);
+}
+
+.portalx-jobs-page .jobboard-list > li.jobboard-list__empty {
+    border-bottom: none;
+}
+
+.portalx-jobs-page .jobboard-list__item {
+    display: grid;
+    gap: 6px;
+}
+
+.portalx-jobs-page .jobboard-list__title {
+    font-size: 1.04rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.portalx-jobs-page .jobboard-list__meta {
+    margin: 0;
+    color: var(--page-text-main);
+    font-size: 0.9rem;
+}
+
+.portalx-jobs-page .jobboard-list__empty {
+    font-size: 1rem;
+    color: var(--page-text-main);
+    min-height: 90px;
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    justify-items: center;
+    text-align: center;
+}
+
+.portalx-jobs-page .jobboard-list__empty p {
+    margin: 0;
+    line-height: 1.55;
+}
+
+.portalx-jobs-page .jobboard-actions__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 2px;
+    justify-content: center;
+}
+
+.portalx-jobs-page .jobboard-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    width: 190px;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--frame-border));
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent) 14%, #0a1938);
+    color: #eef5ff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    white-space: normal;
+}
+
+.portalx-jobs-page .jobboard-btn:hover {
+    border-color: color-mix(in srgb, var(--accent) 46%, var(--frame-border));
+    background: color-mix(in srgb, var(--accent) 20%, #0a1938);
+}
+
+.portalx-jobs-page .jobboard-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 14, 28, 0.48);
+    z-index: 1200;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+}
+
+.portalx-jobs-page .jobboard-modal[hidden] {
+    display: none;
+}
+
+.portalx-jobs-page .jobboard-modal__panel {
+    position: relative;
+    width: min(920px, 100%);
+    max-height: 86vh;
+    overflow: auto;
+    background: color-mix(in srgb, var(--card-bg) 99%, #ffffff);
+    border: 1px solid color-mix(in srgb, var(--frame-border) 68%, transparent);
+    padding: 16px 18px;
+    color: var(--page-text-main);
+}
+
+.portalx-jobs-page .jobboard-modal__panel h2 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+    color: #1f4a73;
+}
+
+.portalx-jobs-page .jobboard-modal__panel p {
+    margin: 0 0 8px;
+}
+
+.portalx-jobs-page .jobboard-modal__panel ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.portalx-jobs-page .jobboard-modal__close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: 1px solid color-mix(in srgb, var(--frame-border) 80%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card-bg) 92%, #ffffff);
+    color: var(--page-text-main);
+    cursor: pointer;
+}
+
+.portalx-jobs-page .jobboard-modal__close:hover {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
+}
+
+html[data-theme="dark"] .portalx-jobs-page {
+    --jb-panel-bg: color-mix(in srgb, #0f1b2e 86%, var(--surface-2));
+    --jb-panel-border: color-mix(in srgb, var(--accent) 32%, var(--frame-border));
+    --jb-title-bg: color-mix(in srgb, var(--accent) 24%, #0f1b2e);
+    --jb-title-border: color-mix(in srgb, var(--accent) 38%, var(--frame-border));
+    --jb-input-bg: color-mix(in srgb, #101a2c 88%, var(--surface-2));
+    --jb-input-border: color-mix(in srgb, var(--accent) 30%, var(--frame-border));
+}
+
+html[data-theme="dark"] .portalx-jobs-page .jobboard-topbar,
+html[data-theme="dark"] .portalx-jobs-page .jobboard-refine {
+    box-shadow: 0 3px 12px rgba(2, 6, 12, 0.34);
+}
+
+html[data-theme="dark"] .portalx-jobs-page .jobboard-refine__item > summary::before {
+    background: color-mix(in srgb, var(--accent) 58%, #0c1f3d);
+    color: #f4f8ff;
+}
+
+@media (max-width: 900px) {
+    .portalx-jobs-page .jobboard-layout {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .portalx-jobs-page .jobboard-panel-title {
+        font-size: 1.1rem;
+    }
+
+    .portalx-jobs-page .jobboard-main__meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .portalx-jobs-page .jobboard-modal__panel {
+        padding: 14px;
+    }
+}

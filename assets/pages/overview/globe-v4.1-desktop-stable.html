@@ -21,6 +21,7 @@
       user-select: none;
       position: relative;
     }
+    #bg-canvas,
     #globe-base,
     #globe-overlay,
     #countries-canvas {
@@ -42,7 +43,6 @@
     #globe-stage.is-interactive {
       pointer-events: auto;
     }
-    #globe-stage.is-draw-mode,
     #globe-stage.is-draw-mode #doodle-canvas {
       cursor: crosshair;
     }
@@ -77,6 +77,30 @@
     .globe-play-controls .row:last-child {
       margin-bottom: 0;
     }
+    .globe-play-controls .row--override-add {
+      flex-wrap: nowrap;
+    }
+    .globe-play-controls .row--override-add input[type="text"] {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .globe-play-controls .section-divider {
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.18);
+      margin: 8px 0;
+    }
+    .globe-play-controls .row--section-title {
+      margin-bottom: 4px;
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.82;
+    }
+    .globe-play-controls .row label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
     .globe-play-controls button {
       border: 1px solid rgba(255, 255, 255, 0.25);
       background: rgba(255, 255, 255, 0.08);
@@ -94,6 +118,137 @@
       width: 120px;
       accent-color: #7df9ff;
     }
+    .globe-play-controls input[type="color"] {
+      width: 28px;
+      height: 22px;
+      padding: 0;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .globe-play-controls .color-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      opacity: 0.92;
+    }
+    .globe-play-controls select,
+    .globe-play-controls input[type="text"] {
+      min-height: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      border-radius: 7px;
+      background: rgba(8, 16, 28, 0.56);
+      color: inherit;
+      font: inherit;
+      padding: 3px 8px;
+      min-width: 120px;
+    }
+    .globe-play-controls .diag-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 10px;
+      width: 100%;
+      font-size: 11px;
+      opacity: 0.9;
+    }
+    .globe-play-controls .diag-grid strong {
+      font-weight: 700;
+      color: #7df9ff;
+    }
+    .globe-play-controls .layer-order-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      display: grid;
+      gap: 5px;
+    }
+    .globe-play-controls .layer-order-item {
+      --layer-accent: #7df9ff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 1px solid color-mix(in srgb, var(--layer-accent) 34%, rgba(255, 255, 255, 0.18));
+      border-radius: 8px;
+      background: color-mix(in srgb, var(--layer-accent) 14%, rgba(255, 255, 255, 0.04));
+      padding: 4px 7px;
+      cursor: grab;
+      user-select: none;
+    }
+    .globe-play-controls .layer-order-item.is-off {
+      opacity: 0.72;
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+    .globe-play-controls .layer-order-item .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+    }
+    .globe-play-controls .layer-order-item.dragging {
+      opacity: 0.48;
+      border-color: rgba(125, 249, 255, 0.9);
+    }
+    .globe-play-controls .layer-order-item .controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+    .globe-play-controls .layer-order-item .layer-color-picker {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.34);
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .globe-play-controls .layer-order-item .layer-color-picker::-webkit-color-swatch-wrapper {
+      padding: 0;
+      border-radius: 999px;
+    }
+    .globe-play-controls .layer-order-item .layer-color-picker::-webkit-color-swatch {
+      border: none;
+      border-radius: 999px;
+    }
+    .globe-play-controls .layer-order-item .layer-color-picker::-moz-color-swatch {
+      border: none;
+      border-radius: 999px;
+    }
+    .globe-play-controls .layer-order-item .remove {
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.06);
+      color: inherit;
+      font: 10px/1 "JetBrains Mono", monospace;
+      cursor: pointer;
+      padding: 0;
+    }
+    .globe-play-controls .layer-order-item .remove:hover {
+      border-color: rgba(255, 120, 120, 0.8);
+      color: #ff9b9b;
+    }
+    .globe-play-controls .country-status {
+      font-size: 11px;
+      opacity: 0.84;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .globe-play-controls .hint {
       opacity: 0.84;
       font-size: 11px;
@@ -103,15 +258,17 @@
 </head>
 <body>
   <div id="globe-stage" aria-hidden="true">
+    <canvas id="bg-canvas"></canvas>
     <svg id="globe-base"></svg>
     <canvas id="countries-canvas"></canvas>
     <canvas id="doodle-canvas"></canvas>
     <svg id="globe-overlay"></svg>
   </div>
   <aside class="globe-play-controls" id="globePlayControls" aria-hidden="true">
+    <div class="row row--section-title">Draw + View</div>
     <div class="row">
-      <button type="button" id="playPauseBtn">Pause Spin</button>
       <button type="button" id="drawToggleBtn">Draw</button>
+      <label class="color-item">Draw <input type="color" id="drawColorPicker" value="#7df9ff" /></label>
       <button type="button" id="clearDrawBtn">Clear Draw</button>
     </div>
     <div class="row">
@@ -120,10 +277,55 @@
       <button type="button" id="resetViewBtn">Reset View</button>
       <button type="button" id="randomJumpBtn">Random Jump</button>
     </div>
+    <hr class="section-divider" />
+    <div class="row row--section-title">Motion</div>
     <div class="row">
       <span>Spin</span>
       <input type="range" id="spinSpeedRange" min="-60" max="60" step="1" value="-20" />
       <span id="spinSpeedLabel">-20 deg/s</span>
+      <button type="button" id="playPauseBtn">Pause Spin</button>
+    </div>
+    <div class="row">
+      <span>Latitude</span>
+      <input type="range" id="latFocusRange" min="-70" max="70" step="1" value="31" />
+      <span id="latFocusLabel">31 deg</span>
+    </div>
+    <hr class="section-divider" />
+    <div class="row row--section-title">Layers</div>
+    <div class="row">
+      <ul class="layer-order-list" id="layerOrderList" aria-label="Layer order"></ul>
+    </div>
+    <hr class="section-divider" />
+    <div class="row row--override-add">
+      <input type="text" id="countryOverrideName" placeholder="Country name" />
+      <input type="color" id="countryOverrideColor" value="#ffd166" />
+      <button type="button" id="countryOverrideAddBtn">Add Override</button>
+    </div>
+    <div class="row">
+      <span class="country-status" id="countryOverrideStatus">No overrides yet.</span>
+    </div>
+    <hr class="section-divider" />
+    <div class="row row--section-title">Background</div>
+    <div class="row">
+      <label class="color-item">BG <input type="color" id="backgroundColorPicker" value="#0b1220" /></label>
+      <label><input type="checkbox" id="starsEnabledChk" /> Stars</label>
+      <label class="color-item">Star <input type="color" id="starsColorPicker" value="#cfe8ff" /></label>
+      <label><input type="checkbox" id="starsTwinkleChk" /> Twinkle</label>
+    </div>
+    <hr class="section-divider" />
+    <div class="row row--section-title">Source + Settings</div>
+    <div class="row">
+      <label>Detail
+        <select id="detailSourceSelect">
+          <option value="standard">Standard</option>
+          <option value="high">High Detail</option>
+        </select>
+      </label>
+      <button type="button" id="applyDetailBtn">Apply Detail</button>
+    </div>
+    <div class="row">
+      <button type="button" id="saveSettingsBtn">Save Lab Settings</button>
+      <button type="button" id="loadSettingsBtn">Load Lab Settings</button>
     </div>
     <div class="hint">Drag to rotate. Wheel to zoom. Draw mode lets you sketch on the globe.</div>
   </aside>
@@ -212,6 +414,11 @@
       countriesFill: "none",
       countriesStroke: "rgba(255,255,255,0.52)",
       countriesStrokeWidth: 1.35,
+      statesStroke: "rgba(255,255,255,0.32)",
+      statesStrokeWidth: 0.9,
+      starsEnabled: false,
+      starsColor: "rgba(207,232,255,0.86)",
+      starsTwinkle: false,
       texasFill: "rgba(125,249,255,0.05)",
       texasStroke: "rgba(125,249,255,1)",
       texasStrokeWidth: 1.2,
@@ -274,7 +481,7 @@
       ,
       // Screen-space speed compensation for lon rotation.
       // 0 = no compensation, 1 = full compensation (divide by zoom).
-      lonSpeedZoomCompensation: 1.5,
+      lonSpeedZoomCompensation: 0,
       // Render pacing
       movingFrameIntervalMs: 0,
       idleFrameIntervalMs: 33
@@ -285,6 +492,9 @@
     const themeParam = String(urlParams.get("theme") || "dark").toLowerCase();
     const viewTheme = themeParam === "light" ? "light" : "dark";
     const interactiveEnabled = String(urlParams.get("interactive") || "0") === "1";
+    const detailParam = String(urlParams.get("detail") || "standard").toLowerCase() === "high"
+      ? "high"
+      : "standard";
     const MODE_OVERRIDES = {
       desktop: {},
       mobile: {
@@ -314,14 +524,86 @@
         landFill: "rgba(15,23,42,0.04)",
         landStroke: "rgba(51,65,85,0.46)",
         countriesStroke: "rgba(15,23,42,0.58)",
+        statesStroke: "rgba(51,65,85,0.46)",
         texasFill: "rgba(14,165,233,0.12)",
         texasStroke: "rgba(2,132,199,0.95)"
       }
     };
     const CFG = { ...BASE_CFG, ...(MODE_OVERRIDES[viewMode] || {}), ...(THEME_OVERRIDES[viewTheme] || {}) };
+    const ENABLE = {
+      sphere: Boolean(CFG.enableSphere),
+      texas: Boolean(CFG.enableTexas),
+      graticule: Boolean(CFG.enableGraticule),
+      land: Boolean(CFG.enableLand || interactiveEnabled),
+      countries: Boolean(CFG.enableCountries),
+      states: Boolean(interactiveEnabled)
+    };
     const globeBg = String(CFG.backgroundColor || "#0b1220");
-    document.documentElement.style.background = globeBg;
-    document.body.style.background = globeBg;
+    const parseRgb = (raw) => {
+      const clampAlpha = (v) => Math.max(0, Math.min(1, v));
+      const input = String(raw || "").trim();
+      if (!input) return null;
+      const rgbaMatch = input.match(/^rgba?\(([^)]+)\)$/i);
+      if (rgbaMatch) {
+        const parts = rgbaMatch[1].split(",").map((part) => part.trim());
+        if (parts.length < 3) return null;
+        const r = Number(parts[0]);
+        const g = Number(parts[1]);
+        const b = Number(parts[2]);
+        const a = (parts.length >= 4) ? Number(parts[3]) : 1;
+        if (![r, g, b].every(Number.isFinite)) return null;
+        return { r, g, b, a: Number.isFinite(a) ? clampAlpha(a) : 1 };
+      }
+      const hexMatch = input.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hexMatch) {
+        const hex = hexMatch[1];
+        if (hex.length === 3) {
+          const r = Number.parseInt(hex[0] + hex[0], 16);
+          const g = Number.parseInt(hex[1] + hex[1], 16);
+          const b = Number.parseInt(hex[2] + hex[2], 16);
+          return { r, g, b, a: 1 };
+        }
+        const r = Number.parseInt(hex.slice(0, 2), 16);
+        const g = Number.parseInt(hex.slice(2, 4), 16);
+        const b = Number.parseInt(hex.slice(4, 6), 16);
+        return { r, g, b, a: 1 };
+      }
+      return null;
+    };
+    const blendColorOver = (fgRaw, bgRaw) => {
+      const clampAlpha = (v) => Math.max(0, Math.min(1, v));
+      const fg = parseRgb(fgRaw);
+      const bg = parseRgb(bgRaw);
+      if (!fg || !bg) return "";
+      const alpha = clampAlpha(Number.isFinite(fg.a) ? fg.a : 1);
+      const r = Math.round((fg.r * alpha) + (bg.r * (1 - alpha)));
+      const g = Math.round((fg.g * alpha) + (bg.g * (1 - alpha)));
+      const b = Math.round((fg.b * alpha) + (bg.b * (1 - alpha)));
+      return `rgb(${r}, ${g}, ${b})`;
+    };
+    const colorToHex = (raw, fallback = "#7df9ff") => {
+      const parsed = parseRgb(raw);
+      if (!parsed) return fallback;
+      const toHex = (n) => {
+        const v = Math.max(0, Math.min(255, Math.round(Number(n) || 0)));
+        return v.toString(16).padStart(2, "0");
+      };
+      return `#${toHex(parsed.r)}${toHex(parsed.g)}${toHex(parsed.b)}`;
+    };
+    const hexToRgba = (hex, alpha = 1) => {
+      const parsed = parseRgb(hex);
+      if (!parsed) return hex;
+      const a = Math.max(0, Math.min(1, Number(alpha) || 0));
+      return `rgba(${parsed.r},${parsed.g},${parsed.b},${a})`;
+    };
+    const setDocumentBackground = (color) => {
+      const next = String(color || globeBg);
+      document.documentElement.style.background = next;
+      document.body.style.background = next;
+    };
+    const texasBaseBg = blendColorOver(CFG.texasFill, globeBg) || blendColorOver(CFG.texasStroke, globeBg) || globeBg;
+    let settledToGlobeBg = false;
+    setDocumentBackground(texasBaseBg);
 
     const clamp01 = (v) => Math.max(0, Math.min(1, v));
     const lerp = (a, b, t) => a + ((b - a) * t);
@@ -332,6 +614,60 @@
       const m = String(mode || "").toLowerCase();
       if (m === "border" || m === "fill" || m === "both" || m === "none") return m;
       return "border";
+    };
+    const normalizeCountryKey = (name) => String(name || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, " ");
+    const readCountryName = (feature) => {
+      const props = (feature && feature.properties) ? feature.properties : {};
+      return String(
+        props.name || props.NAME || props.admin || props.ADMIN || props.geounit || props.GEOUNIT || ""
+      ).trim();
+    };
+    const getCurrentSettings = () => ({
+      spinSpeedDegPerSec,
+      spinEnabled,
+      userLonOffset,
+      userLatOffset,
+      userZoomOffset,
+      layerVisibility: { ...layerVisibility },
+      layerOrder: layerOrder.slice(),
+      overrideLayerOrder: overrideLayerOrder.slice(),
+      background: {
+        color: backgroundColorHex,
+        starsEnabled,
+        starsColor: starsColorHex,
+        starsTwinkle
+      },
+      colors: {
+        sphereStroke: CFG.sphereStroke,
+        graticuleStroke: CFG.graticuleStroke,
+        landStroke: CFG.landStroke,
+        countriesStroke: CFG.countriesStroke,
+        statesStroke: CFG.statesStroke,
+        texasStroke: CFG.texasStroke,
+        drawStrokeColor
+      },
+      countryOverrides: Array.from(countryOverrides.values()).map((entry) => ({ ...entry }))
+    });
+    const saveSettings = () => {
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(getCurrentSettings()));
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+    const readSavedSettings = () => {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch (_) {
+        return null;
+      }
     };
     const parseIndexOrder = (csv) => String(csv || "")
       .split(",")
@@ -438,6 +774,8 @@
 
     const globeStage = document.getElementById("globe-stage");
     const playControls = document.getElementById("globePlayControls");
+    const bgCanvas = document.getElementById("bg-canvas");
+    const bgCtx = bgCanvas.getContext("2d");
     const svgBase = d3.select("#globe-base");
     const svgOverlay = d3.select("#globe-overlay");
     const countriesCanvas = document.getElementById("countries-canvas");
@@ -482,6 +820,13 @@
       .attr("stroke-width", CFG.texasStrokeWidth)
       .style("opacity", 0);
 
+    const statesPath = svgOverlay.append("path")
+      .attr("fill", "none")
+      .attr("stroke", CFG.statesStroke)
+      .attr("stroke-width", CFG.statesStrokeWidth)
+      .style("display", "none")
+      .style("opacity", 0);
+
     const applyRenderMode = (pathSel, mode, fillColor, strokeColor, strokeWidth) => {
       const m = normalizeRenderMode(mode);
       if (m === "none") {
@@ -505,6 +850,13 @@
     applyRenderMode(texasPath, CFG.texasRenderMode, CFG.texasFill, CFG.texasStroke, CFG.texasStrokeWidth);
 
     const getAtlasUrls = (sourceKey) => {
+      if (sourceKey === "high") {
+        return {
+          land: "https://cdn.jsdelivr.net/npm/world-atlas@2/land-50m.json",
+          countries: "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json",
+          states: "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json"
+        };
+      }
       if (sourceKey === "cdn") {
         return {
           land: "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json",
@@ -519,16 +871,28 @@
       };
     };
 
-    const dataSource = urlParams.get("source") === "cdn" ? "cdn" : "local";
+    const dataSource = detailParam === "high"
+      ? "high"
+      : (urlParams.get("source") === "cdn" ? "cdn" : "local");
+    const getSourceFallbackChain = (sourceKey) => {
+      if (sourceKey === "high") return ["high", "cdn", "local"];
+      if (sourceKey === "cdn") return ["cdn", "local"];
+      return ["local", "cdn"];
+    };
 
     const loadJsonWithFallback = async (pathKey) => {
-      const primary = getAtlasUrls(dataSource);
-      try {
-        return await d3.json(primary[pathKey]);
-      } catch (_) {
-        const fallback = getAtlasUrls(dataSource === "cdn" ? "local" : "cdn");
-        return d3.json(fallback[pathKey]);
+      const chain = getSourceFallbackChain(dataSource);
+      let lastErr = null;
+      for (const sourceKey of chain) {
+        try {
+          const urls = getAtlasUrls(sourceKey);
+          const data = await d3.json(urls[pathKey]);
+          if (data) return data;
+        } catch (err) {
+          lastErr = err;
+        }
       }
+      throw lastErr || new Error(`atlas_load_failed:${pathKey}`);
     };
     const setViewport = () => {
       width = Math.max(1, window.innerWidth || document.documentElement.clientWidth || 1);
@@ -536,14 +900,51 @@
       r = Math.min(width, height) / 2;
       svgBase.attr("width", width).attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
       svgOverlay.attr("width", width).attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
+      bgCanvas.width = Math.max(1, Math.floor(width));
+      bgCanvas.height = Math.max(1, Math.floor(height));
       countriesCanvas.width = Math.max(1, Math.floor(width));
       countriesCanvas.height = Math.max(1, Math.floor(height));
       doodleCanvas.width = Math.max(1, Math.floor(width));
       doodleCanvas.height = Math.max(1, Math.floor(height));
       projection.translate([width / 2, height / 2]).scale(baseScale());
     };
+    const rebuildStarsField = () => {
+      const area = Math.max(1, width * height);
+      const count = Math.max(40, Math.min(340, Math.round(area / 18000)));
+      starsField = Array.from({ length: count }).map(() => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 0.4 + (Math.random() * 1.2),
+        a: 0.2 + (Math.random() * 0.8),
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.25 + (Math.random() * 1.1)
+      }));
+    };
+    const renderBackgroundCanvas = (nowMs = performance.now()) => {
+      if (!bgCtx) return;
+      bgCtx.save();
+      bgCtx.globalCompositeOperation = "source-over";
+      bgCtx.globalAlpha = 1;
+      bgCtx.fillStyle = backgroundColorHex;
+      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+      if (starsEnabled && starsField.length) {
+        const starRgb = parseRgb(starsColorHex) || { r: 207, g: 232, b: 255, a: 1 };
+        starsField.forEach((star) => {
+          const twinkleFactor = starsTwinkle
+            ? (0.38 + (0.62 * (0.5 + (0.5 * Math.sin((nowMs * 0.001 * star.speed) + star.phase)))))
+            : 1;
+          bgCtx.globalAlpha = clamp01(star.a * twinkleFactor);
+          bgCtx.beginPath();
+          bgCtx.fillStyle = `rgb(${starRgb.r},${starRgb.g},${starRgb.b})`;
+          bgCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+          bgCtx.fill();
+        });
+      }
+      bgCtx.restore();
+    };
 
     let texas = { type: "Feature", geometry: null };
+    let usStates = null;
     let land = null;
     let countries = null;
     let countriesGroups = [];
@@ -570,6 +971,59 @@
     let userZoomOffset = 0;
     let spinEnabled = true;
     let spinSpeedDegPerSec = Number(CFG.persistentLonDegPerSec || 0);
+    let drawStrokeColor = viewTheme === "light"
+      ? "rgba(2,132,199,0.9)"
+      : "rgba(125,249,255,0.92)";
+    const layerVisibility = {
+      sphere: ENABLE.sphere,
+      graticule: ENABLE.graticule,
+      land: ENABLE.land,
+      countries: ENABLE.countries,
+      states: ENABLE.states,
+      texas: ENABLE.texas
+    };
+    const SETTINGS_KEY = "tsi_globe_lab_settings_v1";
+    const defaultLayerOrder = ["sphere", "graticule", "land", "countries", "states", "texas"];
+    const layerLabels = {
+      sphere: "Globe",
+      graticule: "Lat/Lon",
+      land: "Land",
+      countries: "Countries",
+      states: "States",
+      texas: "Texas"
+    };
+    let layerOrder = defaultLayerOrder.slice();
+    const countryOverrides = new Map();
+    let overrideLayerOrder = [];
+    let backgroundColorHex = String(CFG.backgroundColor || "#0b1220");
+    let starsEnabled = Boolean(CFG.starsEnabled);
+    let starsColorHex = colorToHex(CFG.starsColor || "#cfe8ff", "#cfe8ff");
+    let starsTwinkle = Boolean(CFG.starsTwinkle);
+    let starsField = [];
+    let countryFeatureByKey = new Map();
+    let diagState = {
+      lastTs: performance.now(),
+      frameCount: 0,
+      fps: 0,
+      renderMs: 0
+    };
+    let diagnosticsUi = null;
+    let isPointerHoldOverride = false;
+    if (interactiveEnabled) {
+      defaultLayerOrder.forEach((key) => {
+        layerVisibility[key] = true;
+      });
+    }
+    let dragVelocityLon = 0;
+    let dragVelocityLat = 0;
+    let inertiaActive = false;
+    const INERTIA_DAMPING = 4.8;
+    const INERTIA_MIN_SPEED = 0.15;
+    const RETURN_TO_SPIN_EASING = 2.4;
+    const doodleStrokes = [];
+    let activeDoodleStroke = null;
+    let refreshLatUi = null;
+    let isUserDragging = false;
     const getLonSpeedDegPerSec = () => (spinEnabled ? spinSpeedDegPerSec : 0);
     const getViewZoom = () => Math.max(0.05, timelineState.values.zoom + persistentZoomOffset + userZoomOffset);
 
@@ -596,10 +1050,10 @@
       ? "groups"
       : "single";
 
-    const countriesFetchAtResolved = (!CFG.enableLand && CFG.countriesFetchAt === CFG.landFadeCompleteMarker)
+    const countriesFetchAtResolved = (!ENABLE.land && CFG.countriesFetchAt === CFG.landFadeCompleteMarker)
       ? CFG.introCompleteMarker
       : CFG.countriesFetchAt;
-    const countriesFadeAtResolved = (!CFG.enableLand && CFG.countriesFadeAt === CFG.landFadeCompleteMarker)
+    const countriesFadeAtResolved = (!ENABLE.land && CFG.countriesFadeAt === CFG.landFadeCompleteMarker)
       ? CFG.countriesReadyMarker
       : CFG.countriesFadeAt;
     const TIMELINE = [];
@@ -614,7 +1068,7 @@
       ease: CFG.introZoomEase,
       completeMarker: CFG.introCompleteMarker
     });
-    if (CFG.enableTexas) {
+    if (ENABLE.texas) {
       TIMELINE.push({
         id: CFG.texasRevealId,
         type: "tween",
@@ -626,7 +1080,7 @@
         ease: CFG.texasRevealEase
       });
     }
-    if (CFG.enableGraticule) {
+    if (ENABLE.graticule) {
       TIMELINE.push({
         id: CFG.graticuleRevealId,
         type: "tween",
@@ -638,7 +1092,7 @@
         ease: CFG.graticuleRevealEase
       });
     }
-    if (CFG.enableLand) {
+    if (ENABLE.land) {
       TIMELINE.push({
         id: CFG.landFetchId,
         type: "fetch",
@@ -658,7 +1112,7 @@
         completeMarker: CFG.landFadeCompleteMarker
       });
     }
-    if (CFG.enableCountries) {
+    if (ENABLE.countries) {
       TIMELINE.push({
         id: CFG.countriesFetchId,
         type: "fetch",
@@ -832,6 +1286,14 @@
         } else if (step.resource === "countries") {
           const atlas = await loadJsonWithFallback("countries");
           countries = topojson.feature(atlas, atlas.objects.countries);
+          countryFeatureByKey = new Map();
+          if (countries && Array.isArray(countries.features)) {
+            countries.features.forEach((feature) => {
+              const name = readCountryName(feature);
+              if (!name) return;
+              countryFeatureByKey.set(normalizeCountryKey(name), feature);
+            });
+          }
           if (countriesRevealMode === "groups" && countries && Array.isArray(countries.features)) {
             rebuildCountriesGroups(countries.features.slice());
           }
@@ -881,7 +1343,7 @@
     };
 
     const updateCountriesGroupFade = (elapsedMs) => {
-      if (!CFG.enableCountries || countriesRevealMode !== "groups" || countriesGroups.length === 0) return;
+      if (!ENABLE.countries || countriesRevealMode !== "groups" || countriesGroups.length === 0) return;
       if (countriesRevealComplete) return;
       const startMs = timelineState.markers[CFG.countriesReadyMarker];
       if (startMs == null) return;
@@ -967,16 +1429,139 @@
       }
     };
 
+    const renderDoodles = () => {
+      doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
+      if (!doodleStrokes.length) return;
+      doodleCtx.save();
+      doodleCtx.lineCap = "round";
+      doodleCtx.lineJoin = "round";
+      doodleCtx.lineWidth = 2;
+      doodleCtx.strokeStyle = drawStrokeColor;
+
+      doodleStrokes.forEach((stroke) => {
+        if (!stroke || !stroke.length) return;
+        let drewPoint = false;
+        doodleCtx.beginPath();
+        for (let i = 0; i < stroke.length; i += 1) {
+          const point = projection(stroke[i]);
+          if (!point || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
+            drewPoint = false;
+            continue;
+          }
+          if (!drewPoint) {
+            doodleCtx.moveTo(point[0], point[1]);
+            drewPoint = true;
+          } else {
+            doodleCtx.lineTo(point[0], point[1]);
+          }
+        }
+        if (drewPoint) doodleCtx.stroke();
+      });
+      doodleCtx.restore();
+    };
+
+    const applyLayerOrder = () => {
+      const toRank = (key) => {
+        const idx = layerOrder.indexOf(key);
+        return idx < 0 ? 999 : idx;
+      };
+      const baseLayers = [
+        { key: "sphere", node: sphere.node() },
+        { key: "graticule", node: graticulePath.node() },
+        { key: "land", node: landPath.node() }
+      ].sort((a, b) => toRank(a.key) - toRank(b.key));
+      baseLayers.forEach((entry) => {
+        if (entry.node && entry.node.parentNode) entry.node.parentNode.appendChild(entry.node);
+      });
+
+      const overlayLayers = [
+        { key: "states", node: statesPath.node() },
+        { key: "texas", node: texasPath.node() }
+      ].sort((a, b) => toRank(a.key) - toRank(b.key));
+      overlayLayers.forEach((entry) => {
+        if (entry.node && entry.node.parentNode) entry.node.parentNode.appendChild(entry.node);
+      });
+
+      const minRank = (keys) => keys.reduce((acc, key) => Math.min(acc, toRank(key)), 999);
+      svgBase.style("z-index", String(minRank(["sphere", "graticule", "land"])));
+      countriesCanvas.style.zIndex = String(toRank("countries"));
+      svgOverlay.style("z-index", String(minRank(["states", "texas"])));
+      doodleCanvas.style.zIndex = "30";
+    };
+
+    const drawCountriesCanvas = () => {
+      countriesCtx.clearRect(0, 0, countriesCanvas.width, countriesCanvas.height);
+      if (!(ENABLE.countries && layerVisibility.countries && normalizeRenderMode(CFG.countriesRenderMode) !== "none" && countries)) {
+        lastCountriesStaticRenderKey = "";
+        return;
+      }
+      const hiddenCountryKeys = new Set(
+        Array.from(countryOverrides.values())
+          .filter((entry) => entry && entry.visible === false)
+          .map((entry) => normalizeCountryKey(entry.name))
+      );
+      const mode = normalizeRenderMode(CFG.countriesRenderMode);
+      const doFill = mode === "fill" || mode === "both";
+      const doStroke = mode === "border" || mode === "both";
+      const canvasPath = d3.geoPath(projection, countriesCtx);
+
+      countriesCtx.save();
+      countriesCtx.lineWidth = CFG.countriesStrokeWidth || 1;
+      countriesCtx.strokeStyle = CFG.countriesStroke;
+      countriesCtx.fillStyle = CFG.countriesFill;
+      const drawCollection = (collection, alpha) => {
+        if (!collection || !Array.isArray(collection.features) || collection.features.length === 0) return;
+        const filtered = collection.features.filter((feature) => {
+          const key = normalizeCountryKey(readCountryName(feature));
+          return !hiddenCountryKeys.has(key);
+        });
+        if (!filtered.length) return;
+        countriesCtx.globalAlpha = clamp01(alpha);
+        countriesCtx.beginPath();
+        canvasPath({ type: "FeatureCollection", features: filtered });
+        if (doFill) countriesCtx.fill();
+        if (doStroke) countriesCtx.stroke();
+      };
+      if (countriesRevealMode === "groups" && countriesGroups.length > 0 && !countriesFlattened) {
+        for (let i = 0; i < countriesGroups.length; i += 1) {
+          const alpha = clamp01(timelineState.values.countriesGroupOpacities[i] || 0);
+          if (alpha <= 0) continue;
+          drawCollection(countriesGroups[i], alpha);
+        }
+      } else {
+        drawCollection(countries, clamp01(timelineState.values.countriesOpacity));
+      }
+
+      // Draw color overrides on top of default countries render.
+      countryOverrides.forEach((entry) => {
+        if (!entry || entry.visible === false) return;
+        const key = normalizeCountryKey(entry.name);
+        const feature = countryFeatureByKey.get(key);
+        if (!feature) return;
+        countriesCtx.globalAlpha = 1;
+        countriesCtx.strokeStyle = entry.color || CFG.countriesStroke;
+        countriesCtx.fillStyle = "rgba(0,0,0,0)";
+        countriesCtx.lineWidth = Math.max(1.2, Number(CFG.countriesStrokeWidth || 1) + 0.4);
+        countriesCtx.beginPath();
+        canvasPath(feature);
+        countriesCtx.stroke();
+      });
+      countriesCtx.restore();
+    };
+
     const render = () => {
+      const renderStart = performance.now();
+      renderBackgroundCanvas(renderStart);
       const drawPaths = projectionDirty;
-      if (CFG.enableSphere && normalizeRenderMode(CFG.sphereRenderMode) !== "none") {
+      applyLayerOrder();
+      if (ENABLE.sphere && layerVisibility.sphere && normalizeRenderMode(CFG.sphereRenderMode) !== "none") {
         sphere.style("display", "");
         if (drawPaths) sphere.attr("d", path({ type: "Sphere" }));
       } else {
         sphere.style("display", "none");
       }
 
-      if (CFG.enableGraticule && normalizeRenderMode(CFG.graticuleRenderMode) !== "none" && timelineState.values.graticuleOpacity > 0) {
+      if (ENABLE.graticule && layerVisibility.graticule && normalizeRenderMode(CFG.graticuleRenderMode) !== "none" && timelineState.values.graticuleOpacity > 0) {
         graticulePath
           .style("display", "")
           .style("opacity", clamp01(timelineState.values.graticuleOpacity));
@@ -985,16 +1570,29 @@
         graticulePath.style("display", "none");
       }
 
-      if (CFG.enableTexas && normalizeRenderMode(CFG.texasRenderMode) !== "none") {
+      if (ENABLE.texas && layerVisibility.texas && normalizeRenderMode(CFG.texasRenderMode) !== "none") {
         texasPath
           .style("display", "")
           .style("opacity", clamp01(timelineState.values.texasOpacity));
         if (drawPaths) texasPath.attr("d", path(texas));
+        if (!settledToGlobeBg && timelineState.values.texasOpacity > 0.001) {
+          settledToGlobeBg = true;
+          setDocumentBackground(globeBg);
+        }
       } else {
         texasPath.style("display", "none");
       }
 
-      if (CFG.enableLand && normalizeRenderMode(CFG.landRenderMode) !== "none" && land) {
+      if (ENABLE.states && layerVisibility.states && usStates) {
+        statesPath
+          .style("display", "")
+          .style("opacity", 1);
+        if (drawPaths) statesPath.attr("d", path(usStates));
+      } else {
+        statesPath.style("display", "none");
+      }
+
+      if (ENABLE.land && layerVisibility.land && normalizeRenderMode(CFG.landRenderMode) !== "none" && land) {
         landPath
           .style("display", "")
           .style("opacity", clamp01(timelineState.values.landOpacity));
@@ -1003,51 +1601,22 @@
         landPath.style("display", "none");
       }
 
-      if (CFG.enableCountries && normalizeRenderMode(CFG.countriesRenderMode) !== "none" && countries) {
-        const mode = normalizeRenderMode(CFG.countriesRenderMode);
-        const doFill = mode === "fill" || mode === "both";
-        const doStroke = mode === "border" || mode === "both";
-        const drawCountriesCanvas = () => {
-          countriesCtx.clearRect(0, 0, countriesCanvas.width, countriesCanvas.height);
-          countriesCtx.save();
-          countriesCtx.lineWidth = CFG.countriesStrokeWidth || 1;
-          countriesCtx.strokeStyle = CFG.countriesStroke;
-          countriesCtx.fillStyle = CFG.countriesFill;
-          const canvasPath = d3.geoPath(projection, countriesCtx);
-          if (countriesRevealMode === "groups" && countriesGroups.length > 0 && !countriesFlattened) {
-            for (let i = 0; i < countriesGroups.length; i += 1) {
-              const alpha = clamp01(timelineState.values.countriesGroupOpacities[i] || 0);
-              if (alpha <= 0) continue;
-              countriesCtx.globalAlpha = alpha;
-              countriesCtx.beginPath();
-              canvasPath(countriesGroups[i]);
-              if (doFill) countriesCtx.fill();
-              if (doStroke) countriesCtx.stroke();
-            }
-          } else {
-            countriesCtx.globalAlpha = clamp01(timelineState.values.countriesOpacity);
-            countriesCtx.beginPath();
-            canvasPath(countries);
-            if (doFill) countriesCtx.fill();
-            if (doStroke) countriesCtx.stroke();
-          }
-          countriesCtx.restore();
-        };
-        if (drawPaths) {
-          drawCountriesCanvas();
-        } else {
-          const opacitiesKey = (countriesRevealMode === "groups" && countriesGroups.length > 0 && !countriesFlattened)
-            ? timelineState.values.countriesGroupOpacities.map((v) => clamp01(v || 0).toFixed(3)).join(",")
-            : clamp01(timelineState.values.countriesOpacity).toFixed(3);
-          const staticRenderKey = `${mode}|${CFG.countriesStrokeWidth}|${CFG.countriesStroke}|${CFG.countriesFill}|${opacitiesKey}|${countriesRevealMode}|${countriesFlattened}`;
-          if (staticRenderKey !== lastCountriesStaticRenderKey) {
-            lastCountriesStaticRenderKey = staticRenderKey;
-            drawCountriesCanvas();
-          }
-        }
+      if (drawPaths) {
+        drawCountriesCanvas();
       } else {
-        countriesCtx.clearRect(0, 0, countriesCanvas.width, countriesCanvas.height);
-        lastCountriesStaticRenderKey = "";
+        const mode = normalizeRenderMode(CFG.countriesRenderMode);
+        const opacitiesKey = (countriesRevealMode === "groups" && countriesGroups.length > 0 && !countriesFlattened)
+          ? timelineState.values.countriesGroupOpacities.map((v) => clamp01(v || 0).toFixed(3)).join(",")
+          : clamp01(timelineState.values.countriesOpacity).toFixed(3);
+        const overridesKey = Array.from(countryOverrides.values())
+          .map((entry) => `${normalizeCountryKey(entry.name)}:${entry.visible ? "1" : "0"}:${entry.color}`)
+          .sort()
+          .join("|");
+        const staticRenderKey = `${mode}|${CFG.countriesStrokeWidth}|${CFG.countriesStroke}|${CFG.countriesFill}|${opacitiesKey}|${countriesRevealMode}|${countriesFlattened}|${overridesKey}`;
+        if (staticRenderKey !== lastCountriesStaticRenderKey) {
+          lastCountriesStaticRenderKey = staticRenderKey;
+          drawCountriesCanvas();
+        }
       }
 
       if (countriesRevealMode === "groups" && countriesRevealComplete && !countriesFlattened) {
@@ -1056,6 +1625,8 @@
         timelineState.values.countriesOpacity = CFG.countriesFadeTo;
       }
 
+      renderDoodles();
+      diagState.renderMs = performance.now() - renderStart;
       projectionDirty = false;
     };
 
@@ -1067,6 +1638,7 @@
 
       const playPauseBtn = document.getElementById("playPauseBtn");
       const drawToggleBtn = document.getElementById("drawToggleBtn");
+      const drawColorPicker = document.getElementById("drawColorPicker");
       const clearDrawBtn = document.getElementById("clearDrawBtn");
       const zoomOutBtn = document.getElementById("zoomOutBtn");
       const zoomInBtn = document.getElementById("zoomInBtn");
@@ -1074,14 +1646,29 @@
       const randomJumpBtn = document.getElementById("randomJumpBtn");
       const spinSpeedRange = document.getElementById("spinSpeedRange");
       const spinSpeedLabel = document.getElementById("spinSpeedLabel");
+      const latFocusRange = document.getElementById("latFocusRange");
+      const latFocusLabel = document.getElementById("latFocusLabel");
+      const layerOrderList = document.getElementById("layerOrderList");
+      const countryOverrideName = document.getElementById("countryOverrideName");
+      const countryOverrideColor = document.getElementById("countryOverrideColor");
+      const countryOverrideAddBtn = document.getElementById("countryOverrideAddBtn");
+      const countryOverrideStatus = document.getElementById("countryOverrideStatus");
+      const backgroundColorPicker = document.getElementById("backgroundColorPicker");
+      const starsEnabledChk = document.getElementById("starsEnabledChk");
+      const starsColorPicker = document.getElementById("starsColorPicker");
+      const starsTwinkleChk = document.getElementById("starsTwinkleChk");
+      const detailSourceSelect = document.getElementById("detailSourceSelect");
+      const applyDetailBtn = document.getElementById("applyDetailBtn");
+      const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+      const loadSettingsBtn = document.getElementById("loadSettingsBtn");
+      diagnosticsUi = null;
 
       let drawMode = false;
       let drawing = false;
       let dragging = false;
       let lastX = 0;
       let lastY = 0;
-      let lastDrawX = 0;
-      let lastDrawY = 0;
+      let lastDragTs = 0;
 
       const setDrawMode = (active) => {
         drawMode = active === true;
@@ -1093,9 +1680,7 @@
         doodleCtx.lineCap = "round";
         doodleCtx.lineJoin = "round";
         doodleCtx.lineWidth = 2;
-        doodleCtx.strokeStyle = viewTheme === "light"
-          ? "rgba(2,132,199,0.9)"
-          : "rgba(125,249,255,0.92)";
+        doodleCtx.strokeStyle = drawStrokeColor;
       }
 
       const getLocalPoint = (event) => {
@@ -1106,11 +1691,227 @@
         };
       };
 
+      const updateSpinUi = () => {
+        if (playPauseBtn) {
+          playPauseBtn.textContent = spinEnabled ? "Pause Spin" : "Resume Spin";
+          playPauseBtn.classList.toggle("active", !spinEnabled);
+        }
+        if (spinSpeedRange) spinSpeedRange.value = String(Math.round(spinSpeedDegPerSec));
+        if (spinSpeedLabel) spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+      };
+      const updateLatFocusUi = () => {
+        const latTarget = Math.max(-88, Math.min(88, texLat + userLatOffset));
+        if (latFocusRange) latFocusRange.value = String(Math.round(latTarget));
+        if (latFocusLabel) latFocusLabel.textContent = `${Math.round(latTarget)} deg`;
+      };
+      const updateLayerToggleUi = () => {};
+      const getBaseLayerColorHex = (key) => {
+        if (key === "sphere") return colorToHex(CFG.sphereStroke);
+        if (key === "graticule") return colorToHex(CFG.graticuleStroke);
+        if (key === "land") return colorToHex(CFG.landStroke);
+        if (key === "countries") return colorToHex(CFG.countriesStroke);
+        if (key === "states") return colorToHex(CFG.statesStroke);
+        if (key === "texas") return colorToHex(CFG.texasStroke);
+        return "#7df9ff";
+      };
+      const setBaseLayerColorHex = (key, hex) => {
+        if (!hex) return;
+        if (key === "sphere") {
+          CFG.sphereStroke = hex;
+          sphere.attr("stroke", CFG.sphereStroke);
+          return;
+        }
+        if (key === "graticule") {
+          CFG.graticuleStroke = hex;
+          graticulePath.attr("stroke", CFG.graticuleStroke);
+          return;
+        }
+        if (key === "land") {
+          const currentAlpha = (parseRgb(CFG.landFill) || {}).a;
+          const fillAlpha = Number.isFinite(currentAlpha) ? currentAlpha : (viewTheme === "light" ? 0.04 : 0.03);
+          CFG.landStroke = hex;
+          CFG.landFill = hexToRgba(hex, fillAlpha);
+          landPath.attr("stroke", CFG.landStroke).attr("fill", CFG.landFill);
+          return;
+        }
+        if (key === "countries") {
+          CFG.countriesStroke = hex;
+          return;
+        }
+        if (key === "states") {
+          CFG.statesStroke = hex;
+          statesPath.attr("stroke", CFG.statesStroke);
+          return;
+        }
+        if (key === "texas") {
+          const currentAlpha = (parseRgb(CFG.texasFill) || {}).a;
+          const fillAlpha = Number.isFinite(currentAlpha) ? currentAlpha : (viewTheme === "light" ? 0.12 : 0.05);
+          CFG.texasStroke = hex;
+          CFG.texasFill = hexToRgba(hex, fillAlpha);
+          texasPath.attr("stroke", CFG.texasStroke).attr("fill", CFG.texasFill);
+        }
+      };
+      const updateLayerOrderUi = () => {
+        if (!layerOrderList) return;
+        layerOrderList.innerHTML = "";
+        layerOrder.forEach((key) => {
+          const accent = getBaseLayerColorHex(key);
+          const item = document.createElement("li");
+          item.className = "layer-order-item";
+          item.draggable = true;
+          item.dataset.layerType = "base";
+          item.dataset.layerKey = key;
+          item.style.setProperty("--layer-accent", accent);
+          if (!layerVisibility[key]) item.classList.add("is-off");
+          item.innerHTML = `
+            <span class="label">${layerLabels[key] || key}</span>
+            <span class="controls">
+              <input type="color" class="layer-color-picker" value="${accent}" aria-label="Set ${layerLabels[key] || key} color" />
+            </span>
+          `;
+          layerOrderList.appendChild(item);
+        });
+        const orderedOverrideKeys = overrideLayerOrder.filter((key) => countryOverrides.has(key));
+        Array.from(countryOverrides.keys()).forEach((key) => {
+          if (!orderedOverrideKeys.includes(key)) orderedOverrideKeys.push(key);
+        });
+        overrideLayerOrder = orderedOverrideKeys.slice();
+        orderedOverrideKeys.forEach((key) => {
+          const entry = countryOverrides.get(key);
+          if (!entry) return;
+            const accent = colorToHex(entry.color, "#ffd166");
+            const item = document.createElement("li");
+            item.className = "layer-order-item";
+            item.draggable = true;
+            item.dataset.layerType = "override";
+            item.dataset.layerKey = key;
+            item.style.setProperty("--layer-accent", accent);
+            if (!entry.visible) item.classList.add("is-off");
+            item.innerHTML = `
+              <span class="label">Override: ${entry.name}</span>
+              <span class="controls">
+                <input type="color" class="layer-color-picker" value="${accent}" aria-label="Set ${entry.name} override color" />
+                <button type="button" class="remove" aria-label="Remove override">x</button>
+              </span>
+            `;
+          layerOrderList.appendChild(item);
+        });
+      };
+      const updateCountryOverrideUi = () => {
+        const entries = Array.from(countryOverrides.values());
+        if (!countryOverrideStatus) return;
+        countryOverrideStatus.textContent = entries.length
+          ? `${entries.length} override(s) configured.`
+          : "No overrides yet.";
+      };
+      const applySavedSettings = (settings) => {
+        if (!settings || typeof settings !== "object") return;
+        if (settings.layerVisibility && typeof settings.layerVisibility === "object") {
+          Object.keys(layerVisibility).forEach((key) => {
+            if (typeof settings.layerVisibility[key] === "boolean") {
+              layerVisibility[key] = settings.layerVisibility[key];
+            }
+          });
+        }
+        if (Array.isArray(settings.layerOrder)) {
+          const cleaned = settings.layerOrder.filter((key) => defaultLayerOrder.includes(key));
+          const missing = defaultLayerOrder.filter((key) => !cleaned.includes(key));
+          layerOrder = cleaned.concat(missing);
+        }
+        if (settings.background && typeof settings.background === "object") {
+          if (settings.background.color) {
+            backgroundColorHex = colorToHex(settings.background.color, "#0b1220");
+            CFG.backgroundColor = backgroundColorHex;
+            setDocumentBackground(backgroundColorHex);
+          }
+          if (typeof settings.background.starsEnabled === "boolean") starsEnabled = settings.background.starsEnabled;
+          if (settings.background.starsColor) starsColorHex = colorToHex(settings.background.starsColor, "#cfe8ff");
+          if (typeof settings.background.starsTwinkle === "boolean") starsTwinkle = settings.background.starsTwinkle;
+        }
+        if (settings.colors && typeof settings.colors === "object") {
+          if (settings.colors.sphereStroke) {
+            CFG.sphereStroke = settings.colors.sphereStroke;
+            sphere.attr("stroke", CFG.sphereStroke);
+          }
+          if (settings.colors.graticuleStroke) {
+            CFG.graticuleStroke = settings.colors.graticuleStroke;
+            graticulePath.attr("stroke", CFG.graticuleStroke);
+          }
+          if (settings.colors.landStroke) {
+            CFG.landStroke = settings.colors.landStroke;
+            const currentAlpha = (parseRgb(CFG.landFill) || {}).a;
+            CFG.landFill = hexToRgba(CFG.landStroke, Number.isFinite(currentAlpha) ? currentAlpha : 0.03);
+            landPath.attr("stroke", CFG.landStroke).attr("fill", CFG.landFill);
+          }
+          if (settings.colors.countriesStroke) CFG.countriesStroke = settings.colors.countriesStroke;
+          if (settings.colors.statesStroke) {
+            CFG.statesStroke = settings.colors.statesStroke;
+            statesPath.attr("stroke", CFG.statesStroke);
+          }
+          if (settings.colors.texasStroke) {
+            CFG.texasStroke = settings.colors.texasStroke;
+            const texasAlpha = (parseRgb(CFG.texasFill) || {}).a;
+            CFG.texasFill = hexToRgba(CFG.texasStroke, Number.isFinite(texasAlpha) ? texasAlpha : 0.05);
+            texasPath.attr("stroke", CFG.texasStroke).attr("fill", CFG.texasFill);
+          }
+          if (settings.colors.drawStrokeColor) drawStrokeColor = settings.colors.drawStrokeColor;
+        }
+        if (typeof settings.spinSpeedDegPerSec === "number") spinSpeedDegPerSec = settings.spinSpeedDegPerSec;
+        if (typeof settings.spinEnabled === "boolean") spinEnabled = settings.spinEnabled;
+        if (typeof settings.userLonOffset === "number") userLonOffset = settings.userLonOffset;
+        if (typeof settings.userLatOffset === "number") userLatOffset = settings.userLatOffset;
+        if (typeof settings.userZoomOffset === "number") userZoomOffset = settings.userZoomOffset;
+        countryOverrides.clear();
+        overrideLayerOrder = [];
+        if (Array.isArray(settings.countryOverrides)) {
+          settings.countryOverrides.forEach((entry) => {
+            const name = String((entry && entry.name) || "").trim();
+            if (!name) return;
+            const key = normalizeCountryKey(name);
+            countryOverrides.set(key, {
+              name,
+              color: String(entry.color || "#ffd166"),
+              visible: entry.visible !== false
+            });
+          });
+        }
+        if (Array.isArray(settings.overrideLayerOrder)) {
+          const cleanedOverrideOrder = settings.overrideLayerOrder
+            .map((value) => normalizeCountryKey(value))
+            .filter((value, idx, arr) => value && arr.indexOf(value) === idx && countryOverrides.has(value));
+          const missingOverrideKeys = Array.from(countryOverrides.keys()).filter((key) => !cleanedOverrideOrder.includes(key));
+          overrideLayerOrder = cleanedOverrideOrder.concat(missingOverrideKeys);
+        } else {
+          overrideLayerOrder = Array.from(countryOverrides.keys());
+        }
+        if (backgroundColorPicker) backgroundColorPicker.value = colorToHex(backgroundColorHex, "#0b1220");
+        if (starsEnabledChk) starsEnabledChk.checked = starsEnabled;
+        if (starsColorPicker) starsColorPicker.value = colorToHex(starsColorHex, "#cfe8ff");
+        if (starsTwinkleChk) starsTwinkleChk.checked = starsTwinkle;
+        rebuildStarsField();
+        updateLayerOrderUi();
+        updateLayerToggleUi();
+        updateSpinUi();
+        updateLatFocusUi();
+        updateCountryOverrideUi();
+        projectionDirty = true;
+        lastCountriesStaticRenderKey = "";
+        render();
+      };
+      const bindColorPicker = (picker, onInput) => {
+        if (!picker || typeof onInput !== "function") return;
+        picker.addEventListener("input", () => {
+          onInput(String(picker.value || "").trim());
+          projectionDirty = true;
+          lastCountriesStaticRenderKey = "";
+          render();
+        });
+      };
+
       if (playPauseBtn) {
         playPauseBtn.addEventListener("click", () => {
           spinEnabled = !spinEnabled;
-          playPauseBtn.textContent = spinEnabled ? "Pause Spin" : "Resume Spin";
-          playPauseBtn.classList.toggle("active", !spinEnabled);
+          updateSpinUi();
         });
       }
 
@@ -1122,6 +1923,8 @@
 
       if (clearDrawBtn) {
         clearDrawBtn.addEventListener("click", () => {
+          doodleStrokes.length = 0;
+          activeDoodleStroke = null;
           doodleCtx.clearRect(0, 0, doodleCanvas.width, doodleCanvas.height);
         });
       }
@@ -1143,14 +1946,13 @@
           userLonOffset = 0;
           userLatOffset = 0;
           userZoomOffset = 0;
+          dragVelocityLon = 0;
+          dragVelocityLat = 0;
+          inertiaActive = false;
           spinEnabled = true;
           spinSpeedDegPerSec = Number(CFG.persistentLonDegPerSec || -20);
-          if (spinSpeedRange) spinSpeedRange.value = String(Math.round(spinSpeedDegPerSec));
-          if (spinSpeedLabel) spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
-          if (playPauseBtn) {
-            playPauseBtn.textContent = "Pause Spin";
-            playPauseBtn.classList.remove("active");
-          }
+          updateSpinUi();
+          updateLatFocusUi();
         });
       }
 
@@ -1159,6 +1961,10 @@
           userLonOffset = (Math.random() * 300) - 150;
           userLatOffset = (Math.random() * 110) - 55;
           userZoomOffset = (Math.random() * 0.9) - 0.15;
+          dragVelocityLon = 0;
+          dragVelocityLat = 0;
+          inertiaActive = false;
+          updateLatFocusUi();
         });
       }
 
@@ -1166,36 +1972,229 @@
         spinSpeedRange.value = String(Math.round(spinSpeedDegPerSec));
         spinSpeedRange.addEventListener("input", () => {
           spinSpeedDegPerSec = Number(spinSpeedRange.value || 0);
-          if (spinSpeedLabel) spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+          if (Math.abs(spinSpeedDegPerSec) > 0) spinEnabled = true;
+          updateSpinUi();
         });
       }
-      if (spinSpeedLabel) {
-        spinSpeedLabel.textContent = `${Math.round(spinSpeedDegPerSec)} deg/s`;
+      if (latFocusRange) {
+        latFocusRange.value = String(Math.round(texLat));
+        latFocusRange.addEventListener("input", () => {
+          const nextLat = Number(latFocusRange.value || texLat);
+          if (!Number.isFinite(nextLat)) return;
+          userLatOffset = Math.max(-88, Math.min(88, nextLat)) - texLat;
+          dragVelocityLat = 0;
+          inertiaActive = false;
+          updateLatFocusUi();
+        });
+      }
+      updateSpinUi();
+      updateLatFocusUi();
+      updateLayerToggleUi();
+      updateLayerOrderUi();
+      updateCountryOverrideUi();
+      refreshLatUi = updateLatFocusUi;
+      if (layerOrderList) {
+        let draggedKey = "";
+        let draggedType = "";
+        layerOrderList.addEventListener("dragstart", (event) => {
+          const item = event.target && event.target.closest(".layer-order-item");
+          if (!item) return;
+          draggedKey = String(item.dataset.layerKey || "");
+          draggedType = String(item.dataset.layerType || "");
+          item.classList.add("dragging");
+          if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+        });
+        layerOrderList.addEventListener("dragend", (event) => {
+          const item = event.target && event.target.closest(".layer-order-item");
+          if (item) item.classList.remove("dragging");
+          draggedKey = "";
+          draggedType = "";
+        });
+        layerOrderList.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+        });
+        layerOrderList.addEventListener("drop", (event) => {
+          event.preventDefault();
+          const item = event.target && event.target.closest(".layer-order-item");
+          if (!item) return;
+          const targetType = String(item.dataset.layerType || "");
+          const targetKey = item ? String(item.dataset.layerKey || "") : "";
+          if (!draggedKey || !targetKey || draggedKey === targetKey) return;
+          if (draggedType === "base" && targetType === "base") {
+            const from = layerOrder.indexOf(draggedKey);
+            const to = layerOrder.indexOf(targetKey);
+            if (from < 0 || to < 0) return;
+            const [moved] = layerOrder.splice(from, 1);
+            layerOrder.splice(to, 0, moved);
+          } else if (draggedType === "override" && targetType === "override") {
+            const from = overrideLayerOrder.indexOf(draggedKey);
+            const to = overrideLayerOrder.indexOf(targetKey);
+            if (from < 0 || to < 0) return;
+            const [moved] = overrideLayerOrder.splice(from, 1);
+            overrideLayerOrder.splice(to, 0, moved);
+          } else {
+            return;
+          }
+          updateLayerOrderUi();
+          projectionDirty = true;
+          render();
+        });
+        layerOrderList.addEventListener("click", (event) => {
+          const item = event.target && event.target.closest(".layer-order-item");
+          if (!item) return;
+          if (event.target && event.target.closest(".layer-color-picker")) return;
+          const itemType = String(item.dataset.layerType || "");
+          const key = String(item.dataset.layerKey || "");
+          if (!key) return;
+          const removeBtn = event.target && event.target.closest(".remove");
+          if (removeBtn && itemType === "override") {
+            countryOverrides.delete(key);
+            overrideLayerOrder = overrideLayerOrder.filter((entryKey) => entryKey !== key);
+            updateCountryOverrideUi();
+            updateLayerOrderUi();
+            projectionDirty = true;
+            lastCountriesStaticRenderKey = "";
+            render();
+            return;
+          }
+          if (itemType === "base") {
+            layerVisibility[key] = !layerVisibility[key];
+          } else if (itemType === "override") {
+            const entry = countryOverrides.get(key);
+            if (!entry) return;
+            entry.visible = !entry.visible;
+            countryOverrides.set(key, entry);
+          }
+          updateCountryOverrideUi();
+          updateLayerOrderUi();
+          projectionDirty = true;
+          lastCountriesStaticRenderKey = "";
+          render();
+        });
+        layerOrderList.addEventListener("input", (event) => {
+          const picker = event.target && event.target.closest(".layer-color-picker");
+          if (!picker) return;
+          const item = picker.closest(".layer-order-item");
+          if (!item) return;
+          const itemType = String(item.dataset.layerType || "");
+          const key = String(item.dataset.layerKey || "");
+          const nextHex = colorToHex(String(picker.value || "").trim(), "#7df9ff");
+          if (!key) return;
+          if (itemType === "base") {
+            setBaseLayerColorHex(key, nextHex);
+          } else if (itemType === "override") {
+            const entry = countryOverrides.get(key);
+            if (!entry) return;
+            entry.color = nextHex;
+            countryOverrides.set(key, entry);
+          } else {
+            return;
+          }
+          item.style.setProperty("--layer-accent", nextHex);
+          projectionDirty = true;
+          lastCountriesStaticRenderKey = "";
+          render();
+        });
+      }
+
+      if (drawColorPicker) drawColorPicker.value = colorToHex(drawStrokeColor);
+      if (backgroundColorPicker) backgroundColorPicker.value = colorToHex(backgroundColorHex, "#0b1220");
+      if (starsEnabledChk) starsEnabledChk.checked = starsEnabled;
+      if (starsColorPicker) starsColorPicker.value = colorToHex(starsColorHex, "#cfe8ff");
+      if (starsTwinkleChk) starsTwinkleChk.checked = starsTwinkle;
+      setDocumentBackground(backgroundColorHex);
+      rebuildStarsField();
+
+      bindColorPicker(drawColorPicker, (hex) => {
+        drawStrokeColor = hexToRgba(hex, 0.92);
+      });
+      bindColorPicker(backgroundColorPicker, (hex) => {
+        backgroundColorHex = colorToHex(hex, "#0b1220");
+        CFG.backgroundColor = backgroundColorHex;
+        setDocumentBackground(backgroundColorHex);
+      });
+      bindColorPicker(starsColorPicker, (hex) => {
+        starsColorHex = colorToHex(hex, "#cfe8ff");
+      });
+      if (starsEnabledChk) {
+        starsEnabledChk.addEventListener("change", () => {
+          starsEnabled = starsEnabledChk.checked === true;
+          projectionDirty = true;
+          render();
+        });
+      }
+      if (starsTwinkleChk) {
+        starsTwinkleChk.addEventListener("change", () => {
+          starsTwinkle = starsTwinkleChk.checked === true;
+          projectionDirty = true;
+          render();
+        });
+      }
+      if (countryOverrideAddBtn) {
+        countryOverrideAddBtn.addEventListener("click", () => {
+          const name = String(countryOverrideName && countryOverrideName.value || "").trim();
+          if (!name) return;
+          const key = normalizeCountryKey(name);
+          countryOverrides.set(key, {
+            name,
+            color: String(countryOverrideColor && countryOverrideColor.value || "#ffd166"),
+            visible: true
+          });
+          if (!overrideLayerOrder.includes(key)) overrideLayerOrder.push(key);
+          updateCountryOverrideUi();
+          updateLayerOrderUi();
+          projectionDirty = true;
+          lastCountriesStaticRenderKey = "";
+          render();
+        });
+      }
+      if (detailSourceSelect) detailSourceSelect.value = detailParam;
+      if (applyDetailBtn) {
+        applyDetailBtn.addEventListener("click", () => {
+          const nextDetail = (detailSourceSelect && detailSourceSelect.value === "high") ? "high" : "standard";
+          const nextUrl = new URL(window.location.href);
+          nextUrl.searchParams.set("detail", nextDetail);
+          window.location.href = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+        });
+      }
+      if (saveSettingsBtn) {
+        saveSettingsBtn.addEventListener("click", () => {
+          saveSettings();
+        });
+      }
+      if (loadSettingsBtn) {
+        loadSettingsBtn.addEventListener("click", () => {
+          const saved = readSavedSettings();
+          if (saved) applySavedSettings(saved);
+        });
       }
 
       doodleCanvas.addEventListener("pointerdown", (event) => {
         if (!drawMode) return;
         drawing = true;
         const p = getLocalPoint(event);
-        lastDrawX = p.x;
-        lastDrawY = p.y;
+        const geo = projection.invert([p.x, p.y]);
+        activeDoodleStroke = [];
+        if (geo && Number.isFinite(geo[0]) && Number.isFinite(geo[1])) {
+          activeDoodleStroke.push(geo);
+        }
+        doodleStrokes.push(activeDoodleStroke);
         doodleCanvas.setPointerCapture(event.pointerId);
       });
       doodleCanvas.addEventListener("pointermove", (event) => {
         if (!drawMode || !drawing) return;
         const p = getLocalPoint(event);
-        doodleCtx.beginPath();
-        doodleCtx.moveTo(lastDrawX, lastDrawY);
-        doodleCtx.lineTo(p.x, p.y);
-        doodleCtx.stroke();
-        lastDrawX = p.x;
-        lastDrawY = p.y;
+        const geo = projection.invert([p.x, p.y]);
+        if (!activeDoodleStroke || !geo || !Number.isFinite(geo[0]) || !Number.isFinite(geo[1])) return;
+        activeDoodleStroke.push(geo);
       });
       const stopDraw = (event) => {
         if (event && doodleCanvas.hasPointerCapture(event.pointerId)) {
           doodleCanvas.releasePointerCapture(event.pointerId);
         }
         drawing = false;
+        activeDoodleStroke = null;
       };
       doodleCanvas.addEventListener("pointerup", stopDraw);
       doodleCanvas.addEventListener("pointercancel", stopDraw);
@@ -1204,25 +2203,44 @@
       globeStage.addEventListener("pointerdown", (event) => {
         if (drawMode) return;
         dragging = true;
+        isUserDragging = true;
+        isPointerHoldOverride = true;
+        inertiaActive = false;
+        dragVelocityLon = 0;
+        dragVelocityLat = 0;
         lastX = event.clientX;
         lastY = event.clientY;
+        lastDragTs = event.timeStamp || performance.now();
         globeStage.setPointerCapture(event.pointerId);
       });
       globeStage.addEventListener("pointermove", (event) => {
         if (!dragging || drawMode) return;
         const dx = event.clientX - lastX;
         const dy = event.clientY - lastY;
+        const nowTs = event.timeStamp || performance.now();
+        const moveDt = Math.max(0.001, (nowTs - lastDragTs) / 1000);
+        lastDragTs = nowTs;
         lastX = event.clientX;
         lastY = event.clientY;
         const zoomFactor = Math.max(0.55, getViewZoom());
-        userLonOffset -= (dx * 0.22) / zoomFactor;
-        userLatOffset += (dy * 0.22) / zoomFactor;
+        const lonDelta = (-dx * 0.22) / zoomFactor;
+        const latDelta = (dy * 0.22) / zoomFactor;
+        userLonOffset += lonDelta;
+        userLatOffset += latDelta;
+        dragVelocityLon = lonDelta / moveDt;
+        dragVelocityLat = latDelta / moveDt;
+        updateLatFocusUi();
       });
       const stopDrag = (event) => {
         if (event && globeStage.hasPointerCapture(event.pointerId)) {
           globeStage.releasePointerCapture(event.pointerId);
         }
+        if (Math.abs(dragVelocityLon) > INERTIA_MIN_SPEED || Math.abs(dragVelocityLat) > INERTIA_MIN_SPEED) {
+          inertiaActive = true;
+        }
         dragging = false;
+        isUserDragging = false;
+        isPointerHoldOverride = false;
       };
       globeStage.addEventListener("pointerup", stopDrag);
       globeStage.addEventListener("pointercancel", stopDrag);
@@ -1239,6 +2257,23 @@
       const elapsedMs = now - timelineState.startTs;
       const dt = Math.max(0, (now - lastTs) / 1000);
       lastTs = now;
+
+      if (interactiveEnabled && !Number.isNaN(dt) && dt > 0) {
+        if (inertiaActive) {
+          userLonOffset += dragVelocityLon * dt;
+          userLatOffset += dragVelocityLat * dt;
+          const damping = Math.exp(-INERTIA_DAMPING * dt);
+          dragVelocityLon *= damping;
+          dragVelocityLat *= damping;
+          if (Math.abs(dragVelocityLon) < INERTIA_MIN_SPEED && Math.abs(dragVelocityLat) < INERTIA_MIN_SPEED) {
+            inertiaActive = false;
+          }
+        }
+        if (spinEnabled && !inertiaActive && !isUserDragging && !isPointerHoldOverride) {
+          const pull = Math.max(0, Math.min(1, RETURN_TO_SPIN_EASING * dt));
+          userLonOffset = lerp(userLonOffset, 0, pull);
+        }
+      }
 
       const motionActive = (
         (Math.abs(getLonSpeedDegPerSec()) > 1e-6) ||
@@ -1262,7 +2297,7 @@
         const startMs = (Number.isFinite(markerKey))
           ? markerKey
           : (timelineState.markers[markerKey] == null ? null : timelineState.markers[markerKey]);
-        if (startMs != null && elapsedMs >= startMs) {
+        if (startMs != null && elapsedMs >= startMs && !isPointerHoldOverride) {
           const zoom = getViewZoom();
           const comp = Number(CFG.lonSpeedZoomCompensation || 0);
           const scale = (comp === 0 || zoom <= 0) ? 1 : Math.pow(1 / zoom, comp);
@@ -1274,45 +2309,79 @@
         }
       }
       if (shouldRender) {
+        if (typeof refreshLatUi === "function") refreshLatUi();
         updateView();
         render();
         lastRenderTs = now;
+      }
+      diagState.frameCount += 1;
+      const diagDt = now - diagState.lastTs;
+      if (diagDt >= 500) {
+        diagState.fps = (diagState.frameCount * 1000) / Math.max(1, diagDt);
+        diagState.frameCount = 0;
+        diagState.lastTs = now;
+        try {
+          window.parent.postMessage({
+            type: "tsi:globe-diagnostics",
+            fps: Number(diagState.fps.toFixed(1)),
+            renderMs: Number(diagState.renderMs.toFixed(1)),
+            zoom: Number(getViewZoom().toFixed(2)),
+            lon: Number((texLon + persistentLonOffset + userLonOffset).toFixed(1)),
+            lat: Number((Math.max(-88, Math.min(88, texLat + persistentLatOffset + userLatOffset))).toFixed(1))
+          }, "*");
+        } catch (_) {}
+        if (diagnosticsUi && diagnosticsUi.diagFps) diagnosticsUi.diagFps.textContent = `${diagState.fps.toFixed(1)}`;
+        if (diagnosticsUi && diagnosticsUi.diagRender) diagnosticsUi.diagRender.textContent = `${diagState.renderMs.toFixed(1)} ms`;
+        if (diagnosticsUi && diagnosticsUi.diagZoom) diagnosticsUi.diagZoom.textContent = `${getViewZoom().toFixed(2)}x`;
+        if (diagnosticsUi && diagnosticsUi.diagCenter) {
+          const viewLon = texLon + persistentLonOffset + userLonOffset;
+          const viewLat = Math.max(-88, Math.min(88, texLat + persistentLatOffset + userLatOffset));
+          diagnosticsUi.diagCenter.textContent = `${viewLon.toFixed(1)}, ${viewLat.toFixed(1)}`;
+        }
       }
       requestAnimationFrame(tick);
     };
 
     const start = async () => {
       console.info(`[globe] mode=${viewMode}, source=${dataSource}`);
-      if (CFG.enableTexas) {
+      if (ENABLE.texas || ENABLE.states) {
         try {
           const usAtlas = await loadJsonWithFallback("states");
           const states = topojson.feature(usAtlas, usAtlas.objects.states).features;
-          texas = states.find((d) => d.id === "48") || texas;
+          const texasFeature = states.find((d) => d.id === "48");
+          texas = texasFeature || texas;
+          usStates = {
+            type: "FeatureCollection",
+            features: states.filter((d) => d.id !== "48")
+          };
           projectionDirty = true;
         } catch (err) {
-          console.warn("[globe] Failed to fetch Texas geometry; continuing without Texas.", err);
+          console.warn("[globe] Failed to fetch state geometries; continuing without Texas/states.", err);
         }
       }
 
       try {
         setViewport();
+        rebuildStarsField();
         initInteractive();
         updateView();
         render();
 
         window.addEventListener("resize", () => {
           setViewport();
+          rebuildStarsField();
           updateView();
           render();
         }, { passive: true });
       } catch (err) {
         console.warn("[globe] Viewport init failed; attempting minimal fallback.", err);
         setViewport();
+        rebuildStarsField();
         projection.rotate([0, 0, 0]).scale(baseScale() * CFG.introZoomTo);
-        if (CFG.enableSphere && normalizeRenderMode(CFG.sphereRenderMode) !== "none") {
+        if (ENABLE.sphere && normalizeRenderMode(CFG.sphereRenderMode) !== "none") {
           sphere.attr("d", path({ type: "Sphere" }));
         }
-        if (CFG.enableGraticule && normalizeRenderMode(CFG.graticuleRenderMode) !== "none") {
+        if (ENABLE.graticule && normalizeRenderMode(CFG.graticuleRenderMode) !== "none") {
           graticulePath.style("display", "").attr("d", path(graticule));
         }
       }

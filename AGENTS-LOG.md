@@ -235,6 +235,14 @@
 - Troubleshooting suggestions: If mobile map behavior still desyncs, verify tab-panel state by checking .pipeline-map-tab.is-map-active against corresponding .map-overlay.is-active entries during toggles.
 - Resolutions/outcomes: Error state is preserved in history and partial pipeline implementation is now normalized to shared category-state handling with helper/loading visibility restored.
 - Commit hash(es): 54dc3e9, bc593a6
+### 2026-03-02 00:12:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented shared label governance and naming/route normalization: added central label source (js/site-labels.js), rewired utility header/menus to consume labels (js/utility-header.js), updated page headers/crumbs to label keys across portal/legal pages, adjusted Job Listings sidebar title treatment (gentle title shading + non-bold refine option headers), removed Investment from Career hub cards/submenu, set Investment as standalone header path, renamed Press to Public Relations/Media Request, renamed Security Notice to Security Statement, and aligned main footer links to the approved set and footer-variant labels via data-tsi-footer-key + initFooterLabels in js/main.js.
+- Troubleshooting suggestions: Hard refresh after deploy to clear cached JS/CSS; if any page still shows legacy text, verify it includes js/site-labels.js before js/utility-header.js and confirm data-tsi-label-key/data-tsi-footer-key values match keys in js/site-labels.js.
+- Resolutions/outcomes: Shared naming is now centralized and reusable, portal/legal/page labels are consistent, footer link scope matches requested removals, and Job Listings sidebar title styling aligns with requested visual tone.
+### 2026-03-02 00:24:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested UI/interaction updates across overview, job listings, utility menus, and Globe Lab: added left padding for Job Listings non-U.S. search note, widened utility dropdown menus and forced single-line menu links, delayed overview paragraph/backdrop reveal to post-zoom timing, and expanded Globe Lab with grouped settings sections/dividers, drag-reorder layer stack control, per-country color/visibility overrides, hold-to-override rotation behavior, diagnostics (FPS/render/zoom/center), saved-settings controls with auto-load default off, and standard/high-detail atlas source switching.
+- Troubleshooting suggestions: Hard refresh after deploy to clear cached CSS/JS; for country overrides use official map names (for example "United States", "Mexico", "Canada") so feature matching succeeds.
+- Resolutions/outcomes: Header menu wrapping and job-note padding issues are resolved; overview copy backdrop no longer appears during the tight Texas zoom; Globe Lab now has operator-grade controls and diagnostics requested for tuning and future map work.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`), treated prior run as unclean exit, and resumed from current working tree per user direction (restart Option 1 behavior).
 - Troubleshooting suggestions: If repository state appears inconsistent before next packet, run `git status` and `git log --oneline -n 5` first, then continue from the current `STATUS.md` map item.
 - Resolutions/outcomes: Recovery condition acknowledged and documented; active session continued without workspace reset.
@@ -1777,372 +1785,198 @@
 - Actions taken: Executed rollback packet for pipeline map recovery: removed temporary compare maps from `index.html`, removed compare-only geometry/passive branches from `js/main.js`, restored primary `renderDots` geometry to `viewBox 0 0 width height` with direct ocean bounds, and restored `.pipeline-map-frame svg` sizing in `css/main.css` to `height: auto`.
 - Troubleshooting suggestions: If any residual edge clipping remains, apply one minimal guard on the single primary path only (avoid reintroducing multi-map diagnostics).
 - Resolutions/outcomes: Pipeline map runtime is back to a single-map baseline aligned with Feb 19 geometry behavior.
+
+### 2026-03-01 13:42:55 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested UI/lab pass: adjusted overview first-load globe background staging in `assets/pages/overview/globe-v4.1-desktop-stable.html` to blend Texas fill alpha over site background before reveal, added Globe Lab layer toggles (globe, lat/lon, land, countries, states, Texas) with independent visibility wiring, and updated `css/main.css` for continuous/darker overview paragraph shading plus Globe Lab-style footer legal link buttons.
+- Troubleshooting suggestions: If layer density feels heavy in Globe Lab, default individual toggles off per mode by setting initial `layerVisibility` values in `globe-v4.1-desktop-stable.html`; if overview backdrop still reads too strong in light theme, reduce `.overview-copy::before` middle alpha from `0.62` to `0.50`.
+- Resolutions/outcomes: Overview startup transition is visually smoother, paragraph backdrop no longer breaks between lines, footer links match the standardized pill-header style, and Globe Lab now supports granular layer inspection controls.
+
+### 2026-03-01 14:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied user correction pass: reverted `footer-legal` links in `css/main.css` to original inline style, added Globe-Lab-style top utility bars (`.tsi-utility-bar`) to all footer-linked destination pages (`privacy/terms/security/accessibility` plus `portal-hub`, `portal-investment`, `portal-press`, `portal-employment`, `portal-internship`), softened overview paragraph backdrop edge profile (broader blur, radial fade, reduced line-level contrast), and fixed Globe Lab controls in `assets/pages/overview/globe-v4.1-desktop-stable.html` by decoupling Texas from states rendering and removing latitude auto-recenter while spin is active.
+- Troubleshooting suggestions: If legal/portal pages feel too tall on mobile with the new utility bar, reduce `.tsi-utility-bar` vertical padding from `10px` to `8px`; if overview text backdrop is still visible at edges, reduce radial alpha stops further (`0.36/0.26/0.14` -> `0.30/0.22/0.10`).
+- Resolutions/outcomes: Footer appearance restored as requested, linked pages now have consistent top header bars, Texas is independently controllable from states in Globe Lab, and latitude slider/drag adjustments no longer fight the user.
+
+### 2026-03-01 14:46:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented shared footer-linked page header behavior: added reusable `js/utility-header.js` (theme toggle + home-link wiring), updated legal/portal headers to include TSI thumbnail logo + breadcrumb text and Globe-Lab-style right controls (`Theme`, `Back to Site`), switched back-to-site routes to `index.html?home=00#overview`, and updated `js/main.js` to detect `home=00` and trigger Overview `00`-tab-equivalent quick replay + globe reset on arrival. Also aligned active page stylesheet cache key to `v=20260301-uihotfix` for consistent CSS loading.
+- Troubleshooting suggestions: If any page still shows old header after deploy/cache, hard refresh once and verify request URL includes `main.css?v=20260301-uihotfix`; if breadcrumb text wraps too early on narrow screens, shorten per-page trail labels.
+- Resolutions/outcomes: Header layout/controls are now consistent across footer-linked destinations, back behavior maps to Overview `00` replay semantics, and prior legal-vs-portal header style divergence from CSS cache skew is removed.
+
+### 2026-03-01 15:02:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Addressed remaining header inconsistency report by (1) removing `data-theme="light"` from legal pages so shared header theme logic is consistent with portal/globe pages, (2) moving portal page horizontal/top padding from `.portalx-page` to `.portalx-shell` in `css/portal-expansion.css` so top utility bar renders full-width, and (3) adding the same font import to portal pages and `globe-lab.html` for consistent header text rendering.
+- Troubleshooting suggestions: If any page still appears inset, verify no browser extension/user-style injects body padding; in standard rendering `.portalx-page` should now have zero side/top padding and `.portalx-shell` carries content inset.
+- Resolutions/outcomes: Header bar width/padding/text style now follow a single pattern across legal, portal, and globe-lab surfaces, with unified back/theme controls and 00-home routing behavior intact.
+
+### 2026-03-01 15:21:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented legal-area hub and clickable left-header trails: added new `legal-hub.html` modeled after Opportunity Desk, linked it in `index.html` footer as `Legal Desk`, converted legal/portal utility-header left text into clickable breadcrumb links (`.tsi-utility-crumb`), and updated styling in `css/main.css` to support breadcrumb link behavior. Also made current breadcrumb items clickable per request and kept right-side controls unchanged.
+- Troubleshooting suggestions: If breadcrumb labels wrap on very narrow devices, shorten per-page trail labels first (for example `Accessibility` instead of `Accessibility Statement`) before reducing utility-bar font size further.
+- Resolutions/outcomes: Legal pages now have a central desk page and left-side location trails are clickable across legal/portal/globe-lab header areas while preserving unified back/theme behavior and home replay logic.
+
+### 2026-03-01 15:34:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added universal header submenu behavior for parent breadcrumb links with subpages in `js/utility-header.js` and `css/main.css`. Hover/focus over `Opportunity Desk` now shows its four portal routes; hover/focus over `Legal Desk` shows its four legal pages. Kept logic centralized so all pages using the shared utility header inherit behavior automatically.
+- Troubleshooting suggestions: If submenu overlap appears near viewport edges on narrow screens, add right-aligned fallback positioning for `.tsi-crumb-menu` when parent is close to the right edge.
+- Resolutions/outcomes: Header navigation now exposes child-page options directly from parent breadcrumb links without per-page hardcoding.
+### 2026-03-01 16:10:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected previous unclean session close via active tail marker at EOF and resumed from current working tree state.
+- Troubleshooting suggestions: Restart options available if needed: (1) continue from current working tree + STATUS, (2) review `git status`/recent commits before edits, (3) reset to known-good commit for packet restart.
+- Resolutions/outcomes: Recovery note logged and active session continued in-place.
+
+### 2026-03-01 16:18:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed minimal/modern desk-page visual refinement by simplifying `css/portal-expansion.css` backgrounds, flattening hero styling, softening card depth/hover, tightening spacing, and standardizing CTA/button emphasis for both `Opportunity Desk` and `Legal Desk`. Logged unclean-session recovery detection and continued active session workflow. Updated `STATUS.md` with completed shared desk experience item.
+- Troubleshooting suggestions: If you want an even cleaner look, next low-risk step is removing card top accent lines (`.portalx-grid--desk .portalx-card::before`) and using border-only cards.
+- Resolutions/outcomes: Desk pages are less generic and visually calmer while preserving all existing routing/header behaviors.
+
+### 2026-03-01 16:32:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restyled legal document pages (`privacy.html`, `terms.html`, `security.html`, `accessibility.html`) through shared `css/main.css` to a continuous, minimal sheet layout inspired by provided reference (single centered document surface, subtle border/shadow, calmer section rhythm) while preserving existing site fonts, color tokens, and utility header behavior.
+- Troubleshooting suggestions: If the sheet still feels too framed, reduce `.legal-page main` box-shadow and border alpha; if text density feels high on mobile, increase paragraph line-height to `1.72`.
+- Resolutions/outcomes: Legal docs now read as one continuous paper-like document instead of segmented blocks, with consistent structure across all legal pages.
+
+### 2026-03-01 16:41:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed remaining boxed visual treatment from legal document pages by flattening .legal-page main (no border/radius/shadow/background card) and removing section divider box feel from legal h2 styles in css/main.css.
+- Troubleshooting suggestions: If any page still appears boxed after deploy, hard refresh once to invalidate cached main.css.
+- Resolutions/outcomes: Legal pages now render as continuous unboxed content while keeping existing fonts/colors/header behavior.
+
+### 2026-03-01 16:52:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Legal Desk hub to remove individual card pods and switch to a single-column continuous document list (legal-hub.html + css/portal-expansion.css): row separators only, no boxed tiles, and simplified inline-style action links.
+- Troubleshooting suggestions: If any old card styling appears, hard refresh once to clear cached portal-expansion.css.
+- Resolutions/outcomes: Legal Desk now follows the requested continuous-sheet/list structure similar to the provided reference.
+
+### 2026-03-01 17:05:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied strict no-card legal visual pass to match provided reference: set flat neutral legal background, removed legal page container card treatment, removed Legal Desk hero card styling, disabled legal-only atmospheric overlay, and removed legal row pod borders while keeping single-column content flow.
+- Troubleshooting suggestions: If any prior card styling remains visible in browser, force-refresh once to invalidate cached main.css and portal-expansion.css.
+- Resolutions/outcomes: Legal area now renders as continuous content on a simple neutral background with no cards/pods.
+
+### 2026-03-01 17:14:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected legal visual regression by restoring the paper-like content surface (white sheet on neutral background) for both legal document pages (.legal-page main in css/main.css) and Legal Desk hub (.legal-page .portalx-shell in css/portal-expansion.css), while keeping pod/card elements removed.
+- Troubleshooting suggestions: If the prior no-paper state persists visually, hard refresh once to clear cached CSS assets.
+- Resolutions/outcomes: Legal pages now match requested structure: continuous paper area with no individual card pods.
+
+### 2026-03-01 17:25:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied legal paper + header polish pass: added subtle full-edge border/shadow to legal paper surfaces, tucked paper top under utility header (margin-top negative), and added a global subtle shadow to .tsi-utility-bar with z-layering so the header casts above content consistently.
+- Troubleshooting suggestions: If overlap feels too deep on any viewport, reduce negative top margin from -8px/-6px to -4px in legal paper selectors.
+- Resolutions/outcomes: Requested visual hierarchy achieved across pages using this header type: soft elevated header and paper sheet visually tucked beneath it.
+
+### 2026-03-01 17:34:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted legal paper shadows per request by removing sheet edge border/outline and changing both legal sheet selectors to a darker, tighter shadow (  4px 12px rgba(6, 12, 24, 0.16)) in css/main.css and css/portal-expansion.css.
+- Troubleshooting suggestions: If this still reads too heavy, reduce alpha to  .13; if still too soft, increase to  .18 without increasing blur radius.
+- Resolutions/outcomes: Paper now has cleaner edges and a more compact, higher-contrast elevation.
+
+### 2026-03-01 17:42:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed utility-header dropdown hover persistence by removing trigger-to-menu gap in css/main.css (.tsi-brand-menu and .tsi-crumb-menu now positioned at 	op: 100% instead of calc(100% + 8px)).
+- Troubleshooting suggestions: If menu clipping appears in narrow contexts, adjust container overflow/z-index before reintroducing any vertical menu offset.
+- Resolutions/outcomes: Logo and breadcrumb menus stay open while moving pointer from trigger to dropdown options.
+
+### 2026-03-01 17:56:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Standardized Opportunity Desk to the same visual system as Legal Desk via css/portal-expansion.css: identical neutral backdrop and paper container treatment, removed hero-card styling, converted content area to single-column no-card row flow, and changed route CTAs to inline link-style actions.
+- Troubleshooting suggestions: If any route still appears as a tile, clear cached CSS and verify page class includes desk-page--opportunity on portal-hub.html.
+- Resolutions/outcomes: Both desk hubs now share the same minimal paper/no-card presentation.
+
+### 2026-03-01 18:04:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Set Opportunity area pages to light-theme default by adding data-default-theme="light" and shared storage key 	si-theme-opportunity on HTML roots for portal-hub.html, portal-investment.html, portal-press.html, portal-employment.html, and portal-internship.html.
+- Troubleshooting suggestions: If an existing browser localStorage theme value persists dark, clear 	si-theme-opportunity key or toggle once on-page.
+- Resolutions/outcomes: Opportunity pages now load in light mode by default with existing theme switch behavior preserved.
+
+### 2026-03-01 18:12:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed remaining Opportunity Desk title-card regression in css/portal-expansion.css by replacing the later .desk-page--opportunity .portalx-hero rule with full unboxed hero styles (no border/background/shadow/padding).
+- Troubleshooting suggestions: If old card style still appears, hard refresh once to invalidate cached stylesheet.
+- Resolutions/outcomes: Opportunity Desk title now matches requested non-card presentation.
+
+### 2026-03-01 18:24:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed naming/navigation split requested: renamed Opportunity Desk labels to Careers Desk on hub/subpages and main-site links, removed Press card from portal-hub.html, removed Press from portal-hub breadcrumb submenu in js/utility-header.js, added standalone Press Desk item to logo hover menu, and changed portal-press.html header trail to standalone (logo > Press Desk) while preserving shared header/theme/back behavior.
+- Troubleshooting suggestions: If old labels persist, hard refresh and verify latest index.html + js/utility-header.js are loaded.
+- Resolutions/outcomes: Careers and Press are now separated as requested, with consistent utility-header styling logic retained.
+
+### 2026-03-01 18:39:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented global portal upload-method refresh to a drag-and-drop style component: added DOM enhancement helper in js/portal-intake-v2.js (portalV2WireDropInput) that transforms each file input into a dashed drop zone with upload title, accepted types, select-file affordance, drag-over state, filename display, and drop-to-attach behavior while preserving existing validation/submission flow.
+- Troubleshooting suggestions: If dropped files do not attach on a specific browser, fallback click-select remains active; verify DataTransfer availability and keep standard file picker path as baseline.
+- Resolutions/outcomes: All current site upload opportunities handled by portal intake now use the same modern upload interaction pattern and visual style.
+
+### 2026-03-01 18:53:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added requested TODO planning items in STATUS.md for official social account setup (Facebook, LinkedIn, X, Instagram, TikTok) and future site link placement. Enhanced global portal upload component to support file removal via inline X control: selecting/dropping a file now shows filename + removable state; clicking X clears the selected file and triggers standard change flow.
+- Troubleshooting suggestions: If the X does not appear after selection in a cached browser session, hard refresh; verify js/portal-intake-v2.js and css/portal-expansion.css are current.
+- Resolutions/outcomes: Social TODOs are tracked, and upload UI now supports user-controlled file deselection across portal upload opportunities.
+
+### 2026-03-01 19:02:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Standardized Careers/Press route-detail pages to match the same paper/no-card system as desk/legal surfaces by adding scoped overrides in css/portal-expansion.css for portal-investment, portal-press, portal-employment, and portal-internship page classes (neutral page background, tucked paper shell, unboxed hero, unboxed form wrapper).
+- Troubleshooting suggestions: If any page still renders old card blocks, force-refresh once and verify body class includes portalx-page--{route}.
+- Resolutions/outcomes: Individual route pages now align to the same minimal paper presentation requested across this area.
+
+### 2026-03-01 19:11:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed Careers Desk hover-menu regression by updating css/main.css to prevent breadcrumb title clipping (.tsi-utility-bar__title changed from overflow: hidden to overflow: visible), which restores submenu rendering for breadcrumb parent links.
+- Troubleshooting suggestions: If submenu still does not show, hard refresh once to clear cached main.css and verify js/utility-header.js is loaded on the page.
+- Resolutions/outcomes: Careers breadcrumb hover now exposes the expected submenu options.
+
+### 2026-03-01 19:19:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed three reported UI issues: (1) upload remove X now truly hidden on load by adding .portalx-upload-clear[hidden]{display:none;}, (2) upload plus icon geometry is centered using left/top:50% + translate, and (3) dropdown typography parity enforced between logo and breadcrumb menus via shared menu-link style/hover rules in css/main.css.
+- Troubleshooting suggestions: If any stale behavior remains, hard refresh once to invalidate cached main.css and portal-expansion.css.
+- Resolutions/outcomes: Upload control and header menus now match requested behavior/visual consistency.
+
+### 2026-03-01 19:29:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented global utility-header hover-transition hardening to prevent submenu collapse during diagonal cursor travel: added .is-open display support in css/main.css and added wireHoverPersistence in js/utility-header.js with short close delay (220ms) for both logo and breadcrumb dropdown wrappers.
+- Troubleshooting suggestions: If menus feel too sticky, reduce delay from 220ms to 140-180ms; if they still collapse too quickly on diagonal movement, raise to 260ms.
+- Resolutions/outcomes: Users can now move from trigger toward submenu options (including southeast paths over breadcrumb separator area) without losing dropdown visibility.
+
+### 2026-03-01 19:48:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested portal form logic/content updates across portal-investment.html, portal-employment.html, portal-press.html, portal-internship.html, js/portal-intake-v2.js, css/portal-expansion.css, and js/main.js: inline placeholder guidance, automatic required-field notation markers, internship graduation-date label clarification, employment "Open to multiple paths" checkbox auto-filling role-of-interest, investment investor-type dropdown with conditional required Other text input, press "No deadline" toggle with explicit mode field, and stronger email-format validation regex for both portal and main-site submit handlers.
+- Troubleshooting suggestions: Validate each route in-browser once (especially conditional rows and checkbox toggles) after hard refresh to confirm cached CSS/JS does not mask new state logic.
+- Resolutions/outcomes: Portal forms now provide clearer input guidance and handle key user-edge cases with conditional logic while preserving existing backend submission paths.
+
+### 2026-03-02 10:22:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented careers-route restructuring: replaced `portal-employment.html` with a no-form `Job Descriptions` page, created `portal-career-interest.html` for employment submissions, updated Careers hub/footer/menu labels to `Job Descriptions`, and added dual-submit handling in `js/portal-intake-v2.js` so the secondary submit action redirects to `portal-internship.html` after successful submission.
+- Troubleshooting suggestions: Browser-test both career-interest submit buttons against the live Apps Script endpoint; confirm only successful submissions redirect to internship and that failed submits stay on-page with error messaging.
+- Resolutions/outcomes: Employment URL now functions as requested job-description hub, employment intake remains available via Career Interest form, and internship cross-navigation is now embedded directly in the form submission flow.
+
+### 2026-03-02 10:41:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed remaining card-style job-content blocks from `portal-employment.html` and rebuilt the page as a flat listings layout with search/filter controls, plain results list, and inline alternative-route links; added scoped styling under `.portalx-jobs-page` in `css/portal-expansion.css` to avoid affecting other pages.
+- Troubleshooting suggestions: If any card styling appears on this page after deploy, clear browser cache for `portal-expansion.css`; if you want even flatter visuals, next step is removing the shell shadow only for `.portalx-jobs-page .portalx-shell`.
+- Resolutions/outcomes: The job descriptions page now follows a no-card listings pattern aligned with the examples provided.
+
+### 2026-03-02 10:55:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied second-pass job-page styling to match provided examples more closely: replaced simple filter rows with a full-width blue search bar, added a left filter rail (`Filter Results`) and a right results column (`Jobs` count + sort + filtered chip + row-list area) in `portal-employment.html`; updated scoped `.portalx-jobs-page` styles in `css/portal-expansion.css`.
+- Troubleshooting suggestions: If this still feels too far from target, next pass should tune exact spacing/typography tokens from a single chosen reference (for example Image #4) and keep only that visual grammar.
+- Resolutions/outcomes: Employment listings page now presents the requested job-board format while keeping no-card result rows and preserving route links for career-interest/internship actions.
+
+### 2026-03-02 11:09:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Job Listings page per owner request: restored left sidebar + right-side results layout, changed official listings URL to `https://careers.texasskillsinitiative.com`, converted the notice back to a link-trigger pattern that opens a popup modal, and replaced prior dynamic URL script with static canonical URL messaging.
+- Troubleshooting suggestions: Verify modal behavior on desktop/mobile (open, backdrop click close, Escape close) and confirm final production DNS points the careers subdomain correctly before launch.
+- Resolutions/outcomes: Page now aligns with requested interaction model and contains canonical careers domain guidance; pre-1.0 domain-pointing task added in `STATUS.md`.
+
+### 2026-03-01 23:48:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected active tail marker from prior session (`[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`) and resumed from current working tree; completed Job Listings stabilization packet by extracting page-specific CSS to `css/job-listings.css`, verifying no residual `jobboard` selectors remain in `css/portal-expansion.css`, and fixing sidebar header mismatch by unifying `Search Jobs` and `Refine Your Search` panel-title box model (`portal-employment.html`, `css/job-listings.css`).
+- Troubleshooting suggestions: Hard refresh once to invalidate cached CSS (`portal-expansion.css`/`job-listings.css`) and verify the two sidebar panel headers now share the same left/right/title padding in both light and dark themes.
+- Resolutions/outcomes: Job Listings formatting logic is now isolated from shared portal CSS, panel-title spacing is consistent, and render logic remains data-driven (`TSI_JOB_LISTINGS` controls empty state vs rows).
+
+### 2026-03-02 00:12:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented shared label governance and naming/route normalization: added central label source (js/site-labels.js), rewired utility header/menus to consume labels (js/utility-header.js), updated page headers/crumbs to label keys across portal/legal pages, adjusted Job Listings sidebar title treatment (gentle title shading + non-bold refine option headers), removed Investment from Career hub cards/submenu, set Investment as standalone header path, renamed Press to Public Relations/Media Request, renamed Security Notice to Security Statement, and aligned main footer links to the approved set and footer-variant labels via data-tsi-footer-key + initFooterLabels in js/main.js.
+- Troubleshooting suggestions: Hard refresh after deploy to clear cached JS/CSS; if any page still shows legacy text, verify it includes js/site-labels.js before js/utility-header.js and confirm data-tsi-label-key/data-tsi-footer-key values match keys in js/site-labels.js.
+- Resolutions/outcomes: Shared naming is now centralized and reusable, portal/legal/page labels are consistent, footer link scope matches requested removals, and Job Listings sidebar title styling aligns with requested visual tone.
+### 2026-03-02 00:24:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested UI/interaction updates across overview, job listings, utility menus, and Globe Lab: added left padding for Job Listings non-U.S. search note, widened utility dropdown menus and forced single-line menu links, delayed overview paragraph/backdrop reveal to post-zoom timing, and expanded Globe Lab with grouped settings sections/dividers, drag-reorder layer stack control, per-country color/visibility overrides, hold-to-override rotation behavior, diagnostics (FPS/render/zoom/center), saved-settings controls with auto-load default off, and standard/high-detail atlas source switching.
+- Troubleshooting suggestions: Hard refresh after deploy to clear cached CSS/JS; for country overrides use official map names (for example "United States", "Mexico", "Canada") so feature matching succeeds.
+- Resolutions/outcomes: Header menu wrapping and job-note padding issues are resolved; overview copy backdrop no longer appears during the tight Texas zoom; Globe Lab now has operator-grade controls and diagnostics requested for tuning and future map work.
+### 2026-03-02 00:32:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented nested utility-header hover navigation from logo menu entries by adding secondary flyout support in `js/utility-header.js` and corresponding submenu styles in `css/main.css` (Career Opportunities and Legal Desk now expose child links on hover). Rebuilt `index.html` footer into explicit two-row grid layout with left/center/right alignment per row, inserted unlinked egg separators where requested, placed linked Globe Lab egg between Accessibility and Security, and preserved theme toggle/status/internal-access behavior.
+- Troubleshooting suggestions: Hard refresh to clear cached `main.css` and `utility-header.js`; if submenu flyouts appear clipped, verify no parent container reintroduced `overflow:hidden` around `.tsi-utility-brand-wrap`.
+- Resolutions/outcomes: Hover path now supports deeper access (`logo -> Career Opportunities -> child routes`) and footer structure now matches requested row alignment and separator behavior.
+### 2026-03-02 00:43:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Unified Globe Lab layer interactions by combining visibility toggles into the drag-order list itself: base layers and manual country overrides now share one list UI, click toggles on/off state, and manual override rows include inline `x` removal. Simplified override creation flow to `Add Override` and removed separate select/remove/toggle controls. Adjusted footer container sizing to full-width grid (`max-width: none`) so right-side alignment matches left margin range.
+- Troubleshooting suggestions: Hard refresh after deploy; if right footer still appears centered, verify no stale cached `main.css` is loaded and confirm viewport width isn't triggering mobile footer rules.
+- Resolutions/outcomes: Layer management is more uniform and override-aware in Globe Lab, and footer right margin now tracks the same edge range logic as the left side.
+### 2026-03-02 00:54:49 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected primary nav translucency persistence by adding `body.has-primary-nav` to `index.html`, introducing body top offset from `--nav-current-height`, and switching only the primary index nav to fixed overlay mode (`body.has-primary-nav nav[aria-label="Primary"]`) so the globe remains visible behind the bar after load. Also tuned footer span constraints in `css/main.css` (`.footer-layout--grid` + row column sizing) to restore balanced left/right margin behavior.
+- Troubleshooting suggestions: Hard refresh to invalidate CSS cache; if footer still looks left-biased on a narrow viewport, confirm page width is above the mobile breakpoint (`<=900px` stacks rows left by design).
+- Resolutions/outcomes: Top nav now remains persistently translucent over live globe content, and desktop footer alignment returns to a symmetric container span.
+### 2026-03-02 01:04:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Globe Lab layer controls in `assets/pages/overview/globe-v4.1-desktop-stable.html` so each base/override layer row now includes an inline color picker; removed the separate layer-color rows; added delegated layer-list color-input handling for both base layers and country overrides; and styled active row controls (`drag` badge + row border/fill) from each layer’s current color.
+- Troubleshooting suggestions: Hard refresh Globe Lab and verify each row color picker updates stroke color live; override rows should keep their custom color after toggling visibility.
+- Resolutions/outcomes: Layer editing is now single-row, color + visibility are managed in one place, and active layer controls visually reflect current set color.
+### 2026-03-02 01:06:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested behavior split for overview controls and pipeline stability. In `js/main.js`, added explicit `resetSequenceCycle` path so logo click triggers a full first-load replay cycle while `00` retains quick replay. In `index.html`, moved footer theme toggle to bottom-row center. For pipeline, added `data-map-src` fallback in `index.html` and enhanced MD fetch handling in `js/main.js` (`response.ok` validation + PNG fallback on fetch/render failure) so map overlays/tabs continue functioning when MD cannot load.
+- Troubleshooting suggestions: Hard refresh (`Ctrl+F5`) to clear cached JS/HTML, then test in this order: logo click from a non-overview tab, `00` click, and pipeline tab toggles/marker visibility.
+- Resolutions/outcomes: Logo and `00` now execute distinct replay modes as requested, footer theme control is centered in row 2, and pipeline no longer hard-fails when MD fetch is unavailable.
+### 2026-03-02 01:20:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Patched pipeline tab/overlay regression in `js/main.js` by removing duplicate phase-tab click binding path (desktop tabs were toggling twice; mobile tabs were activating both mobile + desktop overlays), and updated frame-flash color resolution to read either `--map-control-color` or `--map-tab-color` so edge glow matches active tab color. Updated Globe Lab controls in `assets/pages/overview/globe-v4.1-desktop-stable.html`: added draggable override rows (override-order persistence), removed drag-pill UI while preserving drag behavior, slimmed layer-row action controls, moved/locked override add controls on one row, added background controls (BG color, stars on/off, star color, twinkle), and removed auto-load settings behavior while keeping manual Lab save/load.
+- Troubleshooting suggestions: Hard refresh before testing (`Ctrl+F5`), then verify pipeline tabs on desktop and mobile separately; for Globe Lab, drag override rows among override rows and confirm saved settings restore background/stars without affecting main site navigation/theme behavior.
+- Resolutions/outcomes: Pipeline tab state now remains stable per click across viewports, map edge glow tracks active tab color, and Globe Lab settings are clearly lab-scoped with manual persistence only.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-### 2026-02-27 15:39:09 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Applied a targeted map-dot rendering nudge in `js/main.js` by changing dot center Y offset from `0.5` to `0.47` (`dotCenterYOffset`) to avoid residual bottom-edge clipping caused by device-pixel rounding.
-- Troubleshooting suggestions: If clipping is still visible on specific DPR/zoom combos, adjust only `dotCenterYOffset` in small increments (`0.46` to `0.48`) before changing frame or SVG geometry again.
-- Resolutions/outcomes: Bottom-row map dots should render fully without reintroducing left/right gutter artifacts.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-### 2026-02-27 15:41:17 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Applied frame-geometry fix in `css/main.css` by setting `.pipeline-map-frame` padding to `0` (base and small-screen override), removing content-box ratio distortion that clips the bottom row.
-- Troubleshooting suggestions: If any visual spacing is desired back around the map, reintroduce it via non-layout overlays (pseudo/border layer) rather than frame padding.
-- Resolutions/outcomes: Bottom-row clipping source shifted from frame-content distortion to true map bounds; this should resolve persistent bottom clipping where dot-offset changes did not.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-### 2026-02-27 15:56:50 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added pane-content typewriter rendering in `js/main.js` by introducing `runPaneTypewriter`/`clearPaneTyping` over `.pipeline-map-tab-pane-text` and `.pipeline-map-tab-pane-lead`, triggered on active pane changes in `updateContentPane`.
-- Troubleshooting suggestions: Adjust `charDelayMs` (`14`) and `lineDelayMs` (`120`) in `runPaneTypewriter` for faster/slower typing cadence; title and locations button intentionally excluded from animation selectors.
-- Resolutions/outcomes: Tab body content now reveals one character at a time on pane switch while title bar and `View Locations` behavior remain unchanged.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-### 2026-02-27 17:17:16 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed tab-pane typewriter runtime from `js/main.js`, restored immediate text rendering, and added map-tab helper copy node (`.pipeline-map-tab-pane-helper`) that toggles visibility by selected tab in `updateContentPane`.
-- Troubleshooting suggestions: If helper text should persist across non-map tabs later, remove `mapPaneHelper.classList.toggle('is-hidden', key !== "__map__")` and style accordingly.
-- Resolutions/outcomes: Tab content now loads normally; helper text appears in MAP tab pane and disappears when other tabs are selected, while title and `View Locations` behavior remain unchanged.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
-### 2026-02-27 17:20:24 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated shared unified-tab compact label builder in `js/main.js` to render `PHASE TAB` instead of `PHASE` (`.pipeline-map-tab-word`).
-- Troubleshooting suggestions: If label wraps on narrow widths, reduce `.pipeline-map-tab-word` letter-spacing/font-size in mobile media block to keep two-line tab density.
-- Resolutions/outcomes: Phase-tab text now includes the requested `TAB` suffix on both desktop and mobile tab panels.
-### 2026-02-27 17:34:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed legacy desktop inline pipeline button-lane generation in `js/main.js` by deleting `.pipeline-map-inline-controls-desktop` container creation, `.map-control--desktop` button rendering, and associated desktop lock selector references.
-- Troubleshooting suggestions: If any duplicate desktop controls still appear, hard-refresh browser cache and verify only `.pipeline-map-tab-panel` remains visible above the map on widths >= `769px`.
-- Resolutions/outcomes: Desktop pipeline interaction now routes through the unified tab panel without the older desktop button row; mobile logic remains unchanged.
-### 2026-02-27 17:47:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated pipeline title placement by removing standalone `.pipeline-map-title-box` injection above the map in `js/main.js`, creating that same styled title element at the top of the MAP tab pane (`.pipeline-map-tab-pane-map-title`), and wiring desktop flash behavior to the in-pane title node. Also hid `.pipeline-note` on desktop via `@media (min-width: 769px)` while keeping mobile hidden behavior intact.
-- Troubleshooting suggestions: If title styling ever diverges between pane and legacy styles, keep `.pipeline-map-title-box` as the single source of truth and only scope visibility by breakpoint classes.
-- Resolutions/outcomes: Desktop now shows “Texas Skills Initiative Global Pipeline” at the top of map-tab content, the old standalone title box is removed, and the text box below the map no longer appears on desktop.
-### 2026-02-27 17:55:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed the legacy pipeline note box markup from `index.html` so it cannot briefly render on mobile, added MAP-pane overview fallback copy in `js/main.js` when `.pipeline-note` is absent, removed auto-application of first-tab guided highlight classes in pipeline tab state logic, and changed `.pipeline-map-tab:focus-visible` outline from white-mixed accent to pure `var(--accent)` in `css/main.css`.
-- Troubleshooting suggestions: If any residual bright edge remains only during active keyboard navigation, capture whether the tab is focused (not just selected), since `:focus-visible` is still intentionally enabled for accessibility.
-- Resolutions/outcomes: Old note box no longer exists in DOM, mobile flash path is removed, and phase-tab highlight no longer uses the white-tinted outline style.
-### 2026-02-27 18:02:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed a second startup reveal path in `js/main.js` that explicitly unhid and repopulated `.pipeline-map-helper-overlay` text after map load.
-- Troubleshooting suggestions: If any helper text still appears on-map, hard refresh cache to ensure latest `js/main.js` is loaded; only tab-pane helper text should remain.
-- Resolutions/outcomes: Map overlay helper text is now suppressed consistently on both desktop and mobile.
-### 2026-02-28 10:40:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Rebuilt the overview globe scene runtime in `assets/pages/overview/globe-3.7.2-west.html` with a staged Texas-first reveal sequence and nonlinear `slow -> fast -> slow` intro zoom, added dual post-intro behavior modes (`orbit` and `cockpit`) via query parameter, and switched `index.html` overview iframe source to `?mode=orbit` as the baseline.
-- Troubleshooting suggestions: To test the alternate camera path without code edits, open `assets/pages/overview/globe-3.7.2-west.html?mode=cockpit`; if motion feels too strong on low-end devices, reduce `cockpitDrift` before changing intro duration.
-- Resolutions/outcomes: Overview now starts as a single-color field, reveals Texas first, then expands into full country/detail rendering with full-frame viewport coverage and reduced per-device runtime load.
-### 2026-02-28 10:52:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Disabled overview dots by default while preserving particle-generation logic behind `particles=on`, added local data assets (`assets/pages/overview/data/land-110m.json`, `countries-110m.json`, `us-states-10m.json`), and implemented source toggle routing in globe runtime (`source=local|cdn`) with automatic fallback. Updated overview iframe URL to `?mode=orbit&source=local&particles=off`.
-- Troubleshooting suggestions: For CDN force-test use `?source=cdn`; for future particle experiments add `&particles=on` without touching code.
-- Resolutions/outcomes: Default overview path now avoids remote atlas dependency and removes dots visually while keeping both CDN loading and particle capability available on demand.
-### 2026-02-28 11:05:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added camera orientation controls to overview globe (`pitch` + `roll` query params) and applied them to cockpit intro/post-intro rotation. Set cockpit defaults toward the requested straight-down/north-oriented feel using `cockpitStartPitch=-90` and `cockpitStartRoll=-90` with smooth interpolation.
-- Troubleshooting suggestions: For fast visual tuning, adjust only one axis at a time (first `roll`, then `pitch`) using URL params before changing drift/zoom.
-- Resolutions/outcomes: Cockpit view can now be tuned directly to match target perspective without code changes.
-### 2026-02-28 11:10:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added `yaw` query-parameter support to overview globe camera control and integrated it into intro/post-intro rotation logic. Implemented late-intro yaw blending to preserve Texas-first reveal before transitioning to user heading.
-- Troubleshooting suggestions: Use moderate yaw values first (e.g., `-45` to `45`) before extreme values to avoid losing intended Texas reveal emphasis.
-- Resolutions/outcomes: Globe camera now supports full heading + tilt + bank tuning through `yaw`, `pitch`, and `roll`.
-### 2026-02-28 11:18:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added explicit in-file helper text block to `globe-3.7.2-west.html` documenting camera params and sequence-template structure, and added optional `help=on` console hint for quick orientation tuning.
-- Troubleshooting suggestions: Use `help=on` only during setup/debug; remove it in normal runs to keep console clean.
-- Resolutions/outcomes: Orientation/sequence guidance now lives with the runtime code for repeatable tuning without external notes.
-### 2026-02-28 11:24:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Changed globe angle semantics so `pitch` and `roll` are interpreted as relative deltas by default (`angles=relative`) from the straight-down baseline, and added `angles=absolute` support for direct raw-angle control.
-- Troubleshooting suggestions: If a movement feels too large in relative mode, switch temporarily to `angles=absolute` to isolate target values, then convert back to relative deltas.
-- Resolutions/outcomes: Camera controls now match requested relative-motion intent while preserving explicit absolute control when needed.
-### 2026-02-28 11:36:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Created `assets/pages/overview/globe-3.7.3-west.html` as a standalone animation tuning harness and added on-page control inputs for `yaw`, `pitch`, `roll`, `angle mode (relative|absolute)`, `zoom`, and `rotation speed` with live updates during animation playback.
-- Troubleshooting suggestions: For deterministic camera framing tests, set speed to `0` after intro, then tune yaw/pitch/roll/zoom before reintroducing drift.
-- Resolutions/outcomes: Orientation and motion parameters are now directly editable in-browser without touching main site wiring.
-### 2026-02-28 11:44:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Corrected yaw control behavior in `globe-3.7.3-west.html` by introducing persistent drift accumulation and recalculating post-intro longitude each frame as `texasAnchor + yawOffset + driftAccumulator`.
-- Troubleshooting suggestions: If yaw still appears static while testing, temporarily set rotation speed to `0` to isolate heading response independent of drift.
-- Resolutions/outcomes: Yaw control now updates continuously after intro instead of only at transition handoff.
-### 2026-02-28 11:52:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated `globe-3.7.3-west.html` relative-angle reference frame to true straight-down-over-Texas baseline (`pitch=-31`, `roll=0`) and decoupled it from cinematic cockpit-start values.
-- Troubleshooting suggestions: For clean heading validation, keep `Pitch=0`, `Roll=0`, `Speed=0` in relative mode, then adjust `Yaw`.
-- Resolutions/outcomes: Relative yaw now behaves predictably without pole-singularity lock effects from prior baseline.
-### 2026-02-28 12:04:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added new standalone `assets/pages/overview/globe-3.7.4-west.html` using `geoSatellite` perspective projection and preserved local/CDN atlas toggles; implemented live on-page controls for yaw/pitch/roll, angle mode, distance, camera tilt, and rotation speed.
-- Troubleshooting suggestions: In this perspective rig, keep `Distance >= 1.01`; use `Speed=0` while framing, then raise speed once orientation is locked.
-- Resolutions/outcomes: New test harness supports off-center camera behavior that orthographic mode cannot provide.
-### 2026-02-28 12:18:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Created `assets/pages/overview/globe-3.8.0-webgl.html` as a Three.js baseline prototype with real camera-space orientation controls (yaw/pitch/roll), relative/absolute mode, true camera distance control, rotation speed, and replayable Texas-first intro scaffold.
-- Troubleshooting suggestions: If texture CDN is blocked, fallback material still renders; for deterministic framing set speed to `0` and replay intro.
-- Resolutions/outcomes: WebGL path is now available for cinematic camera behavior not achievable in the pure SVG/D3 projection stack.
-### 2026-02-28 12:26:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed hard center-lock in `globe-3.8.0-webgl.html` by adding `Look Offset X/Y/Z` controls and applying camera aim to a local-offset look target instead of fixed origin.
-- Troubleshooting suggestions: To verify decoupled aiming immediately, set `Speed=0` and `Look Offset Y=0.2` (or `X=0.2`) and observe horizon/target shift without changing distance.
-- Resolutions/outcomes: Camera can now look away from Earth center while preserving independent orientation and distance controls.
-### 2026-02-28 12:33:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added requested filename alias `assets/pages/overview/globe-v3.7e.html` (copied from existing `globe-3.7e-west.html`) and updated `index.html` overview iframe to use `globe-v3.7e.html?mode=orbit&source=local&particles=off`.
-- Troubleshooting suggestions: If browser still shows prior background asset, hard refresh to clear cached iframe source.
-- Resolutions/outcomes: Overview now uses the explicitly requested `globe-v3.7e.html` asset path.
-### 2026-02-28 12:43:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added automatic intro motion profile directly to `assets/pages/overview/globe-v3.7e.html`: initializes at high zoom, runs `slow -> fast -> slow` zoom-out over `introDurationMs`, then transitions to gentle roll using `postIntroRollDegPerSec`.
-- Troubleshooting suggestions: Tune only `introStartZoom`, `introEndZoom`, `introDurationMs`, and `postIntroRollDegPerSec` in the `OPT` block for pacing changes; keep `lockOnTexas=true` for center stability.
-- Resolutions/outcomes: Requested position/zoom behavior now runs in the active 3.7e overview background file without changing site wiring.
-### 2026-02-28 12:49:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Audited and removed intro control contention in `globe-v3.7e.html` by gating legacy wheel-zoom handler behind new `userWheelZoomEnabled` flag (default `false`) and moving intro progression state to dedicated runtime variable (`introActive`) instead of mutating config.
-- Troubleshooting suggestions: If manual zoom testing is needed later, set `userWheelZoomEnabled=true`; keep it `false` for production background to avoid accidental touchpad/wheel interference.
-- Resolutions/outcomes: Intro now has a single zoom authority path (`slow -> fast -> slow`), then cleanly hands off to gentle roll.
-### 2026-02-28 12:58:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Applied anti-pan hardening to `globe-v3.7e.html` by replacing fixed `2000x2000` canvas with viewport sizing + explicit viewBox, updating Texas anchor latitude to `31`, and disabling SVG pointer interaction. Updated `index.html` iframe source with `v=20260228a` cache-bust token.
-- Troubleshooting suggestions: If drift still appears after this patch, confirm with a hard refresh first; then we can add an on-screen center crosshair to verify true anchor lock versus perceived feature drift.
-- Resolutions/outcomes: Background should now render with stable Texas-centered framing and no user-input pan influence.
-### 2026-02-28 13:06:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Replaced `assets/pages/overview/globe-v3.7e.html` with a minimal `v3.7.min` implementation containing only essential globe rendering and motion primitives (Texas-centered camera lock, intro zoom curve, post-intro gentle roll, responsive sizing, and local/CDN atlas loading fallback).
-- Troubleshooting suggestions: If further jitter appears, reduce `introStartZoom` and/or `postIntroRollDegPerSec` before reintroducing any optional visual systems.
-- Resolutions/outcomes: Competing and heavy legacy subsystems were removed; intro and steady-state animation paths are now singular and deterministic.
-### 2026-02-28 13:14:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added load-profile gating to `globe-v3.7e.html` so atlas fetch/render can be constrained to `texas-only`, `regional`, or `global` via query param (`profile`), with optional deferred countries promotion after intro (`promoteToGlobalAfterIntro`).
-- Troubleshooting suggestions: Use `?profile=texas-only` for maximum intro performance checks, then step up to `regional`/`global` only if visual scope requires it.
-- Resolutions/outcomes: Overview background can now avoid unnecessary data/model work based on expected in-frame content.
-### 2026-02-28 13:20:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Switched default overview profile to `texas-only` in `globe-v3.7e.html` and updated `index.html` iframe source query to include `profile=texas-only` plus cache-bust token `v=20260228b`.
-- Troubleshooting suggestions: If you still see prior land/country lines after deploy, hard refresh once to invalidate cached iframe URL.
-- Resolutions/outcomes: Active Overview now loads/render targets just sphere/graticule/Texas path by default, matching requested globe+Texas-only behavior.
-### 2026-02-28 13:25:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Tuned overview intro for faster/leaner rendering in `globe-v3.7e.html` by reducing intro duration to `4200ms` and deferring graticule draw until intro completion.
-- Troubleshooting suggestions: If intro still feels too long, reduce `introDurationMs` further in `300-500ms` increments before changing zoom endpoints.
-- Resolutions/outcomes: Faster zoom-out now runs with less early visual complexity, improving startup smoothness while preserving post-intro framing.
-### 2026-02-28 13:31:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated active overview runtime `globe-v3.7e.html` to disable post-intro roll (`postIntroRollDegPerSec: 0`) and enable deferred countries load after intro (`promoteToGlobalAfterIntro: true`) while retaining `texas-only` initial profile. Bumped iframe cache token in `index.html` to `v=20260228c`.
-- Troubleshooting suggestions: If countries do not appear after intro due to cached iframe, hard-refresh once to load the new URL token.
-- Resolutions/outcomes: Intro now settles without ongoing roll, then country outlines are loaded in after zoom-out.
-### 2026-02-28 13:39:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Hardened post-intro country reveal in `globe-v3.7e.html` by adding deferred countries load fallback (`local -> cdn`), making stroke presentation visibly stronger on load, and animating countries opacity in over ~1.2s after intro completion. Updated iframe cache token to `v=20260228d`.
-- Troubleshooting suggestions: If no visible reveal appears, verify intro is completing (zoom reaches endpoint) and then watch for ~1s country fade-in immediately afterward.
-- Resolutions/outcomes: Country-load phase now has a clear visual transition instead of silently drawing with faint lines.
-### 2026-02-28 13:47:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Resolved partial-country-line output by changing deferred countries render from `topojson.mesh` borders to full `topojson.feature` country outlines and bundling deferred land+countries load together after intro. Updated iframe cache token to `v=20260228e`.
-- Troubleshooting suggestions: If any regions still appear incomplete, verify the profile is still `texas-only` at startup and let intro finish to trigger full deferred load.
-- Resolutions/outcomes: Post-intro geography should now display complete country/coast outlines rather than isolated shared-border segments.
-### 2026-02-28 13:55:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Increased country-visibility tuning in `globe-v3.7e.html` by reducing final zoom (wider frame), adding faint land fill, and strengthening country stroke opacity/width both at baseline and deferred reveal. Updated iframe cache token to `v=20260228f`.
-- Troubleshooting suggestions: If countries still feel faint on your display, next step is raising land fill to `0.05` and countries stroke alpha to `0.62` after intro.
-- Resolutions/outcomes: Post-intro country outlines should now be clearly visible in normal viewing conditions.
-### 2026-02-28 10:08:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Replaced `globe-v3.7e.html` runtime with strict staged atlas-loading flow: load `states` first (Texas-only intro), run full nonlinear zoom-out, then fetch/fade `land`, then fetch/fade `countries` (per-stage local->cdn fallback). Removed mixed legacy conditional paths and undefined `countriesMesh` branch from active runtime. Updated overview iframe URL in `index.html` to `globe-v3.7e.html?...&v=20260228g`.
-- Troubleshooting suggestions: If sequence appears unchanged, hard-refresh once to ensure iframe query token `v=20260228g` is loaded; if local atlas files are missing/corrupt, fallback source automatically switches to CDN per stage.
-- Resolutions/outcomes: Overview loader now follows deterministic order requested: Texas prefetch -> intro complete -> land fade-in -> countries fade-in.
-### 2026-02-28 10:22:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Refactored `assets/pages/overview/globe-v3.7e.html` to a timeline/keyframe execution model using a single `TIMELINE` sequence and marker-based dependencies (`introComplete`, `landReady`, `landFadeComplete`, `countriesReady`). Replaced hardcoded deferred-sequence logic with generic timeline processing (`processTimeline`) and one-shot fetch steps (`runFetchStep`) while keeping visual/output behavior unchanged.
-- Troubleshooting suggestions: Future sequencing edits should be made in the `TIMELINE` array only (timings, order, dependencies) before touching render or projection logic.
-- Resolutions/outcomes: Current behavior is now defined declaratively per element in sequence and can be tuned as timeline/keyframes without rewiring runtime control flow.
-### 2026-02-28 10:31:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added a single centralized `SEQUENCE` config block in `assets/pages/overview/globe-v3.7e.html` and rewired `TIMELINE` step fields (`id`, `at`, `duration`, `ease`, markers, opacity ranges) to reference it directly.
-- Troubleshooting suggestions: For timing-only changes, adjust values under `SEQUENCE` first; only modify `TIMELINE` structure when adding/removing step types.
-- Resolutions/outcomes: All sequence timing/easing/order knobs now live in one edit zone, with runtime logic unchanged.
-### 2026-02-28 10:38:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Flattened sequence controls from nested `SEQUENCE` object to single-line `SEQ` definitions in `assets/pages/overview/globe-v3.7e.html` and updated `TIMELINE` references accordingly.
-- Troubleshooting suggestions: For simple tuning, edit only `const SEQ = { ... }`; if `at` references a marker string, ensure the referenced marker name matches an earlier step `completeMarker`.
-- Resolutions/outcomes: Sequence tuning now matches requested style: one basic definitions area with line-by-line variables and no helper functions.
-### 2026-02-28 10:43:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added `centerLon` and `centerLat` to the flat `SEQ` definitions block in `assets/pages/overview/globe-v3.7e.html` and switched runtime anchor variables to use `SEQ` center values.
-- Troubleshooting suggestions: Keep longitude in `[-180, 180]` and latitude in `[-90, 90]` to avoid disorienting center locks.
-- Resolutions/outcomes: Globe center position is now tunable from the same one-block control surface as sequence timing/fade settings.
-### 2026-02-28 10:51:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Consolidated sequence/camera controls by removing duplicate intro/zoom/roll/fade fields from `OPT` and wiring runtime defaults/fallbacks to `SEQ` (`zoom init`, `post-intro roll`, and fallback scale).
-- Troubleshooting suggestions: Edit only `SEQ` for behavior tuning; keep `OPT` for visual stroke/fill styling.
-- Resolutions/outcomes: No cross-search needed for timing/position behavior; one top block controls it.
-### 2026-02-28 11:04:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Replaced split `OPT/SEQ` control surfaces with a single flat `CFG` block and added explicit lon/lat graticule generation controls (`graticuleReveal*`, `graticuleStroke*`) wired into timeline state and render fade behavior.
-- Troubleshooting suggestions: To delay lon/lat line generation, increase `graticuleRevealAt` dependency (marker) or `graticuleRevealDurationMs`; to hide lines set `graticuleRevealTo: 0`.
-- Resolutions/outcomes: Every active visual element in the overview sequence (sphere, graticule, Texas, land, countries) now has editable variables in one basic top block.
-### 2026-02-28 11:18:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added `CFG` section toggles (`enableSphere`, `enableTexas`, `enableGraticule`, `enableLand`, `enableCountries`) and render mode controls (`sphere/texas/graticule/land/countriesRenderMode`) with accepted values `border|fill|both|none`; wired timeline construction/fetch/startup/render paths to honor disabled sections.
-- Troubleshooting suggestions: If `countries` is enabled while `land` is disabled, keep `countriesFetchAt` as `landFadeComplete` only if you intentionally want countries blocked; runtime now auto-falls back to intro marker in this combo for continuity.
-- Resolutions/outcomes: You can now disable entire sequence sections and switch each element between border/fill rendering from the single `CFG` block without code-path edits.
-### 2026-02-28 11:33:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added countries reveal-mode toggle in `assets/pages/overview/globe-v3.7e.html` with `countriesRevealMode` (`single` or `groups`), plus grouped reveal controls (`countriesGroupCount`, `countriesGroupStaggerMs`). Implemented random country feature grouping on fetch and per-group staggered fade updates while keeping single-block countries fade path unchanged.
-- Troubleshooting suggestions: For stronger group separation, increase `countriesGroupStaggerMs`; if group transitions feel too long, reduce `countriesFadeDurationMs` first before lowering group count.
-- Resolutions/outcomes: Countries can now render as one block (current behavior) or in randomized multi-group fades using the same top control block.
-### 2026-02-28 11:44:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added per-stage camera tween controls in `assets/pages/overview/globe-v3.7e.html` for intro/texas/graticule/land/countries (`CamEnabled`, lon/lat/roll/zoom from->to, and ease), wired through timeline into projection offsets.
-- Troubleshooting suggestions: Keep all `*CamEnabled` flags false until needed; enable one stage at a time to validate movement interactions with existing reveal timings.
-- Resolutions/outcomes: Stage-specific rotation/position/zoom motion is now configurable in `CFG` and remains inert by default.
-### 2026-02-28 11:52:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added per-stage persistence flags and reset timing (`intro/texas/graticule/land/countries CamPersist + CamResetDurationMs`) and wired automatic reset tweens when persistence is disabled.
-- Troubleshooting suggestions: Set `*CamPersist: true` to keep stage offsets; set `false` with a short `*CamResetDurationMs` for temporary movement that smoothly returns to baseline.
-- Resolutions/outcomes: Each stage now has an explicit place to choose persistent vs temporary camera movement in the same control block.
-### 2026-02-28 11:58:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added inline helper text comments directly above the stage camera config fields in `assets/pages/overview/globe-v3.7e.html`, documenting additive offset logic, units, persistence behavior, and stage-duration mapping.
-- Troubleshooting suggestions: Keep comments in sync when adding new stage camera fields so tuning remains one-stop and self-describing.
-- Resolutions/outcomes: Camera section is now self-explanatory without needing to inspect runtime functions.
-### 2026-02-28 12:07:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added infinite persistent-motion controls in `assets/pages/overview/globe-v3.7e.html` (`persistentMotionEnabled`, `persistentMotionStartMarker`, and per-second lon/lat/roll/zoom rates) and wired them into per-frame camera offset accumulation after marker activation.
-- Troubleshooting suggestions: Keep `persistentRollDegPerSec` at `0` if you want globe rotation without camera roll; use only `persistentLonDegPerSec` for east/west globe spin.
-- Resolutions/outcomes: You can now start a behavior once and keep it running indefinitely until another offset sequence overrides it.
-### 2026-02-28 12:14:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Expanded helper comments in the `CFG` control sections of `assets/pages/overview/globe-v3.7e.html` to document section toggles, render modes, marker dependencies, fetch/fade staging, and persistent-motion usage.
-- Troubleshooting suggestions: Keep marker-name comments aligned with active marker keys if custom marker strings are introduced later.
-- Resolutions/outcomes: Tuning surface is now more self-describing by section without inspecting runtime internals.
-### 2026-02-28 12:27:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added region-priority grouped countries reveal path in `assets/pages/overview/globe-v3.7e.html` with new controls (`countriesGroupStrategy`, `countriesRegionOrderCsv`, `countriesRegionDelayMs`), centroid-based region assignment, ordered regional buckets with intra-region randomness, and per-group region-phase delays.
-- Troubleshooting suggestions: If a continent appears too early, increase `countriesRegionDelayMs` or move it later in `countriesRegionOrderCsv`; switch `countriesGroupStrategy` back to `random` for original behavior.
-- Resolutions/outcomes: Countries can now build out gradually with controllable geographic sequencing (for example Americas first, then Asia, then Africa/Europe).
-### 2026-02-28 12:39:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added longitude-based grouped countries sequencing in `assets/pages/overview/globe-v3.7e.html` (`countriesGroupStrategy: longitude`) with configurable band definitions/order (`countriesLongitudeBandsCsv`, `countriesLongitudeOrderCsv`) and shared per-phase delay (`countriesGroupPhaseDelayMs`).
-- Troubleshooting suggestions: To co-load Oceania with West Asia, keep them in the same longitude band in `countriesLongitudeBandsCsv`; adjust `countriesLongitudeOrderCsv` to shift that band earlier/later.
-- Resolutions/outcomes: Reveal order can now be driven by visibility-oriented longitude chunks instead of continent buckets.
-### 2026-02-28 12:46:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Tuned active longitude-group defaults in `assets/pages/overview/globe-v3.7e.html` to improve observable phased rollout (`countriesGroupPhaseDelayMs=1200`, `countriesGroupCount=12`, `countriesGroupStaggerMs=260`, `countriesFadeDurationMs=450`).
-- Troubleshooting suggestions: If phases still overlap too much, increase `countriesGroupPhaseDelayMs`; if buildout feels too slow, reduce `countriesGroupCount` before lowering delay.
-- Resolutions/outcomes: Longitude-chunk sequencing should now present clearer phase separation while retaining gradual random-in-group behavior.
-### 2026-02-28 12:55:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Diagnosed no-output issue and fixed invalid countries grouping conditional chain in `assets/pages/overview/globe-v3.7e.html` (`else if` ordering for `region|longitude|random` strategy branch).
-- Troubleshooting suggestions: If output still appears blank, hard-refresh to clear cached iframe script and verify no console syntax errors remain.
-- Resolutions/outcomes: Script parse error removed; globe rendering pipeline can execute again.
-### 2026-02-28 13:08:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added longitude-visibility gated phase starts for grouped countries in `assets/pages/overview/globe-v3.7e.html` with new controls (`countriesLongitudeVisibilityGate`, `countriesLongitudeVisibilityThresholdDeg`, `countriesLongitudePhaseGapMs`) and phase-anchor tracking so phase 0 starts immediately while later phases wait for partial on-screen visibility.
-- Troubleshooting suggestions: If later phases still appear too early, reduce `countriesLongitudeVisibilityThresholdDeg`; if they feel stuck, increase it slightly or reduce spin speed.
-- Resolutions/outcomes: Initial `-180:-20` chunk loads first with random-in-group behavior, and subsequent longitude chunks are deferred until they rotate partway into view.
-### 2026-02-28 13:16:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Switched longitude gate behavior to midpoint-start triggering with new `countriesLongitudeVisibilityGateMode` and active mode `band-start-midpoint`; tightened gate threshold (`4deg`) and adjusted overview final zoom to `introZoomTo=1.45` for a slightly wider frame.
-- Troubleshooting suggestions: If phase starts feel too strict at high spin rates, raise `countriesLongitudeVisibilityThresholdDeg` modestly (`6-10`).
-- Resolutions/outcomes: Next section now begins when its start longitude reaches screen midpoint, and camera framing is slightly zoomed out.
-### 2026-02-28 15:51:30 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Completed clean-exit protocol after overview globe pipeline packet; verified final repository state with `git status --short` and `git log --oneline -n 3`.
-- Troubleshooting suggestions: If reopening this packet later, continue from `assets/pages/overview/globe-v3.7e.html` CFG controls (`countriesGroupStrategy`, longitude bands/order, visibility gate) and validate behavior with a hard refresh.
-- Resolutions/outcomes: Session closed with packet commit `3254901` recorded; active-session tail marker removed for clean close.
-- Commit hash(es): `3254901`
-
-### 2026-02-28 16:04:37 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Imported Portal V2 additive bundle from `C:\dev\tsi\tsi-site-repo-wt-20260227-154014` into this worktree via direct file checkout (`portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, `portal-internship.html`, `css/portal-expansion.css`, `js/portal-intake-v2.js`, `form-backend/portal_v2_config.js`, `form-backend/portal_v2_apps_script_webapp.js`, `PORTAL-V2-README.md`).
-- Troubleshooting suggestions: Keep prototype files (`portal-investor.html`, `js/portal-intake.js`) out of staged commits during v2 integration to avoid dual-runtime drift; wire `index.html` links in a separate commit for lower blast radius.
-- Resolutions/outcomes: Portal V2 package is now present in target worktree and syntax checks pass for imported JS/backend files.
 
 
-### 2026-02-28 17:00:59 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated footer bottom-bar links in `index.html` (`.footer-legal`) to include Portal V2 access links: `portal-hub.html`, `portal-investment.html`, `portal-press.html`, `portal-employment.html`, and `portal-internship.html`.
-- Troubleshooting suggestions: If footer wrapping becomes dense on smaller widths, shorten labels first (for example `Opportunity`), or split footer links into two rows in a dedicated follow-up packet.
-- Resolutions/outcomes: New portal routes are now directly reachable from the main site footer without modifying top navigation or modal behavior.
-
-### 2026-02-28 19:39:06 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Repointed the remaining engagement CTA in `index.html` from `portal.html` to `portal-hub.html` (`Visit the opportunity desk`) and removed legacy prototype files `portal-investor.html` and `js/portal-intake.js` that are not used by Portal V2 logic.
-- Troubleshooting suggestions: `portal.html` and `js/portal-form.js` still exist as legacy standalone files; keep them unlinked, or retire them in a separate cleanup packet if you want strict v2-only file inventory.
-- Resolutions/outcomes: Main-site navigation now routes only to Portal V2 pages, and obsolete prototype runtime files were removed from this worktree.
-
-### 2026-02-28 22:24:22 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Deleted legacy portal files `portal.html` and `js/portal-form.js`, confirmed no remaining runtime references to `portal.html`/`portal-investor.html`/`js/portal-intake.js`/`js/portal-form.js` in active HTML/JS, and executed live Portal V2 endpoint verification with JSON payloads for routes (`investment`, `press`, `employment`) plus internship with attachment payload.
-- Troubleshooting suggestions: `AGENTS-LOG.md` contains one embedded NUL byte from prior history; most editors read it, but some tools treat the file as binary. If desired, run a one-time text re-encode cleanup before long-term automation indexing.
-- Resolutions/outcomes: Portal V2 is the only active linked portal path, legacy runtime entry files were retired, and endpoint submit checks returned `{ok:true}` for tested routes/payloads.
-
-### 2026-02-28 22:31:05 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Sanitized `AGENTS-LOG.md` by removing one embedded NUL byte (`0x00`) and re-saving as UTF-8 text; confirmed `nul_bytes=0` post-write and normal text search behavior restored.
-- Troubleshooting suggestions: Preserve plain UTF-8 text in future log imports/merges to prevent binary-classification by CLI tools.
-- Resolutions/outcomes: Log file is now safe for human reading and agent tooling (`rg` no longer flags binary behavior).
-
-### 2026-02-28 22:36:44 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added explicit Portal V2 deployment TODOs in `STATUS.md` for (1) provisioning production Google Sheet + `PORTAL_V2_SPREADSHEET_ID`, and (2) creating/assigning route-specific Google Drive upload folders + `PORTAL_V2_*_UPLOAD_FOLDER_ID` permissions verification.
-- Troubleshooting suggestions: Complete these two TODOs before final launch sign-off so accepted portal submissions and attachments land in intended production destinations.
-- Resolutions/outcomes: Storage setup tasks are now formally tracked as planned items in the primary roadmap document.
-
-### 2026-02-28 22:59:58 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated Overview iframe source in `index.html` to the new globe asset `assets/pages/overview/globe-v4.1-desktop-stable.html` with `mode=desktop` and cache token `v=20260301a`; performed local HTTP checks (`index.html` and globe asset both `200`).
-- Troubleshooting suggestions: When you start the mobile pass, add a viewport-aware mode handoff (`desktop`/`mobile`) rather than hardwiring desktop mode in iframe query.
-- Resolutions/outcomes: Desktop now uses Globe v4.1 as the active overview background runtime; mobile optimization is explicitly deferred per request.
-
-### 2026-02-28 23:06:13 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Removed the Overview first-load auto-advance timer path in `js/main.js` that transitioned from `#overview` to `#mandate`; retained the existing `overviewContinue` click handler so manual `Click to continue` behavior remains unchanged.
-- Troubleshooting suggestions: Optional cleanup later: remove now-unused `.overview-hero.is-auto-transition-out` CSS rule if you want to retire dead transition styling.
-- Resolutions/outcomes: Initial page load no longer auto-navigates away from Overview, and user-driven continue navigation still routes to Mandate.
-
-### 2026-02-28 23:16:02 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Applied global Overview style adjustments in `css/main.css`: made `.overview-continue` background opaque while keeping existing text/border color palette, and added dark feathered shading behind small copy text via `.overview-copy::before` gradient+blur so edges fade softly.
-- Troubleshooting suggestions: If copy shading appears too strong on light theme, lower middle alpha values in the `.overview-copy::before` gradient before reducing blur radius.
-- Resolutions/outcomes: `Click to continue` is now visually solid/opaque and overview small text has improved readability with feathered dark backing.
-
-### 2026-02-28 23:22:08 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Increased darkness of Overview copy feather backdrop in `css/main.css` by raising `.overview-copy::before` gradient alpha stops (edge and center) while keeping geometry/falloff unchanged.
-- Troubleshooting suggestions: If this now feels too heavy on light theme, reduce center alpha first before changing blur/shape.
-- Resolutions/outcomes: Small-copy backing is visibly darker with the same feathered left/right fade behavior.
-
-### 2026-02-28 23:21:43 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Reworked Overview small-text backing in `css/main.css` from section-wide shading to text-trimmed line backplates (`.overview-copy-line::before` with `width: fit-content` line sizing), then wired backplate opacity to `.overview-copy.is-body-visible` so it fades in with final body text reveal.
-- Troubleshooting suggestions: If any line appears too tightly cropped, increase horizontal line padding (`.overview-copy-line` `padding-inline`) before altering gradient stops.
-- Resolutions/outcomes: Backing now follows the shape of each text line and animates in sync with the final copy reveal state.
-
-### 2026-03-01 00:21:50 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated Overview reveal CSS in `css/main.css` to use `color: transparent` for unrevealed body/phrase/accent-phrase text instead of background-matched color, keeping existing reveal class transitions intact.
-- Troubleshooting suggestions: If any anti-aliased ghosting appears during fade-in on specific browsers, add `will-change: color` to `.overview-copy` and `.overview-phrase` as a targeted follow-up.
-- Resolutions/outcomes: Overview paragraph hide/reveal no longer depends on matching page background color, so globe backgrounds do not break text visibility behavior.
-
-### 2026-03-01 01:19:19 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Corrected bottom footer-nav rendering in `css/main.css` by enabling wrap on `.footer-layout` and assigning `.footer-legal` to a dedicated full-width wrapped row (`flex-basis: 100%`, `width: 100%`, `flex-wrap: wrap`) so expanded link set no longer compresses or overflows in desktop layout.
-- Troubleshooting suggestions: If link density still feels high at 1200px widths, reduce `.footer-legal` gap from `14px` to `10-12px` before shrinking font size.
-- Resolutions/outcomes: Bottom nav/footer link bar now renders as a stable wrapped row with predictable spacing after portal-link expansion.
-
-### 2026-03-01 01:22:51 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Fixed transparent footer rendering by updating `css/main.css` so `footer` creates a positioned stacking context (`position: relative; z-index: 5`) and `.footer-layout` paints explicit `background-color: var(--frame-bg)`, preventing fixed overview globe bleed-through.
-- Troubleshooting suggestions: If any residual bleed appears from children, apply `background-color: inherit` to footer subcontainers that visually span the row.
-- Resolutions/outcomes: Bottom footer/nav bar now renders as an opaque surface instead of appearing transparent over the globe layer.
-
-### 2026-03-01 01:28:11 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Implemented light/dark theme support for the v4.1 overview globe by adding URL-driven theme overrides in `assets/pages/overview/globe-v4.1-desktop-stable.html` (light palette + background) and adding `syncOverviewGlobeTheme` in `js/main.js` to update iframe `theme` query param on initial load and theme-toggle changes.
-- Troubleshooting suggestions: Current behavior reloads the iframe when theme changes; if seamless no-reload theme morph is needed later, add a `postMessage` theme channel instead of query-param reload.
-- Resolutions/outcomes: Overview globe now renders with light-specific colors when site light theme is active and dark colors when dark theme is active.
-
-### 2026-03-01 01:29:50 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Updated Overview line-level feather shadow color in `css/main.css` from dark to white by replacing `.overview-copy-line::before` gradient stops with white rgba values; preserved existing line-trimmed shape and reveal sync.
-- Troubleshooting suggestions: If white glow is too bright over light theme, lower center alpha first (for example `0.84 -> 0.62`) while keeping edge alphas proportional.
-- Resolutions/outcomes: Requested shadow color swap completed (black/dark -> white) without altering reveal mechanics.
-
-### 2026-03-01 01:36:21 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Resolved theme-switch persistence bug for Overview line backdrop by replacing hardcoded white gradient color with theme token `--overview-copy-backdrop-rgb` in `css/main.css`; set token values for both default (dark) and `[data-theme="light"]` scopes.
-- Troubleshooting suggestions: If you want different backdrop tint per theme later, adjust only `--overview-copy-backdrop-rgb` values without touching the gradient geometry/alpha curve.
-- Resolutions/outcomes: Backdrop now switches correctly with theme (no white persistence when toggling back to dark).
-
-### 2026-03-01 01:45:57 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Implemented Overview home-control behavior split in `js/main.js`: added `activateOverviewHome` + `forceFullOverviewOnActivate`, wired `#tab-overview` click to soft reset/replay, and wired `.logo-container` click to full reset/replay (`forceFull: true`) with existing pulse effect retained. Added `aria-label="Go to Overview"` to logo link in `index.html`.
-- Troubleshooting suggestions: If full logo reset should also restart globe iframe sequence later, append a cache-bust refresh to overview iframe source inside the logo click path.
-- Resolutions/outcomes: `00` and logo now have distinct, deterministic reset semantics matching requested behavior; keyboard/click accessibility labels are aligned for logo home navigation.
-
-### 2026-03-01 01:54:04 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Deleted legacy overview globe asset `assets/pages/overview/globe-3.7.2-west.html` per direction now that v4.1 is active.
-- Troubleshooting suggestions: If additional old globe variants are no longer needed, remove them in one scoped cleanup packet to keep the overview asset set minimal.
-- Resolutions/outcomes: Legacy 3.7.2 variant is removed from working tree; active overview runtime remains v4.1 desktop asset path.
-
-### 2026-03-01 01:58:10 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Deleted all requested legacy overview globes (`3.7*` and `3.8*`) under `assets/pages/overview/`; verified v4.1 still references local atlas files under `assets/pages/overview/data/` so subfolder retained.
-- Troubleshooting suggestions: Keep `data/` checked in unless you switch v4.1 to CDN-only atlas loading; removing it now would break local-first fallback path.
-- Resolutions/outcomes: Overview asset set is reduced to active v4.1 runtime plus required local atlas data files.
-
-### 2026-03-01 02:03:40 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Implemented Globe Lab packet: added `globe-lab.html` interactive access page, enhanced `assets/pages/overview/globe-v4.1-desktop-stable.html` with `interactive=1` runtime controls (drag rotate, wheel zoom, draw/clear canvas overlay, spin pause/resume, spin-speed slider, random jump, reset view), added small footer easter-egg link in `index.html` + `.footer-egg` style in `css/main.css`, and removed legacy overview globes (`3.7*`/`3.8*`) while retaining required `assets/pages/overview/data/*` atlas files.
-- Troubleshooting suggestions: For mobile-specific Globe Lab ergonomics later, tune pointer sensitivity and control density under a dedicated mobile query-mode instead of reusing desktop defaults.
-- Resolutions/outcomes: Users can now open an interactive/fun globe experience from a hidden footer egg link, while the main overview background remains stable and non-interactive by default.
-
-### 2026-03-01 03:00:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Per startup protocol, checked `AGENTS-LOG.md` EOF marker and detected prior unclean close condition (`[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE` still present from earlier session).
-- Troubleshooting suggestions: Resume with a clean state check first if you suspect interrupted edits (`git status`, then recent commits) before continuing packet work.
-- Resolutions/outcomes: Unclean-exit recovery note recorded; active tail marker retained as required for current live session.
-
-### 2026-03-01 03:01:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Completed unclean-close detection/recovery packet; validated working tree/commit context (`git status --short`, `git log --oneline -n 3`) and prepared restart options from current state.
-- Troubleshooting suggestions: Treat this session as active until requested clean-close protocol is run; avoid resetting history unless you explicitly choose restart-from-commit.
-- Resolutions/outcomes: Packet complete; repository is ready to continue from current tree and latest `STATUS.md` focus.
-
-### 2026-03-01 03:18:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Implemented additive Portal V2 backend upgrade without touching legacy handler: added dashboard/unreviewed state + tab-color signal behavior to `form-backend/portal_v2_apps_script_webapp.js`, added dashboard-related script-property keys/columns in `form-backend/portal_v2_config.js`, and documented deploy + review-reset workflow in `PORTAL-V2-README.md`; updated `STATUS.md` with packet completion evidence.
-- Troubleshooting suggestions: Deploy V2 as a separate Apps Script web app endpoint and point only `js/portal-intake-v2.js` to it; if dashboard sheet header is manually changed, run `portalV2RefreshDashboard_()` once to rebuild expected columns.
-- Resolutions/outcomes: V2 now supports shared-spreadsheet route separation with visual "new data" tab cues and a central dashboard while legacy V1 backend remains unchanged.
-
-### 2026-03-01 03:33:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Refactored `form-backend/portal_v2_apps_script_webapp.js` into unified route mode for production cutover: added explicit route resolver (`legacy_*` + `portal_*`), legacy-compatible validation/row mapping, route-specific target resolution (including legacy sheet overrides), and compatible dashboard/review helpers across all routes; expanded `form-backend/portal_v2_config.js` with legacy sheet/spreadsheet/upload keys and updated `PORTAL-V2-README.md` with full cutover instructions (`js/main.js` + `js/portal-intake-v2.js` endpoint alignment).
-- Troubleshooting suggestions: During cutover, point a staging clone of `js/main.js` and `js/portal-intake-v2.js` to the same new V2 endpoint first; verify one POST per legacy and portal route lands in intended tabs before changing production endpoint values.
-- Resolutions/outcomes: V2 endpoint can now replace current intake routing behavior while preserving V1 script untouched for fallback testing.
-
-### 2026-03-01 03:44:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Added configurable auto-reply capability in unified V2 backend with global + per-route toggles (`PORTAL_V2_AUTO_REPLY_*`) and message controls (`SUBJECT_PREFIX`, `SIGNATURE`), and expanded Drive routing controls with legacy per-route upload-folder overrides (`PORTAL_V2_LEGACY_*_UPLOAD_FOLDER_ID`) in `form-backend/portal_v2_config.js`; updated `PORTAL-V2-README.md` and `STATUS.md` to reflect new controls and existing attachment schema coverage.
-- Troubleshooting suggestions: Enable auto-reply in two steps (`PORTAL_V2_AUTO_REPLY_ENABLED=true` plus route-specific toggle) and test with a non-owner email first to verify deliverability/spam handling.
-- Resolutions/outcomes: V2 now supports route-specific attachment storage destinations and selective submitter auto-replies without changing legacy V1 script.
-
-### 2026-03-01 03:58:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Per user-provided deployment URL, updated active frontend intake endpoints to unified V2 web app in `js/main.js` (`FORM_ENDPOINT`) and `js/portal-intake-v2.js` (`PORTAL_V2_ENDPOINT`) using `https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec`; verified references by search.
-- Troubleshooting suggestions: Run one submission per legacy and portal route immediately after deploy to confirm sheet routing (`01..07`) and attachment write behavior under live endpoint.
-- Resolutions/outcomes: Site intake traffic is now configured to flow through the new V2 backend endpoint for both legacy and portal forms.
-
-### 2026-03-01 12:57:10 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Executed live POST smoke submissions against the deployed unified V2 endpoint for all seven routes using unique emails/submission IDs to avoid rate-limit suppression; included one attachment payload test on portal internship route. Route set tested: `legacy_stakeholder`, `legacy_investor`, `legacy_employment`, `portal_investment`, `portal_press`, `portal_employment`, `portal_internship`.
-- Troubleshooting suggestions: Verify destination tabs by searching submitted IDs in the sheet (`01..07`): `smoke-legacy-stakeholder-20260301175649`, `smoke-legacy-investor-20260301175649`, `smoke-legacy-employment-20260301175649`, `smoke-portal-investment-20260301175649`, `smoke-portal-press-20260301175649`, `smoke-portal-employment-20260301175649`, `smoke-portal-internship-20260301175649`.
-- Resolutions/outcomes: Endpoint returned `{ok:true}` for all seven route submissions; network-path and backend acceptance validated end-to-end.
-
-### 2026-03-01 13:09:00 -06:00 | Agent: Codex | Version: GPT-5
-- Actions taken: Implemented property-footprint mitigation in `form-backend/portal_v2_apps_script_webapp.js`: changed rate-limiting from `PropertiesService` to `CacheService`, prevented dashboard state property writes when `PORTAL_V2_DASHBOARD_ENABLED=false`, added maintenance utility `portalV2ClearGeneratedState()` to remove generated `portal_v2_unread_*`, `portal_v2_last_*`, and legacy `portal_v2_rl_*` keys, and force-pushed updated script to deployed `TSI Intake v2` Apps Script project.
-- Troubleshooting suggestions: After disabling dashboard mode in Script Properties, run `portalV2ClearGeneratedState` once to free property slots; avoid running `portalV2RefreshDashboard` unless dashboard mode is re-enabled.
-- Resolutions/outcomes: V2 can now run without growing Script Properties count from runtime state, preventing recurrence of the 50-property cap issue.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

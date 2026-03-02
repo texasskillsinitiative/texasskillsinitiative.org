@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-legal">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,12 +10,27 @@
     <link rel="apple-touch-icon" sizes="180x180" href="assets/global/icon/tsi-app-apple-180.png">
     <link rel="manifest" href="site.webmanifest">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=20260220-mobilefix">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
 </head>
 <body class="legal-page">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb" href="legal-hub.html" data-tsi-label-key="legal_desk">Legal Desk</a>
+                <span class="tsi-utility-bar__crumb-sep">&gt;</span>
+                <a class="tsi-utility-crumb is-current" href="privacy.html" data-tsi-label-key="privacy_policy">Privacy Policy</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
     <main>
-        <h1>Privacy Policy</h1>
-        <a class="legal-return" href="index.html">Return to texasskillsinitiative.org</a>
+        <h1 data-tsi-label-key="privacy_policy">Privacy Policy</h1>
         <p class="legal-meta">Effective date: September 15, 2025<br>Last updated: February 20, 2026</p>
 
         <p>Texas Skills Initiative (TSI) is an initiative in formation and expects to organize as a Texas limited liability company. This Privacy Policy explains how we collect, use, and share information when you visit our website or submit the stakeholder inquiry form.</p>
@@ -76,8 +91,9 @@
             <li>Current revision: February 20, 2026</li>
         </ul>
 
-        <p><a href="index.html">Return to texasskillsinitiative.org</a></p>
     </main>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
 </body>
 </html>
 

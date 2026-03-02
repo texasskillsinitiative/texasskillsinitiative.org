@@ -16,10 +16,10 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="css/main.css?v=20260220-mobilefix">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
 </head>
 
-<body>
+<body class="has-primary-nav">
     <a class="skip-link" href="#mainContent">Skip to main content</a>
     <noscript>
         <div class="noscript-banner">
@@ -586,7 +586,8 @@
                         aria-label="Map category toggles" data-map-controls="md"></div>
                     <div class="pipeline-map-frame" aria-label="Vector world map">
                         <svg viewBox="0 0 181 89" role="img" aria-label="Stylized world map"
-                            data-map-md="assets/pages/pipeline/pipeline-world-map.md">
+                            data-map-md="assets/pages/pipeline/pipeline-world-map.md"
+                            data-map-src="assets/pages/pipeline/pipeline-world-map.png">
                             <rect width="181" height="89" class="map-ocean" />
                             <g class="map-dots" data-dot-grid></g>
                         </svg>
@@ -604,7 +605,7 @@
                     <p class="engagement-kicker">Secure Your Region's Place</p>
                     <p class="engagement-framing-title">Engineering parity into the 2026 pipeline.</p>
                 </div>
-                <a class="btn-cta btn-cta--inline" href="portal-hub.html">Visit the opportunity desk</a>
+                <a class="btn-cta btn-cta--inline" href="portal-hub.html">Visit career opportunities</a>
                 <p class="engagement-framing-copy">
                     High-fidelity corridor engineering requires massive local alignment. We operate at a deliberate
                     pace to ensure every regional asset <span class="text-main-strong"><strong>sets the
@@ -966,38 +967,48 @@
     </div>
     <!-- Footer Section Start -->
     <footer>
-        <div class="footer-layout">
-            <div class="footer-left">
-                <div>© 2026 TEXAS SKILLS INITIATIVE. All rights reserved.</div>
-            </div>
-            <div class="footer-right footer-theme">
-                <span class="footer-label">Theme</span>
-                <span class="theme-text">Dark</span>
-                <label class="theme-switch"><input type="checkbox" id="checkbox" aria-label="Toggle light theme">
-                    <div class="slider"></div>
-                </label>
-                <span class="theme-text">Light</span>
-            </div>
-            <div class="footer-actions">
-                <div class="status-pill">
-                    <div class="status-dot"></div><span>SYSTEM: ACTIVE</span>
+        <div class="footer-layout footer-layout--grid">
+            <div class="footer-row footer-row--top">
+                <div class="footer-cell footer-cell--left footer-links-group">
+                    <a href="portal-hub.html" data-tsi-footer-key="career_opportunities">Career</a>
+                    <span class="footer-egg-dot" aria-hidden="true">•</span>
+                    <a href="portal-investment.html" data-tsi-footer-key="investment_inquiry">Investment</a>
+                    <span class="footer-egg-dot" aria-hidden="true">•</span>
+                    <a href="portal-press.html" data-tsi-footer-key="public_relations_media_request">PR</a>
                 </div>
-                <button class="btn-portal btn-portal--footer" data-modal-open="portalModal">TSI INTERNAL ACCESS</button>
+                <div class="footer-cell footer-cell--center"></div>
+                <div class="footer-cell footer-cell--right footer-status-group">
+                    <div class="status-pill">
+                        <div class="status-dot"></div><span>SYSTEM: ACTIVE</span>
+                    </div>
+                    <button class="btn-portal btn-portal--footer" data-modal-open="portalModal">TSI INTERNAL ACCESS</button>
+                </div>
             </div>
-            <div class="footer-legal">
-                <a href="portal-hub.html">Opportunity Desk</a>
-                <a href="portal-investment.html">Investment</a>
-                <a href="portal-press.html">Press</a>
-                <a href="portal-employment.html">Employment</a>
-                <a href="portal-internship.html">Internship</a>
-                <a href="privacy.html">Privacy</a>
-                <a href="terms.html">Terms</a>
-                <a href="accessibility.html">Accessibility</a>
-                <a href="security.html">Security</a>
-                <a href="globe-lab.html" class="footer-egg" aria-label="Open Globe Lab">•</a>
+            <div class="footer-row footer-row--bottom">
+                <div class="footer-cell footer-cell--left footer-links-group">
+                    <a href="privacy.html" data-tsi-footer-key="privacy_policy">Privacy</a>
+                    <span class="footer-egg-dot" aria-hidden="true">•</span>
+                    <a href="terms.html" data-tsi-footer-key="terms_of_use">Terms</a>
+                    <span class="footer-egg-dot" aria-hidden="true">•</span>
+                    <a href="accessibility.html" data-tsi-footer-key="accessibility_statement">Accessibility</a>
+                    <a href="globe-lab.html" class="footer-egg-link" aria-label="Open Globe Lab">•</a>
+                    <a href="security.html" data-tsi-footer-key="security_statement">Security</a>
+                </div>
+                <div class="footer-cell footer-cell--center footer-right footer-theme">
+                    <span class="footer-label">Theme</span>
+                    <span class="theme-text">Dark</span>
+                    <label class="theme-switch"><input type="checkbox" id="checkbox" aria-label="Toggle light theme">
+                        <div class="slider"></div>
+                    </label>
+                    <span class="theme-text">Light</span>
+                </div>
+                <div class="footer-cell footer-cell--right footer-copyright">
+                    © 2026 TEXAS SKILLS INITIATIVE. All rights reserved.
+                </div>
             </div>
         </div>
     </footer>
+    <script src="js/site-labels.js" defer></script>
     <script src="js/main.js?v=20260220-mobilefix" defer></script>
 </body>
 

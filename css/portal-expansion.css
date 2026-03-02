@@ -1,17 +1,147 @@
 .portalx-page {
     min-height: 100vh;
-    padding: 40px 18px 64px;
+    padding: 0 0 64px;
     background:
-        radial-gradient(1200px 600px at 20% -10%, rgba(18, 54, 112, 0.18), transparent 60%),
-        radial-gradient(900px 500px at 100% 0%, rgba(173, 132, 67, 0.16), transparent 62%),
+        linear-gradient(180deg, color-mix(in srgb, var(--page-bg) 94%, var(--card-bg)) 0%, var(--page-bg) 240px),
         var(--page-bg);
     color: var(--page-text-main);
+}
+
+.desk-page {
+    position: relative;
+}
+
+.desk-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        radial-gradient(700px 300px at 8% -8%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 76%);
+}
+
+.legal-page.portalx-page {
+    background: color-mix(in srgb, var(--page-bg) 86%, #dfe3e8);
+}
+
+.legal-page.desk-page::before {
+    display: none;
+}
+
+.desk-page--opportunity.portalx-page {
+    background: color-mix(in srgb, var(--page-bg) 86%, #dfe3e8);
+}
+
+.desk-page--opportunity.desk-page::before {
+    display: none;
+}
+
+.portalx-page--investment.portalx-page,
+.portalx-page--press.portalx-page,
+.portalx-page--employment.portalx-page,
+.portalx-page--internship.portalx-page {
+    background: color-mix(in srgb, var(--page-bg) 86%, #dfe3e8);
+}
+
+.legal-page .portalx-shell {
+    max-width: 860px;
+    margin: -8px auto 80px;
+    padding: 30px 34px 40px;
+    border: none;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--card-bg) 98%, #ffffff);
+    box-shadow: 0 4px 12px rgba(6, 12, 24, 0.16);
+    gap: 12px;
+}
+
+.desk-page--opportunity .portalx-shell {
+    max-width: 860px;
+    margin: -8px auto 80px;
+    padding: 30px 34px 40px;
+    border: none;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--card-bg) 98%, #ffffff);
+    box-shadow: 0 4px 12px rgba(6, 12, 24, 0.16);
+    gap: 12px;
+}
+
+.portalx-page--investment .portalx-shell,
+.portalx-page--press .portalx-shell,
+.portalx-page--employment .portalx-shell,
+.portalx-page--internship .portalx-shell {
+    max-width: 860px;
+    margin: -8px auto 80px;
+    padding: 30px 34px 40px;
+    border: none;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--card-bg) 98%, #ffffff);
+    box-shadow: 0 4px 12px rgba(6, 12, 24, 0.16);
+    gap: 12px;
+}
+
+.desk-page--opportunity .portalx-hero {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.desk-page--opportunity .portalx-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-card {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 12px 0 16px;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-card::before {
+    display: none;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-card:hover {
+    transform: none;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-route {
+    font-family: "JetBrains Mono", monospace;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-btn {
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    min-height: 0;
+    justify-self: start;
+    letter-spacing: 0.08em;
+}
+
+.desk-page--opportunity .portalx-grid--desk .portalx-btn:hover {
+    color: color-mix(in srgb, var(--accent) 78%, var(--page-text-main));
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .portalx-shell {
     max-width: 980px;
     margin: 0 auto;
+    padding: 36px 18px 0;
     display: grid;
+    gap: 18px;
+}
+
+.desk-page .portalx-shell {
+    position: relative;
+    z-index: 1;
     gap: 20px;
 }
 
@@ -22,12 +152,52 @@
     background: color-mix(in srgb, var(--card-bg) 92%, transparent);
 }
 
+.desk-page .portalx-hero {
+    border-color: color-mix(in srgb, var(--accent) 16%, var(--frame-border));
+    border-left: 3px solid color-mix(in srgb, var(--accent) 72%, var(--frame-border));
+    border-radius: 10px;
+    padding: 20px 22px;
+    background: color-mix(in srgb, var(--card-bg) 97%, transparent);
+    box-shadow: 0 3px 12px rgba(4, 10, 22, 0.06);
+}
+
+.desk-page--opportunity .portalx-hero {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.desk-page--legal .portalx-hero {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.portalx-page--investment .portalx-hero,
+.portalx-page--press .portalx-hero,
+.portalx-page--employment .portalx-hero,
+.portalx-page--internship .portalx-hero {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
 .portalx-kicker {
     margin: 0 0 8px 0;
     font-size: 0.72rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--page-text-dim);
+}
+
+.desk-page .portalx-kicker {
+    color: color-mix(in srgb, var(--accent) 70%, var(--page-text-main));
 }
 
 .portalx-hero h1 {
@@ -50,10 +220,38 @@
     text-transform: uppercase;
 }
 
+.portalx-back.site-back-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin-top: 14px;
+    border: 1px solid var(--frame-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card-bg) 90%, transparent);
+    color: var(--page-text-main);
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+.portalx-back.site-back-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
 .portalx-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 14px;
+}
+
+.portalx-grid--desk {
+    gap: 16px;
 }
 
 .portalx-card {
@@ -65,12 +263,42 @@
     gap: 8px;
 }
 
+.portalx-grid--desk .portalx-card {
+    position: relative;
+    border-radius: 10px;
+    border-color: color-mix(in srgb, var(--accent) 14%, var(--frame-border));
+    background: color-mix(in srgb, var(--card-bg) 96%, transparent);
+    box-shadow: 0 2px 8px rgba(4, 10, 22, 0.05);
+    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.portalx-grid--desk .portalx-card::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    top: 0;
+    width: 56px;
+    height: 2px;
+    background: color-mix(in srgb, var(--accent) 46%, transparent);
+}
+
+.portalx-grid--desk .portalx-card:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--accent) 24%, var(--frame-border));
+    box-shadow: 0 5px 14px rgba(4, 10, 22, 0.08);
+}
+
 .portalx-route {
     margin: 0;
     font-size: 0.66rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--page-text-dim);
+}
+
+.portalx-grid--desk .portalx-route {
+    font-family: "JetBrains Mono", monospace;
+    color: color-mix(in srgb, var(--accent) 72%, var(--page-text-main));
 }
 
 .portalx-card h2,
@@ -94,11 +322,33 @@
     color: #eef5ff;
 }
 
+.portalx-grid--desk .portalx-btn {
+    border-radius: 8px;
+    border-color: color-mix(in srgb, var(--accent) 26%, var(--frame-border));
+    background: color-mix(in srgb, var(--accent) 10%, var(--card-bg));
+    justify-self: start;
+}
+
+.portalx-grid--desk .portalx-btn:hover {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
+    background: color-mix(in srgb, var(--accent) 15%, var(--card-bg));
+}
+
 .portalx-formwrap {
     border: 1px solid var(--frame-border);
     border-radius: 12px;
     background: color-mix(in srgb, var(--card-bg) 94%, transparent);
     padding: 20px;
+}
+
+.portalx-page--investment .portalx-formwrap,
+.portalx-page--press .portalx-formwrap,
+.portalx-page--employment .portalx-formwrap,
+.portalx-page--internship .portalx-formwrap {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
 }
 
 .portalx-form {
@@ -118,6 +368,31 @@
     color: var(--page-text-dim);
 }
 
+.portalx-required {
+    color: color-mix(in srgb, var(--accent) 78%, var(--page-text-main));
+    font-weight: 700;
+}
+
+.portalx-row--checkline {
+    gap: 6px;
+}
+
+.portalx-row--checkline label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    font-size: 0.86rem;
+    color: var(--page-text-main);
+}
+
+.portalx-row--checkline input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+}
+
 .portalx-row input,
 .portalx-row textarea,
 .portalx-row select {
@@ -128,6 +403,144 @@
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 0.92rem;
+}
+
+.portalx-upload {
+    position: relative;
+    display: grid;
+    gap: 8px;
+    padding: 16px;
+    border: 2px dashed color-mix(in srgb, var(--frame-border) 86%, transparent);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--card-bg) 98%, #ffffff);
+    transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.portalx-upload.is-dragover,
+.portalx-upload:focus-within {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--frame-border));
+    background: color-mix(in srgb, var(--card-bg) 92%, #ffffff);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.portalx-upload-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.portalx-upload-icon {
+    width: 20px;
+    height: 20px;
+    border: 2px solid color-mix(in srgb, var(--page-text-main) 74%, transparent);
+    border-radius: 4px;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.portalx-upload-icon::before,
+.portalx-upload-icon::after {
+    content: "";
+    position: absolute;
+    background: color-mix(in srgb, var(--page-text-main) 74%, transparent);
+}
+
+.portalx-upload-icon::before {
+    width: 8px;
+    height: 2px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.portalx-upload-icon::after {
+    width: 2px;
+    height: 8px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.portalx-upload-title {
+    margin: 0;
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--page-text-main);
+}
+
+.portalx-upload-meta {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--page-text-dim);
+}
+
+.portalx-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    width: fit-content;
+    padding: 0 16px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in srgb, var(--frame-border) 84%, transparent);
+    background: color-mix(in srgb, var(--card-bg) 90%, #ffffff);
+    color: color-mix(in srgb, var(--accent) 72%, var(--page-text-main));
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.portalx-upload-filebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.portalx-upload-name {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--page-text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+}
+
+.portalx-upload-clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid color-mix(in srgb, var(--frame-border) 84%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--card-bg) 92%, #ffffff);
+    color: var(--page-text-main);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.portalx-upload-clear:hover {
+    border-color: color-mix(in srgb, var(--accent) 46%, var(--frame-border));
+    color: color-mix(in srgb, var(--accent) 72%, var(--page-text-main));
+}
+
+.portalx-upload-clear[hidden] {
+    display: none;
+}
+
+.portalx-upload input[type="file"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
 }
 
 .portalx-row textarea {
@@ -173,8 +586,89 @@
 .portalx-status.is-success { color: var(--status-green); }
 .portalx-status.is-error { color: #e59aa3; }
 
+/* Job Listings styles moved to css/job-listings.css */
+.legaldesk-list {
+    display: grid;
+    gap: 0;
+    border-top: none;
+}
+
+.legaldesk-row {
+    display: grid;
+    gap: 8px;
+    padding: 12px 0 16px;
+    border-bottom: none;
+}
+
+.legaldesk-row h2,
+.legaldesk-row p {
+    margin: 0;
+}
+
+.legaldesk-row h2 {
+    font-size: 1.05rem;
+}
+
+.legaldesk-route {
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent) 70%, var(--page-text-main));
+}
+
+.legaldesk-row .portalx-btn {
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    min-height: 0;
+    justify-self: start;
+    letter-spacing: 0.08em;
+}
+
+.legaldesk-row .portalx-btn:hover {
+    color: color-mix(in srgb, var(--accent) 78%, var(--page-text-main));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
 @media (max-width: 900px) {
     .portalx-grid {
         grid-template-columns: 1fr;
     }
+
+    .desk-page .portalx-hero {
+        padding: 18px 16px;
+        border-radius: 10px;
+    }
+
+    .legaldesk-row {
+        padding: 14px 0 16px;
+    }
+
+    .legal-page .portalx-shell {
+        margin: -6px 12px 56px;
+        padding: 16px 10px 24px;
+    }
+
+    .desk-page--opportunity .portalx-shell {
+        margin: -6px 12px 56px;
+        padding: 16px 10px 24px;
+    }
+
+    .portalx-page--investment .portalx-shell,
+    .portalx-page--press .portalx-shell,
+    .portalx-page--employment .portalx-shell,
+    .portalx-page--internship .portalx-shell {
+        margin: -6px 12px 56px;
+        padding: 16px 10px 24px;
+    }
+
+    .desk-page--opportunity .portalx-grid--desk .portalx-card {
+        padding: 14px 0 16px;
+    }
+
 }
+

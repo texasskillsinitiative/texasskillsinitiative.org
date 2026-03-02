@@ -22,6 +22,7 @@ const _021026_SUBMISSION_MESSAGES = {
 };
 const FORM_ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
 const FORM_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
+const FORM_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const MODAL_FOCUS_SELECTOR = [
     'a[href]',
     'button:not([disabled])',
@@ -31,6 +32,23 @@ const MODAL_FOCUS_SELECTOR = [
     '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 const _modalFocusRestore = new Map();
+
+function initFooterLabels() {
+    const footerLinks = document.querySelectorAll('[data-tsi-footer-key]');
+    if (!footerLinks.length) return;
+    const store = window.TSI_SITE_LABELS;
+    if (!store || typeof store.getLabel !== 'function' || typeof store.getHref !== 'function') return;
+
+    footerLinks.forEach((link) => {
+        if (!(link instanceof HTMLAnchorElement)) return;
+        const key = String(link.getAttribute('data-tsi-footer-key') || '').trim();
+        if (!key) return;
+        const href = store.getHref(key);
+        const text = store.getLabel(key, 'footer') || store.getLabel(key, 'full');
+        if (href) link.setAttribute('href', href);
+        if (text) link.textContent = text;
+    });
+}
 
 function normalizeSubmissionType(value) {
     const raw = String(value || '').trim().toLowerCase();
@@ -523,7 +541,7 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
     }
 
     const email = document.getElementById('email').value;
-    if (!email.includes('@')) {
+    if (!FORM_EMAIL_REGEX.test(String(email || '').trim())) {
         if (emailError) {
             emailError.textContent = "Please enter a valid email address.";
             emailError.classList.add('visible');
@@ -1941,8 +1959,14 @@ if (overview) {
 
     let overviewHasPlayedOnce = false;
     const runOverviewSequence = (options = {}) => {
+        const OVERVIEW_COPY_MIN_DELAY_S = 6.1;
         const opts = options && typeof options === 'object' ? options : {};
         const forceFull = Boolean(opts.forceFull);
+        const quickReplay = Boolean(opts.quickReplay);
+        const resetCycle = Boolean(opts.resetCycle);
+        if (resetCycle) {
+            overviewHasPlayedOnce = false;
+        }
         scheduleOverviewFit();
         clearOverviewTimers();
 
@@ -1958,7 +1982,34 @@ if (overview) {
         overview.classList.remove('is-auto-transition-out');
 
         void overview.offsetWidth;
-        const showSyncedRevisit = overviewHasPlayedOnce && !forceFull;
+        const showSyncedRevisit = !quickReplay && overviewHasPlayedOnce && !forceFull;
+        if (quickReplay) {
+            overview.style.setProperty('--tsi-debug-fade-ms', '1200ms');
+            overview.style.setProperty('--tsi-debug-fade-ease', 'ease');
+            revealItems.forEach((item, idx) => {
+                item.style.setProperty('--reveal-delay', `${Math.max(0, idx) * 0.09}s`);
+            });
+            requestAnimationFrame(() => {
+                revealItems.forEach(item => item.classList.add('reveal-active'));
+            });
+            overviewPhrases.forEach((phrase, idx) => {
+                schedule(() => {
+                    phrase.classList.add('is-phrase-visible');
+                }, 0.5 + (idx * 0.08));
+            });
+            if (overviewCopy) {
+                schedule(() => {
+                    overviewCopy.classList.add('is-body-visible');
+                }, 1.05);
+            }
+            if (overviewContinue) {
+                schedule(() => {
+                    overviewContinue.classList.add('is-visible');
+                }, 1.35);
+            }
+            overviewHasPlayedOnce = true;
+            return;
+        }
         if (showSyncedRevisit) {
             // Revisit behavior: synchronized, gentle 1s fade for overview content.
             overview.style.setProperty('--tsi-debug-fade-ms', '1000ms');
@@ -2031,7 +2082,8 @@ if (overview) {
                 }, phraseDelay);
             });
 
-            const bodyDelay = phraseStartDelay + (phraseNodes.length * phraseGap) + 0.3;
+            const bodyDelayRaw = phraseStartDelay + (phraseNodes.length * phraseGap) + 0.3;
+            const bodyDelay = Math.max(bodyDelayRaw, OVERVIEW_COPY_MIN_DELAY_S);
             schedule(() => {
                 overviewCopy.classList.add('is-body-visible');
             }, bodyDelay);
@@ -2090,6 +2142,48 @@ const stabilizeViewportTop = () => {
     }, 80);
 };
 let forceFullOverviewOnActivate = false;
+let quickOverviewReplayOnActivate = false;
+let resetOverviewSequenceCycleOnActivate = false;
+let resetOverviewGlobeOnActivate = false;
+const maybeApplyOverviewReplayLaunch = () => {
+    let url;
+    try {
+        url = new URL(window.location.href);
+    } catch (_) {
+        return;
+    }
+    const launch = String(url.searchParams.get('home') || '').trim().toLowerCase();
+    if (launch !== '00') return;
+    forceFullOverviewOnActivate = false;
+    quickOverviewReplayOnActivate = true;
+    resetOverviewGlobeOnActivate = true;
+    if (!window.location.hash) {
+        window.location.hash = '#overview';
+    }
+    if (window.history && typeof window.history.replaceState === 'function') {
+        url.searchParams.delete('home');
+        const nextSearch = url.searchParams.toString();
+        const nextHash = window.location.hash || '#overview';
+        const nextRelative = `${url.pathname}${nextSearch ? `?${nextSearch}` : ''}${nextHash}`;
+        window.history.replaceState({}, '', nextRelative);
+    }
+};
+
+const restartOverviewGlobe = () => {
+    const iframe = document.querySelector('.overview-animation iframe');
+    if (!(iframe instanceof HTMLIFrameElement)) return;
+    const rawSrc = iframe.getAttribute('src');
+    if (!rawSrc || !rawSrc.includes('assets/pages/overview/globe-')) return;
+    let nextUrl;
+    try {
+        nextUrl = new URL(rawSrc, window.location.href);
+    } catch (_) {
+        return;
+    }
+    nextUrl.searchParams.set('restart', Date.now().toString(36));
+    const nextRelative = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    iframe.setAttribute('src', nextRelative);
+};
 
 function setActiveTabFromHash(options = {}) {
     const shouldResetScroll = options.resetScroll !== false;
@@ -2128,10 +2222,18 @@ function setActiveTabFromHash(options = {}) {
         }
     });
 
+    if (resolvedId === 'overview' && resetOverviewGlobeOnActivate) {
+        restartOverviewGlobe();
+        resetOverviewGlobeOnActivate = false;
+    }
     if (resolvedId === 'overview' && typeof window._runOverviewSequence === 'function') {
         const shouldForceFull = forceFullOverviewOnActivate === true;
-        window._runOverviewSequence({ forceFull: shouldForceFull });
+        const shouldQuickReplay = quickOverviewReplayOnActivate === true;
+        const shouldResetCycle = resetOverviewSequenceCycleOnActivate === true;
+        window._runOverviewSequence({ forceFull: shouldForceFull, quickReplay: shouldQuickReplay, resetCycle: shouldResetCycle });
         forceFullOverviewOnActivate = false;
+        quickOverviewReplayOnActivate = false;
+        resetOverviewSequenceCycleOnActivate = false;
         if (typeof window._fitOverviewToViewport === 'function') {
             window._fitOverviewToViewport();
         }
@@ -2154,12 +2256,19 @@ window.addEventListener('hashchange', () => {
     setActiveTabFromHash({ resetScroll: false });
     stabilizeViewportTop();
 });
+maybeApplyOverviewReplayLaunch();
 setActiveTabFromHash({ resetScroll: false });
 stabilizeViewportTop();
 
 const activateOverviewHome = (options = {}) => {
     const forceFull = options.forceFull === true;
+    const quickReplay = options.quickReplay === true;
+    const resetSequenceCycle = options.resetSequenceCycle === true;
+    const resetGlobe = options.resetGlobe !== false;
     forceFullOverviewOnActivate = forceFull;
+    quickOverviewReplayOnActivate = quickReplay;
+    resetOverviewSequenceCycleOnActivate = resetSequenceCycle;
+    resetOverviewGlobeOnActivate = resetGlobe;
     const currentHash = window.location.hash || '#overview';
     if (currentHash !== '#overview') {
         window.location.hash = '#overview';
@@ -5538,7 +5647,10 @@ function initPipelineMap() {
             if (!frame) return;
             const sourceControl = Array.from(sourceControls || []).find(control => control.getAttribute('data-map-target') === targetClass);
             const flashColor = sourceControl
-                ? sourceControl.style.getPropertyValue('--map-control-color').trim()
+                ? (
+                    sourceControl.style.getPropertyValue('--map-control-color').trim()
+                    || sourceControl.style.getPropertyValue('--map-tab-color').trim()
+                )
                 : '';
             frame.style.setProperty('--map-frame-category-flash-color', flashColor || 'var(--accent)');
             frame.classList.remove('map-frame-category-flash-active');
@@ -5641,15 +5753,9 @@ function initPipelineMap() {
                 setCategoryState(target, nextState, { flashFrame: nextState });
             });
         });
-        desktopMapControls.forEach(control => {
-            control.addEventListener('click', () => {
-                const target = control.getAttribute('data-map-target');
-                const overlay = Array.from(overlays).find(node => node.classList.contains(`${target}--desktop`));
-                if (!overlay) return;
-                const nextState = !overlay.classList.contains('is-active');
-                setDesktopCategoryState(target, nextState, { flashFrame: nextState });
-            });
-        });
+        // Phase-tab click logic already handles desktop/mobile overlay targeting.
+        // Avoid binding a second handler to phase tabs; duplicate handlers can
+        // invert state immediately (desktop) and activate both overlay sets (mobile).
         updateHelperCopy();
         window.addEventListener('resize', updateHelperCopy);
         const clearToggleGuidance = () => {};
@@ -6257,15 +6363,26 @@ function initPipelineMap() {
         const mapSrc = map.getAttribute('data-map-src');
         if (mapMdPath) {
             fetch(mapMdPath, { cache: 'no-store' })
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`md fetch failed: ${response.status}`);
+                    }
+                    return response.text();
+                })
                 .then(text => {
                     const ok = renderFromText(map, text, mapMdPath);
                     if (!ok) {
                         console.warn(`[map] failed to render md source: ${mapMdPath}`);
+                        if (mapSrc) {
+                            renderFromImage(map, mapSrc, mapSrc);
+                        }
                     }
                 })
                 .catch(() => {
                     console.warn(`[map] failed to fetch md source: ${mapMdPath}`);
+                    if (mapSrc) {
+                        renderFromImage(map, mapSrc, mapSrc);
+                    }
                 });
             return;
         }
@@ -6414,14 +6531,14 @@ function initWOWRefinements() {
             setTimeout(() => {
                 logoContainer.classList.remove('is-pulsing');
             }, 600); // Matches CSS animation duration
-            activateOverviewHome({ forceFull: true });
+            activateOverviewHome({ forceFull: true, quickReplay: false, resetGlobe: true, resetSequenceCycle: true });
         });
     }
     // Overview tab (00) soft reset behavior, including when already on Overview.
     if (overviewTabLink) {
         overviewTabLink.addEventListener('click', (event) => {
             event.preventDefault();
-            activateOverviewHome({ forceFull: false });
+            activateOverviewHome({ forceFull: false, quickReplay: true, resetGlobe: true });
         });
     }
 }
@@ -6470,4 +6587,10 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPersonaInteractions);
 } else {
     initPersonaInteractions();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initFooterLabels);
+} else {
+    initFooterLabels();
 }

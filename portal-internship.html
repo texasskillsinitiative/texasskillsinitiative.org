@@ -1,35 +1,51 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-opportunity">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Internship Application | TSI</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
     <link rel="stylesheet" href="css/portal-expansion.css">
 </head>
 <body class="portalx-page portalx-page--internship">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb" href="portal-hub.html" data-tsi-label-key="career_opportunities">Career Opportunities</a>
+                <span class="tsi-utility-bar__crumb-sep">&gt;</span>
+                <a class="tsi-utility-crumb is-current" href="portal-internship.html" data-tsi-label-key="internship_application">Internship Application</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
     <main class="portalx-shell">
         <header class="portalx-hero">
-            <p class="portalx-kicker">TSI Opportunity Desk</p>
-            <h1>Internship Application</h1>
+            <p class="portalx-kicker" data-tsi-label-key="career_opportunities">Career Opportunities</p>
+            <h1 data-tsi-label-key="internship_application">Internship Application</h1>
             <p>Selective intake for local, hybrid, and remote internship pathways. Submit a complete application profile for review.</p>
-            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
         </header>
         <section class="portalx-formwrap">
             <form id="portalIntakeForm" class="portalx-form" data-portal-route="internship" data-requires-file="true">
-                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
-                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
-                <div class="portalx-row"><label for="school">School / institution</label><input id="school" name="intern_school" required></div>
-                <div class="portalx-row"><label for="program">Program / major</label><input id="program" name="intern_program" required></div>
-                <div class="portalx-row"><label for="grad">Expected graduation date</label><input id="grad" type="month" name="intern_grad_date" required></div>
+                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name" placeholder="Jane Doe"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email" placeholder="name@school.edu"></div>
+                <div class="portalx-row"><label for="school">School / institution</label><input id="school" name="intern_school" required placeholder="University of Texas"></div>
+                <div class="portalx-row"><label for="program">Program / major</label><input id="program" name="intern_program" required placeholder="Public Policy"></div>
+                <div class="portalx-row"><label for="grad">Graduation Date (use anticipated date if currently completing your program)</label><input id="grad" type="month" name="intern_grad_date" required></div>
                 <div class="portalx-row"><label for="track">Internship track interest</label><select id="track" name="intern_track" required><option value="">Select</option><option>Research & Analysis</option><option>Program Operations</option><option>Data & Visualization</option><option>Community Engagement</option><option>Communications</option></select></div>
                 <div class="portalx-row"><label for="mode">Preferred mode</label><select id="mode" name="intern_mode" required><option value="">Select</option><option>Local</option><option>Hybrid</option><option>Remote</option><option>Flexible</option></select></div>
-                <div class="portalx-row"><label for="hours">Availability hours per week</label><input id="hours" name="intern_hours_per_week" required></div>
+                <div class="portalx-row"><label for="hours">Availability hours per week</label><input id="hours" name="intern_hours_per_week" required placeholder="10-20"></div>
                 <div class="portalx-row"><label for="start">Earliest start date</label><input id="start" type="date" name="intern_start_date" required></div>
-                <div class="portalx-row"><label for="portfolio">Portfolio / GitHub / website</label><input id="portfolio" type="url" name="intern_portfolio_url"></div>
-                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
-                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
-                <div class="portalx-row"><label for="message">Statement of interest</label><textarea id="message" name="message" required></textarea></div>
+                <div class="portalx-row"><label for="portfolio">Portfolio / GitHub / website</label><input id="portfolio" type="url" name="intern_portfolio_url" placeholder="https://github.com/username"></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required placeholder="San Antonio"></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required placeholder="United States"></div>
+                <div class="portalx-row"><label for="message">Statement of interest</label><textarea id="message" name="message" required placeholder="Share your goals and why this internship track is a fit."></textarea></div>
                 <div class="portalx-row"><label for="portalFile">Resume (required)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx" required><span class="portalx-help">Required. PDF/DOC/DOCX, max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
 
                 <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
@@ -42,5 +58,8 @@
         </section>
     </main>
     <script src="js/portal-intake-v2.js"></script>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
 </body>
 </html>
+

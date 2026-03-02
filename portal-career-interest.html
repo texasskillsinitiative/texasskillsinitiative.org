@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-opportunity">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Future Career Interest | TSI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
+    <link rel="stylesheet" href="css/portal-expansion.css">
+</head>
+<body class="portalx-page portalx-page--employment">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb" href="portal-hub.html" data-tsi-label-key="career_opportunities">Career Opportunities</a>
+                <span class="tsi-utility-bar__crumb-sep">&gt;</span>
+                <a class="tsi-utility-crumb" href="portal-employment.html" data-tsi-label-key="job_listings">Job Listings</a>
+                <span class="tsi-utility-bar__crumb-sep">&gt;</span>
+                <a class="tsi-utility-crumb is-current" href="portal-career-interest.html">Career Interest</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
+    <main class="portalx-shell">
+        <header class="portalx-hero">
+            <p class="portalx-kicker" data-tsi-label-key="career_opportunities">Career Opportunities</p>
+            <h1>Future Career Interest</h1>
+            <p>Share your profile for pipeline review. If you are also exploring internships, use the combined submit option below.</p>
+        </header>
+        <section class="portalx-formwrap">
+            <form id="portalIntakeForm" class="portalx-form" data-portal-route="employment">
+                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name" placeholder="Jane Doe"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email" placeholder="name@domain.com"></div>
+                <div class="portalx-row"><label for="org">Current organization (optional)</label><input id="org" name="org" placeholder="Current employer or institution"></div>
+                <div class="portalx-row"><label for="roleInterest">Role of interest</label><input id="roleInterest" name="employment_role_interest" required placeholder="Program Operations Associate"></div>
+                <div class="portalx-row portalx-row--checkline"><label for="employmentOpenPaths"><input id="employmentOpenPaths" type="checkbox"> Open to multiple paths</label><span class="portalx-help">If checked, role of interest will auto-fill as "Open to multiple paths".</span></div>
+                <div class="portalx-row"><label for="timeline">Availability timeline</label><input id="timeline" name="employment_timeline" required placeholder="Immediate, 30 days, part-time, etc."></div>
+                <div class="portalx-row"><label for="locPref">Location preference</label><select id="locPref" name="employment_location_pref" required><option value="">Select</option><option>Local</option><option>Hybrid</option><option>Remote</option><option>Flexible</option></select></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required placeholder="Houston"></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required placeholder="United States"></div>
+                <div class="portalx-row"><label for="message">Application summary</label><textarea id="message" name="message" required placeholder="Share your background and what role paths interest you."></textarea></div>
+                <div class="portalx-row"><label for="portalFile">Resume / portfolio (optional)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"><span class="portalx-help">Optional. Max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
+
+                <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
+                <input type="hidden" name="handler_tier" value="2">
+                <input type="hidden" name="submission_type" value="employment">
+                <input type="hidden" name="concierge_track" value="employment_portal">
+                <input type="hidden" name="page_path" value="/portal-career-interest.html">
+                <div class="portalx-actions">
+                    <button type="submit" class="portalx-btn">Submit</button>
+                    <button type="submit" class="portalx-btn" data-next-url="portal-internship.html">Submit and view our internship opportunities</button>
+                    <span id="portalFormStatus" class="portalx-status" aria-live="polite"></span>
+                </div>
+            </form>
+        </section>
+    </main>
+    <script src="js/portal-intake-v2.js"></script>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
+</body>
+</html>

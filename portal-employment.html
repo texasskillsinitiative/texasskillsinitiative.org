@@ -1,42 +1,251 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-opportunity">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Employment Intake | TSI</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/portal-expansion.css">
+    <title>Job Listings | TSI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
+    <link rel="stylesheet" href="css/portal-expansion.css?v=20260302-jobsfix1">
+    <link rel="stylesheet" href="css/job-listings.css?v=20260302-jobsfix1">
 </head>
-<body class="portalx-page portalx-page--employment">
+<body class="portalx-page portalx-page--employment portalx-jobs-page">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb" href="portal-hub.html" data-tsi-label-key="career_opportunities">Career Opportunities</a>
+                <span class="tsi-utility-bar__crumb-sep">&gt;</span>
+                <a class="tsi-utility-crumb is-current" href="portal-employment.html" data-tsi-label-key="job_listings">Job Listings</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
+
     <main class="portalx-shell">
         <header class="portalx-hero">
-            <p class="portalx-kicker">TSI Opportunity Desk</p>
-            <h1>Employment Intake</h1>
-            <p>This intake is active year-round. We currently may have no open posted positions, but applications are accepted for pipeline review.</p>
-            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
+            <p class="portalx-kicker" data-tsi-label-key="career_opportunities">Career Opportunities</p>
+            <h1 data-tsi-label-key="job_listings">Job Listings</h1>
+            <div class="jobboard-hero-separator" aria-hidden="true"></div>
+            <p class="jobboard-hero-intro">Search and filter current openings here across role type, location, and function.</p>
         </header>
-        <section class="portalx-formwrap">
-            <form id="portalIntakeForm" class="portalx-form" data-portal-route="employment">
-                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
-                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
-                <div class="portalx-row"><label for="org">Current organization (optional)</label><input id="org" name="org"></div>
-                <div class="portalx-row"><label for="roleInterest">Role of interest</label><input id="roleInterest" name="employment_role_interest" required></div>
-                <div class="portalx-row"><label for="timeline">Availability timeline</label><input id="timeline" name="employment_timeline" required></div>
-                <div class="portalx-row"><label for="locPref">Location preference</label><select id="locPref" name="employment_location_pref" required><option value="">Select</option><option>Local</option><option>Hybrid</option><option>Remote</option><option>Flexible</option></select></div>
-                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
-                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
-                <div class="portalx-row"><label for="message">Application summary</label><textarea id="message" name="message" required></textarea></div>
-                <div class="portalx-row"><label for="portalFile">Resume / portfolio (optional)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"><span class="portalx-help">Optional. Max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
 
-                <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
-                <input type="hidden" name="handler_tier" value="2">
-                <input type="hidden" name="submission_type" value="employment">
-                <input type="hidden" name="concierge_track" value="employment_portal">
-                <input type="hidden" name="page_path" value="/portal-employment.html">
-                <div class="portalx-actions"><button type="submit" class="portalx-btn">Submit employment profile</button><span id="portalFormStatus" class="portalx-status" aria-live="polite"></span></div>
-            </form>
+        <section class="jobboard-layout" aria-label="Job listing results">
+            <aside class="jobboard-sidebar">
+                <a class="jobboard-alert-link" href="#" data-open-listings-notice>Recruitment Fraud Notice</a>
+                <section class="jobboard-topbar" aria-label="Job search">
+                    <p class="jobboard-topbar__title jobboard-panel-title">Search Jobs</p>
+                    <form class="jobboard-topbar__form" action="#" method="get" onsubmit="return false;">
+                        <label class="jobboard-topbar__field">
+                            <span>Keyword</span>
+                            <input type="text" name="q" placeholder="Search jobs or keywords">
+                        </label>
+                        <label class="jobboard-topbar__field">
+                            <span>Location</span>
+                            <input type="text" name="location" placeholder="City, state/province, or ZIP">
+                        </label>
+                        <label class="jobboard-topbar__field">
+                            <span>Radius</span>
+                            <select name="radius">
+                                <option value="">Radius</option>
+                                <option value="10">10 miles</option>
+                                <option value="25">25 miles</option>
+                                <option value="50">50 miles</option>
+                            </select>
+                        </label>
+                        <button type="submit" class="jobboard-topbar__submit">Search</button>
+                    </form>
+                    <p class="jobboard-topbar__note">For non-U.S. searches, use the Country filter in Refine Your Search.</p>
+                </section>
+                <section class="jobboard-refine" aria-label="Refine search">
+                    <details class="jobboard-refine__group" open>
+                        <summary class="jobboard-panel-title">Refine Your Search</summary>
+                        <div class="jobboard-refine__body">
+                            <details class="jobboard-refine__item">
+                                <summary>Job Function</summary>
+                                <div class="jobboard-refine__panel">
+                                    <div class="jobboard-refine__empty">
+                                        None available.
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="jobboard-refine__item">
+                                <summary>Category</summary>
+                                <div class="jobboard-refine__panel">
+                                    <div class="jobboard-refine__empty">None available.</div>
+                                </div>
+                            </details>
+                            <details class="jobboard-refine__item">
+                                <summary>Country</summary>
+                                <div class="jobboard-refine__panel">
+                                    <div class="jobboard-refine__empty">None available.</div>
+                                </div>
+                            </details>
+                            <details class="jobboard-refine__item">
+                                <summary>State/Province</summary>
+                                <div class="jobboard-refine__panel">
+                                    <div class="jobboard-refine__empty">None available.</div>
+                                </div>
+                            </details>
+                            <details class="jobboard-refine__item">
+                                <summary>City</summary>
+                                <div class="jobboard-refine__panel">
+                                    <div class="jobboard-refine__empty">None available.</div>
+                                </div>
+                            </details>
+                            <button type="button" class="jobboard-sidebar__clear">Clear Filters</button>
+                        </div>
+                    </details>
+                </section>
+            </aside>
+
+            <section class="jobboard-main" aria-label="Job listing results">
+                <div class="jobboard-main__meta">
+                    <div>
+                        <p class="jobboard-main__count">0 Jobs</p>
+                        <p class="jobboard-main__filtered">Filtered by <span>All</span></p>
+                    </div>
+                    <label class="jobboard-main__sort">
+                        <span>Sort by</span>
+                        <select name="sort">
+                            <option value="relevancy">Relevancy</option>
+                            <option value="newest">Newest</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="jobboard-listings-slot" id="jobboardListingsSlot"></div>
+                <ul class="jobboard-list" id="jobboardResultsList"></ul>
+            </section>
         </section>
     </main>
-    <script src="js/portal-intake-v2.js"></script>
+
+    <div class="jobboard-modal" id="listingsNoticeModal" hidden>
+        <div class="jobboard-modal__panel" role="dialog" aria-modal="true" aria-labelledby="listingsNoticeTitle">
+            <button type="button" class="jobboard-modal__close" data-close-listings-notice aria-label="Close notice">×</button>
+            <h2 id="listingsNoticeTitle">Texas Skills Initiative Recruiting Notice</h2>
+            <p>For clarity and consistency, Texas Skills Initiative publishes official openings only on the careers URL below.</p>
+            <ul>
+                <li>Official listings URL: <a href="https://careers.texasskillsinitiative.com">careers.texasskillsinitiative.com</a></li>
+                <li>Texas Skills Initiative does not currently post jobs on external job boards.</li>
+                <li>Career application steps and role updates are managed through that listings URL.</li>
+                <li>If you do not see an opening listed there, there are no active postings at this time.</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        (function () {
+            function renderEmptyState(list, slot) {
+                if (slot) {
+                    slot.textContent = '';
+                    var slotNote = document.createElement('p');
+                    slotNote.className = 'jobboard-listings-slot__note';
+                    slotNote.textContent = 'No current listings.';
+                    slot.appendChild(slotNote);
+                }
+
+                var emptyItem = document.createElement('li');
+                emptyItem.className = 'jobboard-list__empty';
+
+                var line1 = document.createElement('p');
+                line1.textContent = "We'd still like the chance to get to know you!";
+                emptyItem.appendChild(line1);
+
+                var line2 = document.createElement('p');
+                line2.textContent = 'Share your background now so we can review for future openings and current internship pathways.';
+                emptyItem.appendChild(line2);
+
+                var ctaWrap = document.createElement('div');
+                ctaWrap.className = 'jobboard-actions__buttons';
+
+                var careerBtn = document.createElement('a');
+                careerBtn.className = 'jobboard-btn';
+                careerBtn.href = 'portal-career-interest.html';
+                careerBtn.textContent = 'Future Career Interest';
+                ctaWrap.appendChild(careerBtn);
+
+                var internshipBtn = document.createElement('a');
+                internshipBtn.className = 'jobboard-btn';
+                internshipBtn.href = 'portal-internship.html';
+                internshipBtn.textContent = 'Internship Opportunities';
+                ctaWrap.appendChild(internshipBtn);
+
+                emptyItem.appendChild(ctaWrap);
+                list.appendChild(emptyItem);
+            }
+
+            function renderJobRows(list, jobs, slot) {
+                if (slot) slot.textContent = '';
+                jobs.forEach(function (job) {
+                    var item = document.createElement('li');
+                    item.className = 'jobboard-list__item';
+
+                    var title = document.createElement('a');
+                    title.className = 'jobboard-list__title';
+                    title.href = String(job.href || '#');
+                    title.textContent = String(job.title || 'Untitled role');
+                    item.appendChild(title);
+
+                    var meta = document.createElement('p');
+                    meta.className = 'jobboard-list__meta';
+                    var location = String(job.location || 'Location not listed');
+                    var posted = String(job.posted || '');
+                    meta.textContent = posted ? location + ' • ' + posted : location;
+                    item.appendChild(meta);
+
+                    list.appendChild(item);
+                });
+            }
+
+            function renderJobListings() {
+                var jobs = Array.isArray(window.TSI_JOB_LISTINGS) ? window.TSI_JOB_LISTINGS : [];
+                var list = document.getElementById('jobboardResultsList');
+                var jobsCount = document.querySelector('.jobboard-main__count');
+                var listingsSlot = document.getElementById('jobboardListingsSlot');
+                if (!list || !jobsCount) return;
+
+                list.textContent = '';
+                jobsCount.textContent = jobs.length + ' Jobs';
+                if (jobs.length === 0) {
+                    renderEmptyState(list, listingsSlot);
+                    return;
+                }
+                renderJobRows(list, jobs, listingsSlot);
+            }
+
+            function wireRecruitmentNoticeModal() {
+                var modal = document.getElementById('listingsNoticeModal');
+                var openBtn = document.querySelector('[data-open-listings-notice]');
+                var closeBtn = document.querySelector('[data-close-listings-notice]');
+                if (!modal || !openBtn || !closeBtn) return;
+
+                function closeModal() {
+                    modal.hidden = true;
+                }
+
+                openBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    modal.hidden = false;
+                });
+                closeBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', function (event) {
+                    if (event.target === modal) closeModal();
+                });
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape' && !modal.hidden) closeModal();
+                });
+            }
+
+            renderJobListings();
+            wireRecruitmentNoticeModal();
+        })();
+    </script>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
 </body>
 </html>

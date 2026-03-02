@@ -1,32 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-default-theme="light" data-theme-storage-key="tsi-theme-opportunity">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Press Request | TSI</title>
-    <link rel="stylesheet" href="css/main.css">
+    <title>Public Relations/Media Request | TSI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css?v=20260301-uihotfix">
     <link rel="stylesheet" href="css/portal-expansion.css">
 </head>
 <body class="portalx-page portalx-page--press">
+    <header class="tsi-utility-bar">
+        <div class="tsi-utility-bar__left">
+            <a class="tsi-utility-brand" data-utility-home-link href="index.html?home=00#overview" aria-label="Back to Site">
+                <img src="assets/global/icon/tsi-favicon.svg" alt="TSI">
+            </a>
+            <h1 class="tsi-utility-bar__title">
+                <a class="tsi-utility-crumb is-current" href="portal-press.html" data-tsi-label-key="public_relations_media_request">Public Relations/Media Request</a>
+            </h1>
+        </div>
+        <div class="tsi-utility-bar__actions">
+            <button type="button" class="tsi-utility-bar__btn" data-utility-theme-toggle>Theme: Dark</button>
+            <a class="tsi-utility-bar__btn" data-utility-home-link href="index.html?home=00#overview">Back to Site</a>
+        </div>
+    </header>
     <main class="portalx-shell">
         <header class="portalx-hero">
-            <p class="portalx-kicker">TSI Opportunity Desk</p>
-            <h1>Press Request</h1>
+            <p class="portalx-kicker" data-tsi-label-key="public_relations_media_request">Public Relations/Media Request</p>
+            <h1 data-tsi-label-key="public_relations_media_request">Public Relations/Media Request</h1>
             <p>For media interviews, statements, briefing calls, and publication deadlines.</p>
-            <a class="portalx-back" href="portal-hub.html">Return to opportunity desk</a>
         </header>
         <section class="portalx-formwrap">
             <form id="portalIntakeForm" class="portalx-form" data-portal-route="press">
-                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name"></div>
-                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email"></div>
-                <div class="portalx-row"><label for="outlet">Publication / outlet</label><input id="outlet" name="press_outlet" required></div>
-                <div class="portalx-row"><label for="role">Role</label><input id="role" name="press_role" placeholder="reporter, producer, editor"></div>
-                <div class="portalx-row"><label for="deadline">Publication deadline</label><input id="deadline" type="date" name="press_deadline"></div>
-                <div class="portalx-row"><label for="topic">Requested topic</label><input id="topic" name="press_topic" required></div>
+                <div class="portalx-row"><label for="name">Full name</label><input id="name" name="name" required autocomplete="name" placeholder="Jane Doe"></div>
+                <div class="portalx-row"><label for="email">Email</label><input id="email" type="email" name="email" required autocomplete="email" placeholder="name@outlet.com"></div>
+                <div class="portalx-row"><label for="outlet">Publication / outlet</label><input id="outlet" name="press_outlet" required placeholder="TSI Daily"></div>
+                <div class="portalx-row"><label for="role">Role</label><input id="role" name="press_role" placeholder="Reporter, producer, editor"></div>
+                <div class="portalx-row"><label for="deadline">Requested publication deadline</label><input id="deadline" type="date" name="press_deadline"></div>
+                <div class="portalx-row portalx-row--checkline"><label for="pressNoDeadline"><input id="pressNoDeadline" type="checkbox"> No deadline</label></div>
+                <input type="hidden" id="pressDeadlineMode" name="press_deadline_mode" value="">
+                <div class="portalx-row"><label for="topic">Requested topic</label><input id="topic" name="press_topic" required placeholder="Advanced manufacturing workforce strategy"></div>
                 <div class="portalx-row"><label for="format">Interview format</label><select id="format" name="press_format"><option value="">Select</option><option>On camera</option><option>Audio</option><option>Written Q&A</option><option>Background briefing</option></select></div>
-                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required></div>
-                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required></div>
-                <div class="portalx-row"><label for="message">Request details</label><textarea id="message" name="message" required></textarea></div>
+                <div class="portalx-row"><label for="city">City / region</label><input id="city" name="loc_city" required placeholder="Dallas"></div>
+                <div class="portalx-row"><label for="country">Country</label><input id="country" name="loc_country" value="United States" required placeholder="United States"></div>
+                <div class="portalx-row"><label for="message">Request details</label><textarea id="message" name="message" required placeholder="Share scope, audience, and requested participants."></textarea></div>
                 <div class="portalx-row"><label for="portalFile">Press brief (optional)</label><input id="portalFile" type="file" name="application_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"><span class="portalx-help">Optional. Max 8MB.</span><span id="portalFileError" class="portalx-error" role="alert"></span></div>
 
                 <input type="text" name="website" class="portalx-honeypot" tabindex="-1" aria-hidden="true" autocomplete="off">
@@ -34,10 +50,13 @@
                 <input type="hidden" name="submission_type" value="press">
                 <input type="hidden" name="concierge_track" value="press_portal">
                 <input type="hidden" name="page_path" value="/portal-press.html">
-                <div class="portalx-actions"><button type="submit" class="portalx-btn">Submit press request</button><span id="portalFormStatus" class="portalx-status" aria-live="polite"></span></div>
+                <div class="portalx-actions"><button type="submit" class="portalx-btn">Submit PR/media request</button><span id="portalFormStatus" class="portalx-status" aria-live="polite"></span></div>
             </form>
         </section>
     </main>
     <script src="js/portal-intake-v2.js"></script>
+    <script src="js/site-labels.js" defer></script>
+    <script src="js/utility-header.js" defer></script>
 </body>
 </html>
+
