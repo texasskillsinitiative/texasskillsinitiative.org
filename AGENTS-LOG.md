@@ -1977,6 +1977,11 @@
 - Actions taken: Patched pipeline tab/overlay regression in `js/main.js` by removing duplicate phase-tab click binding path (desktop tabs were toggling twice; mobile tabs were activating both mobile + desktop overlays), and updated frame-flash color resolution to read either `--map-control-color` or `--map-tab-color` so edge glow matches active tab color. Updated Globe Lab controls in `assets/pages/overview/globe-v4.1-desktop-stable.html`: added draggable override rows (override-order persistence), removed drag-pill UI while preserving drag behavior, slimmed layer-row action controls, moved/locked override add controls on one row, added background controls (BG color, stars on/off, star color, twinkle), and removed auto-load settings behavior while keeping manual Lab save/load.
 - Troubleshooting suggestions: Hard refresh before testing (`Ctrl+F5`), then verify pipeline tabs on desktop and mobile separately; for Globe Lab, drag override rows among override rows and confirm saved settings restore background/stars without affecting main site navigation/theme behavior.
 - Resolutions/outcomes: Pipeline tab state now remains stable per click across viewports, map edge glow tracks active tab color, and Globe Lab settings are clearly lab-scoped with manual persistence only.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-03-02 01:24:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed clean-close protocol after requested Globe Lab updates (top-bar diagnostics bridge, collapsible helper hint, draw-cursor scope fix), updated `STATUS.md` with a next-session review note, captured final repository checks, and recorded checkpoint commit.
+- Troubleshooting suggestions: On next session, run focused Globe Lab regression (desktop/mobile pipeline tab parity + diagnostics postMessage continuity after theme reload) before starting new packet work.
+- Resolutions/outcomes: Session closed cleanly with commit checkpoint `cdd17a4`; no push performed.
+- Commit hash(es): `cdd17a4`
+[AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-03-02 01:24:02 -06:00
 
 
