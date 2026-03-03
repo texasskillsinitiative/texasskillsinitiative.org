@@ -2057,4 +2057,24 @@
 - Actions taken: Moved the Overview preload tint into the globe iframe’s pre-paint CSS variable and delayed the theme background switch until Texas becomes visible, preventing initial pageBg flash.
 - Troubleshooting suggestions: Hard refresh and confirm the iframe’s `--globe-preload-bg` is set before first paint; inspect the iframe background color during load.
 - Resolutions/outcomes: First paint should now match the Texas-blend background, then revert to theme default after Texas appears.
+### 2026-03-02 19:04:39 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior session ended without clean close (active tail marker present) and recorded recovery note before resuming work.
+- Troubleshooting suggestions: If anything looks inconsistent, review `git status` and recent commits before continuing.
+- Resolutions/outcomes: Recovery note logged; proceeding with new session under clean-exit protocol.
+### 2026-03-02 19:05:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `AGENTS.md` to reference the new global policy files and logged the change in `STATUS.md`.
+- Troubleshooting suggestions: If an agent still follows the old PM standard filename, it will resolve via the deprecation stub; update references when convenient.
+- Resolutions/outcomes: TSI repo now points to global rules and PM standards as priority inputs.
+### 2026-03-02 19:47:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Clarified log history: prior `CLEAN_EXIT_CONFIRMED` marker indicates no unclean-exit recovery was needed; added back the original PM standard reference to `AGENTS.md` alongside new global policy files.
+- Troubleshooting suggestions: If log ordering is confusing, treat entries as append-only and rely on timestamps rather than position for chronology.
+- Resolutions/outcomes: Global policy references now include the required `GLOBAL-AGENT-PM-STANDARD.md`; recovery note conflict is documented for future readers.
+### 2026-03-02 20:03:48 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected the recovery-note mismatch: the prior `CLEAN_EXIT_CONFIRMED` marker means no unclean-exit recovery was required for that session; this note supersedes the earlier recovery entry.
+- Troubleshooting suggestions: Treat `AGENTS-LOG.md` as append-only and rely on timestamps for chronology; do not reorder historical entries.
+- Resolutions/outcomes: Log now explicitly documents the recovery-note inconsistency without deleting or reordering prior entries.
+### 2026-03-02 20:05:32 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `AGENTS.md` to follow the deprecated global PM standard stub by removing the old `GLOBAL-AGENT-PM-STANDARD.md` reference and keeping only the two current global policy files.
+- Troubleshooting suggestions: If any older tools still reference the deprecated file, keep the stub file in global policy but avoid re-adding it to repo `AGENTS.md`.
+- Resolutions/outcomes: Repo now points to the current global policy files per the deprecation instructions.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

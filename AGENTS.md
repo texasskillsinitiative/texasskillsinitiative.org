@@ -8,8 +8,9 @@ This file defines recommended autonomous behavior for this repository.
 - Launch Codex with `codex -a never -s danger-full-access` for this repository when you want direct execution without approval prompts.
 - If this mode is not used, approval prompts and sandbox limits may block requested actions.
 
-`Global PM standard reference`:
-- Also follow `C:\dev\global-access\ai-visible\GLOBAL-AGENT-PM-STANDARD.md` for cross-repository milestone/version normalization and machine-checkable status hygiene.
+`Global policy references (priority)`:
+- `C:\dev\global-access\ai-visible\GLOBAL-AGENT-RULES.md`
+- `C:\dev\global-access\ai-visible\GLOBAL-AGENT-PM-STANDARDS.md`
 
 ## 1) Source Of Truth
 - `STATUS.md` is the primary roadmap and progress tracker for this repository.
