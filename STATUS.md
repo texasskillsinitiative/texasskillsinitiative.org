@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-03-02
+Last updated: 2026-03-03
 Current milestone: 1.0
 Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
@@ -594,6 +594,8 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-03-01: Ran live unified-endpoint smoke submissions for all seven routes (legacy stakeholder/investor/employment + portal investment/press/employment/internship) against `AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec`; all returned `{ok:true}` with traceable IDs (`smoke-legacy-stakeholder-20260301175649`, `smoke-legacy-investor-20260301175649`, `smoke-legacy-employment-20260301175649`, `smoke-portal-investment-20260301175649`, `smoke-portal-press-20260301175649`, `smoke-portal-employment-20260301175649`, `smoke-portal-internship-20260301175649`).
 - [Done] 2026-03-01: Reduced Script Properties pressure in V2 backend by moving rate-limit state to `CacheService` (replacing dynamic `portal_v2_rl_*` property writes), gating dashboard state writes behind `PORTAL_V2_DASHBOARD_ENABLED`, and adding maintenance helper `portalV2ClearGeneratedState()` to delete generated `portal_v2_*` state keys (dashboard + legacy rate-limit keys).
 - [Done] 2026-03-01: Applied requested Overview/Footer/Globe Lab UX refinements: lowered overview line-backdrop intensity, added dark/light-theme tuned `Click to continue` styling (including dark-theme gold edge glow and darker-gold light-theme treatment), wired logo click to full overview+globe restart and `00` click to quick (~1.2s) sequenced replay with globe reset, standardized back-to-site button styling (`site-back-btn`) across legal pages/portal hub, and upgraded globe interactive runtime with startup background transition smoothing (Texas color -> default bg), drag inertia with gentle spin re-centering, `Spin 0` control, latitude slider, and globe-anchored persistent draw strokes.
+- [Done] 2026-03-03: Matched Overview preload background to the Texas fill tone (alpha-respecting) until the globe signals ready, then reverted Overview background to theme default to eliminate load-time flash.
+- [Done] 2026-03-03: Forced Overview iframe first paint to use the Texas-blend background via prepaint CSS variable, then switched back to theme default immediately after Texas becomes visible (removes first-load and replay flashes).
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.

@@ -1832,6 +1832,39 @@ const ensurePipelineMapInitialized = () => {
     }, 250);
 };
 
+const OVERVIEW_PRELOAD_CLASS = 'is-overview-preload';
+const OVERVIEW_GLOBE_READY_MESSAGE = 'tsi:overview-globe-ready';
+let overviewGlobeWindow = null;
+
+const getOverviewGlobeIframe = () => document.querySelector('.overview-animation iframe');
+function setOverviewPreloadActive(active) {
+    if (!document.body) return;
+    document.body.classList.toggle(OVERVIEW_PRELOAD_CLASS, Boolean(active));
+}
+const bindOverviewGlobeWindow = () => {
+    const iframe = getOverviewGlobeIframe();
+    if (!iframe) return;
+    overviewGlobeWindow = iframe.contentWindow || null;
+};
+const initOverviewPreloadHandlers = () => {
+    const overviewSection = document.getElementById('overview');
+    if (!overviewSection) return;
+    setOverviewPreloadActive(true);
+    const iframe = getOverviewGlobeIframe();
+    if (!iframe) return;
+    bindOverviewGlobeWindow();
+    iframe.addEventListener('load', () => {
+        bindOverviewGlobeWindow();
+    });
+};
+window.addEventListener('message', (event) => {
+    if (!event || !event.data || event.data.type !== OVERVIEW_GLOBE_READY_MESSAGE) return;
+    if (overviewGlobeWindow && event.source && event.source !== overviewGlobeWindow) return;
+    setOverviewPreloadActive(false);
+});
+
+initOverviewPreloadHandlers();
+
 // Theme Toggle & Animations (Keep your existing code here)
 const toggleSwitch = document.querySelector('#checkbox');
 const syncOverviewGlobeTheme = () => {
@@ -1849,6 +1882,7 @@ const syncOverviewGlobeTheme = () => {
     if (nextUrl.searchParams.get('theme') === nextTheme) return;
     nextUrl.searchParams.set('theme', nextTheme);
     const nextRelative = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    setOverviewPreloadActive(true);
     iframe.setAttribute('src', nextRelative);
 };
 if (toggleSwitch) {
@@ -2177,6 +2211,7 @@ const restartOverviewGlobe = () => {
     }
     nextUrl.searchParams.set('restart', Date.now().toString(36));
     const nextRelative = `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`;
+    setOverviewPreloadActive(true);
     iframe.setAttribute('src', nextRelative);
 };
 

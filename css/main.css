@@ -43,6 +43,8 @@
             --tab-active-bg: #18243a;
             --tab-active-bg-strong: #121d31;
             --overview-copy-backdrop-rgb: 3, 8, 14;
+            --overview-texas-fill-rgb: 125, 249, 255;
+            --overview-texas-fill-alpha: 0.05;
         }
 
         [data-theme="light"] {
@@ -67,6 +69,8 @@
             --tab-active-bg: #f2f5fa;
             --tab-active-bg-strong: #e6edf7;
             --overview-copy-backdrop-rgb: 255, 255, 255;
+            --overview-texas-fill-rgb: 14, 165, 233;
+            --overview-texas-fill-alpha: 0.12;
         }
 
         body {
@@ -5883,6 +5887,16 @@
 
         .section-wrap#overview {
             display: block;
+            background-color: var(--page-bg);
+            transition: background-color var(--motion-base) var(--motion-ease-soft);
+        }
+
+        body.is-overview-preload {
+            background-color: rgba(var(--overview-texas-fill-rgb), var(--overview-texas-fill-alpha));
+        }
+
+        body.is-overview-preload .section-wrap#overview {
+            background-color: rgba(var(--overview-texas-fill-rgb), var(--overview-texas-fill-alpha));
         }
 
         .section-wrap:target~.section-wrap#overview {

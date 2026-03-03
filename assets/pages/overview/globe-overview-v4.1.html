@@ -4,13 +4,82 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vector Globe v3.7e</title>
+  <script>
+    (function () {
+      const clampAlpha = (v) => Math.max(0, Math.min(1, v));
+      const parseRgb = (raw) => {
+        const input = String(raw || "").trim();
+        if (!input) return null;
+        const rgbaMatch = input.match(/^rgba?\(([^)]+)\)$/i);
+        if (rgbaMatch) {
+          const parts = rgbaMatch[1].split(",").map((part) => part.trim());
+          if (parts.length < 3) return null;
+          const r = Number(parts[0]);
+          const g = Number(parts[1]);
+          const b = Number(parts[2]);
+          const a = (parts.length >= 4) ? Number(parts[3]) : 1;
+          if (![r, g, b].every(Number.isFinite)) return null;
+          return { r, g, b, a: Number.isFinite(a) ? clampAlpha(a) : 1 };
+        }
+        const hexMatch = input.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+        if (hexMatch) {
+          const hex = hexMatch[1];
+          if (hex.length === 3) {
+            const r = Number.parseInt(hex[0] + hex[0], 16);
+            const g = Number.parseInt(hex[1] + hex[1], 16);
+            const b = Number.parseInt(hex[2] + hex[2], 16);
+            return { r, g, b, a: 1 };
+          }
+          const r = Number.parseInt(hex.slice(0, 2), 16);
+          const g = Number.parseInt(hex.slice(2, 4), 16);
+          const b = Number.parseInt(hex.slice(4, 6), 16);
+          return { r, g, b, a: 1 };
+        }
+        return null;
+      };
+      const blendColorOver = (fgRaw, bgRaw) => {
+        const fg = parseRgb(fgRaw);
+        const bg = parseRgb(bgRaw);
+        if (!fg || !bg) return "";
+        const alpha = clampAlpha(Number.isFinite(fg.a) ? fg.a : 1);
+        const r = Math.round((fg.r * alpha) + (bg.r * (1 - alpha)));
+        const g = Math.round((fg.g * alpha) + (bg.g * (1 - alpha)));
+        const b = Math.round((fg.b * alpha) + (bg.b * (1 - alpha)));
+        return `rgb(${r}, ${g}, ${b})`;
+      };
+      const params = new URLSearchParams(window.location.search || "");
+      const themeParam = String(params.get("theme") || "").toLowerCase();
+      let parentTheme = "";
+      try {
+        parentTheme = String(window.parent && window.parent.document
+          ? window.parent.document.documentElement.getAttribute("data-theme")
+          : "").toLowerCase();
+      } catch (_) {
+        parentTheme = "";
+      }
+      const viewTheme = themeParam === "light" || parentTheme === "light" ? "light" : "dark";
+      const THEME_PRELOAD = {
+        dark: {
+          pageBg: "#0b1220",
+          texasFill: "rgba(125,249,255,0.05)"
+        },
+        light: {
+          pageBg: "#f1f5f9",
+          texasFill: "rgba(14,165,233,0.12)"
+        }
+      };
+      const active = THEME_PRELOAD[viewTheme] || THEME_PRELOAD.dark;
+      const preloadBg = blendColorOver(active.texasFill, active.pageBg) || active.pageBg;
+      document.documentElement.style.setProperty("--globe-preload-bg", preloadBg);
+    })();
+  </script>
   <style>
     html, body {
       margin: 0;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: #0b1220;
+      background: var(--globe-preload-bg, #0b1220);
     }
     body { min-height: 100svh; }
     #globe-stage {
@@ -97,10 +166,19 @@
     };
     const ACTIVE_COLORS = THEME_COLORS[viewTheme] || THEME_COLORS.dark;
 
-    document.documentElement.style.backgroundColor = ACTIVE_COLORS.pageBg;
-    document.body.style.backgroundColor = ACTIVE_COLORS.pageBg;
     const stage = document.getElementById("globe-stage");
-    if (stage) stage.style.background = ACTIVE_COLORS.pageBg;
+    const preloadVar = window.getComputedStyle(document.documentElement)
+      .getPropertyValue("--globe-preload-bg")
+      .trim();
+    const preloadBg = preloadVar || ACTIVE_COLORS.pageBg;
+    const setDocumentBackground = (color) => {
+      const next = String(color || ACTIVE_COLORS.pageBg);
+      document.documentElement.style.backgroundColor = next;
+      document.body.style.backgroundColor = next;
+      if (stage) stage.style.background = next;
+    };
+    let settledToGlobeBg = false;
+    setDocumentBackground(preloadBg);
 
     // Single control block: edit all behavior + visual variables here.
     const BASE_CFG = {
@@ -282,6 +360,24 @@
       if (m === "border" || m === "fill" || m === "both" || m === "none") return m;
       return "border";
     };
+    const OVERVIEW_READY_MESSAGE = "tsi:overview-globe-ready";
+    const notifyParentReady = (() => {
+      let sent = false;
+      return (phase) => {
+        if (sent) return;
+        sent = true;
+        try {
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage({
+              type: OVERVIEW_READY_MESSAGE,
+              phase: String(phase || "ready")
+            }, "*");
+          }
+        } catch (_) {
+          // Ignore cross-origin or messaging failures.
+        }
+      };
+    })();
     const parseIndexOrder = (csv) => String(csv || "")
       .split(",")
       .map((token) => Number.parseInt(token.trim(), 10))
@@ -1072,6 +1168,13 @@
         render();
         lastRenderTs = now;
         perfRenderedFrames += 1;
+        if (!settledToGlobeBg && (!CFG.enableTexas || timelineState.values.texasOpacity > 0.001)) {
+          setDocumentBackground(ACTIVE_COLORS.pageBg);
+          settledToGlobeBg = true;
+        }
+        if (!CFG.enableTexas || timelineState.values.texasOpacity > 0.001) {
+          notifyParentReady("texas");
+        }
       }
 
       const perfSampleElapsedMs = now - perfLastSampleTs;

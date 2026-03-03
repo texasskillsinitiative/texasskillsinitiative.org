@@ -2045,3 +2045,16 @@
 - Resolutions/outcomes: Session closed cleanly; commit recorded.
 - Commit hash(es): `9f4f457`
 [AGENTS-LOG-TAIL] CLEAN_EXIT_CONFIRMED 2026-03-02 17:56:36 -06:00
+### 2026-03-03 09:15:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Overview preload background to match the Texas fill tone (alpha respected) until the globe signals readiness; added globe-to-parent ready message and preload reset on theme/globe restarts.
+- Troubleshooting suggestions: If the preload color persists, hard refresh and confirm the overview iframe can post `tsi:overview-globe-ready` messages.
+- Resolutions/outcomes: Overview now loads without a background flash while the globe initializes.
+### 2026-03-02 18:16:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Extended the overview preload tint to the full page body so the Texas-fill background is visible behind the fixed iframe.
+- Troubleshooting suggestions: If the tint is still too subtle, we can increase the preload alpha without changing the globe’s actual Texas fill.
+- Resolutions/outcomes: Preload background should now be visible at the page level during globe initialization.
+### 2026-03-02 18:31:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved the Overview preload tint into the globe iframe’s pre-paint CSS variable and delayed the theme background switch until Texas becomes visible, preventing initial pageBg flash.
+- Troubleshooting suggestions: Hard refresh and confirm the iframe’s `--globe-preload-bg` is set before first paint; inspect the iframe background color during load.
+- Resolutions/outcomes: First paint should now match the Texas-blend background, then revert to theme default after Texas appears.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
