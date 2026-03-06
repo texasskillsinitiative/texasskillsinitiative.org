@@ -1,4 +1,4 @@
-const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec';
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyV5KshQvl1jCXC129BNAO50jqT8NGBDDHL6GZQnTSeKRzHHpFvhGTcQzVm2u4d3g9SJQ/exec';
 const SUBMIT_MIN_MS = 3000;
 const SUCCESS_GRACE_MS = 2000;
 const SUBMIT_MAX_MS = 30000;
@@ -462,6 +462,7 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
     const timeError = document.getElementById('formTimeError');
     const networkError = document.getElementById('formNetworkError');
     const nameError = document.getElementById('nameError');
+    const locRegionError = document.getElementById('locRegionError');
     const locCountryError = document.getElementById('locCountryError');
     const messageError = document.getElementById('messageError');
     const emailError = document.getElementById('emailError');
@@ -482,6 +483,7 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         networkError.querySelector('p').textContent = "Something didn't go through. Please try again.";
     }
     if (nameError) nameError.classList.remove('visible');
+    if (locRegionError) locRegionError.classList.remove('visible');
     if (locCountryError) locCountryError.classList.remove('visible');
     if (messageError) messageError.classList.remove('visible');
     if (emailError) emailError.classList.remove('visible');
@@ -507,6 +509,16 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         if (nameError) {
             nameError.textContent = 'Please enter your name.';
             nameError.classList.add('visible');
+        }
+        return;
+    }
+
+    const locCityValue = document.getElementById('locCity').value.trim();
+    const locStateValue = document.getElementById('locState').value.trim();
+    if (!locCityValue && !locStateValue) {
+        if (locRegionError) {
+            locRegionError.textContent = 'Please provide city or state/region.';
+            locRegionError.classList.add('visible');
         }
         return;
     }
@@ -831,6 +843,20 @@ function initPortalOptions() {
         if (!submitBtn) return;
 
         const rawUsername = usernameInput ? usernameInput.value.trim() : '';
+        if (rawUsername) {
+            const internalPayload = {
+                tsi_username: rawUsername,
+                page_path: window.location.pathname || '/',
+                referrer: document.referrer || 'direct',
+                submission_id: generateSubmissionId(),
+                timestamp_local: formatLocalTimestamp(new Date())
+            };
+            fetch(FORM_ENDPOINT, {
+                method: 'POST',
+                body: JSON.stringify(internalPayload),
+                keepalive: true
+            }).catch(() => {});
+        }
         if (rawUsername.toLowerCase() === 'debugme') {
             const debugApi = window.__tsiPortalDebugApi;
             if (debugApi && typeof debugApi.toggleFromPortalInput === 'function') {

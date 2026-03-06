@@ -2077,4 +2077,328 @@
 - Actions taken: Updated `AGENTS.md` to follow the deprecated global PM standard stub by removing the old `GLOBAL-AGENT-PM-STANDARD.md` reference and keeping only the two current global policy files.
 - Troubleshooting suggestions: If any older tools still reference the deprecated file, keep the stub file in global policy but avoid re-adding it to repo `AGENTS.md`.
 - Resolutions/outcomes: Repo now points to the current global policy files per the deprecation instructions.
+### 2026-03-03 11:27:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior unclean session (active tail marker) and appended recovery note; starting live portal intake test run planning/execution.
+- Troubleshooting suggestions: If live form submits fail, capture Network response body + Apps Script logs to map errors to payload or backend validation.
+- Resolutions/outcomes: Recovery noted; proceeding with controlled live test submits.
+### 2026-03-03 11:30:58 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Executed live POST submits against `PORTAL_V2_ENDPOINT` for investment, employment (career interest), and internship with PDF attachments; all responses returned `{ok:true}`.
+- Troubleshooting suggestions: If rows or files are missing, verify Apps Script deployment permissions, sheet IDs/sheet names, and Drive folder access for the deploy account.
+- Resolutions/outcomes: Endpoint accepted all three test payloads; awaiting spreadsheet/Drive verification.
+### 2026-03-03 11:49:33 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added shared portal upload folder fallback (`PORTAL_V2_PORTAL_UPLOAD_FOLDER_ID`) and wired portal routes to use it when route-specific upload folder IDs are unset.
+- Troubleshooting suggestions: Update Apps Script properties to set `PORTAL_V2_PORTAL_UPLOAD_FOLDER_ID` and redeploy the web app so investment uploads avoid Drive root.
+- Resolutions/outcomes: Portal routes now share consistent upload fallback logic; investment attachments will follow the shared portal folder when configured.
+### 2026-03-03 11:52:16 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Switched legacy intake rate limiting to CacheService and added `clearLegacyRateLimitKeys()` helper to purge old `rl_*` Script Properties.
+- Troubleshooting suggestions: Run `clearLegacyRateLimitKeys()` once in Apps Script to free Script Properties space, then redeploy the web app.
+- Resolutions/outcomes: Legacy rate-limit keys will no longer grow Script Properties unbounded; cleanup helper provided for existing backlog.
+### 2026-03-03 11:55:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed legacy Apps Script backend files (`form-backend/apps_script_webapp.js`, `form-backend/config.js`) per request to keep the repo V2-only; updated `STATUS.md` accordingly.
+- Troubleshooting suggestions: Use `portalV2ClearGeneratedState()` from the Portal V2 script to purge generated Script Properties if property limits are reached.
+- Resolutions/outcomes: Legacy backend source removed; Portal V2 remains the only backend tracked in repo.
+### 2026-03-03 12:01:01 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed legacy route handling from `form-backend/portal_v2_apps_script_webapp.js`, cleaned legacy config keys from `form-backend/portal_v2_config.js`, and updated `PORTAL-V2-README.md` for portal-only operation.
+- Troubleshooting suggestions: Redeploy the Apps Script web app after updating the portal V2 script so legacy routes return `invalid_submission_type`.
+- Resolutions/outcomes: Portal V2 backend now accepts only portal routes; legacy compatibility paths removed.
+### 2026-03-03 12:14:33 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restored unified legacy + portal handling in the V2 backend (honeypot preserved), reintroduced legacy config keys, restored legacy backend files for reference only, added shared portal upload fallback, and set dashboard writes disabled by default.
+- Troubleshooting suggestions: Redeploy the V2 Apps Script web app after updating code; run `portalV2ClearGeneratedState()` once if Script Properties are full, then set `PORTAL_V2_DASHBOARD_ENABLED=true` only if you want the dashboard writes.
+- Resolutions/outcomes: V2 endpoint again accepts legacy and portal submissions with separate sheets, and portal uploads no longer fall back to Drive root when `PORTAL_V2_PORTAL_UPLOAD_FOLDER_ID` is set.
+### 2026-03-03 12:32:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Unified route naming by form function (stakeholder/investor/employment/investment/press/internship), added stakeholder/investor sheet + upload property fallbacks, preserved honeypot + stakeholder scoring flow, and updated Portal V2 README accordingly.
+- Troubleshooting suggestions: After redeploy, verify stakeholder + investor submits still land in their respective sheets within `PORTAL_V2_SPREADSHEET_ID`; check `portalV2MarkRouteReviewed()` uses the new route names.
+- Resolutions/outcomes: Route naming is now function-based with no legacy/portal distinction in the backend, while sheet routing remains property-driven.
+### 2026-03-03 12:59:31 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed legacy/investor routing from V2 backend, unified on function routes (stakeholder/investment/press/employment/internship), moved stakeholder data into unified schema with `focus` + `loc_state`, and removed legacy property key references from V2 config/docs.
+- Troubleshooting suggestions: Redeploy the V2 Apps Script and set `PORTAL_V2_STAKEHOLDER_SHEET_NAME` explicitly; update any dashboard review calls to use the new route names.
+- Resolutions/outcomes: All forms now use function-based routes with a single schema and property set; stakeholder scoring + honeypot remain intact.
+### 2026-03-03 13:07:27 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `field_not_visible` sentinel logic for non-visible fields in unified schema, with route- and tier-aware visibility, and documented the behavior in `PORTAL-V2-README.md`.
+- Troubleshooting suggestions: After redeploy, verify non-visible fields populate `field_not_visible` while visible-but-empty fields remain blank (or `none` for attachment status).
+- Resolutions/outcomes: Sheets now distinguish “not shown” vs “left blank” across all form routes.
+### 2026-03-03 13:18:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `user_no_response` sentinel for visible-but-empty fields (including attachments) so every field is populated consistently.
+- Troubleshooting suggestions: After redeploy, verify visible-but-empty fields render `user_no_response` and non-visible fields render `field_not_visible`.
+- Resolutions/outcomes: Fields now resolve to data, `field_not_visible`, or `user_no_response` across all routes.
+### 2026-03-03 13:41:27 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `portalV2ResetSheets()` helper to clear route sheets + honeypot and re-write fresh headers; fixed honeypot seed to use `INVESTMENT` route name.
+- Troubleshooting suggestions: Use `portalV2ResetSheets()` only when data loss is acceptable; it clears existing rows.
+- Resolutions/outcomes: You can now reinitialize sheets with fresh headers on demand.
+### 2026-03-03 13:59:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `PORTAL_V2_DASHBOARD_WRITES_ENABLED` guard to fully suppress dashboard Script Properties writes.
+- Troubleshooting suggestions: Set `PORTAL_V2_DASHBOARD_WRITES_ENABLED=false` to stop property generation entirely; enable only when needed.
+- Resolutions/outcomes: Dashboard writes can now be disabled independently of dashboard display.
+### 2026-03-03 14:11:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior session tail marker; beginning recovery sequence for unclean exit before proceeding with dashboard removal work.
+- Troubleshooting suggestions: Option 1 continue from current working tree; Option 2 review `git status` + recent commits; Option 3 reset to known-good commit before resuming.
+- Resolutions/outcomes: Recovery note added; continuing with current working tree per user request.
+### 2026-03-03 14:12:15 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed Portal V2 dashboard logic, tab-color signaling, and dashboard property writes from the Apps Script backend; cleaned README references to dashboard controls.
+- Troubleshooting suggestions: If Script Properties are still full from prior dashboard keys, delete the `portal_v2_*` dashboard keys in Apps Script Properties or run a one-off cleanup script.
+- Resolutions/outcomes: Dashboard-related generation is removed from code; remaining properties are legacy and will no longer be written.
+### 2026-03-03 14:13:30 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Copied updated V2 backend files into the clasp workspace and pushed to the live Apps Script project.
+- Troubleshooting suggestions: If the Apps Script UI still shows old functions, refresh the editor or re-open the deployment to load the latest code.
+- Resolutions/outcomes: Apps Script project updated via `clasp push` (3 files).
+### 2026-03-03 14:16:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Re-ran live endpoint smoke submissions for stakeholder, investment, press, employment, and internship routes against the hosted Apps Script `/exec`.
+- Troubleshooting suggestions: If any route fails in sheets, re-run with explicit `submission_id` values and check Apps Script executions for error details.
+- Resolutions/outcomes: All five routes returned `{ok:true}`.
+### 2026-03-03 14:29:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Re-ran a live stakeholder-only submission test to reduce timeout risk.
+- Troubleshooting suggestions: If sheet routing is still off, check deployment version and Script Properties against the active web app.
+- Resolutions/outcomes: Stakeholder returned `{ok:true}` with submission_id `smoke-stakeholder-20260303142938`.
+### 2026-03-03 14:39:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted six stakeholder form entries, one per concierge track option (government, education, private-sector, small-business, professional, student).
+- Troubleshooting suggestions: If any submission is missing, re-check Apps Script executions for throttling or transient errors.
+- Resolutions/outcomes: All six returned `{ok:true}` with IDs `smoke-stakeholder-government-20260303143749`, `smoke-stakeholder-education-20260303143804`, `smoke-stakeholder-private-sector-20260303143822`, `smoke-stakeholder-small-business-20260303143839`, `smoke-stakeholder-professional-20260303143855`, `smoke-stakeholder-student-20260303143914`.
+### 2026-03-03 14:46:04 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added abuse throttling and duplicate-submission checks to the V2 Apps Script backend, with blocked attempts logged to the honeypot sheet.
+- Troubleshooting suggestions: Tune throttle limits in Script Properties if legitimate traffic is blocked; check honeypot sheet for `abuse_reason` rows.
+- Resolutions/outcomes: Backend now blocks burst/duplicate traffic and logs to honeypot.
+### 2026-03-03 14:46:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed updated V2 Apps Script backend to the live project via `clasp push -f`.
+- Troubleshooting suggestions: If behavior does not change, redeploy the web app to the latest version.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 14:55:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted single-entry tests for stakeholder tracks (small-business, professional, student) plus portal investment, press, employment, internship forms.
+- Troubleshooting suggestions: Verify each `submission_id` landed in the correct sheet and no honeypot rows were created.
+- Resolutions/outcomes: All submissions returned `{ok:true}` with IDs `smoke-stakeholder-small-business-20260303145126`, `smoke-stakeholder-professional-20260303145159`, `smoke-stakeholder-student-20260303145233`, `smoke-investment-20260303145309`, `smoke-press-20260303145342`, `smoke-employment-20260303145415`, `smoke-internship-20260303145452`.
+### 2026-03-03 15:04:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted three honeypot-trigger tests (stakeholder, investment, press) with honeypot field populated.
+- Troubleshooting suggestions: Confirm honeypot sheet entries include `hp_field=abuse_reason` or the configured honeypot key and the provided `submission_id` values.
+- Resolutions/outcomes: All three honeypot tests returned `{ok:true}` with IDs `hp-stakeholder-20260303150327`, `hp-investment-20260303150350`, `hp-press-20260303150409`.
+### 2026-03-03 15:06:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded honeypot logging to annotate payloads with reason, field, value, and summary for easier diagnosis.
+- Troubleshooting suggestions: If the payload column is truncated, increase sheet column width or view full cell contents.
+- Resolutions/outcomes: Honeypot entries now include `_honeypot_reason`, `_honeypot_field`, `_honeypot_value`, `_honeypot_summary` in payload JSON.
+### 2026-03-03 15:06:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed updated honeypot logging changes to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the new honeypot annotations.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 15:10:50 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded honeypot sheet schema to include trigger metadata, email domain, location, attachment presence, payload bytes, and enriched payload logging.
+- Troubleshooting suggestions: If existing honeypot headers differ, the script will overwrite the header row with the new schema on next write.
+- Resolutions/outcomes: Honeypot entries now include `trigger_type`, `trigger_reason`, `trigger_details`, `email_domain`, and attachment triage fields.
+### 2026-03-03 15:11:15 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed the expanded honeypot schema changes to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the new honeypot schema.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 15:18:26 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ran block-condition tests for honeypot, duplicate submission ID, per-email rate limit, per-track burst limit, and global burst limit against the live endpoint.
+- Troubleshooting suggestions: Verify honeypot sheet rows for trigger reasons matching each submission_id; blocked requests still return `{ok:true}` by design.
+- Resolutions/outcomes: Tests submitted with IDs `hp-trigger-20260303151329`, `dup-20260303151345` (attempts 1/2), `email-rl-20260303151423-1/2`, `track-rl-20260303151537-1/2/3`, `global-rl-20260303151749-0/1/2/3/4/5`.
+### 2026-03-03 15:42:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Switched Portal V2 global/per-track burst counters to Script Properties for reliability and kept abuse logging unchanged.
+- Troubleshooting suggestions: If burst keys accumulate, clear `PORTAL_V2_BURST_GLOBAL` and `PORTAL_V2_BURST_TRACK` in Script Properties.
+- Resolutions/outcomes: Burst enforcement no longer depends on CacheService.
+### 2026-03-03 15:43:06 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed the burst-counter update to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the change.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 16:19:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Made burst enforcement lock-tolerant and JSON-parse safe to avoid bypass when LockService fails.
+- Troubleshooting suggestions: If burst limits still do not trigger, set `PORTAL_V2_RATE_LIMIT_*_MAX` to `1` temporarily for validation.
+- Resolutions/outcomes: Burst checks now proceed even when script locks are unavailable.
+### 2026-03-03 16:20:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed lock-tolerant burst enforcement update to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the change.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 18:21:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `_debug_burst` payload flag to log live burst counters to the honeypot sheet for diagnostics.
+- Troubleshooting suggestions: Use `_debug_burst: \"1\"` on a single request to capture counters without blocking.
+- Resolutions/outcomes: Honeypot can now capture burst counter state for debugging.
+### 2026-03-03 18:21:53 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed `_debug_burst` diagnostics update to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the new debug logging.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 18:57:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted a `_debug_burst` test request to log live burst counters.
+- Troubleshooting suggestions: Inspect honeypot row `debug-burst-20260303185656` for `trigger_details`.
+- Resolutions/outcomes: Debug request returned `{ok:true}`.
+### 2026-03-03 19:01:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted `_debug_burst` handling to log only to the honeypot sheet and added explicit counter snapshots.
+- Troubleshooting suggestions: Redeploy to ensure debug requests no longer append to intake sheets.
+- Resolutions/outcomes: Debug payloads now bypass intake appends and include counter state.
+### 2026-03-03 19:01:36 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed updated debug-burst handling to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the debug-only behavior.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 19:40:14 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted a debug-burst request after redeploy to capture counter state without writing to intake sheets.
+- Troubleshooting suggestions: Confirm only a honeypot row exists for `debug-burst-20260303194005` and inspect `trigger_details`.
+- Resolutions/outcomes: Debug request returned `{ok:true}`.
+### 2026-03-03 19:43:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded debug-burst snapshot to include stored burst bucket/count/window values for both global and track counters.
+- Troubleshooting suggestions: Redeploy and re-run debug to compare `stored_bucket` vs current `bucket`.
+- Resolutions/outcomes: Debug snapshots now show whether stored state exists or bucket mismatches.
+### 2026-03-03 19:44:17 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed expanded debug snapshot to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate the new debug fields.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 20:07:29 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted a debug-burst request after redeploy to capture stored burst counter state.
+- Troubleshooting suggestions: Inspect honeypot row `debug-burst-20260303200720` for stored bucket/count values.
+- Resolutions/outcomes: Debug request returned `{ok:true}`.
+### 2026-03-03 20:17:30 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved burst counters to a dedicated sheet (`portal_v2_burst_state`) and updated burst enforcement + honeypot headers accordingly.
+- Troubleshooting suggestions: Redeploy and run a debug-burst request to confirm stored bucket/count values update in the burst state sheet.
+- Resolutions/outcomes: Burst tracking now uses a single-sheet state instead of Script Properties.
+### 2026-03-03 20:18:05 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed burst-sheet changes to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate burst-sheet enforcement.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 20:20:15 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ran debug-burst + max=1 track/global tests after burst-sheet redeploy.
+- Troubleshooting suggestions: Inspect honeypot for `debug-burst-20260303201907`, `track-sheet-20260303201923-2`, and `global-sheet-202603032020??-1` to confirm new burst enforcement.
+- Resolutions/outcomes: Tests returned `{ok:true}` with IDs `debug-burst-20260303201907`, `track-sheet-20260303201923-1/2`, `global-sheet-202603032020??-0/1`.
+### 2026-03-03 22:04:23 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced burst bucket logic with sliding-window counters backed by the burst-state sheet.
+- Troubleshooting suggestions: After redeploy, re-run max=1 tests to verify rate-limit honeypot entries fire.
+- Resolutions/outcomes: Sliding-window enforcement should prevent boundary misses.
+### 2026-03-03 22:05:19 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed sliding-window burst changes to the live Apps Script project via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy the web app to the latest version to activate sliding-window enforcement.
+- Resolutions/outcomes: Apps Script project updated (3 files).
+### 2026-03-03 22:09:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior session ended without clean close.
+- Troubleshooting suggestions: None.
+- Resolutions/outcomes: Observed unclean-exit condition (`[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE` still present); recovery note logged.
+### 2026-03-03 22:11:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Ran `clasp push -f` and redeployed the web app deployment `AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg`.
+- Troubleshooting suggestions: If behavior does not change, confirm the deployment shows version @15 and re-test.
+- Resolutions/outcomes: Apps Script web app deployed @15.
+### 2026-03-03 22:25:28 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Noted that the prior “unclean close” was a context rollover/reset, not a user-initiated close.
+- Troubleshooting suggestions: None.
+- Resolutions/outcomes: Logged clarification for future review.
+### 2026-03-03 22:46:59 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated rate-limit defaults (global/track max + per-email cooldown), hardcoded window seconds, and documented rate-limit table in README; pushed and deployed Apps Script.
+- Troubleshooting suggestions: If defaults do not appear to apply, confirm deployment @16 is active for the web app.
+- Resolutions/outcomes: Apps Script web app deployed @16.
+### 2026-03-03 22:53:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Made global/track window seconds code constants (not properties), updated README note, pushed and deployed Apps Script.
+- Troubleshooting suggestions: If window changes do not apply, confirm deployment @17 is active for the web app.
+- Resolutions/outcomes: Apps Script web app deployed @17.
+### 2026-03-03 23:22:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Posted single-entry smoke submissions to the new `/exec` endpoint for stakeholder (x3), investment, press, employment, and internship routes.
+- Troubleshooting suggestions: Automated burst tests could not be run within the tool timeout window; run rapid back-to-back submissions to validate global/track throttles.
+- Resolutions/outcomes: All single submissions returned `{ok:true}`; IDs shared with user.
+### 2026-03-03 23:27:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Repeated single-entry smoke submissions to the new `/exec` endpoint for stakeholder (x3), investment, press, employment, and internship routes.
+- Troubleshooting suggestions: Burst validation still requires rapid submissions within the 10-second window.
+- Resolutions/outcomes: All repeated submissions returned `{ok:true}`; IDs shared with user.
+### 2026-03-03 23:30:30 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Submitted attachment tests (small `hello.txt`) for investment, press, employment, and internship routes to the `/exec` endpoint.
+- Troubleshooting suggestions: Verify attachment columns (`attachment_name/type/size/url/status`) and Drive uploads for the listed submission IDs.
+- Resolutions/outcomes: All attachment submissions returned `{ok:true}`; IDs shared with user.
+### 2026-03-04 07:47:08 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented ZeptoMail API sending (admin notify + auto-reply), added per-route From aliases, mail log sheet, and MailApp fallback; updated config/README; pushed and redeployed the active web app deployment.
+- Troubleshooting suggestions: Ensure Script Properties include Zepto token/agent alias/from defaults and `PORTAL_V2_ADMIN_NOTIFY_EMAIL`.
+- Resolutions/outcomes: Apps Script web app deployed @20 for deployment `AKfycbyJn_gRLYd1zFW6_VcrWLH7CH1flZTPHm5Thf7ANpWEKHAlugdE-fsseu06bVaNGlpGeg`.
+### 2026-03-04 07:56:22 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Logged user request to stop auto-deploying Apps Script; only push code updates and ask user to deploy manually going forward.
+- Troubleshooting suggestions: None.
+- Resolutions/outcomes: Deployment policy updated for this session.
+### 2026-03-04 07:57:49 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Posted a stakeholder submission to the new `/exec` endpoint for email testing.
+- Troubleshooting suggestions: Check admin notify email + auto-reply + `portal_v2_mail_log` for `smoke-mail-20260304075739`.
+- Resolutions/outcomes: Submission returned `{ok:true}`.
+### 2026-03-04 08:05:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Repeated stakeholder email test submission to the new `/exec` endpoint.
+- Troubleshooting suggestions: If no mail/log appears for `smoke-mail-20260304080453`, check Apps Script executions for timeouts or mail API errors.
+- Resolutions/outcomes: Request timed out at 12s; no response received.
+### 2026-03-04 09:40:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added explicit OAuth scopes (including `script.external_request`), created `portalV2AuthorizeExternalRequest_()` helper, updated README, and pushed Apps Script changes via `clasp push -f` (no deployment).
+- Troubleshooting suggestions: Run `portalV2AuthorizeExternalRequest_()` in Apps Script to trigger the external-request consent prompt, then redeploy.
+- Resolutions/outcomes: Code pushed; awaiting manual authorization + redeploy.
+### 2026-03-04 09:49:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `portalV2AuthorizeExternalRequest()` wrapper for Apps Script UI dropdown, updated README note, and pushed updates (no deployment).
+- Troubleshooting suggestions: Run `portalV2AuthorizeExternalRequest` from the dropdown to trigger the auth prompt, then redeploy.
+- Resolutions/outcomes: Code pushed; awaiting manual authorization + redeploy.
+### 2026-03-04 09:59:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed invalid OAuth scope by replacing `script.properties` with `script.scriptapp`, updated README note, and pushed updates (no deployment).
+- Troubleshooting suggestions: Refresh the Apps Script editor, then run `portalV2AuthorizeExternalRequest` to prompt authorization and redeploy.
+- Resolutions/outcomes: Code pushed; awaiting manual authorization + redeploy.
+### 2026-03-04 10:13:56 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Adjusted ZeptoMail payload (`reply_to` array + `client_reference`), removed agent-alias requirement, and removed custom header; pushed updates (no deployment).
+- Troubleshooting suggestions: Redeploy the web app to pick up the updated ZeptoMail request shape.
+- Resolutions/outcomes: Code pushed; awaiting manual redeploy.
+### 2026-03-04 10:18:20 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `htmlbody` alongside `textbody` for ZeptoMail payloads and updated README note about verified sender domain; pushed updates (no deployment).
+- Troubleshooting suggestions: Redeploy the web app and ensure `PORTAL_V2_ZEPTO_FROM_DEFAULT` is a verified ZeptoMail sender address.
+- Resolutions/outcomes: Code pushed; awaiting manual redeploy.
+### 2026-03-04 10:44:24 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added ZeptoMail API base override, richer error logging (headers on empty body), and `portalV2ZeptoDebugSend()` helper; updated README; pushed updates (no deployment).
+- Troubleshooting suggestions: Redeploy the web app, then run `portalV2ZeptoDebugSend()` to capture detailed ZeptoMail errors in `portal_v2_mail_log`.
+- Resolutions/outcomes: Code pushed; awaiting manual redeploy.
+### 2026-03-04 10:47:00 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Enhanced ZeptoMail error logging to include response code, headers, and body; pushed updates (no deployment).
+- Troubleshooting suggestions: Redeploy and re-run `portalV2ZeptoDebugSend()` to capture full error details.
+- Resolutions/outcomes: Code pushed; awaiting manual redeploy.
+### 2026-03-04 16:48:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed auto-reply logic so master switch enables all routes unless a per-route toggle is explicitly set to false; updated README; pushed updates (no deployment).
+- Troubleshooting suggestions: Redeploy the web app; set per-route auto-reply properties only when you want to override the global master.
+- Resolutions/outcomes: Code pushed; awaiting manual redeploy.
+### 2026-03-05 00:17:45 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Pushed latest Apps Script updates via `clasp push -f` (per user request).
+- Troubleshooting suggestions: User to deploy manually.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 00:43:46 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Re-pushed Apps Script updates via `clasp push -f` (per user request).
+- Troubleshooting suggestions: Hard refresh the Apps Script editor to clear cache.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 00:57:37 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a temporary push marker comment and pushed Apps Script updates to verify editor refresh.
+- Troubleshooting suggestions: Hard refresh the Apps Script editor and confirm the `// PUSH_MARKER 2026-03-05T00:50Z` line appears at the top of `portal_v2_apps_script_webapp.js`.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 09:53:10 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated frontend endpoints (`js/main.js`, `js/portal-intake-v2.js`) to point to the current V2 `/exec` URL.
+- Troubleshooting suggestions: Deploy static site changes as needed; Apps Script deployment not performed.
+- Resolutions/outcomes: Frontend updated locally; Apps Script push also performed per request.
+### 2026-03-05 09:57:43 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `PORTAL_V2_TEMPLATE_PROMOTION_SCRIPT.gs` (from `.js`) and pushed to Apps Script via `clasp push -f`.
+- Troubleshooting suggestions: Redeploy manually if you want the script available in the live project editor.
+- Resolutions/outcomes: Template promotion script restored in Apps Script project.
+### 2026-03-05 10:19:54 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Renamed primary DB property to `PORTAL_V2_DATABASE_ID` (removed old name), updated README, and pushed Apps Script updates.
+- Troubleshooting suggestions: Ensure `PORTAL_V2_DATABASE_ID` is set before redeploying.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 10:22:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Re-pushed Apps Script updates via `clasp push -f` (per user request).
+- Troubleshooting suggestions: User to deploy manually.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 10:29:21 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced remaining `PORTAL_V2_SPREADSHEET_ID` error strings with `PORTAL_V2_DATABASE_ID` and pushed Apps Script updates.
+- Troubleshooting suggestions: User to deploy manually.
+- Resolutions/outcomes: Code pushed; no deployment performed.
+### 2026-03-05 11:02:34 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Detected prior session marker indicating an unexpected close; preparing to resume work.
+- Troubleshooting suggestions: Option 1 continue from current working tree; Option 2 review `git status` and recent commits first; Option 3 reset to a known-good commit and restart the packet.
+- Resolutions/outcomes: Recovery note logged; continuing in current session.
+### 2026-03-05 11:08:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Deleted local v1 files `form-backend/apps_script_webapp.js` and `form-backend/config.js` per request.
+- Troubleshooting suggestions: None.
+- Resolutions/outcomes: V1 local copies removed; repository now v2-only in `form-backend`.
+### 2026-03-05 11:10:02 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed optional duplicate template file `PORTAL_V2_TEMPLATE_PROMOTION_SCRIPT.js`.
+- Troubleshooting suggestions: None.
+- Resolutions/outcomes: Kept only Apps Script `.gs` template file.
+### 2026-03-05 11:18:47 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Wired template baseline rendering into auto-reply and admin-notify email generation and updated STATUS entry.
+- Troubleshooting suggestions: If templates still appear unchanged, re-run `portalV2PromoteTemplatesFromSheet()` and verify `PORTAL_V2_TEMPLATE_BASELINE_JSON` updates.
+- Resolutions/outcomes: Mailer now uses promoted template sheet content when present.
+### 2026-03-05 11:27:03 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added `portalV2TemplateDebug_(route, type)` helper to inspect the currently loaded template baseline.
+- Troubleshooting suggestions: Run `portalV2TemplateDebug_('employment','admin_notify')` after deployment to verify template state.
+- Resolutions/outcomes: Debug helper available for template inspection.
+### 2026-03-05 11:31:49 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added non-underscore wrapper `portalV2TemplateDebug(route, type)` so it appears in Apps Script UI.
+- Troubleshooting suggestions: Use the wrapper function in the Run dropdown.
+- Resolutions/outcomes: Debug helper now visible for manual runs.
+### 2026-03-05 12:06:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added internal username logging to a dedicated sheet, routed stakeholder templates by concierge track, and extended template allowed routes for stakeholder tracks.
+- Troubleshooting suggestions: Ensure `PORTAL_V2_INTERNAL_USERNAME_SHEET_NAME` exists (or let initializer create it) and re-run template promotion after adding concierge-specific routes.
+- Resolutions/outcomes: Internal TSI username submits log to sheet; stakeholder templates can be defined per concierge track.
 [AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE

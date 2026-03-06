@@ -188,6 +188,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] Transitioned pipeline map to fully interactive MD-driven mode.
 - [Done] Accessibility/QA pass on rubric and navigation.
 - [Done] Form functionality end-to-end verified (Confirmed 2026-02-25).
+- [Done] Portal V2 backend mailer updated: ZeptoMail API sending with per-route From aliases, mail log sheet, fallback to MailApp, and admin notify property rename.
 - [Done] Premium visual refinements (Glassmorphism Nav, Logo Interaction) implemented.
 - [Done] Engagement Section Overhaul: Migrated to Strategic Partnership tone with Persona Cards and Signal Flow visuals.
 
@@ -233,6 +234,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-03-03: Updated `AGENTS.md` to reference `GLOBAL-AGENT-RULES.md` and `GLOBAL-AGENT-PM-STANDARDS.md` as the priority global policy inputs.
 - [Done] 2026-02-27: Captured interrupted mixed working-tree state as forensic checkpoint commit `54dc3e9` (`chore(checkpoint): capture interrupted error state before recovery`) including tracked/untracked artifacts for deterministic replay before recovery.
 - [Done] 2026-02-27: Stabilized pipeline mobile tab-panel recovery in `js/main.js` and `css/main.css` by restoring missing helper/loading CSS states (`.pipeline-map-helper-overlay.is-hidden`, `.map-initializing-overlay*`), routing mobile phase-tab toggles through shared `setCategoryState`, and syncing first-toggle guidance clearing for the new tab control path.
 - [Done] 2026-02-24: Optimized desktop pipeline-map initialization path in `js/main.js` by disabling legacy hidden map-debug/tuning UI construction and reducing popup footprint candidate search breadth (fewer width/font probe combinations), targeting faster first render on `#pipeline`.
@@ -389,6 +391,16 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-02-21: Added temporary operator checklist `TEMP-INVESTOR-EMPLOYMENT-SETUP-TASKS.md` with launch-priority setup/validation tasks for investor and employment intake deployment.
 
 ## Milestone 1.0 - MVP Launch
+- [Done] 2026-03-03: Removed legacy route handling from Portal V2 backend/config and documentation; V2 now accepts only portal routes.
+- [Done] 2026-03-03: Removed legacy Apps Script backend files (`form-backend/apps_script_webapp.js`, `form-backend/config.js`) so the repo only tracks Portal V2 backend sources.
+- [Done] 2026-03-03: Unified portal upload folder fallback logic so investment/press/employment/internship routes use a shared portal upload folder (`PORTAL_V2_PORTAL_UPLOAD_FOLDER_ID`) when route-specific IDs are unset, preventing uploads from falling back to Drive root.
+- [Done] 2026-03-03: Reverted portal-only change: restored unified V2 backend handling for legacy + portal forms (honeypot preserved), restored legacy backend files for reference only, and defaulted dashboard writes to disabled to reduce Script Properties pressure.
+- [Done] 2026-03-03: Removed legacy vs portal naming in V2 route handling; routes now map by form function (`stakeholder`, `investor`, `employment`, `investment`, `press`, `internship`) while keeping stakeholder scoring and honeypot intact.
+- [Done] 2026-03-03: Unified V2 schema/routing around function names only (stakeholder + portal routes), removed investor legacy routing, moved stakeholder data into the unified portal schema with `focus` + `loc_state` columns, and removed legacy property keys from V2 config/docs.
+- [Done] 2026-03-03: Added `field_not_visible` sentinel for non-visible form fields in unified schema so “not shown” vs “left blank” can be distinguished.
+- [Done] 2026-03-03: Added `user_no_response` sentinel for visible-but-empty fields so every field is populated with either data, `field_not_visible`, or `user_no_response`.
+- [Done] 2026-03-03: Added `portalV2ResetSheets()` helper to clear all route sheets + honeypot and write fresh headers for clean reinitialization.
+- [Done] 2026-03-03: Added `PORTAL_V2_DASHBOARD_WRITES_ENABLED` guard so dashboard Script Properties writes can be fully disabled even if dashboard display is enabled.
 - [Done] 2026-03-02: Replaced site-wide logo/icon asset references with new TN branding (new favicon/app icons, updated main logo SVGs), and adjusted portal header brand icon sizing to remove padding.
 - [Done] 2026-03-02: Removed investor/employment options from the access modal, added Future Career Interest route link in the Careers hub, and fixed overview globe light-theme load by resolving the duplicate URL param declaration.
 - [Done] 2026-03-01: Updated overview first-load globe staging to use alpha-aware Texas-fill background blending (from `rgba(125,249,255,0.05)` over site background) and switch to standard background once Texas appears, removing the startup flash artifact.
@@ -596,6 +608,16 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-03-01: Applied requested Overview/Footer/Globe Lab UX refinements: lowered overview line-backdrop intensity, added dark/light-theme tuned `Click to continue` styling (including dark-theme gold edge glow and darker-gold light-theme treatment), wired logo click to full overview+globe restart and `00` click to quick (~1.2s) sequenced replay with globe reset, standardized back-to-site button styling (`site-back-btn`) across legal pages/portal hub, and upgraded globe interactive runtime with startup background transition smoothing (Texas color -> default bg), drag inertia with gentle spin re-centering, `Spin 0` control, latitude slider, and globe-anchored persistent draw strokes.
 - [Done] 2026-03-03: Matched Overview preload background to the Texas fill tone (alpha-respecting) until the globe signals ready, then reverted Overview background to theme default to eliminate load-time flash.
 - [Done] 2026-03-03: Forced Overview iframe first paint to use the Texas-blend background via prepaint CSS variable, then switched back to theme default immediately after Texas becomes visible (removes first-load and replay flashes).
+- [Done] 2026-03-03: Removed Portal V2 dashboard logic (sheet tab coloring, dashboard sheet writes, and dashboard Script Properties generation) so the V2 Apps Script no longer creates dashboard properties.
+- [Done] 2026-03-03: Added Portal V2 abuse throttling (global + per-track burst, duplicate submission ID, per-email rate limit) with honeypot logging for blocked attempts.
+- [Done] 2026-03-05: Wired Portal V2 mail templates from promoted template sheet baseline into auto-reply and admin-notify send paths (fallback to defaults if no template).
+- [Done] 2026-03-05: Added internal TSI username logging to a dedicated sheet and enabled stakeholder template selection by concierge track.
+- [Done] 2026-03-03: Switched Portal V2 burst tracking to Script Properties (`PORTAL_V2_BURST_GLOBAL`, `PORTAL_V2_BURST_TRACK`) to avoid CacheService dropouts.
+- [Done] 2026-03-03: Made burst enforcement lock-tolerant and JSON-parse safe so failed locks no longer bypass rate limits.
+- [Done] 2026-03-03: Added optional `_debug_burst` logging to honeypot for inspecting live burst counters.
+- [Done] 2026-03-03: Debug burst requests now log to honeypot only (no intake sheet append) with explicit snapshot of live counters.
+- [Done] 2026-03-03: Moved burst counters to a dedicated sheet (`portal_v2_burst_state`) for consistent enforcement.
+- [Done] 2026-03-03: Switched burst enforcement to a sliding-window model (sheet-backed) to avoid bucket-boundary misses.
 - [Planned] 2026-02-24: Post-1.0 cleanup pass to remove remaining legacy pointer/debug map behavior code once release-stability validation is complete.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): define top-logo click behavior with an on-click animation and controlled in-SVG element color shift.
 - [Planned] 2026-02-25: Possible option to evaluate prior to `1.0` (no implementation scheduled in this cycle): introduce transparent/blurred top navigation treatment so scroll context is visible through a softened backdrop.
