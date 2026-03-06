@@ -1,4 +1,4 @@
-const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwDGGSMwLCjaU3krrwZl4rrNL2EvLIIwtxz3XK93JXV0eDbL3VQF-MWFVMwPh2oRrgGGg/exec';
+const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyV5KshQvl1jCXC129BNAO50jqT8NGBDDHL6GZQnTSeKRzHHpFvhGTcQzVm2u4d3g9SJQ/exec';
 const PORTAL_V2_MAX_BYTES = 8 * 1024 * 1024;
 const PORTAL_V2_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
 const PORTAL_V2_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -317,6 +317,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = btn.dataset.defaultLabel || 'Submit';
             });
             return;
+        }
+
+        if (route === 'press') {
+            const deadlineInput = form.querySelector('#deadline');
+            const noDeadlineInput = form.querySelector('#pressNoDeadline');
+            const hasDeadline = Boolean(
+                deadlineInput instanceof HTMLInputElement
+                && String(deadlineInput.value || '').trim()
+            );
+            const hasNoDeadline = Boolean(
+                noDeadlineInput instanceof HTMLInputElement
+                && noDeadlineInput.checked
+            );
+            if (!hasDeadline && !hasNoDeadline) {
+                setStatus('Provide a publication deadline or select No deadline.', 'error');
+                if (deadlineInput instanceof HTMLInputElement) deadlineInput.focus();
+                inFlight = false;
+                submitButtons.forEach((btn) => {
+                    if (!(btn instanceof HTMLButtonElement)) return;
+                    btn.disabled = false;
+                    btn.textContent = btn.dataset.defaultLabel || 'Submit';
+                });
+                return;
+            }
         }
 
         try {
