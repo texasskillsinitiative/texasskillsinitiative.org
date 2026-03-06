@@ -785,15 +785,138 @@ function portalV2TemplateRender_(text, data) {
 }
 
 function portalV2TemplateData_(route, payload, submissionId, email, receivedUtc) {
+  var safePayload = payload || {};
+  var formSubmittedTitle = portalV2FormSubmittedTitle_(route, safePayload);
+  var submittedFieldsBlock = portalV2SubmittedFieldsBlock_(route, safePayload, formSubmittedTitle);
   return {
-    name: String(payload && payload.name || '').trim() || 'there',
+    name: String(safePayload.name || '').trim() || 'there',
     route: String(route || ''),
     submission_id: String(submissionId || ''),
     received_utc: String(receivedUtc || ''),
+    received_local: portalV2ReceivedLocal_(safePayload, receivedUtc),
+    received_texas: portalV2FormatInTimeZone_(receivedUtc, 'America/Chicago'),
     email: String(email || ''),
-    concierge_track: String(payload && payload.concierge_track || ''),
-    handler_tier: String(payload && payload.handler_tier || '')
+    concierge_track: String(safePayload.concierge_track || ''),
+    handler_tier: String(safePayload.handler_tier || ''),
+    form_submitted_title: formSubmittedTitle,
+    form_submitted_label: formSubmittedTitle,
+    submitted_fields_block: submittedFieldsBlock,
+    // Backward-compatible alias for older templates.
+    submitted_fields_row: submittedFieldsBlock
   };
+}
+
+function portalV2ReceivedLocal_(payload, receivedUtc) {
+  var local = String(payload && payload.timestamp_local || '').trim();
+  if (local) return local;
+  var scriptTz = '';
+  try { scriptTz = Session.getScriptTimeZone() || ''; } catch (ignore) {}
+  if (!scriptTz) scriptTz = 'Etc/UTC';
+  return portalV2FormatInTimeZone_(receivedUtc, scriptTz);
+}
+
+function portalV2FormatInTimeZone_(isoOrDate, timeZoneId) {
+  var tz = String(timeZoneId || '').trim() || 'Etc/UTC';
+  try {
+    var d = isoOrDate ? new Date(isoOrDate) : new Date();
+    if (isNaN(d.getTime())) d = new Date();
+    return Utilities.formatDate(d, tz, "yyyy-MM-dd HH:mm:ss z");
+  } catch (err) {
+    return String(isoOrDate || '');
+  }
+}
+
+function portalV2FormSubmittedTitle_(route, payload) {
+  var safeRoute = String(route || '').trim().toLowerCase();
+  var track = String(payload && payload.concierge_track || '').trim().toLowerCase();
+  if (safeRoute === PORTAL_V2_ROUTES.STAKEHOLDER) {
+    if (track === 'government') return 'REGIONAL & GOVERNMENT AUTHORITY';
+    if (track === 'education') return 'EDUCATIONAL LEADERSHIP & INSTRUCTION';
+    if (track === 'private-sector') return 'PRIVATE SECTOR & INDUSTRY LEADERSHIP';
+    if (track === 'small-business') return 'SMALL BUSINESS & LOCAL COMMERCE';
+    if (track === 'professional') return 'PROFESSIONAL & TECHNICAL PERSPECTIVE';
+    if (track === 'student') return 'STUDENT & COMMUNITY PERSPECTIVE';
+    return 'STAKEHOLDER PERSPECTIVE';
+  }
+  if (safeRoute === PORTAL_V2_ROUTES.INVESTMENT) return 'INVESTMENT INQUIRY';
+  if (safeRoute === PORTAL_V2_ROUTES.PRESS) return 'PRESS INQUIRY';
+  if (safeRoute === PORTAL_V2_ROUTES.EMPLOYMENT) return 'EMPLOYMENT INQUIRY';
+  if (safeRoute === PORTAL_V2_ROUTES.INTERNSHIP) return 'INTERNSHIP INQUIRY';
+  return String(route || '').trim().toUpperCase() || 'TSI SUBMISSION';
+}
+
+function portalV2TemplateFieldValue_(value) {
+  var next = String(value === undefined || value === null ? '' : value).trim();
+  if (!next) return '';
+  var low = next.toLowerCase();
+  if (low === String(PORTAL_V2_NOT_VISIBLE).toLowerCase()) return '';
+  if (low === String(PORTAL_V2_NO_RESPONSE).toLowerCase()) return '';
+  // Keep values email-friendly while preserving meaning.
+  return next.replace(/\r\n/g, '\n').replace(/\n+/g, ' / ');
+}
+
+function portalV2SubmittedFieldsBlock_(route, payload, formSubmittedTitle) {
+  var safePayload = payload || {};
+  var visibility = portalV2RouteVisibility_(route, safePayload.handler_tier || '');
+  var lines = [];
+  var add = function (label, value) {
+    var next = portalV2TemplateFieldValue_(value);
+    if (!next) return;
+    lines.push(String(label || '').trim() + ': ' + next);
+  };
+
+  add('Perspective Selected', formSubmittedTitle);
+  add('Name', safePayload.name);
+  add('Email', safePayload.email);
+  if (visibility.org) add('Organization', safePayload.org);
+  if (visibility.role) add('Role', safePayload.role);
+  add('City', safePayload.loc_city);
+  if (visibility.locState) add('State/Region', safePayload.loc_state);
+  add('Country', safePayload.loc_country);
+  if (visibility.focus) add('Focus', safePayload.focus);
+
+  if (visibility.investment) {
+    add('Investment Stage', safePayload.investment_stage);
+    add('Investment Check Range', safePayload.investment_check_range);
+    add('Investment Geography', safePayload.investment_geography);
+    add('Investment Focus', safePayload.investment_focus);
+    add('Investment Timeline', safePayload.investment_timeline);
+  }
+
+  if (visibility.press) {
+    add('Press Outlet', safePayload.press_outlet);
+    add('Press Role', safePayload.press_role);
+    add('Press Deadline', safePayload.press_deadline);
+    add('Press Topic', safePayload.press_topic);
+    add('Press Format', safePayload.press_format);
+  }
+
+  if (visibility.employment) {
+    add('Employment Role Interest', safePayload.employment_role_interest);
+    add('Employment Timeline', safePayload.employment_timeline);
+    add('Employment Location Preference', safePayload.employment_location_pref);
+  }
+
+  if (visibility.internship) {
+    add('School', safePayload.intern_school);
+    add('Program', safePayload.intern_program);
+    add('Graduation Date', safePayload.intern_grad_date);
+    add('Internship Track', safePayload.intern_track);
+    add('Internship Mode', safePayload.intern_mode);
+    add('Hours Per Week', safePayload.intern_hours_per_week);
+    add('Start Date', safePayload.intern_start_date);
+    add('Portfolio URL', safePayload.intern_portfolio_url);
+  }
+
+  add('Message', safePayload.message);
+  add('Attachment Name', safePayload.attachment_name);
+  add('Attachment Type', safePayload.attachment_type);
+  add('Attachment Size', safePayload.attachment_size);
+  add('Attachment URL', safePayload.attachment_url);
+  add('Attachment Status', safePayload.attachment_status);
+
+  if (!lines.length) return 'No additional submitted fields.';
+  return lines.join('\n');
 }
 
 function portalV2TemplateKey_(route, payload) {
@@ -851,10 +974,12 @@ function portalV2TryAutoReply_(route, payload, email, submissionId) {
 
     var subject;
     var body;
+    var fallbackReasons = [];
     if (tmpl && tmpl.subject && tmpl.body) {
       subject = portalV2TemplateRender_(tmpl.subject, data);
       body = portalV2TemplateRender_(tmpl.body, data);
     } else {
+      fallbackReasons.push('template_fallback:auto_reply_template_missing_or_incomplete');
       subject = String(PORTAL_V2_CONFIG.AUTO_REPLY_SUBJECT_PREFIX || 'TSI Intake Confirmation') + ': ' + route;
       body = [
         'Hello ' + data.name + ',',
@@ -869,7 +994,7 @@ function portalV2TryAutoReply_(route, payload, email, submissionId) {
       ].join('\n');
     }
 
-    portalV2SendMail_(route, 'auto_reply', email, subject, body, submissionId);
+    portalV2SendMail_(route, 'auto_reply', email, subject, body, submissionId, fallbackReasons);
   } catch (err) {
     console.error('portal v2 auto-reply failed: ' + err);
   }
@@ -907,20 +1032,131 @@ function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload) {
 
   var subject;
   var body;
+  var fallbackReasons = [];
   if (tmpl && tmpl.subject && tmpl.body) {
     subject = portalV2TemplateRender_(tmpl.subject, data);
     body = portalV2TemplateRender_(tmpl.body, data);
   } else {
+    fallbackReasons.push('template_fallback:admin_notify_template_missing_or_incomplete');
     subject = 'TSI intake (v2): ' + route + ' - ' + email;
     body = 'submission_id: ' + submissionId + '\nattachment_status: ' + (attachment && attachment.status || 'none');
   }
-  portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId);
+  portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId, fallbackReasons);
 }
 
-function portalV2SendMail_(route, mailType, toAddress, subject, body, submissionId) {
+function portalV2NormalizeFallbackReasons_(reasons) {
+  var input = Array.isArray(reasons) ? reasons : [];
+  var out = [];
+  var seen = {};
+  for (var i = 0; i < input.length; i += 1) {
+    var reason = String(input[i] || '').replace(/\s+/g, ' ').trim();
+    if (!reason || seen[reason]) continue;
+    seen[reason] = true;
+    out.push(reason);
+  }
+  return out;
+}
+
+function portalV2AppendFallbackReason_(reasons, reason) {
+  var next = portalV2NormalizeFallbackReasons_(reasons);
+  var token = String(reason || '').replace(/\s+/g, ' ').trim();
+  if (!token) return next;
+  for (var i = 0; i < next.length; i += 1) {
+    if (next[i] === token) return next;
+  }
+  next.push(token);
+  return next;
+}
+
+function portalV2AnnotateFallbackMessage_(subject, body, reasons) {
+  var normalized = portalV2NormalizeFallbackReasons_(reasons);
+  var rawSubject = String(subject || '').trim();
+  var rawBody = String(body || '');
+  if (!normalized.length) return { subject: rawSubject, body: rawBody, reasons: [] };
+
+  var taggedSubject = rawSubject;
+  if (!/^\[fallback\]\s/i.test(taggedSubject)) taggedSubject = '[Fallback] ' + taggedSubject;
+
+  var note = [
+    '',
+    '[[FALLBACK_NOTICE]]',
+    'Triggers: ' + normalized.join(' | ')
+  ].join('\n');
+  return { subject: taggedSubject, body: rawBody + note, reasons: normalized };
+}
+
+function portalV2IsInternalMailType_(mailType) {
+  var kind = String(mailType || '').trim().toLowerCase();
+  return kind === 'admin_notify' || kind === 'fallback_notice';
+}
+
+function portalV2InternalDomains_() {
+  var csv = String(PORTAL_V2_CONFIG.INTERNAL_EMAIL_DOMAINS_CSV || '').trim();
+  if (!csv) return ['texasskillsinitiative.org', 'texasskillsinitiative.com'];
+  var parts = csv.split(',');
+  var out = [];
+  for (var i = 0; i < parts.length; i += 1) {
+    var d = String(parts[i] || '').trim().toLowerCase();
+    if (!d) continue;
+    out.push(d);
+  }
+  if (!out.length) out.push('texasskillsinitiative.org', 'texasskillsinitiative.com');
+  return out;
+}
+
+function portalV2IsInternalEmailAddress_(email) {
+  var value = String(email || '').trim().toLowerCase();
+  var at = value.lastIndexOf('@');
+  if (at < 0) return false;
+  var domain = value.slice(at + 1);
+  var domains = portalV2InternalDomains_();
+  for (var i = 0; i < domains.length; i += 1) {
+    if (domain === domains[i]) return true;
+  }
+  return false;
+}
+
+function portalV2ZeptoFromContext_(route) {
+  var r = String(route || '').trim().toLowerCase();
+  var routeFrom = '';
+  var routeKey = '';
+  if (r === PORTAL_V2_ROUTES.STAKEHOLDER) {
+    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_STAKEHOLDER || '').trim();
+    routeKey = 'PORTAL_V2_ZEPTO_FROM_STAKEHOLDER';
+  } else if (r === PORTAL_V2_ROUTES.INVESTMENT) {
+    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_INVESTMENT || '').trim();
+    routeKey = 'PORTAL_V2_ZEPTO_FROM_INVESTMENT';
+  } else if (r === PORTAL_V2_ROUTES.PRESS) {
+    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_PRESS || '').trim();
+    routeKey = 'PORTAL_V2_ZEPTO_FROM_PRESS';
+  } else if (r === PORTAL_V2_ROUTES.EMPLOYMENT) {
+    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_EMPLOYMENT || '').trim();
+    routeKey = 'PORTAL_V2_ZEPTO_FROM_EMPLOYMENT';
+  } else if (r === PORTAL_V2_ROUTES.INTERNSHIP) {
+    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_INTERNSHIP || '').trim();
+    routeKey = 'PORTAL_V2_ZEPTO_FROM_INTERNSHIP';
+  }
+  if (routeFrom) return { from: routeFrom, reason: '' };
+
+  var defaultFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_DEFAULT || '').trim();
+  if (defaultFrom) {
+    var defaultRaw = portalV2ReadPropRaw_('PORTAL_V2_ZEPTO_FROM_DEFAULT');
+    var legacyRaw = portalV2ReadPropRaw_('PORTAL_V2_ZEPTO_FROM');
+    if (routeKey) return { from: defaultFrom, reason: 'sender_fallback:' + routeKey + ' missing; using default sender' };
+    if (!defaultRaw && !legacyRaw) return { from: defaultFrom, reason: 'sender_fallback:default sender property missing; using built-in sender' };
+    return { from: defaultFrom, reason: '' };
+  }
+  return { from: '', reason: 'sender_fallback:no sender configured' };
+}
+
+function portalV2SendMail_(route, mailType, toAddress, subject, body, submissionId, fallbackReasons) {
   var to = String(toAddress || '').trim();
   if (!to) return false;
-  var from = portalV2ZeptoFromForRoute_(route);
+  var reasons = portalV2NormalizeFallbackReasons_(fallbackReasons);
+  var fromCtx = portalV2ZeptoFromContext_(route);
+  var from = String(fromCtx.from || '').trim();
+  if (fromCtx.reason) reasons = portalV2AppendFallbackReason_(reasons, fromCtx.reason);
+  var primaryMail = portalV2AnnotateFallbackMessage_(subject, body, reasons);
   var replyTo = String(PORTAL_V2_CONFIG.ZEPTO_REPLY_TO_DEFAULT || '').trim();
   var result = portalV2ZeptoSendEmail_({
     route: route,
@@ -928,64 +1164,73 @@ function portalV2SendMail_(route, mailType, toAddress, subject, body, submission
     to: to,
     from: from,
     replyTo: replyTo,
-    subject: subject,
-    body: body,
+    subject: primaryMail.subject,
+    body: primaryMail.body,
     submissionId: submissionId
   });
   if (result && result.ok) return true;
 
-    if (PORTAL_V2_CONFIG.MAIL_FALLBACK_ENABLED) {
-      var isInternal = mailType !== 'auto_reply';
-      var fallbackSubject = isInternal ? '[FALLBACK NOTICE] ' + subject : subject;
-      var fallbackBody = body;
-      if (isInternal) {
-        fallbackBody = [
-          body,
-          '',
-          '[[FALLBACK_METADATA]]',
-          'fallback_type: mailapp-fallback',
-          'mail_type: ' + String(mailType || ''),
-          'issue: ' + String(result && result.error || '')
-        ].join('\n');
-      }
-      try {
-        MailApp.sendEmail(to, fallbackSubject, fallbackBody);
-        portalV2MailLog_({
-          route: route,
-          mailType: mailType,
-          to: to,
-          from: from || '',
-          subject: fallbackSubject,
-          status: 'sent',
-          provider: 'mailapp-fallback',
-          error: '',
-          submissionId: submissionId
-        });
-        portalV2NotifyFallback_(route, mailType, to, submissionId, result, subject);
-        return true;
-      } catch (err) {
-        portalV2MailLog_({
-          route: route,
-          mailType: mailType,
-          to: to,
-          from: from || '',
-          subject: fallbackSubject,
-          status: 'error',
-          provider: 'mailapp-fallback',
-          error: String(err || ''),
-          submissionId: submissionId
-        });
-        return false;
-      }
+  if (PORTAL_V2_CONFIG.MAIL_FALLBACK_ENABLED) {
+    var providerReasons = portalV2AppendFallbackReason_(reasons, 'provider_fallback:zeptomail_send_failed');
+    if (result && result.error) {
+      var detail = String(result.error || '').replace(/\s+/g, ' ').trim();
+      if (detail) providerReasons = portalV2AppendFallbackReason_(providerReasons, 'provider_error:' + detail);
     }
+    var fallbackMail = portalV2AnnotateFallbackMessage_(subject, body, providerReasons);
+    try {
+      MailApp.sendEmail(to, fallbackMail.subject, fallbackMail.body);
+      portalV2MailLog_({
+        route: route,
+        mailType: mailType,
+        to: to,
+        from: from || '',
+        subject: fallbackMail.subject,
+        status: 'sent',
+        provider: 'mailapp-fallback',
+        error: '',
+        submissionId: submissionId
+      });
+      portalV2NotifyFallback_(route, mailType, to, submissionId, result, subject, fallbackMail.reasons);
+      return true;
+    } catch (err) {
+      portalV2MailLog_({
+        route: route,
+        mailType: mailType,
+        to: to,
+        from: from || '',
+        subject: fallbackMail.subject,
+        status: 'error',
+        provider: 'mailapp-fallback',
+        error: String(err || ''),
+        submissionId: submissionId
+      });
+      return false;
+    }
+  }
   return false;
 }
 
-function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult, originalSubject) {
+function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult, originalSubject, reasons) {
+  if (!portalV2IsInternalMailType_(mailType)) return;
   var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
   if (!admin) return;
-  var subject = '[FALLBACK NOTICE] ' + String(originalSubject || 'MailApp fallback used');
+  if (!portalV2IsInternalEmailAddress_(admin)) {
+    portalV2MailLog_({
+      route: route,
+      mailType: 'fallback_notice_blocked',
+      to: admin,
+      from: '',
+      subject: String(originalSubject || 'MailApp fallback used'),
+      status: 'blocked',
+      provider: 'mailapp-fallback',
+      error: 'admin_notify_not_internal',
+      submissionId: submissionId
+    });
+    return;
+  }
+  var subject = '[Fallback] ' + String(originalSubject || 'MailApp fallback used');
   var errDetail = zeptoResult && zeptoResult.error ? String(zeptoResult.error) : '';
+  var normalizedReasons = portalV2NormalizeFallbackReasons_(reasons);
   var body = [
     'route: ' + String(route || ''),
     'mail_type: ' + String(mailType || ''),
@@ -994,6 +1239,7 @@ function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult,
     'note: ZeptoMail send failed; fallback used.',
     'check: mail log for Zepto error details; verify token, agent alias, and from address.',
     'zepto_error: ' + errDetail,
+    'triggers: ' + (normalizedReasons.length ? normalizedReasons.join(' | ') : 'provider_fallback:zeptomail_send_failed'),
     '',
     '[[FALLBACK_METADATA]]',
     'fallback_type: mailapp-fallback',

@@ -1,6 +1,6 @@
 # TSI Site Status
 
-Last updated: 2026-03-03
+Last updated: 2026-03-06
 Current milestone: 1.0
 Next step: complete remaining Milestone 1.0 launch gates (validation evidence + owner sign-off) and mark 1.0 done.
 Waiting on: final owner launch authorization and production sheet-write confirmation for the engagement endpoint.
@@ -234,6 +234,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
   - Rollback checkpoint: next in-scope map commit hash.
 
 ## Recent History (High-Level)
+- [Done] 2026-03-06: Updated Portal V2 mail fallback handling to annotate fallback-delivered messages with `[Fallback]` subject prefix + trailing trigger details, and hard-gated fallback report notifications to internal mail types/addresses only (`form-backend/portal_v2_apps_script_webapp.js`, `form-backend/portal_v2_config.js`).
+- [Done] 2026-03-06: Added sender-config alias support in Apps Script (`PORTAL_V2_ZEPTO_FROM` as fallback for `PORTAL_V2_ZEPTO_FROM_DEFAULT`) and reduced ambient-induced nav flicker by hardening nav background when ambient layers are active (`form-backend/portal_v2_config.js`, `css/main.css`).
+- [Done] 2026-03-06: Aligned Careers utility-header submenu order to match hub route order (`Job Listings`, `Internship Application`, `Future Career Interest`) and relocated pipeline map title box above the tab panel while preserving category flash/title behavior (`js/utility-header.js`, `js/main.js`, `css/main.css`).
+- [Done] 2026-03-06: Added ambient background modes `d/e/f` (subtle crossfade and globe-stripe variants with reduced-motion fallbacks), updated ambient docs, and expanded runtime class handling (`css/main.css`, `js/main.js`, `js/utility-header.js`, `PRELAUNCH-AMBIENT-OPTIONS.md`).
+- [Done] 2026-03-06: Updated Engagement layout by moving persona cards into the top gold framing box and creating a separate "Serve With Us" action box for the high-fidelity copy + career CTA (`index.html`, `css/main.css`).
+- [Done] 2026-03-06: Added team gallery click-to-expand image lightbox interaction (keyboard accessible, focus restore, Escape/backdrop close) for lower team visuals (`index.html`, `js/main.js`, `css/main.css`).
 - [Done] 2026-03-03: Updated `AGENTS.md` to reference `GLOBAL-AGENT-RULES.md` and `GLOBAL-AGENT-PM-STANDARDS.md` as the priority global policy inputs.
 - [Done] 2026-02-27: Captured interrupted mixed working-tree state as forensic checkpoint commit `54dc3e9` (`chore(checkpoint): capture interrupted error state before recovery`) including tracked/untracked artifacts for deterministic replay before recovery.
 - [Done] 2026-02-27: Stabilized pipeline mobile tab-panel recovery in `js/main.js` and `css/main.css` by restoring missing helper/loading CSS states (`.pipeline-map-helper-overlay.is-hidden`, `.map-initializing-overlay*`), routing mobile phase-tab toggles through shared `setCategoryState`, and syncing first-toggle guidance clearing for the new tab control path.
@@ -612,6 +618,12 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Done] 2026-03-03: Added Portal V2 abuse throttling (global + per-track burst, duplicate submission ID, per-email rate limit) with honeypot logging for blocked attempts.
 - [Done] 2026-03-05: Wired Portal V2 mail templates from promoted template sheet baseline into auto-reply and admin-notify send paths (fallback to defaults if no template).
 - [Done] 2026-03-05: Added internal TSI username logging to a dedicated sheet and enabled stakeholder template selection by concierge track.
+- [Done] 2026-03-06: Expanded Portal V2 template tokens to support readable autoreply submission summaries (`submitted_fields_block`), multi-timezone receive stamps (`received_local`, `received_texas`), and display-title mapping from clicked stakeholder perspective cards (including `REGIONAL & GOVERNMENT AUTHORITY` for `government` track).
+- [Done] 2026-03-06: Added prelaunch form verification harness `scripts/test_form_prelaunch_matrix.ps1` covering route-level positive and negative submission checks (invalid email, missing required input, press deadline enforcement, invalid attachment type, duplicate submission ID).
+- [Done] 2026-03-06: Updated legal pages for current operating model and target-jurisdiction readiness by adding explicit local-storage disclosure, U.S. transfer wording, and PH/VN/TH-focused privacy notice language in `privacy.html` and `terms.html`.
+- [Done] 2026-03-06: Corrected Careers IA so Future Career Interest sits directly under Career Opportunities in utility menus/breadcrumbs (`portal-career-interest.html`, `js/site-labels.js`, `js/utility-header.js`).
+- [Done] 2026-03-06: Implemented live-test ambient cross-page background modes (`?ambient=a|b|c|off`) with persistence, reduced-motion guardrails, and operator notes in `PRELAUNCH-AMBIENT-OPTIONS.md`.
+- [Done] 2026-03-06: Normalized Rubric phase narrative voice in `index.html` by standardizing stage copy to `Purpose / Inputs / Actions / Outputs / Gate`.
 - [Done] 2026-03-03: Switched Portal V2 burst tracking to Script Properties (`PORTAL_V2_BURST_GLOBAL`, `PORTAL_V2_BURST_TRACK`) to avoid CacheService dropouts.
 - [Done] 2026-03-03: Made burst enforcement lock-tolerant and JSON-parse safe so failed locks no longer bypass rate limits.
 - [Done] 2026-03-03: Added optional `_debug_burst` logging to honeypot for inspecting live burst counters.

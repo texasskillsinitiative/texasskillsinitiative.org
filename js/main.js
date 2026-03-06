@@ -48,6 +48,45 @@ function initFooterLabels() {
     });
 }
 
+function initAmbientLayer() {
+    if (window.__tsiAmbientInit) return;
+    window.__tsiAmbientInit = true;
+
+    const rootEl = document.documentElement;
+    const bodyEl = document.body;
+    if (!rootEl || !bodyEl) return;
+
+    const storageKey = 'tsi-ambient-mode';
+    const params = new URLSearchParams(window.location.search);
+    const rawParam = String(params.get('ambient') || '').trim().toLowerCase();
+    const allowed = new Set(['off', 'a', 'b', 'c', 'd', 'e', 'f']);
+    let mode = '';
+
+    if (rawParam && allowed.has(rawParam)) {
+        mode = rawParam;
+        try { localStorage.setItem(storageKey, mode); } catch (ignore) {}
+    } else {
+        try { mode = String(localStorage.getItem(storageKey) || '').trim().toLowerCase(); } catch (ignore) {}
+        if (!allowed.has(mode)) mode = 'off';
+    }
+
+    if (!mode || mode === 'off') {
+        rootEl.classList.remove('has-ambient-layer', 'ambient-mode-a', 'ambient-mode-b', 'ambient-mode-c', 'ambient-mode-d', 'ambient-mode-e', 'ambient-mode-f');
+        return;
+    }
+
+    let layer = document.getElementById('tsiAmbientLayer');
+    if (!layer) {
+        layer = document.createElement('div');
+        layer.id = 'tsiAmbientLayer';
+        layer.className = 'tsi-ambient-layer';
+        layer.setAttribute('aria-hidden', 'true');
+        bodyEl.insertBefore(layer, bodyEl.firstChild);
+    }
+    layer.setAttribute('data-ambient-mode', mode);
+    rootEl.classList.add('has-ambient-layer', `ambient-mode-${mode}`);
+}
+
 function normalizeSubmissionType(value) {
     const raw = String(value || '').trim().toLowerCase();
     return 'stakeholder';
@@ -2498,7 +2537,8 @@ function initRubricActions() {
     if (!stage || toggles.length < 2 || views.length < 2) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const transitionMs = 400;
-    let activeKey = 'diagnostic';
+    const initialToggle = toggles.find((toggle) => toggle.classList.contains('is-active')) || toggles[0];
+    let activeKey = initialToggle ? String(initialToggle.getAttribute('data-protocol-toggle') || '').trim() : '';
     let isAnimating = false;
 
     const viewByKey = new Map(views.map(view => [view.getAttribute('data-protocol-view'), view]));
@@ -2537,7 +2577,9 @@ function initRubricActions() {
         const currentView = viewByKey.get(activeKey);
         const nextView = viewByKey.get(nextKey);
         if (!currentView || !nextView) return;
-        const forward = activeKey === 'diagnostic' && nextKey === 'deployment';
+        const currentIdx = toggles.findIndex((toggle) => toggle.getAttribute('data-protocol-toggle') === activeKey);
+        const nextIdx = toggles.findIndex((toggle) => toggle.getAttribute('data-protocol-toggle') === nextKey);
+        const forward = nextIdx >= currentIdx;
         if (prefersReducedMotion) {
             finalizeView(nextKey, currentView, nextView);
             return;
@@ -2598,7 +2640,7 @@ function initRubricActions() {
         view.setAttribute('aria-hidden', isActive ? 'false' : 'true');
         clearMotionClasses(view);
     });
-    activeKey = initialView.getAttribute('data-protocol-view') || 'diagnostic';
+    activeKey = initialView.getAttribute('data-protocol-view') || activeKey || (views[0] ? views[0].getAttribute('data-protocol-view') : '');
     syncToggleState(activeKey);
 
     // Initial height calculation
@@ -4546,6 +4588,8 @@ function initPipelineMap() {
             // Remove any previously created tab panel (re-entrant safe)
             const existingTabPanel = mapShell.querySelector('.pipeline-map-tab-panel');
             if (existingTabPanel) existingTabPanel.remove();
+            const existingTitleShell = mapShell.querySelector('.pipeline-map-title-shell');
+            if (existingTitleShell) existingTitleShell.remove();
 
             // Grab the "This map reflects..." text from the pipeline-note box
             const pipelineNote = mapShell.querySelector('.pipeline-note');
@@ -4571,6 +4615,14 @@ function initPipelineMap() {
             const contentCol = document.createElement('div');
             contentCol.className = 'pipeline-map-tab-content is-map-pane-active';
 
+            const titleShell = document.createElement('div');
+            titleShell.className = 'pipeline-map-title-shell';
+            const externalTitle = document.createElement('p');
+            externalTitle.className = 'pipeline-map-title-box is-title-mode';
+            applyPipelineTitleContent(externalTitle);
+            titleShell.appendChild(externalTitle);
+            desktopTitleBox = externalTitle;
+
             // ── MAP tab (non-activating, always returns to default view) ──
             const mapTab = document.createElement('button');
             mapTab.type = 'button';
@@ -4589,11 +4641,6 @@ function initPipelineMap() {
             const mapPane = document.createElement('div');
             mapPane.className = 'pipeline-map-tab-pane is-active';
             mapPane.setAttribute('data-tab-key', '__map__');
-            const mapPaneTitle = document.createElement('p');
-            mapPaneTitle.className = 'pipeline-map-title-box pipeline-map-tab-pane-map-title is-title-mode';
-            applyPipelineTitleContent(mapPaneTitle);
-            mapPane.appendChild(mapPaneTitle);
-            desktopTitleBox = mapPaneTitle;
             if (pipelineNoteMobileMapText) {
                 const mapPaneText = document.createElement('p');
                 mapPaneText.className = 'pipeline-map-tab-pane-text';
@@ -4851,11 +4898,13 @@ function initPipelineMap() {
             tabPanel.appendChild(tabCol);
             tabPanel.appendChild(contentCol);
 
-            // Insert before frame so desktop order is: title -> desktop buttons -> tab panel -> map.
+            // Desktop order target: controls -> title -> map -> tab panel.
             // Mobile visual order remains controlled by CSS `order`.
             if (frame && frame.parentNode === mapShell) {
-                mapShell.insertBefore(tabPanel, frame);
+                mapShell.insertBefore(titleShell, frame);
+                mapShell.insertBefore(tabPanel, frame.nextSibling);
             } else {
+                mapShell.appendChild(titleShell);
                 mapShell.appendChild(tabPanel);
             }
 
@@ -6639,10 +6688,76 @@ function initPersonaInteractions() {
     });
 }
 
+function initTeamImageLightbox() {
+    const lightbox = document.getElementById('imageLightbox');
+    const imgNode = document.getElementById('imageLightboxImg');
+    const captionNode = document.getElementById('imageLightboxCaption');
+    const closeBtn = document.getElementById('imageLightboxClose');
+    const thumbs = Array.from(document.querySelectorAll('.pillar-gallery .pillar-thumb img'));
+    if (!lightbox || !imgNode || !captionNode || !closeBtn || !thumbs.length) return;
+
+    let activeTrigger = null;
+    const open = (trigger, src, alt, caption) => {
+        activeTrigger = trigger;
+        imgNode.src = src;
+        imgNode.alt = alt || 'Expanded image';
+        captionNode.textContent = caption || alt || '';
+        lightbox.hidden = false;
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('image-lightbox-open');
+        closeBtn.focus();
+    };
+    const close = () => {
+        if (lightbox.hidden) return;
+        lightbox.hidden = true;
+        lightbox.setAttribute('aria-hidden', 'true');
+        imgNode.removeAttribute('src');
+        captionNode.textContent = '';
+        document.body.classList.remove('image-lightbox-open');
+        if (activeTrigger && typeof activeTrigger.focus === 'function') activeTrigger.focus();
+        activeTrigger = null;
+    };
+
+    thumbs.forEach((img) => {
+        const fig = img.closest('figure');
+        const figCaptionNode = fig ? fig.querySelector('figcaption') : null;
+        const caption = figCaptionNode ? String(figCaptionNode.textContent || '').trim() : '';
+        img.setAttribute('role', 'button');
+        img.setAttribute('tabindex', '0');
+        img.setAttribute('aria-label', `Expand image: ${caption || img.alt || 'Team image'}`);
+        img.addEventListener('click', () => open(img, img.getAttribute('src') || '', img.getAttribute('alt') || '', caption));
+        img.addEventListener('keydown', (event) => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            open(img, img.getAttribute('src') || '', img.getAttribute('alt') || '', caption);
+        });
+    });
+
+    closeBtn.addEventListener('click', close);
+    lightbox.addEventListener('click', (event) => {
+        if (event.target === lightbox) close();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') close();
+    });
+}
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPersonaInteractions);
 } else {
     initPersonaInteractions();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initTeamImageLightbox);
+} else {
+    initTeamImageLightbox();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAmbientLayer);
+} else {
+    initAmbientLayer();
 }
 
 if (document.readyState === 'loading') {

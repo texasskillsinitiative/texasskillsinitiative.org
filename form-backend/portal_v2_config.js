@@ -48,12 +48,17 @@ var PORTAL_V2_CONFIG = {
   HONEYPOT_KEY: portalV2ReadProp_('PORTAL_V2_HONEYPOT_KEY', 'website'),
   HONEYPOT_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_HONEYPOT_SHEET_NAME', 'portal_v2_honeypot'),
   INTERNAL_USERNAME_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_INTERNAL_USERNAME_SHEET_NAME', 'portal_v2_internal_username'),
+  INTERNAL_EMAIL_DOMAINS_CSV: portalV2ReadProp_('PORTAL_V2_INTERNAL_EMAIL_DOMAINS_CSV', 'texasskillsinitiative.org,texasskillsinitiative.com'),
   SOURCE: portalV2ReadProp_('PORTAL_V2_SOURCE', 'tsi-portal-v2'),
   ADMIN_NOTIFY_EMAIL: portalV2ReadProp_('PORTAL_V2_ADMIN_NOTIFY_EMAIL', portalV2ReadProp_('PORTAL_V2_ADMIN_EMAIL', '')),
   ZEPTO_TOKEN: portalV2ReadProp_('PORTAL_V2_ZEPTO_TOKEN', ''),
   ZEPTO_AGENT_ALIAS: portalV2ReadProp_('PORTAL_V2_ZEPTO_AGENT_ALIAS', ''),
   ZEPTO_API_BASE: portalV2ReadProp_('PORTAL_V2_ZEPTO_API_BASE', 'https://api.zeptomail.com'),
-  ZEPTO_FROM_DEFAULT: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_DEFAULT', 'hello@texasskillsinitiative.org'),
+  // Supports legacy key alias if only PORTAL_V2_ZEPTO_FROM is defined.
+  ZEPTO_FROM_DEFAULT: portalV2ReadProp_(
+    'PORTAL_V2_ZEPTO_FROM_DEFAULT',
+    portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM', 'hello@texasskillsinitiative.org')
+  ),
   ZEPTO_FROM_STAKEHOLDER: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_STAKEHOLDER', ''),
   ZEPTO_FROM_INVESTMENT: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_INVESTMENT', ''),
   ZEPTO_FROM_PRESS: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_PRESS', ''),

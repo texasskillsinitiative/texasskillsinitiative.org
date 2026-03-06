@@ -2405,3 +2405,33 @@
 - Actions taken: Removed working docs from repo, replaced rubric images, committed v2 updates and frontend endpoint changes.
 - Troubleshooting suggestions: Redeploy Apps Script for latest backend changes and re-promote templates; deploy frontend when ready to activate internal username logging.
 - Resolutions/outcomes: Commits created (5408c60, 8e05192, 3a8ac27); working tree clean; no push performed.
+### 2026-03-05 23:26:33 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Completed clean-close request for this session without commit; verified repository state and prepared handoff summary.
+- Troubleshooting suggestions: If any expected local edits are missing, run git reflog --date=iso and coordinate with concurrent agent activity before restoring.
+- Resolutions/outcomes: Clean close completed with no new commit in this session.
+- Commit hashes: none (per user request)
+### 2026-03-06 00:20:09 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented Portal V2 autoreply token expansion and rendering helpers in `form-backend/portal_v2_apps_script_webapp.js`: added `received_local`, `received_texas`, `form_submitted_title`, and `submitted_fields_block` (with `submitted_fields_row` backward-compatible alias), mapped stakeholder card tracks to user-visible titles (including `government -> REGIONAL & GOVERNMENT AUTHORITY`), and built readable multi-line submitted-field formatting with route-aware visibility and attachment metadata lines.
+- Troubleshooting suggestions: Re-run `portalV2PromoteTemplatesFromSheet()` after deploying script changes so template validation recognizes new tokens; if a sheet template still references only `submitted_fields_row`, it will continue to work via alias while migrating to `submitted_fields_block`.
+- Resolutions/outcomes: Requested token rename and title mapping behavior are implemented; government-track autoreply now supports exact clicked-title output and readable field-block rendering.
+### 2026-03-06 00:26:40 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Synced updated Apps Script files into `.tmp/tsi-intake-v2-clasp` and pushed to script ID `1Z_afIBobTvSdAQO4qAFN1c-IIUi3MECsHmqrcYueN-ZYjOC6qPUHUhUl` using `clasp push --force`.
+- Troubleshooting suggestions: If live web app still serves previous behavior, publish a new Apps Script deployment version (or update active deployment target to the latest code), then run `portalV2PromoteTemplatesFromSheet()`.
+- Resolutions/outcomes: Remote Apps Script project accepted 4-file push (`appsscript.json`, `portal_v2_apps_script_webapp.js`, `portal_v2_config.js`, `PORTAL_V2_TEMPLATE_PROMOTION_SCRIPT.gs`).
+### 2026-03-06 02:27:41 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented approved pre-1.0 packet items in repo scope: added prelaunch form matrix script (`scripts/test_form_prelaunch_matrix.ps1`), refreshed legal/privacy language for local-storage disclosure and PH/VN/TH-focused handling (`privacy.html`, `terms.html`), corrected Career Opportunities hierarchy for Future Career Interest (`portal-career-interest.html`, `js/site-labels.js`, `js/utility-header.js`), added live-test ambient background modes (`?ambient=a|b|c|off`) with persistence and reduced-motion guardrails (`js/main.js`, `js/utility-header.js`, `css/main.css`, `PRELAUNCH-AMBIENT-OPTIONS.md`), and standardized rubric phase narrative structure in `index.html`.
+- Troubleshooting suggestions: For ambient-mode validation, test desktop/mobile with `ambient=a`, `ambient=b`, and `ambient=c` plus `prefers-reduced-motion`; for form verification, run `scripts/test_form_prelaunch_matrix.ps1 -Email <test_email> -DelaySeconds 31` against the active endpoint to avoid abuse-throttle collisions.
+- Resolutions/outcomes: Prelaunch implementation items requested for immediate execution are now in place; deferred post-1.0 items (blacklist and certification badge track) were not implemented.
+### 2026-03-06 13:14:18 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented requested frontend follow-up packet: reordered Career Opportunities submenu to match hub ordering, moved pipeline map title shell above tab controls while preserving active-tab color/title flash behavior, added ambient variants `d/e/f`, restructured engagement top framing/serve blocks, and added click-to-expand lightbox interaction for bottom team gallery images.
+- Troubleshooting suggestions: Validate in-browser at desktop + mobile widths with `?ambient=d`, `?ambient=e`, and `?ambient=f`; verify pipeline title flash still updates when switching categories and that lightbox open/close works with click, Enter/Space, and Escape.
+- Resolutions/outcomes: Requested UI and interaction updates are in place and JavaScript syntax checks passed for `js/main.js` and `js/utility-header.js`.
+### 2026-03-06 13:33:07 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Investigated mail sender and nav blinking reports; added Apps Script sender-property alias support (`PORTAL_V2_ZEPTO_FROM` fallback when `PORTAL_V2_ZEPTO_FROM_DEFAULT` is absent) and added ambient-active nav anti-flicker styling by disabling nav glass blur/increasing opacity while ambient layer is enabled.
+- Troubleshooting suggestions: Confirm Script Properties include either `PORTAL_V2_ZEPTO_FROM_DEFAULT` or `PORTAL_V2_ZEPTO_FROM`; inspect `portal_v2_mail_log.from` for the resolved sender and verify Zepto sender/domain verification if provider rewrites From.
+- Resolutions/outcomes: Code now tolerates alternate sender key naming and reduces ambient-induced navbar flicker artifacts.
+### 2026-03-06 13:49:52 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented unified fallback annotation path in Portal V2 mail send flow (`[Fallback]` subject prefix + trailing fallback-trigger note in message body), added fallback-reason propagation for template-default paths, and enforced strict internal-only fallback-report notification gating (only internal mail types and internal-domain admin recipient; otherwise logged as `fallback_notice_blocked` and suppressed).
+- Troubleshooting suggestions: Validate by forcing template/default and provider fallback paths, then confirm: (1) outbound message contains `[Fallback]` and `[[FALLBACK_NOTICE]]`, (2) `fallback_notice` is only emitted for internal mail types, and (3) misconfigured external admin notify address produces `fallback_notice_blocked` log row.
+- Resolutions/outcomes: Fallback report notifications cannot be sent to external sources through current logic; fallback annotations remain on delivered fallback-affected messages.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
