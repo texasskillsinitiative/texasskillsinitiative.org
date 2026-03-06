@@ -2401,4 +2401,7 @@
 - Actions taken: Added internal username logging to a dedicated sheet, routed stakeholder templates by concierge track, and extended template allowed routes for stakeholder tracks.
 - Troubleshooting suggestions: Ensure `PORTAL_V2_INTERNAL_USERNAME_SHEET_NAME` exists (or let initializer create it) and re-run template promotion after adding concierge-specific routes.
 - Resolutions/outcomes: Internal TSI username submits log to sheet; stakeholder templates can be defined per concierge track.
-[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
+### 2026-03-05 12:30:12 -06:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed working docs from repo, replaced rubric images, committed v2 updates and frontend endpoint changes.
+- Troubleshooting suggestions: Redeploy Apps Script for latest backend changes and re-promote templates; deploy frontend when ready to activate internal username logging.
+- Resolutions/outcomes: Commits created (5408c60, 8e05192, 3a8ac27); working tree clean; no push performed.
