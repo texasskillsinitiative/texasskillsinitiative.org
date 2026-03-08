@@ -3237,15 +3237,24 @@
             gap: 8px;
         }
 
-        .rubric-phase-panel {
-            max-width: 860px;
+        .rubric-phase-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            max-width: 980px;
             margin: 0 auto;
+        }
+
+        .rubric-phase-panel {
+            height: 100%;
+            align-content: start;
         }
 
         .rubric-diagnostic-asset,
         .rubric-deploy-asset {
             border-color: color-mix(in srgb, var(--accent) 20%, var(--frame-border));
             min-height: 140px;
+            aspect-ratio: 4 / 3;
         }
 
         .rubric-diagnostic-asset img,
@@ -6672,7 +6681,8 @@
             }
 
             .rubric-diagnostic-grid,
-            .rubric-deployment-grid {
+            .rubric-deployment-grid,
+            .rubric-phase-grid {
                 grid-template-columns: 1fr;
             }
 

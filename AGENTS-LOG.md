@@ -2486,3 +2486,55 @@
 - Actions taken: Completed clean-exit review for the V3 schema/token packet, verified commit `f10f791` contains the repo-facing V3 changes, added the deployment blocker note to `STATUS.md`, and closed the active session marker.
 - Troubleshooting suggestions: On the next session, redeploy the Apps Script web app behind `AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1` first, then rerun a single `SGOV` live submission using the cleaned `rout` payload before broader matrix testing.
 - Resolutions/outcomes: Repo state is checkpointed with the V3 schema/token commit, the remaining blocker is isolated to deployment/runtime mismatch, and the session is cleanly closed. Commit hash: `f10f791`.
+### 2026-03-08 09:14:18 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Claimed a rubric-only packet outside the active form-system work, expanded the homepage rubric phase markup to place the shipped `rubric-01a..04d` assets into structured per-phase sub-panels, updated the rubric CSS for the new grid/card treatment, and refreshed the status tracker to replace the stale refined-image note.
+- Troubleshooting suggestions: If any rubric panel spacing or panel-height behavior regresses on mobile, recheck the `#rubric` tab at `900px` and `600px`; if a future performance pass compresses rubric images, keep the current filenames stable to avoid reintroducing broken references.
+- Resolutions/outcomes: The live homepage rubric no longer depends on missing `rubric-phase-*-refined.png` files and now surfaces the currently shipped rubric asset set in a phase-aligned structure.
+### 2026-03-08 14:17:23 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Continued the non-form frontend packet with a homepage media-delivery pass in `index.html`, adding intrinsic image dimensions and async decoding to content images and enabling lazy loading for rubric, engagement, and team media below the initial fold.
+- Troubleshooting suggestions: If any image crop feels different after future asset replacements, preserve the current aspect ratios or update the matching intrinsic dimensions in `index.html`; if lazy loading delays a section image too aggressively during manual QA, prioritize that one image back to eager rather than removing the pattern globally.
+- Resolutions/outcomes: The homepage now gives the browser better layout and loading hints for its largest content images without changing the visible design or touching the active form-system files.
+### 2026-03-08 14:22:31 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added Google Fonts `preconnect` hints to the clean HTML entrypoints that load the shared font stylesheet (`404`, `accessibility`, `globe-lab`, `legal-hub`, `portal-employment`, `portal-hub`, `portal-internship`, `portal-investment`, `portal-press`, `security`, and `tsi_internal`) while intentionally skipping already-dirty files to avoid overlap with concurrent work.
+- Troubleshooting suggestions: If typography delivery is revisited later, treat these `preconnect` hints as an intermediate optimization and move to self-hosted/subset fonts rather than removing them first; before patching the skipped dirty files, rebase against their in-progress edits.
+- Resolutions/outcomes: Clean public entrypoints now warm up the Google Fonts connections earlier, reducing avoidable handshake latency without any visible UI changes.
+### 2026-03-08 14:27:58 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Phase 04 on the homepage to three panels only, reassigned the `04b/04c/04d` rubric images to the requested sections, folded the former `04d` text into `Refined Deployment`, and moved `rubric-04a.png` into the engagement visual pair in place of the previous second engagement image.
+- Troubleshooting suggestions: If the engagement visual pair now feels too visually dense beside the connection image, keep the new asset placement but consider a later crop/compression pass rather than reverting the requested mapping; if Phase 04 card order changes again, keep the current image/text pairing explicit instead of relying on filename order.
+- Resolutions/outcomes: Phase 04 now presents only the requested three sections, and the former fourth rubric image is surfaced in engagement instead of remaining inside the rubric tab.
+### 2026-03-08 14:33:33 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated Phase 03 rubric terminology on the homepage by removing phase number/letter labels from the three panel headers, replacing `blueprint` wording, renaming the middle panel to `Onboarding Velocity`, and reframing the final panel as hands-on training with no fixed time-span promise.
+- Troubleshooting suggestions: If later copy review wants a different tone for the third panel, keep the current title/content distinction clear so it does not drift back into onboarding-speed language already used by the middle panel.
+- Resolutions/outcomes: Phase 03 now follows the same simplified label philosophy as the revised Phase 04 and avoids the previously over-specific delivery language.
+### 2026-03-08 14:36:48 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied the follow-up Phase 04 asset remap on the homepage by swapping the current `Refined Deployment` image with the engagement-held `04a` asset, moving `04d` into engagement, and swapping the Bottleneck vs. Control image assignments.
+- Troubleshooting suggestions: If a later visual review changes only one of the Phase 04 images, recheck the explicit mapping in `index.html` first because the section no longer follows filename order.
+- Resolutions/outcomes: Phase 04 and engagement now reflect the latest requested image pairings without altering the surrounding structure.
+### 2026-03-08 14:38:34 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Swapped the Phase 02 text content between `Stakeholder Validation` and `Infrastructure and Legal Stress Check` on the homepage without changing their titles or images.
+- Troubleshooting suggestions: If later copy review revisits Phase 02, treat image/title pairing and paragraph text as separate decisions because this section now intentionally decouples them.
+- Resolutions/outcomes: The two Phase 02 panels now present the opposite descriptive copy while preserving their existing visual structure.
+### 2026-03-08 14:40:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Swapped the Phase 02 image assignments between `Stakeholder Validation` and `Infrastructure and Legal Stress Check` so the visuals now align with the previously swapped text.
+- Troubleshooting suggestions: If future review swaps only one of these panels again, update both `src` and `alt` together to keep accessibility text aligned with the rendered image.
+- Resolutions/outcomes: Phase 02 now has both copy and imagery exchanged between the two target panels.
+### 2026-03-08 14:41:12 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reordered the two Phase 02 panels so `Infrastructure and Legal Stress Check` now appears before `Stakeholder Validation`, while preserving each section’s current image/title/text bundle.
+- Troubleshooting suggestions: If Phase 02 gets another structural reorder later, treat panel position separately from panel content because these two panels have now been intentionally decoupled from their original asset naming/order.
+- Resolutions/outcomes: The Phase 02 grid order now matches the latest requested panel placement without altering the current content inside each panel.
+### 2026-03-08 14:42:49 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied the Phase 02 correction request by swapping only the text between `Infrastructure and Legal Stress Check` and `Stakeholder Validation`, leaving their titles, images, and positions untouched.
+- Troubleshooting suggestions: For any further Phase 02 adjustments, specify separately whether the change applies to text, image, title, or panel order because these attributes have been intentionally edited independently.
+- Resolutions/outcomes: The two Phase 02 panels now keep their current placement and visuals, with only the descriptive text exchanged.
+### 2026-03-08 14:44:40 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Consolidated the former Phase 02 operating content into `Stakeholder Validation`, removed the standalone `Operating Assumptions Alignment` panel from Phase 02, and moved the `rubric-02d.png` visual into Phase 03 `Onboarding Velocity`.
+- Troubleshooting suggestions: If Phase 03 imagery is revisited later, note that `Onboarding Velocity` now intentionally uses a reused Phase 02 asset for operational continuity rather than original filename sequencing.
+- Resolutions/outcomes: Phase 02 is slimmer and Phase 03 now carries the operating visual, while the operating-model language remains represented through the merged stakeholder copy.
+### 2026-03-08 14:46:25 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected the Phase 03 operating-image move by restoring `Onboarding Velocity` to its original `rubric-03b.png` image and adding a separate fourth Phase 03 panel, `Operating Alignment`, for the moved `rubric-02d.png` asset.
+- Troubleshooting suggestions: If the Phase 03 grid is reviewed on narrow widths, confirm the new fourth panel wraps cleanly under the existing three; the structure now intentionally carries four panels instead of three.
+- Resolutions/outcomes: The moved operating image now stands as its own Phase 3 section rather than being embedded inside another panel.
+### 2026-03-08 14:48:07 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Swapped the Phase 03 image assignments between `Hands-On Training` and `Operating Alignment`, keeping the current titles and copy in place.
+- Troubleshooting suggestions: If further Phase 03 tuning continues, update both `src` and `alt` together whenever images move so accessibility text stays synchronized with the visual.
+- Resolutions/outcomes: `Hands-On Training` and `Operating Alignment` now display each other's former images without any text or structural changes.
