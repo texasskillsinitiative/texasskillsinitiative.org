@@ -645,6 +645,7 @@ Primary scope reference: `PRODUCT-PRD-BLUEPRINT.md`.
 - [Planned] 2026-03-02: Create and secure official TSI social accounts on Facebook, LinkedIn, X, Instagram, and TikTok.
 - [Planned] 2026-03-02: Add social-link surfacing on site (footer and/or utility-area link cluster) once official account URLs are finalized.
 - [Planned] 2026-03-02: Pre-1.0 launch task - configure DNS/hosting routing so `careers.texasskillsinitiative.com` points to the live Job Listings route (`/portal-employment.html`) in production.
+- [Blocked] 2026-03-08: Live V3 browser-form validation is blocked until the Apps Script web app deployment behind `AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1` is redeployed; direct `/exec` tests still return legacy `invalid_submission_type` behavior for cleaned `rout` payloads even after `clasp push`.
 - [Planned] MVP launch anchor for initial approved scope defined in `PRODUCT-PRD-BLUEPRINT.md` (Section 5).
 - [Planned] Milestone closure requires packet-backed completion evidence in this file and `AGENTS-LOG.md` without scope expansion.
 - [Planned] Launch decision remains gated on final owner sign-off and production submission-path verification.
