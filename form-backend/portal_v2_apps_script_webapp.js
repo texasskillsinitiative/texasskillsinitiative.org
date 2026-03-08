@@ -1,17 +1,78 @@
-var PORTAL_V2_TYPES = {
-  STAKEHOLDER: 'stakeholder',
+// TSI intake backend version marker: v3 (legacy file name retained intentionally).
+var PORTAL_V2_INTERNAL_EVENT_TSI_USERNAME_CAPTURE = 'tsi_username_capture';
+
+var PORTAL_V2_ROUTES = {
+  GOVERNMENT: 'government',
+  EDUCATION: 'education',
+  PRIVATE_SECTOR: 'private-sector',
+  SMALL_BUSINESS: 'small-business',
+  PROFESSIONAL: 'professional',
+  STUDENT: 'student',
   INVESTMENT: 'investment',
   PRESS: 'press',
   EMPLOYMENT: 'employment',
   INTERNSHIP: 'internship'
 };
 
-var PORTAL_V2_ROUTES = {
-  STAKEHOLDER: 'stakeholder',
-  INVESTMENT: 'investment',
-  PRESS: 'press',
-  EMPLOYMENT: 'employment',
-  INTERNSHIP: 'internship'
+var PORTAL_V2_STAKEHOLDER_ROUTE_SET = {
+  'government': true,
+  'education': true,
+  'private-sector': true,
+  'small-business': true,
+  'professional': true,
+  'student': true
+};
+
+var PORTAL_V2_CANONICAL_ROUTE_SET = {
+  'government': true,
+  'education': true,
+  'private-sector': true,
+  'small-business': true,
+  'professional': true,
+  'student': true,
+  'investment': true,
+  'press': true,
+  'employment': true,
+  'internship': true
+};
+
+var PORTAL_V2_ROUTE_TO_ROUT = {
+  'government': 'SGOV',
+  'education': 'SEDU',
+  'private-sector': 'SPVT',
+  'small-business': 'SSML',
+  'professional': 'SPRO',
+  'student': 'SSTU',
+  'investment': 'PINV',
+  'press': 'PPRS',
+  'employment': 'PEMP',
+  'internship': 'PINT'
+};
+
+var PORTAL_V2_ROUT_TO_ROUTE = {
+  'sgov': 'government',
+  'sedu': 'education',
+  'spvt': 'private-sector',
+  'ssml': 'small-business',
+  'spro': 'professional',
+  'sstu': 'student',
+  'pinv': 'investment',
+  'pprs': 'press',
+  'pemp': 'employment',
+  'pint': 'internship'
+};
+
+var PORTAL_V2_ROUTE_NAMES = {
+  'government': 'REGIONAL & GOVERNMENT AUTHORITY',
+  'education': 'EDUCATIONAL LEADERSHIP & INSTRUCTION',
+  'private-sector': 'PRIVATE SECTOR & INDUSTRY LEADERSHIP',
+  'small-business': 'SMALL BUSINESS & LOCAL COMMERCE',
+  'professional': 'PROFESSIONAL & TECHNICAL PERSPECTIVE',
+  'student': 'STUDENT & COMMUNITY PERSPECTIVE',
+  'investment': 'INVESTMENT INQUIRY',
+  'press': 'PRESS INQUIRY',
+  'employment': 'EMPLOYMENT INQUIRY',
+  'internship': 'INTERNSHIP INQUIRY'
 };
 
 var PORTAL_V2_ALLOWED_EXTENSIONS = {
@@ -37,15 +98,16 @@ function doPost(e) {
     var payload = portalV2Parse_(e);
     if (!payload) return portalV2Json_({ ok: false, error: 'invalid_input' });
 
-    if (payload && payload.tsi_username) {
+    if (portalV2IsInternalUsernamePayload_(payload)) {
       portalV2LogInternalUsername_(payload);
       return portalV2Json_({ ok: true });
     }
 
     var route = portalV2ResolveRoute_(payload);
-    if (!route) return portalV2Json_({ ok: false, error: 'invalid_submission_type' });
-    var isStakeholderRoute = route === PORTAL_V2_ROUTES.STAKEHOLDER;
+    if (!route) return portalV2Json_({ ok: false, error: 'invalid_input' });
+    var isStakeholderRoute = portalV2IsStakeholderRoute_(route);
     var submissionId = portalV2Esc_(payload.submission_id || '') || Utilities.getUuid();
+    var receivedUtc = portalV2Now_();
 
     if (payload[PORTAL_V2_CONFIG.HONEYPOT_KEY]) {
       portalV2WriteHoneypot_(route, payload);
@@ -57,8 +119,9 @@ function doPost(e) {
       return portalV2Json_({ ok: true, debug_burst: true });
     }
 
-    if (!portalV2AbuseGate_(route, payload, submissionId)) {
-      return portalV2Json_({ ok: true });
+    var abuse = portalV2AbuseGate_(route, payload, submissionId);
+    if (!abuse.ok) {
+      return portalV2Json_({ ok: false, error: abuse.error });
     }
 
     var email = portalV2Esc_(payload.email || '').trim();
@@ -75,49 +138,49 @@ function doPost(e) {
     if (isStakeholderRoute && !city && !stateOrRegion) return portalV2Json_({ ok: false, error: 'invalid_input' });
 
     if (route === PORTAL_V2_ROUTES.PRESS) {
-      var pressDeadline = String(payload.press_deadline || '').trim();
+      var pressDeadline = String(payload.pprs_deadline || '').trim();
       var pressDeadlineMode = String(payload.press_deadline_mode || '').toLowerCase().trim();
       var hasNoDeadlineFlag = pressDeadlineMode === 'no_deadline';
       if (!pressDeadline && !hasNoDeadlineFlag) return portalV2Json_({ ok: false, error: 'invalid_input' });
     }
 
-    var handlerTier = portalV2Esc_(payload.handler_tier || '').trim();
-    var conciergeTrack = portalV2Esc_(payload.concierge_track || '').trim();
-    if (isStakeholderRoute) {
-      if (!handlerTier || (handlerTier !== '1' && handlerTier !== '2')) return portalV2Json_({ ok: false, error: 'invalid_input' });
-      if (!conciergeTrack) return portalV2Json_({ ok: false, error: 'invalid_input' });
-    } else if (!conciergeTrack) {
-      conciergeTrack = portalV2RouteTrackDefault_(route);
+    var emailGate = portalV2RateLimit_(email, route, payload, submissionId);
+    if (!emailGate.ok) {
+      return portalV2Json_({ ok: false, error: emailGate.error });
     }
 
-    if (!portalV2RateLimit_(email, route, payload, submissionId)) {
-      return portalV2Json_({ ok: true });
-    }
-
-    var visibility = portalV2RouteVisibility_(route, handlerTier);
+    var visibility = portalV2RouteVisibility_(route);
     var attachmentVisible = visibility.attachment || Boolean(payload.attachment_data);
     var attachment = attachmentVisible
       ? portalV2Attachment_(payload, route, submissionId)
       : portalV2NotVisibleAttachment_();
     if (attachment.error) return portalV2Json_({ ok: false, error: attachment.error });
 
-    var row = portalV2PortalRow_(payload, route, conciergeTrack, email, city, country, message, attachment, submissionId, visibility);
+    var row = portalV2PortalRow_(payload, route, receivedUtc, email, city, country, message, attachment, submissionId, visibility);
 
     var appendMeta;
     var lock = LockService.getScriptLock();
-    lock.waitLock(10000);
     try {
-      appendMeta = portalV2Append_(route, row);
+      lock.waitLock(10000);
+    } catch (lockErr) {
+      portalV2LogAbuse_(route, payload, 'append_lock_timeout', { submission_id: submissionId });
+      return portalV2Json_({ ok: false, error: 'temporarily_unavailable' });
+    }
+    try {
+      appendMeta = portalV2Append_(route, row, submissionId, payload);
     } finally {
       try { lock.releaseLock(); } catch (ignore) {}
     }
 
-    portalV2NotifyAdmin_(route, email, submissionId, attachment, payload);
-    portalV2TryAutoReply_(route, payload, email, submissionId);
+    portalV2NotifyAdmin_(route, email, submissionId, attachment, payload, receivedUtc);
+    portalV2TryAutoReply_(route, payload, email, submissionId, receivedUtc);
+    portalV2RefreshDashboardSafe_();
 
-    return portalV2Json_({ ok: true });
+    return portalV2Json_({
+      ok: true,
+      mirror_ok: appendMeta && appendMeta.mirrorOk !== false
+    });
   } catch (err) {
-    if (String(err && err.message || '') === 'rate_limit') return portalV2Json_({ ok: true });
     console.error('portal v2 doPost error: ' + err);
     return portalV2Json_({ ok: false, error: 'server_error' });
   }
@@ -135,33 +198,29 @@ function portalV2Parse_(e) {
 }
 
 function portalV2ResolveRoute_(payload) {
-  var rawSubmission = String(payload && payload.submission_type || '').toLowerCase().trim();
-  var rawTrack = String(payload && payload.concierge_track || '').toLowerCase().trim();
-  var routeHint = rawSubmission || rawTrack;
-  if (routeHint === PORTAL_V2_TYPES.INVESTMENT || routeHint.indexOf('investment') !== -1) return PORTAL_V2_ROUTES.INVESTMENT;
-  if (routeHint === PORTAL_V2_TYPES.PRESS || routeHint.indexOf('press') !== -1) return PORTAL_V2_ROUTES.PRESS;
-  if (routeHint === PORTAL_V2_TYPES.INTERNSHIP || routeHint.indexOf('intern') !== -1) return PORTAL_V2_ROUTES.INTERNSHIP;
-  if (routeHint === PORTAL_V2_TYPES.EMPLOYMENT || routeHint.indexOf('employment') !== -1) return PORTAL_V2_ROUTES.EMPLOYMENT;
-  if (routeHint === PORTAL_V2_TYPES.STAKEHOLDER || routeHint.indexOf('stakeholder') !== -1) return PORTAL_V2_ROUTES.STAKEHOLDER;
-  if (rawTrack) return PORTAL_V2_ROUTES.STAKEHOLDER;
+  var rawRout = String(payload && payload.rout || '').toLowerCase().trim();
+  if (PORTAL_V2_ROUT_TO_ROUTE[rawRout]) return PORTAL_V2_ROUT_TO_ROUTE[rawRout];
+  var rawRoute = String(payload && payload.route || '').toLowerCase().trim();
+  if (PORTAL_V2_CANONICAL_ROUTE_SET[rawRoute]) return rawRoute;
   return '';
 }
 
-function portalV2RouteSubmissionType_(route) {
-  if (route === PORTAL_V2_ROUTES.STAKEHOLDER) return PORTAL_V2_TYPES.STAKEHOLDER;
-  if (route === PORTAL_V2_ROUTES.INVESTMENT) return PORTAL_V2_TYPES.INVESTMENT;
-  if (route === PORTAL_V2_ROUTES.PRESS) return PORTAL_V2_TYPES.PRESS;
-  if (route === PORTAL_V2_ROUTES.EMPLOYMENT) return PORTAL_V2_TYPES.EMPLOYMENT;
-  if (route === PORTAL_V2_ROUTES.INTERNSHIP) return PORTAL_V2_TYPES.INTERNSHIP;
-  return '';
+function portalV2IsStakeholderRoute_(route) {
+  var rawRoute = String(route || '').trim().toLowerCase();
+  return !!PORTAL_V2_STAKEHOLDER_ROUTE_SET[rawRoute];
 }
 
-function portalV2RouteTrackDefault_(route) {
-  if (route === PORTAL_V2_ROUTES.INVESTMENT) return 'investment_portal';
-  if (route === PORTAL_V2_ROUTES.PRESS) return 'press_portal';
-  if (route === PORTAL_V2_ROUTES.EMPLOYMENT) return 'employment_portal';
-  if (route === PORTAL_V2_ROUTES.INTERNSHIP) return 'internship_portal';
-  return '';
+function portalV2IsCanonicalRoute_(route) {
+  return !!PORTAL_V2_CANONICAL_ROUTE_SET[String(route || '').trim().toLowerCase()];
+}
+
+function portalV2IsInternalUsernamePayload_(payload) {
+  var safePayload = payload || {};
+  var eventType = String(safePayload.internal_event || '').trim().toLowerCase();
+  return Boolean(
+    String(safePayload.tsi_username || '').trim()
+    && eventType === PORTAL_V2_INTERNAL_EVENT_TSI_USERNAME_CAPTURE
+  );
 }
 
 function portalV2NotVisibleAttachment_() {
@@ -192,20 +251,23 @@ function portalV2AttachmentField_(value, visible) {
   return next ? next : PORTAL_V2_NO_RESPONSE;
 }
 
-function portalV2RouteVisibility_(route, handlerTier) {
-  var isStakeholder = route === PORTAL_V2_ROUTES.STAKEHOLDER;
+function portalV2RouteVisibility_(route) {
+  var isStakeholder = portalV2IsStakeholderRoute_(route);
   var isInvestment = route === PORTAL_V2_ROUTES.INVESTMENT;
   var isPress = route === PORTAL_V2_ROUTES.PRESS;
   var isEmployment = route === PORTAL_V2_ROUTES.EMPLOYMENT;
   var isInternship = route === PORTAL_V2_ROUTES.INTERNSHIP;
-  var tier = String(handlerTier || '').trim();
-  var tierOne = tier === '1';
-  var tierTwo = tier === '2';
+  var stakeholderOrgRole = route === PORTAL_V2_ROUTES.GOVERNMENT
+    || route === PORTAL_V2_ROUTES.EDUCATION
+    || route === PORTAL_V2_ROUTES.PRIVATE_SECTOR
+    || route === PORTAL_V2_ROUTES.SMALL_BUSINESS;
+  var stakeholderFocus = route === PORTAL_V2_ROUTES.PROFESSIONAL
+    || route === PORTAL_V2_ROUTES.STUDENT;
 
   return {
-    org: isStakeholder ? tierOne : isEmployment,
-    role: isStakeholder ? tierOne : isInvestment,
-    focus: isStakeholder ? tierTwo : false,
+    org: isStakeholder ? stakeholderOrgRole : isEmployment,
+    role: isStakeholder ? stakeholderOrgRole : isInvestment,
+    focus: isStakeholder ? stakeholderFocus : false,
     locState: isStakeholder,
     investment: isInvestment,
     press: isPress,
@@ -215,13 +277,12 @@ function portalV2RouteVisibility_(route, handlerTier) {
   };
 }
 
-function portalV2PortalRow_(payload, route, conciergeTrack, email, city, country, message, attachment, submissionId, visibility) {
+function portalV2PortalRow_(payload, route, receivedUtc, email, city, country, message, attachment, submissionId, visibility) {
   return [
-    portalV2Now_(),
-    portalV2Esc_(payload.timestamp_local || ''),
-    portalV2RouteSubmissionType_(route),
-    conciergeTrack,
-    portalV2Esc_(payload.handler_tier || ''),
+    String(receivedUtc || portalV2Now_()),
+    portalV2Esc_(payload.client_tz || ''),
+    portalV2Esc_(payload.client_utc_offset_minutes || ''),
+    portalV2RoutFromRoute_(route),
     portalV2Esc_(String(payload.name || '').trim()),
     portalV2Esc_(email),
     portalV2ValueOrNotVisible_(payload.org || '', visibility.org),
@@ -231,30 +292,32 @@ function portalV2PortalRow_(payload, route, conciergeTrack, email, city, country
     portalV2Esc_(country),
     portalV2ValueOrNotVisible_(payload.focus || '', visibility.focus),
 
-    portalV2ValueOrNotVisible_(payload.investment_stage || '', visibility.investment),
-    portalV2ValueOrNotVisible_(payload.investment_check_range || '', visibility.investment),
-    portalV2ValueOrNotVisible_(payload.investment_geography || '', visibility.investment),
-    portalV2ValueOrNotVisible_(payload.investment_focus || '', visibility.investment, PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH),
-    portalV2ValueOrNotVisible_(payload.investment_timeline || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_stage || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_check_range || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_geography || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_focus || '', visibility.investment, PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH),
+    portalV2ValueOrNotVisible_(payload.pinv_timeline || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_investor_type || '', visibility.investment),
+    portalV2ValueOrNotVisible_(payload.pinv_investor_type_other || '', visibility.investment),
 
-    portalV2ValueOrNotVisible_(payload.press_outlet || '', visibility.press),
-    portalV2ValueOrNotVisible_(payload.press_role || '', visibility.press),
-    portalV2ValueOrNotVisible_(payload.press_deadline || '', visibility.press),
-    portalV2ValueOrNotVisible_(payload.press_topic || '', visibility.press),
-    portalV2ValueOrNotVisible_(payload.press_format || '', visibility.press),
+    portalV2ValueOrNotVisible_(payload.pprs_outlet || '', visibility.press),
+    portalV2ValueOrNotVisible_(payload.pprs_role || '', visibility.press),
+    portalV2ValueOrNotVisible_(payload.pprs_deadline || '', visibility.press),
+    portalV2ValueOrNotVisible_(payload.pprs_topic || '', visibility.press),
+    portalV2ValueOrNotVisible_(payload.pprs_format || '', visibility.press),
 
-    portalV2ValueOrNotVisible_(payload.employment_role_interest || '', visibility.employment),
-    portalV2ValueOrNotVisible_(payload.employment_timeline || '', visibility.employment),
-    portalV2ValueOrNotVisible_(payload.employment_location_pref || '', visibility.employment),
+    portalV2ValueOrNotVisible_(payload.pemp_role_interest || '', visibility.employment),
+    portalV2ValueOrNotVisible_(payload.pemp_timeline || '', visibility.employment),
+    portalV2ValueOrNotVisible_(payload.pemp_location_pref || '', visibility.employment),
 
-    portalV2ValueOrNotVisible_(payload.intern_school || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_program || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_grad_date || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_track || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_mode || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_hours_per_week || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_start_date || '', visibility.internship),
-    portalV2ValueOrNotVisible_(payload.intern_portfolio_url || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_school || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_program || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_grad_date || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_track || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_mode || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_hours_per_week || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_start_date || '', visibility.internship),
+    portalV2ValueOrNotVisible_(payload.pint_portfolio_url || '', visibility.internship),
 
     portalV2Esc_(message, PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH),
     portalV2AttachmentField_(attachment.name || '', visibility.attachment),
@@ -285,6 +348,7 @@ function portalV2WriteHoneypot_(route, payload) {
       honeypotField: honeyKey,
       honeypotValue: String(honeyVal || '')
     });
+    portalV2RefreshDashboardSafe_();
   } catch (e2) {
     console.error('portal v2 honeypot write failed: ' + e2);
   }
@@ -402,16 +466,15 @@ function portalV2AppendHoneypot_(route, payload, meta) {
   var payloadBytes = String(payloadJson.length || 0);
   var row = [
     portalV2Now_(),
-    portalV2Esc_(safePayload.timestamp_local || ''),
-    portalV2RouteSubmissionType_(route),
+    portalV2Esc_(safePayload.client_tz || ''),
+    portalV2Esc_(safePayload.client_utc_offset_minutes || ''),
+    portalV2RoutFromRoute_(route),
     submissionId,
     String(meta && meta.triggerType || ''),
     portalV2Esc_(meta && meta.reason || ''),
     portalV2Esc_(meta && meta.reasonDetails !== undefined ? JSON.stringify(meta.reasonDetails) : ''),
     portalV2Esc_(meta && meta.honeypotField || ''),
     portalV2Esc_(meta && meta.honeypotValue || ''),
-    portalV2Esc_(safePayload.concierge_track || ''),
-    portalV2Esc_(safePayload.handler_tier || ''),
     portalV2Esc_(safePayload.name || ''),
     portalV2Esc_(email),
     portalV2Esc_(emailDomain),
@@ -433,17 +496,16 @@ function portalV2AppendHoneypot_(route, payload, meta) {
 
 function portalV2HoneypotHeader_() {
   return [
-    'timestamp_utc',
-    'timestamp_local',
-    'submission_type',
+    'received_utc',
+    'client_tz',
+    'client_utc_offset_minutes',
+    'rout',
     'submission_id',
     'trigger_type',
     'trigger_reason',
     'trigger_details',
     'honeypot_field',
     'honeypot_value',
-    'concierge_track',
-    'handler_tier',
     'name',
     'email',
     'email_domain',
@@ -463,15 +525,16 @@ function portalV2HoneypotHeader_() {
 }
 
 function portalV2AbuseGate_(route, payload, submissionId) {
-  var debug = payload && String(payload._debug_burst || '') === '1';
-  if (!portalV2DedupeOk_(route, payload, submissionId)) return false;
-  if (!portalV2BurstGate_(route, payload)) return false;
-  return true;
+  var dedupe = portalV2DedupeOk_(route, payload, submissionId);
+  if (!dedupe.ok) return dedupe;
+  var burst = portalV2BurstGate_(route, payload);
+  if (!burst.ok) return burst;
+  return { ok: true, error: '' };
 }
 
 function portalV2DedupeOk_(route, payload, submissionId) {
   var sid = String(submissionId || '').trim();
-  if (!sid) return true;
+  if (!sid) return { ok: true, error: '' };
   var ttl = Number(PORTAL_V2_CONFIG.DEDUPE_SECONDS || 3600);
   if (!Number.isFinite(ttl) || ttl < 1) ttl = 3600;
   var cache = CacheService.getScriptCache();
@@ -479,10 +542,10 @@ function portalV2DedupeOk_(route, payload, submissionId) {
   var existing = cache.get(key);
   if (existing) {
     portalV2LogAbuse_(route, payload, 'duplicate_submission', { submission_id: sid });
-    return false;
+    return { ok: false, error: 'already_received' };
   }
   cache.put(key, '1', ttl);
-  return true;
+  return { ok: true, error: '' };
 }
 
 function portalV2BurstGate_(route, payload) {
@@ -503,7 +566,7 @@ function portalV2BurstGate_(route, payload) {
     hasLock = true;
   } catch (err) {
     portalV2LogAbuse_(route, payload, 'rate_limit_lock', { error: 'lock_failed' });
-    return false;
+    return { ok: false, error: 'temporarily_unavailable' };
   }
 
   try {
@@ -568,7 +631,8 @@ function portalV2BurstGate_(route, payload) {
       trackCounts: trackCounts
     });
 
-    return !blockedReason;
+    if (blockedReason) return { ok: false, error: 'retry_later' };
+    return { ok: true, error: '' };
   } finally {
     if (hasLock) {
       try { lock.releaseLock(); } catch (ignore) {}
@@ -586,10 +650,10 @@ function portalV2RateLimit_(email, route, payload, submissionId) {
   var existing = cache.get(key);
   if (existing) {
     portalV2LogAbuse_(route, payload, 'rate_limit_email', { email: String(email || ''), submission_id: submissionId });
-    return false;
+    return { ok: false, error: 'retry_later' };
   }
   cache.put(key, '1', ttl);
-  return true;
+  return { ok: true, error: '' };
 }
 
 function portalV2Attachment_(payload, route, submissionId) {
@@ -626,13 +690,48 @@ function portalV2Attachment_(payload, route, submissionId) {
   return { status: 'saved', name: file.getName(), type: mime, size: String(size), url: file.getUrl() };
 }
 
-function portalV2Append_(route, row) {
-  var target = portalV2SheetTarget_(route);
+function portalV2Append_(route, row, submissionId, payload) {
+  var masterTarget = portalV2MasterSheetTarget_();
+  var routeTarget = portalV2SheetTarget_(route);
+  var masterMeta = portalV2AppendTargetRow_(masterTarget, portalV2ColumnsForRoute_(route), row);
+  var mirrorOk = true;
+  var routeMeta = null;
+  var mirrorError = '';
+
+  try {
+    routeMeta = portalV2AppendTargetRow_(routeTarget, portalV2ColumnsForRoute_(route), row);
+  } catch (mirrorErr) {
+    mirrorOk = false;
+    mirrorError = String(mirrorErr || '');
+    portalV2LogWriteIssue_(route, submissionId, payload, masterTarget, routeTarget, mirrorError);
+  }
+
+  return {
+    master: masterMeta,
+    route: routeMeta,
+    mirrorOk: mirrorOk,
+    mirrorError: mirrorError
+  };
+}
+
+function portalV2AppendNamed_(route, name, header, row) {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  return portalV2AppendTargetRow_({
+    spreadsheetId: sid,
+    sheetName: String(name || '').trim()
+  }, header, row);
+}
+
+function portalV2AppendTargetRow_(target, header, row) {
   var ss = SpreadsheetApp.openById(target.spreadsheetId);
   var sheet = ss.getSheetByName(target.sheetName);
   if (!sheet) {
     sheet = ss.insertSheet(target.sheetName);
-    sheet.appendRow(portalV2ColumnsForRoute_(route));
+    if (header && header.length) sheet.appendRow(header);
+  } else if (header && header.length && !portalV2HeaderMatches_(sheet, header)) {
+    sheet.clearContents();
+    sheet.getRange(1, 1, 1, header.length).setValues([header]);
   }
   sheet.appendRow(row);
   return {
@@ -640,29 +739,6 @@ function portalV2Append_(route, row) {
     sheetName: target.sheetName,
     rowIndex: sheet.getLastRow()
   };
-}
-
-function portalV2AppendNamed_(route, name, header, row) {
-  var target = portalV2SheetTarget_(route);
-  var ss = SpreadsheetApp.openById(target.spreadsheetId);
-  var sheet = ss.getSheetByName(name);
-  if (!sheet) {
-    sheet = ss.insertSheet(name);
-    if (header && header.length) sheet.appendRow(header);
-  } else if (header && header.length) {
-    var current = sheet.getRange(1, 1, 1, header.length).getValues()[0];
-    var mismatch = false;
-    for (var i = 0; i < header.length; i++) {
-      if (String(current[i] || '') !== String(header[i] || '')) {
-        mismatch = true;
-        break;
-      }
-    }
-    if (mismatch) {
-      sheet.getRange(1, 1, 1, header.length).setValues([header]);
-    }
-  }
-  sheet.appendRow(row);
 }
 
 function portalV2BurstSheet_() {
@@ -736,15 +812,24 @@ function portalV2ColumnsForRoute_(route) {
   return PORTAL_V2_COLUMNS;
 }
 
+function portalV2MasterSheetTarget_() {
+  var portalSid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!portalSid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  return {
+    spreadsheetId: portalSid,
+    sheetName: String(PORTAL_V2_CONFIG.MASTER_SHEET_NAME || '').trim()
+  };
+}
+
 function portalV2SheetTarget_(route) {
   var portalSid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
   if (!portalSid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
 
-  if (route === PORTAL_V2_ROUTES.INVESTMENT) return { spreadsheetId: portalSid, sheetName: PORTAL_V2_CONFIG.INVESTMENT_SHEET_NAME };
-  if (route === PORTAL_V2_ROUTES.PRESS) return { spreadsheetId: portalSid, sheetName: PORTAL_V2_CONFIG.PRESS_SHEET_NAME };
-  if (route === PORTAL_V2_ROUTES.EMPLOYMENT) return { spreadsheetId: portalSid, sheetName: PORTAL_V2_CONFIG.EMPLOYMENT_SHEET_NAME };
-  if (route === PORTAL_V2_ROUTES.INTERNSHIP) return { spreadsheetId: portalSid, sheetName: PORTAL_V2_CONFIG.INTERNSHIP_SHEET_NAME };
-  return { spreadsheetId: portalSid, sheetName: PORTAL_V2_CONFIG.STAKEHOLDER_SHEET_NAME };
+  var routeKey = String(route || '').trim().toLowerCase();
+  var routeSheets = PORTAL_V2_CONFIG.ROUTE_SHEETS || {};
+  var sheetName = String(routeSheets[routeKey] || '').trim();
+  if (!sheetName) throw new Error('Missing route sheet for route: ' + routeKey);
+  return { spreadsheetId: portalSid, sheetName: sheetName };
 }
 
 function portalV2UploadFolderByRoute_(route) {
@@ -753,7 +838,7 @@ function portalV2UploadFolderByRoute_(route) {
   if (route === PORTAL_V2_ROUTES.PRESS) return String(PORTAL_V2_CONFIG.PRESS_UPLOAD_FOLDER_ID || portalFallback || '').trim();
   if (route === PORTAL_V2_ROUTES.EMPLOYMENT) return String(PORTAL_V2_CONFIG.EMPLOYMENT_UPLOAD_FOLDER_ID || portalFallback || '').trim();
   if (route === PORTAL_V2_ROUTES.INTERNSHIP) return String(PORTAL_V2_CONFIG.INTERNSHIP_UPLOAD_FOLDER_ID || portalFallback || '').trim();
-  if (route === PORTAL_V2_ROUTES.STAKEHOLDER) return String(PORTAL_V2_CONFIG.STAKEHOLDER_UPLOAD_FOLDER_ID || portalFallback || '').trim();
+  if (portalV2IsStakeholderRoute_(route)) return String(PORTAL_V2_CONFIG.STAKEHOLDER_UPLOAD_FOLDER_ID || portalFallback || '').trim();
   return portalFallback;
 }
 
@@ -786,33 +871,72 @@ function portalV2TemplateRender_(text, data) {
 
 function portalV2TemplateData_(route, payload, submissionId, email, receivedUtc) {
   var safePayload = payload || {};
-  var formSubmittedTitle = portalV2FormSubmittedTitle_(route, safePayload);
-  var submittedFieldsBlock = portalV2SubmittedFieldsBlock_(route, safePayload, formSubmittedTitle);
+  var routeName = portalV2RouteName_(route);
+  var submittedFieldsBlock = portalV2SubmittedFieldsBlock_(route, safePayload, routeName);
   return {
     name: String(safePayload.name || '').trim() || 'there',
+    rout: portalV2RoutFromRoute_(route),
     route: String(route || ''),
+    route_name: routeName,
     submission_id: String(submissionId || ''),
     received_utc: String(receivedUtc || ''),
+    client_tz: String(safePayload.client_tz || ''),
+    client_utc_offset_minutes: String(safePayload.client_utc_offset_minutes || ''),
     received_local: portalV2ReceivedLocal_(safePayload, receivedUtc),
     received_texas: portalV2FormatInTimeZone_(receivedUtc, 'America/Chicago'),
     email: String(email || ''),
-    concierge_track: String(safePayload.concierge_track || ''),
-    handler_tier: String(safePayload.handler_tier || ''),
-    form_submitted_title: formSubmittedTitle,
-    form_submitted_label: formSubmittedTitle,
-    submitted_fields_block: submittedFieldsBlock,
-    // Backward-compatible alias for older templates.
-    submitted_fields_row: submittedFieldsBlock
+    org: String(safePayload.org || ''),
+    role: String(safePayload.role || ''),
+    loc_city: String(safePayload.loc_city || ''),
+    loc_state: String(safePayload.loc_state || ''),
+    loc_country: String(safePayload.loc_country || ''),
+    focus: String(safePayload.focus || ''),
+    message: String(safePayload.message || ''),
+    source: String(PORTAL_V2_CONFIG.SOURCE || ''),
+    page_path: String(safePayload.page_path || '/'),
+    referrer: String(safePayload.referrer || 'direct'),
+    pinv_stage: String(safePayload.pinv_stage || ''),
+    pinv_check_range: String(safePayload.pinv_check_range || ''),
+    pinv_geography: String(safePayload.pinv_geography || ''),
+    pinv_focus: String(safePayload.pinv_focus || ''),
+    pinv_timeline: String(safePayload.pinv_timeline || ''),
+    pinv_investor_type: String(safePayload.pinv_investor_type || ''),
+    pinv_investor_type_other: String(safePayload.pinv_investor_type_other || ''),
+    pprs_outlet: String(safePayload.pprs_outlet || ''),
+    pprs_role: String(safePayload.pprs_role || ''),
+    pprs_deadline: String(safePayload.pprs_deadline || ''),
+    pprs_topic: String(safePayload.pprs_topic || ''),
+    pprs_format: String(safePayload.pprs_format || ''),
+    pemp_role_interest: String(safePayload.pemp_role_interest || ''),
+    pemp_timeline: String(safePayload.pemp_timeline || ''),
+    pemp_location_pref: String(safePayload.pemp_location_pref || ''),
+    pint_school: String(safePayload.pint_school || ''),
+    pint_program: String(safePayload.pint_program || ''),
+    pint_grad_date: String(safePayload.pint_grad_date || ''),
+    pint_track: String(safePayload.pint_track || ''),
+    pint_mode: String(safePayload.pint_mode || ''),
+    pint_hours_per_week: String(safePayload.pint_hours_per_week || ''),
+    pint_start_date: String(safePayload.pint_start_date || ''),
+    pint_portfolio_url: String(safePayload.pint_portfolio_url || ''),
+    attachment_name: String(safePayload.attachment_name || ''),
+    attachment_type: String(safePayload.attachment_type || ''),
+    attachment_size: String(safePayload.attachment_size || ''),
+    attachment_url: String(safePayload.attachment_url || ''),
+    attachment_status: String(safePayload.attachment_status || ''),
+    submitted_fields_block: submittedFieldsBlock
   };
 }
 
 function portalV2ReceivedLocal_(payload, receivedUtc) {
-  var local = String(payload && payload.timestamp_local || '').trim();
-  if (local) return local;
-  var scriptTz = '';
-  try { scriptTz = Session.getScriptTimeZone() || ''; } catch (ignore) {}
-  if (!scriptTz) scriptTz = 'Etc/UTC';
-  return portalV2FormatInTimeZone_(receivedUtc, scriptTz);
+  var safePayload = payload || {};
+  var clientTz = String(safePayload.client_tz || '').trim();
+  if (clientTz) {
+    var formattedInClientTz = portalV2FormatInTimeZone_(receivedUtc, clientTz);
+    if (formattedInClientTz) return formattedInClientTz;
+  }
+  var rawOffset = String(safePayload.client_utc_offset_minutes || '').trim();
+  if (rawOffset) return portalV2FormatWithUtcOffset_(receivedUtc, rawOffset);
+  return 'Unavailable';
 }
 
 function portalV2FormatInTimeZone_(isoOrDate, timeZoneId) {
@@ -822,27 +946,42 @@ function portalV2FormatInTimeZone_(isoOrDate, timeZoneId) {
     if (isNaN(d.getTime())) d = new Date();
     return Utilities.formatDate(d, tz, "yyyy-MM-dd HH:mm:ss z");
   } catch (err) {
-    return String(isoOrDate || '');
+    return '';
   }
 }
 
-function portalV2FormSubmittedTitle_(route, payload) {
-  var safeRoute = String(route || '').trim().toLowerCase();
-  var track = String(payload && payload.concierge_track || '').trim().toLowerCase();
-  if (safeRoute === PORTAL_V2_ROUTES.STAKEHOLDER) {
-    if (track === 'government') return 'REGIONAL & GOVERNMENT AUTHORITY';
-    if (track === 'education') return 'EDUCATIONAL LEADERSHIP & INSTRUCTION';
-    if (track === 'private-sector') return 'PRIVATE SECTOR & INDUSTRY LEADERSHIP';
-    if (track === 'small-business') return 'SMALL BUSINESS & LOCAL COMMERCE';
-    if (track === 'professional') return 'PROFESSIONAL & TECHNICAL PERSPECTIVE';
-    if (track === 'student') return 'STUDENT & COMMUNITY PERSPECTIVE';
-    return 'STAKEHOLDER PERSPECTIVE';
+function portalV2FormatWithUtcOffset_(isoOrDate, offsetMinutesRaw) {
+  var parsedOffset = Number(offsetMinutesRaw);
+  if (!Number.isFinite(parsedOffset)) return 'Unavailable';
+  var date = isoOrDate ? new Date(isoOrDate) : new Date();
+  if (isNaN(date.getTime())) return 'Unavailable';
+  var shifted = new Date(date.getTime() + (parsedOffset * 60000));
+  var sign = parsedOffset >= 0 ? '+' : '-';
+  var absMinutes = Math.abs(parsedOffset);
+  var offsetHours = Math.floor(absMinutes / 60);
+  var offsetMinutes = absMinutes % 60;
+  var label = 'UTC' + sign
+    + (offsetHours < 10 ? '0' : '') + offsetHours
+    + ':'
+    + (offsetMinutes < 10 ? '0' : '') + offsetMinutes;
+  try {
+    return Utilities.formatDate(shifted, 'Etc/UTC', "yyyy-MM-dd HH:mm:ss") + ' ' + label;
+  } catch (err) {
+    return 'Unavailable';
   }
-  if (safeRoute === PORTAL_V2_ROUTES.INVESTMENT) return 'INVESTMENT INQUIRY';
-  if (safeRoute === PORTAL_V2_ROUTES.PRESS) return 'PRESS INQUIRY';
-  if (safeRoute === PORTAL_V2_ROUTES.EMPLOYMENT) return 'EMPLOYMENT INQUIRY';
-  if (safeRoute === PORTAL_V2_ROUTES.INTERNSHIP) return 'INTERNSHIP INQUIRY';
-  return String(route || '').trim().toUpperCase() || 'TSI SUBMISSION';
+}
+
+function portalV2RoutFromRoute_(route) {
+  return String(PORTAL_V2_ROUTE_TO_ROUT[String(route || '').trim().toLowerCase()] || '');
+}
+
+function portalV2RouteFromRout_(rout) {
+  return String(PORTAL_V2_ROUT_TO_ROUTE[String(rout || '').trim().toLowerCase()] || '');
+}
+
+function portalV2RouteName_(route) {
+  var safeRoute = String(route || '').trim().toLowerCase();
+  return String(PORTAL_V2_ROUTE_NAMES[safeRoute] || safeRoute.toUpperCase() || 'TSI SUBMISSION');
 }
 
 function portalV2TemplateFieldValue_(value) {
@@ -855,9 +994,9 @@ function portalV2TemplateFieldValue_(value) {
   return next.replace(/\r\n/g, '\n').replace(/\n+/g, ' / ');
 }
 
-function portalV2SubmittedFieldsBlock_(route, payload, formSubmittedTitle) {
+function portalV2SubmittedFieldsBlock_(route, payload, routeName) {
   var safePayload = payload || {};
-  var visibility = portalV2RouteVisibility_(route, safePayload.handler_tier || '');
+  var visibility = portalV2RouteVisibility_(route);
   var lines = [];
   var add = function (label, value) {
     var next = portalV2TemplateFieldValue_(value);
@@ -865,7 +1004,9 @@ function portalV2SubmittedFieldsBlock_(route, payload, formSubmittedTitle) {
     lines.push(String(label || '').trim() + ': ' + next);
   };
 
-  add('Perspective Selected', formSubmittedTitle);
+  add('Form Submitted', routeName);
+  add('Route Code', portalV2RoutFromRoute_(route));
+  add('Route Key', route);
   add('Name', safePayload.name);
   add('Email', safePayload.email);
   if (visibility.org) add('Organization', safePayload.org);
@@ -876,36 +1017,38 @@ function portalV2SubmittedFieldsBlock_(route, payload, formSubmittedTitle) {
   if (visibility.focus) add('Focus', safePayload.focus);
 
   if (visibility.investment) {
-    add('Investment Stage', safePayload.investment_stage);
-    add('Investment Check Range', safePayload.investment_check_range);
-    add('Investment Geography', safePayload.investment_geography);
-    add('Investment Focus', safePayload.investment_focus);
-    add('Investment Timeline', safePayload.investment_timeline);
+    add('Investment Stage', safePayload.pinv_stage);
+    add('Investment Check Range', safePayload.pinv_check_range);
+    add('Investment Geography', safePayload.pinv_geography);
+    add('Investment Focus', safePayload.pinv_focus);
+    add('Investment Timeline', safePayload.pinv_timeline);
+    add('Investor Type', safePayload.pinv_investor_type);
+    add('Investor Type Other', safePayload.pinv_investor_type_other);
   }
 
   if (visibility.press) {
-    add('Press Outlet', safePayload.press_outlet);
-    add('Press Role', safePayload.press_role);
-    add('Press Deadline', safePayload.press_deadline);
-    add('Press Topic', safePayload.press_topic);
-    add('Press Format', safePayload.press_format);
+    add('Press Outlet', safePayload.pprs_outlet);
+    add('Press Role', safePayload.pprs_role);
+    add('Press Deadline', safePayload.pprs_deadline);
+    add('Press Topic', safePayload.pprs_topic);
+    add('Press Format', safePayload.pprs_format);
   }
 
   if (visibility.employment) {
-    add('Employment Role Interest', safePayload.employment_role_interest);
-    add('Employment Timeline', safePayload.employment_timeline);
-    add('Employment Location Preference', safePayload.employment_location_pref);
+    add('Employment Role Interest', safePayload.pemp_role_interest);
+    add('Employment Timeline', safePayload.pemp_timeline);
+    add('Employment Location Preference', safePayload.pemp_location_pref);
   }
 
   if (visibility.internship) {
-    add('School', safePayload.intern_school);
-    add('Program', safePayload.intern_program);
-    add('Graduation Date', safePayload.intern_grad_date);
-    add('Internship Track', safePayload.intern_track);
-    add('Internship Mode', safePayload.intern_mode);
-    add('Hours Per Week', safePayload.intern_hours_per_week);
-    add('Start Date', safePayload.intern_start_date);
-    add('Portfolio URL', safePayload.intern_portfolio_url);
+    add('School', safePayload.pint_school);
+    add('Program', safePayload.pint_program);
+    add('Graduation Date', safePayload.pint_grad_date);
+    add('Internship Track', safePayload.pint_track);
+    add('Internship Mode', safePayload.pint_mode);
+    add('Hours Per Week', safePayload.pint_hours_per_week);
+    add('Start Date', safePayload.pint_start_date);
+    add('Portfolio URL', safePayload.pint_portfolio_url);
   }
 
   add('Message', safePayload.message);
@@ -920,10 +1063,6 @@ function portalV2SubmittedFieldsBlock_(route, payload, formSubmittedTitle) {
 }
 
 function portalV2TemplateKey_(route, payload) {
-  if (route === PORTAL_V2_ROUTES.STAKEHOLDER) {
-    var track = String(payload && payload.concierge_track || '').trim().toLowerCase();
-    if (track) return track;
-  }
   return String(route || '').trim().toLowerCase();
 }
 
@@ -951,23 +1090,12 @@ function portalV2TemplateDebug(route, type) {
   return portalV2TemplateDebug_(route, type);
 }
 
-function portalV2TemplateDebugLog(route, type) {
-  var result = portalV2TemplateDebug_(route, type);
-  Logger.log(JSON.stringify(result));
-  return result;
-}
-
-function portalV2TemplateDebugLogEmploymentAdmin() {
-  return portalV2TemplateDebugLog('employment', 'admin_notify');
-}
-
-function portalV2TryAutoReply_(route, payload, email, submissionId) {
+function portalV2TryAutoReply_(route, payload, email, submissionId, receivedUtc) {
   try {
     if (!PORTAL_V2_CONFIG.AUTO_REPLY_ENABLED) return;
     if (!portalV2AutoReplyEnabledForRoute_(route)) return;
     if (!portalV2EmailOk_(email)) return;
 
-    var receivedUtc = portalV2Now_();
     var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
     var tmpl = portalV2TemplatePick_(route, 'auto_reply', payload);
     if (tmpl && tmpl.enabled === false) return;
@@ -980,15 +1108,17 @@ function portalV2TryAutoReply_(route, payload, email, submissionId) {
       body = portalV2TemplateRender_(tmpl.body, data);
     } else {
       fallbackReasons.push('template_fallback:auto_reply_template_missing_or_incomplete');
-      subject = String(PORTAL_V2_CONFIG.AUTO_REPLY_SUBJECT_PREFIX || 'TSI Intake Confirmation') + ': ' + route;
+      subject = String(PORTAL_V2_CONFIG.AUTO_REPLY_SUBJECT_PREFIX || 'TSI Intake Confirmation') + ': ' + data.route_name;
       body = [
         'Hello ' + data.name + ',',
         '',
         'We received your submission and our team will review it.',
         '',
-        'Route: ' + route,
+        'Form Submitted: ' + data.route_name,
+        'Route Code: ' + data.rout,
+        'Route Key: ' + route,
         'Submission ID: ' + String(submissionId || ''),
-        'Received (UTC): ' + receivedUtc,
+        'Received: ' + data.received_local + ' (Local) | ' + data.received_texas + ' (Texas) | ' + receivedUtc + ' (UTC)',
         '',
         String(PORTAL_V2_CONFIG.AUTO_REPLY_SIGNATURE || 'TSI Intake Team')
       ].join('\n');
@@ -1003,29 +1133,16 @@ function portalV2TryAutoReply_(route, payload, email, submissionId) {
 function portalV2AutoReplyEnabledForRoute_(route) {
   var master = !!PORTAL_V2_CONFIG.AUTO_REPLY_ENABLED;
   if (!master) return false;
-  var override = null;
-  if (route === PORTAL_V2_ROUTES.STAKEHOLDER) override = portalV2AutoReplyOverride_('PORTAL_V2_AUTO_REPLY_STAKEHOLDER_ENABLED');
-  else if (route === PORTAL_V2_ROUTES.INVESTMENT) override = portalV2AutoReplyOverride_('PORTAL_V2_AUTO_REPLY_PORTAL_INVESTMENT_ENABLED');
-  else if (route === PORTAL_V2_ROUTES.PRESS) override = portalV2AutoReplyOverride_('PORTAL_V2_AUTO_REPLY_PORTAL_PRESS_ENABLED');
-  else if (route === PORTAL_V2_ROUTES.EMPLOYMENT) override = portalV2AutoReplyOverride_('PORTAL_V2_AUTO_REPLY_PORTAL_EMPLOYMENT_ENABLED');
-  else if (route === PORTAL_V2_ROUTES.INTERNSHIP) override = portalV2AutoReplyOverride_('PORTAL_V2_AUTO_REPLY_PORTAL_INTERNSHIP_ENABLED');
+  var overrides = PORTAL_V2_CONFIG.AUTO_REPLY_ROUTE_OVERRIDES || {};
+  var routeKey = String(route || '').trim().toLowerCase();
+  var override = Object.prototype.hasOwnProperty.call(overrides, routeKey) ? overrides[routeKey] : null;
   if (override === null) return true;
   return override;
 }
 
-function portalV2AutoReplyOverride_(key) {
-  var raw = portalV2ReadPropRaw_(key);
-  if (raw === null || raw === '') return null;
-  var val = String(raw || '').toLowerCase().trim();
-  if (val === 'true') return true;
-  if (val === 'false') return false;
-  return null;
-}
-
-function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload) {
+function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload, receivedUtc) {
   var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
   if (!admin) return;
-  var receivedUtc = portalV2Now_();
   var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
   var tmpl = portalV2TemplatePick_(route, 'admin_notify', payload);
   if (tmpl && tmpl.enabled === false) return;
@@ -1038,8 +1155,28 @@ function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload) {
     body = portalV2TemplateRender_(tmpl.body, data);
   } else {
     fallbackReasons.push('template_fallback:admin_notify_template_missing_or_incomplete');
-    subject = 'TSI intake (v2): ' + route + ' - ' + email;
-    body = 'submission_id: ' + submissionId + '\nattachment_status: ' + (attachment && attachment.status || 'none');
+    subject = '[TSI][' + data.rout + '][' + submissionId + '] ' + email;
+    body = [
+      'Form Submitted: ' + data.route_name,
+      'Route Code: ' + data.rout,
+      'Route Key: ' + route,
+      'Submission ID: ' + submissionId,
+      '',
+      'Name: ' + data.name,
+      'Email: ' + data.email,
+      'Organization: ' + data.org,
+      'Role: ' + data.role,
+      'City: ' + data.loc_city,
+      'State/Region: ' + data.loc_state,
+      'Country: ' + data.loc_country,
+      '',
+      'Received: ' + data.received_local + ' (Local) | ' + data.received_texas + ' (Texas) | ' + receivedUtc + ' (UTC)',
+      'Page Path: ' + data.page_path,
+      'Referrer: ' + data.referrer,
+      'Attachment Status: ' + (attachment && attachment.status || 'none'),
+      '',
+      data.submitted_fields_block
+    ].join('\n');
   }
   portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId, fallbackReasons);
 }
@@ -1117,35 +1254,16 @@ function portalV2IsInternalEmailAddress_(email) {
 }
 
 function portalV2ZeptoFromContext_(route) {
+  var useRouteFrom = !!PORTAL_V2_CONFIG.ZEPTO_USE_ROUTE_FROM;
   var r = String(route || '').trim().toLowerCase();
   var routeFrom = '';
-  var routeKey = '';
-  if (r === PORTAL_V2_ROUTES.STAKEHOLDER) {
-    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_STAKEHOLDER || '').trim();
-    routeKey = 'PORTAL_V2_ZEPTO_FROM_STAKEHOLDER';
-  } else if (r === PORTAL_V2_ROUTES.INVESTMENT) {
-    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_INVESTMENT || '').trim();
-    routeKey = 'PORTAL_V2_ZEPTO_FROM_INVESTMENT';
-  } else if (r === PORTAL_V2_ROUTES.PRESS) {
-    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_PRESS || '').trim();
-    routeKey = 'PORTAL_V2_ZEPTO_FROM_PRESS';
-  } else if (r === PORTAL_V2_ROUTES.EMPLOYMENT) {
-    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_EMPLOYMENT || '').trim();
-    routeKey = 'PORTAL_V2_ZEPTO_FROM_EMPLOYMENT';
-  } else if (r === PORTAL_V2_ROUTES.INTERNSHIP) {
-    routeFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_INTERNSHIP || '').trim();
-    routeKey = 'PORTAL_V2_ZEPTO_FROM_INTERNSHIP';
+  if (useRouteFrom) {
+    routeFrom = String((PORTAL_V2_CONFIG.ZEPTO_FROM_ROUTE_OVERRIDES || {})[r] || '').trim();
+    if (routeFrom) return { from: routeFrom, reason: '' };
   }
-  if (routeFrom) return { from: routeFrom, reason: '' };
 
   var defaultFrom = String(PORTAL_V2_CONFIG.ZEPTO_FROM_DEFAULT || '').trim();
-  if (defaultFrom) {
-    var defaultRaw = portalV2ReadPropRaw_('PORTAL_V2_ZEPTO_FROM_DEFAULT');
-    var legacyRaw = portalV2ReadPropRaw_('PORTAL_V2_ZEPTO_FROM');
-    if (routeKey) return { from: defaultFrom, reason: 'sender_fallback:' + routeKey + ' missing; using default sender' };
-    if (!defaultRaw && !legacyRaw) return { from: defaultFrom, reason: 'sender_fallback:default sender property missing; using built-in sender' };
-    return { from: defaultFrom, reason: '' };
-  }
+  if (defaultFrom) return { from: defaultFrom, reason: '' };
   return { from: '', reason: 'sender_fallback:no sender configured' };
 }
 
@@ -1275,8 +1393,9 @@ function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult,
 
 function portalV2InternalUsernameHeader_() {
   return [
-    'timestamp_utc',
-    'timestamp_local',
+    'received_utc',
+    'client_tz',
+    'client_utc_offset_minutes',
     'tsi_username',
     'page_path',
     'referrer',
@@ -1295,7 +1414,8 @@ function portalV2LogInternalUsername_(payload) {
 
     var row = [
       portalV2Now_(),
-      String(payload && payload.timestamp_local || ''),
+      String(payload && payload.client_tz || ''),
+      String(payload && payload.client_utc_offset_minutes || ''),
       username,
       String(payload && payload.page_path || ''),
       String(payload && payload.referrer || ''),
@@ -1305,34 +1425,234 @@ function portalV2LogInternalUsername_(payload) {
     var lock = LockService.getScriptLock();
     lock.waitLock(10000);
     try {
-      var ss = SpreadsheetApp.openById(sid);
-      var sheet = ss.getSheetByName(sheetName);
-      if (!sheet) sheet = ss.insertSheet(sheetName);
-      if (sheet.getLastRow() === 0) {
-        var header = portalV2InternalUsernameHeader_();
-        sheet.getRange(1, 1, 1, header.length).setValues([header]);
-      }
-      sheet.appendRow(row);
+      portalV2AppendNamed_(PORTAL_V2_ROUTES.GOVERNMENT, sheetName, portalV2InternalUsernameHeader_(), row);
     } finally {
       try { lock.releaseLock(); } catch (ignore) {}
     }
+    portalV2RefreshDashboardSafe_();
   } catch (err) {
     console.error('portal v2 internal username log failed: ' + err);
   }
 }
 
+function portalV2WriteIssueHeader_() {
+  return [
+    'timestamp_utc',
+    'rout',
+    'submission_id',
+    'master_sheet',
+    'route_sheet',
+    'status',
+    'error',
+    'name',
+    'email',
+    'page_path',
+    'referrer'
+  ];
+}
+
+function portalV2LogWriteIssue_(route, submissionId, payload, masterTarget, routeTarget, errorText) {
+  var safePayload = payload || {};
+  var row = [
+    portalV2Now_(),
+    portalV2RoutFromRoute_(route),
+    String(submissionId || ''),
+    String(masterTarget && masterTarget.sheetName || ''),
+    String(routeTarget && routeTarget.sheetName || ''),
+    'mirror_mismatch',
+    String(errorText || ''),
+    String(safePayload.name || ''),
+    String(safePayload.email || ''),
+    String(safePayload.page_path || ''),
+    String(safePayload.referrer || '')
+  ];
+  portalV2AppendNamed_(route, PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_(), row);
+  portalV2RefreshDashboardSafe_();
+  if (PORTAL_V2_CONFIG.WRITE_ISSUE_ALERT_ENABLED) {
+    portalV2NotifyWriteIssue_(route, submissionId, masterTarget, routeTarget, errorText);
+  }
+}
+
+function portalV2NotifyWriteIssue_(route, submissionId, masterTarget, routeTarget, errorText) {
+  var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
+  if (!admin || !portalV2IsInternalEmailAddress_(admin)) return;
+  var subject = '[Mirror Issue][' + portalV2RoutFromRoute_(route) + '] ' + String(submissionId || '');
+  var body = [
+    'rout: ' + portalV2RoutFromRoute_(route),
+    'route: ' + String(route || ''),
+    'submission_id: ' + String(submissionId || ''),
+    'master_sheet: ' + String(masterTarget && masterTarget.sheetName || ''),
+    'route_sheet: ' + String(routeTarget && routeTarget.sheetName || ''),
+    'error: ' + String(errorText || '')
+  ].join('\n');
+  try {
+    MailApp.sendEmail(admin, subject, body);
+  } catch (err) {
+    console.error('portal v2 write issue notify failed: ' + err);
+  }
+}
+
+function portalV2DashboardHeader_() {
+  return ['section', 'metric', 'key', 'value', 'updated_utc'];
+}
+
+function portalV2RefreshDashboardSafe_() {
+  try {
+    portalV2RefreshDashboard_();
+  } catch (err) {
+    console.error('portal v2 dashboard refresh failed: ' + err);
+  }
+}
+
+function portalV2RefreshDashboard() {
+  return portalV2RefreshDashboard_();
+}
+
+function portalV2RefreshDashboard_() {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  var ss = SpreadsheetApp.openById(sid);
+  var dashboardName = String(PORTAL_V2_CONFIG.DASHBOARD_SHEET_NAME || '').trim();
+  if (!dashboardName) return { ok: false, error: 'missing_dashboard_sheet_name' };
+
+  var dashboard = ss.getSheetByName(dashboardName);
+  if (!dashboard) dashboard = ss.insertSheet(dashboardName);
+
+  var rows = [portalV2DashboardHeader_()];
+  var now = portalV2Now_();
+  var masterSheet = ss.getSheetByName(PORTAL_V2_CONFIG.MASTER_SHEET_NAME);
+  rows.push(['submissions', 'total_rows', PORTAL_V2_CONFIG.MASTER_SHEET_NAME, portalV2SheetDataRowCount_(masterSheet), now]);
+  rows.push(['submissions', 'latest_timestamp_utc', PORTAL_V2_CONFIG.MASTER_SHEET_NAME, portalV2SheetLastTimestamp_(masterSheet), now]);
+
+  var routes = portalV2RouteTypes_();
+  for (var i = 0; i < routes.length; i += 1) {
+    var route = routes[i];
+    var target = portalV2SheetTarget_(route);
+    var routeSheet = ss.getSheetByName(target.sheetName);
+    rows.push(['route', 'row_count', route, portalV2SheetDataRowCount_(routeSheet), now]);
+    rows.push(['route', 'latest_timestamp_utc', route, portalV2SheetLastTimestamp_(routeSheet), now]);
+  }
+
+  rows.push(['support', 'abuse_rows', PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME)), now]);
+  rows.push(['support', 'mail_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
+  rows.push(['support', 'mail_error_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2MailErrorCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
+  rows.push(['support', 'write_issue_rows', PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME)), now]);
+  rows.push(['support', 'latest_write_issue_utc', PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2SheetLastTimestamp_(ss.getSheetByName(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME)), now]);
+
+  dashboard.clearContents();
+  dashboard.getRange(1, 1, rows.length, rows[0].length).setValues(rows);
+  return { ok: true, rows_written: rows.length };
+}
+
+function portalV2SheetDataRowCount_(sheet) {
+  if (!sheet) return 0;
+  return Math.max(sheet.getLastRow() - 1, 0);
+}
+
+function portalV2SheetLastTimestamp_(sheet) {
+  if (!sheet || sheet.getLastRow() < 2) return '';
+  return String(sheet.getRange(sheet.getLastRow(), 1).getValue() || '');
+}
+
+function portalV2MailErrorCount_(sheet) {
+  if (!sheet || sheet.getLastRow() < 2) return 0;
+  var values = sheet.getDataRange().getValues();
+  var count = 0;
+  for (var i = 1; i < values.length; i += 1) {
+    var status = String(values[i][6] || '').trim().toLowerCase();
+    if (status === 'error' || status === 'blocked') count += 1;
+  }
+  return count;
+}
+
+function portalV2ReconcileRouteMirrors() {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    var ss = SpreadsheetApp.openById(sid);
+    var master = ss.getSheetByName(PORTAL_V2_CONFIG.MASTER_SHEET_NAME);
+    if (!master || master.getLastRow() < 2) return { ok: true, restored_rows: 0, by_route: {} };
+
+    var masterRows = master.getDataRange().getValues();
+    var routIndex = portalV2ColumnIndex_('rout');
+    var submissionIdIndex = portalV2ColumnIndex_('submission_id');
+    var nameIndex = portalV2ColumnIndex_('name');
+    var emailIndex = portalV2ColumnIndex_('email');
+    var pagePathIndex = portalV2ColumnIndex_('page_path');
+    var referrerIndex = portalV2ColumnIndex_('referrer');
+    var restored = 0;
+    var byRoute = {};
+
+    for (var i = 0; i < portalV2RouteTypes_().length; i += 1) {
+      var route = portalV2RouteTypes_()[i];
+      var target = portalV2SheetTarget_(route);
+      var routeSheet = ss.getSheetByName(target.sheetName);
+      if (!routeSheet) {
+        routeSheet = ss.insertSheet(target.sheetName);
+        routeSheet.getRange(1, 1, 1, PORTAL_V2_COLUMNS.length).setValues([PORTAL_V2_COLUMNS]);
+      }
+
+      var routeValues = routeSheet.getDataRange().getValues();
+      var existing = {};
+      for (var r = 1; r < routeValues.length; r += 1) {
+        var existingId = String(routeValues[r][submissionIdIndex] || '').trim();
+        if (existingId) existing[existingId] = true;
+      }
+
+      var restoredForRoute = 0;
+      for (var m = 1; m < masterRows.length; m += 1) {
+        var row = masterRows[m];
+        var rowRoute = portalV2RouteFromRout_(row[routIndex]);
+        var rowSubmissionId = String(row[submissionIdIndex] || '').trim();
+        if (rowRoute !== route || !rowSubmissionId || existing[rowSubmissionId]) continue;
+        portalV2AppendTargetRow_(target, PORTAL_V2_COLUMNS, row);
+        existing[rowSubmissionId] = true;
+        restored += 1;
+        restoredForRoute += 1;
+        portalV2AppendNamed_(route, PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_(), [
+          portalV2Now_(),
+          route,
+          rowSubmissionId,
+          String(PORTAL_V2_CONFIG.MASTER_SHEET_NAME || ''),
+          String(target.sheetName || ''),
+          'mirror_backfill',
+          '',
+          String(row[nameIndex] || ''),
+          String(row[emailIndex] || ''),
+          String(row[pagePathIndex] || ''),
+          String(row[referrerIndex] || '')
+        ]);
+      }
+      byRoute[route] = restoredForRoute;
+    }
+
+    portalV2RefreshDashboardSafe_();
+    return { ok: true, restored_rows: restored, by_route: byRoute };
+  } finally {
+    try { lock.releaseLock(); } catch (ignore) {}
+  }
+}
+
+function portalV2ColumnIndex_(columnName) {
+  var target = String(columnName || '').trim();
+  for (var i = 0; i < PORTAL_V2_COLUMNS.length; i += 1) {
+    if (String(PORTAL_V2_COLUMNS[i] || '') === target) return i;
+  }
+  throw new Error('Unknown column: ' + target);
+}
+
 function portalV2ZeptoFromForRoute_(route) {
-  if (route === PORTAL_V2_ROUTES.STAKEHOLDER && PORTAL_V2_CONFIG.ZEPTO_FROM_STAKEHOLDER) return PORTAL_V2_CONFIG.ZEPTO_FROM_STAKEHOLDER;
-  if (route === PORTAL_V2_ROUTES.INVESTMENT && PORTAL_V2_CONFIG.ZEPTO_FROM_INVESTMENT) return PORTAL_V2_CONFIG.ZEPTO_FROM_INVESTMENT;
-  if (route === PORTAL_V2_ROUTES.PRESS && PORTAL_V2_CONFIG.ZEPTO_FROM_PRESS) return PORTAL_V2_CONFIG.ZEPTO_FROM_PRESS;
-  if (route === PORTAL_V2_ROUTES.EMPLOYMENT && PORTAL_V2_CONFIG.ZEPTO_FROM_EMPLOYMENT) return PORTAL_V2_CONFIG.ZEPTO_FROM_EMPLOYMENT;
-  if (route === PORTAL_V2_ROUTES.INTERNSHIP && PORTAL_V2_CONFIG.ZEPTO_FROM_INTERNSHIP) return PORTAL_V2_CONFIG.ZEPTO_FROM_INTERNSHIP;
+  var routeKey = String(route || '').trim().toLowerCase();
+  var routeOverride = String((PORTAL_V2_CONFIG.ZEPTO_FROM_ROUTE_OVERRIDES || {})[routeKey] || '').trim();
+  if (routeOverride) return routeOverride;
   return String(PORTAL_V2_CONFIG.ZEPTO_FROM_DEFAULT || '').trim();
 }
 
 function portalV2ZeptoSendEmail_(opts) {
   var token = String(PORTAL_V2_CONFIG.ZEPTO_TOKEN || '').trim();
-  var agent = String(PORTAL_V2_CONFIG.ZEPTO_AGENT_ALIAS || '').trim();
   var from = String(opts && opts.from || '').trim();
   var to = String(opts && opts.to || '').trim();
   var subject = String(opts && opts.subject || '').trim();
@@ -1418,7 +1738,7 @@ function portalV2ZeptoSendEmail_(opts) {
 function portalV2MailLog_(entry) {
   var header = [
     'timestamp_utc',
-    'route',
+    'rout',
     'mail_type',
     'to',
     'from',
@@ -1430,7 +1750,7 @@ function portalV2MailLog_(entry) {
   ];
   var row = [
     portalV2Now_(),
-    String(entry.route || ''),
+    portalV2RoutFromRoute_(entry.route || ''),
     String(entry.mailType || ''),
     String(entry.to || ''),
     String(entry.from || ''),
@@ -1440,28 +1760,13 @@ function portalV2MailLog_(entry) {
     String(entry.error || ''),
     String(entry.submissionId || '')
   ];
-  portalV2AppendNamed_(PORTAL_V2_ROUTES.STAKEHOLDER, PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, header, row);
-}
-
-// Run manually in Apps Script to authorize external requests (UrlFetchApp).
-function portalV2AuthorizeExternalRequest_() {
-  try {
-    UrlFetchApp.fetch('https://api.zeptomail.com/', { method: 'get', muteHttpExceptions: true });
-  } catch (err) {
-    // Intentionally ignore; this function exists only to trigger the auth prompt.
-  }
-  return { ok: true };
-}
-
-// Wrapper for Apps Script UI dropdown (no trailing underscore).
-function portalV2AuthorizeExternalRequest() {
-  return portalV2AuthorizeExternalRequest_();
+  portalV2AppendNamed_(String(entry.route || PORTAL_V2_ROUTES.GOVERNMENT), PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, header, row);
 }
 
 // Manual ZeptoMail debug sender to capture full error details in mail log.
 function portalV2ZeptoDebugSend() {
   var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
-  var from = portalV2ZeptoFromForRoute_(PORTAL_V2_ROUTES.STAKEHOLDER);
+  var from = portalV2ZeptoFromForRoute_(PORTAL_V2_ROUTES.GOVERNMENT);
   if (!admin || !from) return { ok: false, error: 'missing_admin_or_from' };
   var subject = 'Zepto debug';
   var body = 'Zepto debug send ' + portalV2Now_();
@@ -1477,82 +1782,182 @@ function portalV2ZeptoDebugSend() {
   });
 }
 
-  function portalV2InitializeSheets() {
+function portalV2SenderDebug() {
   var routes = portalV2RouteTypes_();
-  for (var i = 0; i < routes.length; i++) {
+  var routeResolution = [];
+  for (var i = 0; i < routes.length; i += 1) {
     var route = routes[i];
-    var target = portalV2SheetTarget_(route);
-    var ss = SpreadsheetApp.openById(target.spreadsheetId);
-    var sheet = ss.getSheetByName(target.sheetName);
-    if (!sheet) sheet = ss.insertSheet(target.sheetName);
+    var ctx = portalV2ZeptoFromContext_(route);
+    routeResolution.push({
+      route: route,
+      resolved_from: String(ctx && ctx.from || ''),
+      fallback_reason: String(ctx && ctx.reason || '')
+    });
+  }
+  var report = {
+    ok: true,
+    timestamp_utc: portalV2Now_(),
+    config_source: 'top_of_script_defaults',
+    use_route_from: !!PORTAL_V2_CONFIG.ZEPTO_USE_ROUTE_FROM,
+    effective_config: {
+      ADMIN_NOTIFY_EMAIL: String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || ''),
+      ZEPTO_FROM_DEFAULT: String(PORTAL_V2_CONFIG.ZEPTO_FROM_DEFAULT || ''),
+      ZEPTO_FROM_ROUTE_OVERRIDES: PORTAL_V2_CONFIG.ZEPTO_FROM_ROUTE_OVERRIDES || {}
+    },
+    route_resolution: routeResolution
+  };
+  Logger.log(JSON.stringify(report, null, 2));
+  return report;
+}
+
+function portalV2RuntimeConfigDebug() {
+  var report = {
+    ok: true,
+    timestamp_utc: portalV2Now_(),
+    config_source: 'top_of_script_defaults',
+    version: String(PORTAL_V2_CONFIG.VERSION || ''),
+    script_id: String(PORTAL_V2_CONFIG.SCRIPT_ID || ''),
+    spreadsheet_id_present: !!String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim(),
+    template_sheet_id_present: !!String(PORTAL_V2_CONFIG.TEMPLATE_SHEET_ID || '').trim(),
+    zepto_token_present: !!String(PORTAL_V2_CONFIG.ZEPTO_TOKEN || '').trim(),
+    runtime: {
+      honeypot_key: PORTAL_V2_CONFIG.HONEYPOT_KEY,
+      source: PORTAL_V2_CONFIG.SOURCE,
+      master_sheet_name: PORTAL_V2_CONFIG.MASTER_SHEET_NAME,
+      template_sheet_name: PORTAL_V2_CONFIG.TEMPLATE_SHEET_NAME,
+      internal_username_event: PORTAL_V2_INTERNAL_EVENT_TSI_USERNAME_CAPTURE,
+      rate_limit_seconds: PORTAL_V2_CONFIG.RATE_LIMIT_SECONDS,
+      rate_limit_global_max: PORTAL_V2_CONFIG.RATE_LIMIT_GLOBAL_MAX,
+      rate_limit_global_window_seconds: PORTAL_V2_CONFIG.RATE_LIMIT_GLOBAL_WINDOW_SECONDS,
+      rate_limit_track_max: PORTAL_V2_CONFIG.RATE_LIMIT_TRACK_MAX,
+      rate_limit_track_window_seconds: PORTAL_V2_CONFIG.RATE_LIMIT_TRACK_WINDOW_SECONDS,
+      dedupe_seconds: PORTAL_V2_CONFIG.DEDUPE_SECONDS,
+      write_issue_alert_enabled: PORTAL_V2_CONFIG.WRITE_ISSUE_ALERT_ENABLED,
+      auto_reply_enabled: PORTAL_V2_CONFIG.AUTO_REPLY_ENABLED,
+      auto_reply_route_overrides: PORTAL_V2_CONFIG.AUTO_REPLY_ROUTE_OVERRIDES || {}
+    },
+    managed_sheet_names: portalV2ManagedSheetSpecs_()
+  };
+  Logger.log(JSON.stringify(report, null, 2));
+  return report;
+}
+
+function portalV2InitializeSheets() {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  var ss = SpreadsheetApp.openById(sid);
+  var specs = portalV2ManagedSheetSpecs_();
+  for (var i = 0; i < specs.length; i += 1) {
+    var spec = specs[i];
+    var sheet = ss.getSheetByName(spec.sheetName);
+    if (!sheet) sheet = ss.insertSheet(spec.sheetName);
     if (sheet.getLastRow() === 0) {
-      sheet.getRange(1, 1, 1, portalV2ColumnsForRoute_(route).length).setValues([portalV2ColumnsForRoute_(route)]);
+      sheet.getRange(1, 1, 1, spec.header.length).setValues([spec.header]);
     }
   }
+  portalV2RefreshDashboardSafe_();
+  return { ok: true, initialized_sheets: specs.length };
+}
 
-  var honeyRoute = PORTAL_V2_ROUTES.INVESTMENT;
-  var honeyTarget = portalV2SheetTarget_(honeyRoute);
-  var honeySs = SpreadsheetApp.openById(honeyTarget.spreadsheetId);
-  var honey = honeySs.getSheetByName(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME);
-  if (!honey) honey = honeySs.insertSheet(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME);
-    if (honey.getLastRow() === 0) {
-      var honeyHeader = portalV2HoneypotHeader_();
-      honey.getRange(1, 1, 1, honeyHeader.length).setValues([honeyHeader]);
+function portalV2ResetSheets() {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  var live = SpreadsheetApp.openById(sid);
+  var specs = portalV2ManagedSheetSpecs_();
+  var stamp = Utilities.formatDate(new Date(), 'Etc/UTC', 'yyyyMMdd_HHmmss');
+  var archive = SpreadsheetApp.create('TSI Portal ' + String(PORTAL_V2_CONFIG.VERSION || 'v3').toUpperCase() + ' Archive ' + stamp + ' UTC');
+  var meta = archive.getSheets()[0];
+  meta.setName('archive_meta');
+  meta.getRange(1, 1, 6, 2).setValues([
+    ['archived_at_utc', portalV2Now_()],
+    ['source_spreadsheet_id', sid],
+    ['source_spreadsheet_name', live.getName()],
+    ['managed_sheet_count', specs.length],
+    ['archive_spreadsheet_id', archive.getId()],
+    ['archive_spreadsheet_url', archive.getUrl()]
+  ]);
+
+  var archived = [];
+  for (var i = 0; i < specs.length; i += 1) {
+    var spec = specs[i];
+    var liveSheet = live.getSheetByName(spec.sheetName);
+    if (!liveSheet) {
+      liveSheet = live.insertSheet(spec.sheetName);
+      liveSheet.getRange(1, 1, 1, spec.header.length).setValues([spec.header]);
     }
 
-    portalV2InitInternalUsernameSheet_();
-
-    return { ok: true, initialized_routes: routes.length };
-  }
-
-  function portalV2ResetSheets() {
-  var routes = portalV2RouteTypes_();
-  for (var i = 0; i < routes.length; i++) {
-    var route = routes[i];
-    var target = portalV2SheetTarget_(route);
-    var ss = SpreadsheetApp.openById(target.spreadsheetId);
-    var sheet = ss.getSheetByName(target.sheetName);
-    if (!sheet) sheet = ss.insertSheet(target.sheetName);
-    sheet.clearContents();
-    sheet.getRange(1, 1, 1, portalV2ColumnsForRoute_(route).length).setValues([portalV2ColumnsForRoute_(route)]);
-  }
-
-  var honeyRoute = PORTAL_V2_ROUTES.INVESTMENT;
-  var honeyTarget = portalV2SheetTarget_(honeyRoute);
-  var honeySs = SpreadsheetApp.openById(honeyTarget.spreadsheetId);
-  var honey = honeySs.getSheetByName(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME);
-  if (!honey) honey = honeySs.insertSheet(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME);
-  honey.clearContents();
-    var honeyHeader = portalV2HoneypotHeader_();
-    honey.getRange(1, 1, 1, honeyHeader.length).setValues([honeyHeader]);
-
-    portalV2InitInternalUsernameSheet_(true);
-
-    return { ok: true, reset_routes: routes.length };
-  }
-
-  function portalV2InitInternalUsernameSheet_(clearFirst) {
-    var sheetName = String(PORTAL_V2_CONFIG.INTERNAL_USERNAME_SHEET_NAME || '').trim();
-    var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
-    if (!sheetName || !sid) return;
-    var ss = SpreadsheetApp.openById(sid);
-    var sheet = ss.getSheetByName(sheetName);
-    if (!sheet) sheet = ss.insertSheet(sheetName);
-    if (clearFirst) sheet.clearContents();
-    if (sheet.getLastRow() === 0) {
-      var header = portalV2InternalUsernameHeader_();
-      sheet.getRange(1, 1, 1, header.length).setValues([header]);
+    var archiveSheet = archive.getSheetByName(spec.sheetName);
+    if (!archiveSheet) archiveSheet = archive.insertSheet(spec.sheetName);
+    var values = liveSheet.getDataRange().getValues();
+    if (values.length && values[0].length) {
+      archiveSheet.getRange(1, 1, values.length, values[0].length).setValues(values);
+    } else {
+      archiveSheet.getRange(1, 1, 1, spec.header.length).setValues([spec.header]);
     }
+
+    liveSheet.clearContents();
+    liveSheet.getRange(1, 1, 1, spec.header.length).setValues([spec.header]);
+    archived.push([spec.sheetName, values.length]);
   }
+
+  meta.getRange(8, 1, archived.length + 1, 2).setValues([['sheet_name', 'rows_archived']].concat(archived));
+  portalV2RefreshDashboardSafe_();
+  return {
+    ok: true,
+    reset_sheets: specs.length,
+    archive_spreadsheet_id: archive.getId(),
+    archive_spreadsheet_url: archive.getUrl()
+  };
+}
 
 function portalV2RouteTypes_() {
   return [
-    PORTAL_V2_ROUTES.STAKEHOLDER,
+    PORTAL_V2_ROUTES.GOVERNMENT,
+    PORTAL_V2_ROUTES.EDUCATION,
+    PORTAL_V2_ROUTES.PRIVATE_SECTOR,
+    PORTAL_V2_ROUTES.SMALL_BUSINESS,
+    PORTAL_V2_ROUTES.PROFESSIONAL,
+    PORTAL_V2_ROUTES.STUDENT,
     PORTAL_V2_ROUTES.EMPLOYMENT,
     PORTAL_V2_ROUTES.INVESTMENT,
     PORTAL_V2_ROUTES.PRESS,
     PORTAL_V2_ROUTES.INTERNSHIP
   ];
+}
+
+function portalV2ManagedSheetSpecs_() {
+  var specs = [];
+  var seen = {};
+  var add = function (sheetName, header) {
+    var safeName = String(sheetName || '').trim();
+    if (!safeName || seen[safeName]) return;
+    seen[safeName] = true;
+    specs.push({ sheetName: safeName, header: header });
+  };
+
+  add(PORTAL_V2_CONFIG.MASTER_SHEET_NAME, PORTAL_V2_COLUMNS);
+  var routes = portalV2RouteTypes_();
+  for (var i = 0; i < routes.length; i += 1) {
+    add(portalV2SheetTarget_(routes[i]).sheetName, PORTAL_V2_COLUMNS);
+  }
+  add(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2HoneypotHeader_());
+  add(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, [
+    'timestamp_utc',
+    'rout',
+    'mail_type',
+    'to',
+    'from',
+    'subject',
+    'status',
+    'provider',
+    'error',
+    'submission_id'
+  ]);
+  add(PORTAL_V2_CONFIG.BURST_SHEET_NAME, portalV2BurstHeader_());
+  add(PORTAL_V2_CONFIG.INTERNAL_USERNAME_SHEET_NAME, portalV2InternalUsernameHeader_());
+  add(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_());
+  add(PORTAL_V2_CONFIG.DASHBOARD_SHEET_NAME, portalV2DashboardHeader_());
+  return specs;
 }
 
 function portalV2HeaderMatches_(sheet, expectedHeader) {

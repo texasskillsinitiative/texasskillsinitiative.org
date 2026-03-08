@@ -1,4 +1,4 @@
-const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyV5KshQvl1jCXC129BNAO50jqT8NGBDDHL6GZQnTSeKRzHHpFvhGTcQzVm2u4d3g9SJQ/exec';
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1/exec';
 const SUBMIT_MIN_MS = 3000;
 const SUCCESS_GRACE_MS = 2000;
 const SUBMIT_MAX_MS = 30000;
@@ -11,12 +11,37 @@ window._submitStartedAt = 0;
 window._submitStatusTimer = null;
 window._submitMaxWaitTimer = null;
 // 021026_DigitalConcierge
-const _021026_TIER_MESSAGES = {
-    '1': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
-    '2': 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
+const _021026_ROUTE_MESSAGES = {
+    government: 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+    education: 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+    'private-sector': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+    'small-business': 'Thank you for reaching out. We recognize the importance of your perspective. Your information has been shared with our team for review, and we will follow up with you directly to discuss how your experience aligns with our regional work.',
+    professional: 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.',
+    student: 'Thank you for sharing your perspective. Your input has been received and added to our regional review to help inform our understanding of local conditions. We value these insights as we continue our exploratory work in the area.'
 };
 const _021026_SUBMISSION_MESSAGES = {
-    stakeholder: _021026_TIER_MESSAGES['2']
+    government: _021026_ROUTE_MESSAGES.government,
+    education: _021026_ROUTE_MESSAGES.education,
+    'private-sector': _021026_ROUTE_MESSAGES['private-sector'],
+    'small-business': _021026_ROUTE_MESSAGES['small-business'],
+    professional: _021026_ROUTE_MESSAGES.professional,
+    student: _021026_ROUTE_MESSAGES.student
+};
+const STAKEHOLDER_CANONICAL_ROUTES = new Set([
+    'government',
+    'education',
+    'private-sector',
+    'small-business',
+    'professional',
+    'student'
+]);
+const STAKEHOLDER_ROUTE_TO_ROUT = {
+    government: 'SGOV',
+    education: 'SEDU',
+    'private-sector': 'SPVT',
+    'small-business': 'SSML',
+    professional: 'SPRO',
+    student: 'SSTU'
 };
 const FORM_ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
 const FORM_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
@@ -87,9 +112,44 @@ function initAmbientLayer() {
     rootEl.classList.add('has-ambient-layer', `ambient-mode-${mode}`);
 }
 
-function normalizeSubmissionType(value) {
+function normalizeStakeholderRoute(value) {
     const raw = String(value || '').trim().toLowerCase();
-    return 'stakeholder';
+    if (STAKEHOLDER_CANONICAL_ROUTES.has(raw)) return raw;
+    return '';
+}
+
+function stakeholderRout(value) {
+    const route = normalizeStakeholderRoute(value);
+    return route ? String(STAKEHOLDER_ROUTE_TO_ROUT[route] || '') : '';
+}
+
+function clientTimeContext() {
+    const now = new Date();
+    let clientTz = '';
+    try {
+        clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (error) {
+        clientTz = '';
+    }
+    return {
+        client_tz: clientTz,
+        client_utc_offset_minutes: String(-now.getTimezoneOffset())
+    };
+}
+
+function stakeholderSubmitErrorMessage(code) {
+    switch (String(code || '').trim()) {
+        case 'already_received':
+            return 'This submission was already received. No additional action is needed unless you intended to submit different information.';
+        case 'retry_later':
+            return 'Please wait a short moment and try again. Your last attempt was not accepted yet.';
+        case 'temporarily_unavailable':
+            return 'The intake is temporarily busy. Please try again shortly.';
+        case 'invalid_input':
+            return 'Some required information is missing or invalid. Please review the form and try again.';
+        default:
+            return 'Unable to submit right now. Please try again shortly.';
+    }
 }
 
 function extractFileExtension(filename) {
@@ -184,16 +244,17 @@ function trapModalFocus(modal, event) {
 }
 
 function _021026_setConciergeVisibility(form, tier, submissionType) {
-    const nextType = normalizeSubmissionType(submissionType);
+    const nextType = normalizeStakeholderRoute(submissionType);
     const groups = form.querySelectorAll('[data-concierge-group]');
     groups.forEach(group => {
         const groupName = group.getAttribute('data-concierge-group');
         const shouldShow = Boolean(
-            tier && (
+            nextType && (
                 groupName === 'common'
                 || groupName === 'shared'
-                || groupName === (tier === '1' ? 'tier-1' : 'tier-2')
                 || groupName === nextType
+                || (['government', 'education', 'private-sector', 'small-business'].includes(nextType) && groupName === 'tier-1')
+                || (['professional', 'student'].includes(nextType) && groupName === 'tier-2')
             )
         );
         group.hidden = !shouldShow;
@@ -324,21 +385,6 @@ function generateSubmissionId() {
         return window.crypto.randomUUID();
     }
     return 'sub_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
-}
-
-function formatLocalTimestamp(date) {
-    const pad = (value) => String(value).padStart(2, '0');
-    const year = date.getFullYear();
-    const month = pad(date.getMonth() + 1);
-    const day = pad(date.getDate());
-    const hours = pad(date.getHours());
-    const minutes = pad(date.getMinutes());
-    const seconds = pad(date.getSeconds());
-    const tzOffsetMinutes = -date.getTimezoneOffset();
-    const sign = tzOffsetMinutes >= 0 ? '+' : '-';
-    const offsetHours = pad(Math.floor(Math.abs(tzOffsetMinutes) / 60));
-    const offsetMinutes = pad(Math.abs(tzOffsetMinutes) % 60);
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${sign}${offsetHours}:${offsetMinutes}`;
 }
 
 // This handles the "Soft Close"
@@ -507,7 +553,6 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
     const emailError = document.getElementById('emailError');
     const conciergeError = document.getElementById('conciergeError');
     const fileError = document.getElementById('fileError');
-    const handlerTierInput = document.getElementById('handlerTier');
     const submissionTypeInput = document.getElementById('submissionType');
     const fileInput = document.getElementById('applicationFile');
     const successSub = document.getElementById('formSuccessSub');
@@ -535,7 +580,11 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         fileError.classList.remove('visible');
     }
 
-    if (!handlerTierInput || !handlerTierInput.value) {
+    const selectedRoute = normalizeStakeholderRoute(
+        (submissionTypeInput && submissionTypeInput.value)
+        || (document.getElementById('conciergeTrack') && document.getElementById('conciergeTrack').value)
+    );
+    if (!selectedRoute) {
         if (conciergeError) {
             conciergeError.textContent = 'Select a perspective to continue.';
             conciergeError.classList.add('visible');
@@ -605,14 +654,18 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         delete data.application_file;
-        const submissionType = normalizeSubmissionType(
-            (submissionTypeInput && submissionTypeInput.value) || data.submission_type || 'stakeholder'
+        const selectedTrack = String(data.concierge_track || '').trim().toLowerCase();
+        const route = normalizeStakeholderRoute(
+            (submissionTypeInput && submissionTypeInput.value) || selectedTrack
         );
-        data.submission_type = submissionType;
+        data.rout = stakeholderRout(route);
         data.page_path = window.location.pathname || '/';
         data.referrer = document.referrer || 'direct';
         data.submission_id = generateSubmissionId();
-        data.timestamp_local = formatLocalTimestamp(new Date());
+        Object.assign(data, clientTimeContext());
+        delete data.handler_tier;
+        delete data.concierge_track;
+        delete data.submission_type;
 
         const selectedFile = (fileInput && !fileInput.disabled && fileInput.files && fileInput.files[0])
             ? fileInput.files[0]
@@ -653,9 +706,7 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         });
         const body = await res.json().catch(() => null);
         const isOk = res.ok && body && body.ok === true;
-        if (!isOk) {
-            throw new Error((body && body.error) ? body.error : 'server_error');
-        }
+        if (!isOk) throw new Error((body && body.error) ? body.error : 'server_error');
 
         window._successShownAt = Date.now();
         window._formLastState = 'success';
@@ -664,9 +715,9 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
         clearFormStatus();
 
         if (successSub) {
-            successSub.textContent = _021026_SUBMISSION_MESSAGES[submissionType]
-                || _021026_TIER_MESSAGES[handlerTierInput.value]
-                || _021026_TIER_MESSAGES['2'];
+            successSub.textContent = _021026_SUBMISSION_MESSAGES[route]
+                || _021026_ROUTE_MESSAGES[route]
+                || _021026_ROUTE_MESSAGES.student;
         }
         if (modalBody) {
             modalBody.scrollTop = 0;
@@ -703,8 +754,13 @@ document.getElementById('stakeholderForm').addEventListener('submit', async func
             }
             fileError.classList.add('visible');
         } else if (networkError) {
-            if (errCode.startsWith('file_')) {
-                networkError.querySelector('p').textContent = 'Attachment upload failed. Please try again.';
+            const messageEl = networkError.querySelector('p');
+            if (messageEl) {
+                if (errCode.startsWith('file_')) {
+                    messageEl.textContent = 'Attachment upload failed. Please try again.';
+                } else {
+                    messageEl.textContent = stakeholderSubmitErrorMessage(errCode);
+                }
             }
             networkError.hidden = false;
         }
@@ -722,7 +778,6 @@ function _021026_initConciergeForm() {
     const buttons = form.querySelectorAll('[data-concierge-track]');
     const grid = form.querySelector('.concierge-grid');
     const backBtn = form.querySelector('#conciergeBackBtn');
-    const handlerTierInput = form.querySelector('#handlerTier');
     const trackInput = form.querySelector('#conciergeTrack');
     const submissionTypeInput = form.querySelector('#submissionType');
     const error = form.querySelector('#conciergeError');
@@ -730,9 +785,8 @@ function _021026_initConciergeForm() {
     buttons.forEach(button => {
         button.setAttribute('aria-pressed', 'false');
         button.addEventListener('click', () => {
-            const tier = button.getAttribute('data-concierge-tier') || '';
             const trackKey = button.getAttribute('data-concierge-track') || button.textContent.trim();
-            const submissionType = normalizeSubmissionType(button.getAttribute('data-concierge-type') || 'stakeholder');
+            const submissionType = normalizeStakeholderRoute(trackKey || button.getAttribute('data-concierge-type') || '');
             buttons.forEach(btn => {
                 btn.classList.remove('is-active');
                 btn.classList.remove('is-hidden');
@@ -748,14 +802,13 @@ function _021026_initConciergeForm() {
             if (grid) grid.classList.add('is-collapsed');
             if (backBtn) backBtn.classList.add('is-visible');
             form.classList.add('has-concierge');
-            if (handlerTierInput) handlerTierInput.value = tier;
-            if (trackInput) trackInput.value = trackKey;
+            if (trackInput) trackInput.value = submissionType;
             if (submissionTypeInput) submissionTypeInput.value = submissionType;
             if (error) {
                 error.textContent = '';
                 error.classList.remove('visible');
             }
-            _021026_setConciergeVisibility(form, tier, submissionType);
+            _021026_setConciergeVisibility(form, '', submissionType);
         });
     });
 
@@ -765,12 +818,11 @@ function _021026_initConciergeForm() {
         });
     }
 
-    const initialTier = handlerTierInput ? handlerTierInput.value : '';
     const initialSubmissionType = submissionTypeInput ? submissionTypeInput.value : '';
-    if (initialTier) {
+    if (initialSubmissionType) {
         form.classList.add('has-concierge');
     }
-    _021026_setConciergeVisibility(form, initialTier, initialSubmissionType);
+    _021026_setConciergeVisibility(form, '', initialSubmissionType);
 }
 
 function initModalTriggers() {
@@ -884,11 +936,12 @@ function initPortalOptions() {
         const rawUsername = usernameInput ? usernameInput.value.trim() : '';
         if (rawUsername) {
             const internalPayload = {
+                internal_event: 'tsi_username_capture',
                 tsi_username: rawUsername,
                 page_path: window.location.pathname || '/',
                 referrer: document.referrer || 'direct',
                 submission_id: generateSubmissionId(),
-                timestamp_local: formatLocalTimestamp(new Date())
+                ...clientTimeContext()
             };
             fetch(FORM_ENDPOINT, {
                 method: 'POST',

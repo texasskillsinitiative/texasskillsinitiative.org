@@ -1,7 +1,13 @@
-const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyV5KshQvl1jCXC129BNAO50jqT8NGBDDHL6GZQnTSeKRzHHpFvhGTcQzVm2u4d3g9SJQ/exec';
+const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1/exec';
 const PORTAL_V2_MAX_BYTES = 8 * 1024 * 1024;
 const PORTAL_V2_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
 const PORTAL_V2_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PORTAL_V2_ROUTE_TO_ROUT = {
+    investment: 'PINV',
+    press: 'PPRS',
+    employment: 'PEMP',
+    internship: 'PINT'
+};
 
 function portalV2NormalizeRoute(value) {
     const raw = String(value || '').trim().toLowerCase();
@@ -9,11 +15,90 @@ function portalV2NormalizeRoute(value) {
     return '';
 }
 
+function portalV2RoutForRoute(route) {
+    const clean = portalV2NormalizeRoute(route);
+    return clean ? String(PORTAL_V2_ROUTE_TO_ROUT[clean] || '') : '';
+}
+
+function portalV2ClientTimeContext() {
+    const now = new Date();
+    let clientTz = '';
+    try {
+        clientTz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch (error) {
+        clientTz = '';
+    }
+    return {
+        client_tz: clientTz,
+        client_utc_offset_minutes: String(-now.getTimezoneOffset())
+    };
+}
+
+function portalV2CanonicalizePayload(route, payload) {
+    const next = { ...payload };
+    next.rout = portalV2RoutForRoute(route);
+    Object.assign(next, portalV2ClientTimeContext());
+
+    if (route === 'investment') {
+        next.pinv_stage = next.investment_stage || '';
+        next.pinv_check_range = next.investment_check_range || '';
+        next.pinv_geography = next.investment_geography || '';
+        next.pinv_focus = next.investment_focus || '';
+        next.pinv_timeline = next.investment_timeline || '';
+        next.pinv_investor_type = next.investment_investor_type || '';
+        next.pinv_investor_type_other = next.investment_investor_type_other || '';
+    }
+    if (route === 'press') {
+        const noDeadline = String(next.press_deadline_mode || '').trim().toLowerCase() === 'no_deadline';
+        next.pprs_outlet = next.press_outlet || '';
+        next.pprs_role = next.press_role || '';
+        next.pprs_deadline = next.press_deadline || (noDeadline ? 'No deadline' : '');
+        next.pprs_topic = next.press_topic || '';
+        next.pprs_format = next.press_format || '';
+    }
+    if (route === 'employment') {
+        next.pemp_role_interest = next.employment_role_interest || '';
+        next.pemp_timeline = next.employment_timeline || '';
+        next.pemp_location_pref = next.employment_location_pref || '';
+    }
+    if (route === 'internship') {
+        next.pint_school = next.intern_school || '';
+        next.pint_program = next.intern_program || '';
+        next.pint_grad_date = next.intern_grad_date || '';
+        next.pint_track = next.intern_track || '';
+        next.pint_mode = next.intern_mode || '';
+        next.pint_hours_per_week = next.intern_hours_per_week || '';
+        next.pint_start_date = next.intern_start_date || '';
+        next.pint_portfolio_url = next.intern_portfolio_url || '';
+    }
+
+    delete next.handler_tier;
+    delete next.submission_type;
+    delete next.concierge_track;
+    delete next.timestamp_local;
+    return next;
+}
+
 function portalV2ExtractFileExtension(filename) {
     const raw = String(filename || '').trim();
     const idx = raw.lastIndexOf('.');
     if (idx < 0) return '';
     return raw.slice(idx + 1).toLowerCase();
+}
+
+function portalV2FriendlyErrorMessage(code) {
+    switch (String(code || '').trim()) {
+        case 'already_received':
+            return 'This submission was already received. No additional action is needed unless you intended to send different information.';
+        case 'retry_later':
+            return 'Please wait a short moment and try again. Your last attempt was not accepted yet.';
+        case 'temporarily_unavailable':
+            return 'The intake is temporarily busy. Please try again shortly.';
+        case 'invalid_input':
+            return 'Some required information is missing or invalid. Please review the form and try again.';
+        default:
+            return 'Unable to submit right now. Please try again shortly.';
+    }
 }
 
 function portalV2ReadFileAsBase64(file) {
@@ -348,12 +433,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = Object.fromEntries(formData.entries());
             delete payload.application_file;
 
-            payload.submission_type = route;
-            payload.concierge_track = payload.concierge_track || `${route}_portal`;
             payload.page_path = window.location.pathname || '/';
             payload.referrer = document.referrer || 'direct';
             payload.submission_id = portalV2SubmissionId(route);
-            payload.timestamp_local = new Date().toISOString();
+            const canonicalPayload = portalV2CanonicalizePayload(route, payload);
 
             const selectedFile = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
             if (requiresFile && !selectedFile) {
@@ -383,21 +466,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 setStatus('Preparing attachment upload...');
                 const fileBase64 = await portalV2ReadFileAsBase64(selectedFile);
-                payload.attachment_name = selectedFile.name;
-                payload.attachment_type = selectedFile.type || '';
-                payload.attachment_size = String(selectedFile.size);
-                payload.attachment_data = fileBase64;
+                canonicalPayload.attachment_name = selectedFile.name;
+                canonicalPayload.attachment_type = selectedFile.type || '';
+                canonicalPayload.attachment_size = String(selectedFile.size);
+                canonicalPayload.attachment_data = fileBase64;
             } else {
-                payload.attachment_name = '';
-                payload.attachment_type = '';
-                payload.attachment_size = '';
-                payload.attachment_data = '';
+                canonicalPayload.attachment_name = '';
+                canonicalPayload.attachment_type = '';
+                canonicalPayload.attachment_size = '';
+                canonicalPayload.attachment_data = '';
             }
 
             setStatus('Submitting your intake...');
             const response = await fetch(endpoint, {
                 method: 'POST',
-                body: JSON.stringify(payload)
+                body: JSON.stringify(canonicalPayload)
             });
             const body = await response.json().catch(() => null);
             const ok = response.ok && body && body.ok === true;
@@ -419,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!fileError.textContent) fileError.textContent = 'Attachment upload failed. Please review type and size.';
                 fileError.classList.add('visible');
             }
-            setStatus('Unable to submit right now. Please try again shortly.', 'error');
+            setStatus(portalV2FriendlyErrorMessage(code), 'error');
         } finally {
             inFlight = false;
             submitButtons.forEach((btn) => {

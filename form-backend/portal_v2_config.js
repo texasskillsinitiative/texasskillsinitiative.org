@@ -1,3 +1,4 @@
+// TSI intake backend version marker: v3 (legacy file name retained intentionally).
 function portalV2ReadProp_(key, fallbackValue) {
   try {
     var value = PropertiesService.getScriptProperties().getProperty(key);
@@ -8,87 +9,164 @@ function portalV2ReadProp_(key, fallbackValue) {
   }
 }
 
-function portalV2ReadPropRaw_(key) {
-  try {
-    return PropertiesService.getScriptProperties().getProperty(key);
-  } catch (e) {
-    return null;
+// Portal V3 runtime defaults.
+// Edit these values directly in code for normal operational changes.
+// Script Properties are reserved for secrets only (for example Zepto token) unless
+// a future operational need justifies moving another setting back out of code.
+var PORTAL_V2_RUNTIME_DEFAULTS = {
+  SCRIPT: {
+    VERSION: 'v3',
+    SCRIPT_ID: '1M-f5amNTPSb4RZ21gBON0tC6-8pwQMCp0G9G4rx42xBMky1gcX9FtPDy'
+  },
+  STORAGE: {
+    SPREADSHEET_ID: '1hxIaJqfa5O_3vxPNChdfltPkGhsoGpJJiC00ojgV_6c',
+    MASTER_SHEET_NAME: 'ALLF',
+    ROUTE_SHEETS: {
+      government: 'SGOV',
+      education: 'SEDU',
+      'private-sector': 'SPVT',
+      'small-business': 'SSML',
+      professional: 'SPRO',
+      student: 'SSTU',
+      investment: 'PINV',
+      press: 'PPRS',
+      employment: 'PEMP',
+      internship: 'PINT'
+    },
+    SUPPORT_SHEETS: {
+      ABUSE: 'ABUS',
+      MAIL_LOG: 'MAIL',
+      BURST: 'BRST',
+      INTERNAL_USERNAME: 'IUSR',
+      WRITE_ISSUES: 'WRIT',
+      DASHBOARD: 'DASH'
+    }
+  },
+  TEMPLATE_SOURCE: {
+    SPREADSHEET_ID: '1X70S4LbfR3ufqLo9sOQEa582sn72uoGJ35ezXpCIrTQ',
+    SHEET_NAME: 'live_edit'
+  },
+  LIMITS: {
+    RATE_LIMIT_SECONDS: 30,
+    RATE_LIMIT_GLOBAL_MAX: 6,
+    RATE_LIMIT_GLOBAL_WINDOW_SECONDS: 10,
+    RATE_LIMIT_TRACK_MAX: 3,
+    RATE_LIMIT_TRACK_WINDOW_SECONDS: 10,
+    DEDUPE_SECONDS: 3600,
+    MESSAGE_MAX_LENGTH: 1400,
+    FILE_UPLOAD_MAX_BYTES: 8388608
+  },
+  BEHAVIOR: {
+    HONEYPOT_KEY: 'website',
+    INTERNAL_EMAIL_DOMAINS_CSV: 'texasskillsinitiative.org,texasskillsinitiative.com',
+    SOURCE: 'tsi-portal-v3',
+    WRITE_ISSUE_ALERT_ENABLED: true
+  },
+  MAIL: {
+    ADMIN_NOTIFY_EMAIL: '',
+    ZEPTO_API_BASE: 'https://api.zeptomail.com',
+    ZEPTO_USE_ROUTE_FROM: false,
+    ZEPTO_FROM_DEFAULT: 'howdy@texasskillsinitiative.org',
+    ZEPTO_FROM_ROUTE_OVERRIDES: {
+      government: '',
+      education: '',
+      'private-sector': '',
+      'small-business': '',
+      professional: '',
+      student: '',
+      investment: '',
+      press: '',
+      employment: '',
+      internship: ''
+    },
+    ZEPTO_REPLY_TO_DEFAULT: '',
+    MAIL_FALLBACK_ENABLED: true,
+    AUTO_REPLY_ENABLED: false,
+    AUTO_REPLY_ROUTE_OVERRIDES: {
+      government: null,
+      education: null,
+      'private-sector': null,
+      'small-business': null,
+      professional: null,
+      student: null,
+      investment: null,
+      press: null,
+      employment: null,
+      internship: null
+    },
+    AUTO_REPLY_SUBJECT_PREFIX: 'TSI Intake Confirmation',
+    AUTO_REPLY_SIGNATURE: 'TSI Intake Team'
   }
-}
-
-var PORTAL_V2_RATE_LIMIT_GLOBAL_WINDOW_SECONDS_DEFAULT = 10;
-var PORTAL_V2_RATE_LIMIT_TRACK_WINDOW_SECONDS_DEFAULT = 10;
+};
 
 var PORTAL_V2_CONFIG = {
-  SPREADSHEET_ID: portalV2ReadProp_('PORTAL_V2_DATABASE_ID', ''),
+  VERSION: PORTAL_V2_RUNTIME_DEFAULTS.SCRIPT.VERSION,
+  SCRIPT_ID: PORTAL_V2_RUNTIME_DEFAULTS.SCRIPT.SCRIPT_ID,
 
-  INVESTMENT_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_INVESTMENT_SHEET_NAME', 'portal_investment_intake'),
-  PRESS_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_PRESS_SHEET_NAME', 'portal_press_intake'),
-  EMPLOYMENT_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_EMPLOYMENT_SHEET_NAME', 'portal_employment_intake'),
-  INTERNSHIP_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_INTERNSHIP_SHEET_NAME', 'portal_internship_intake'),
-  STAKEHOLDER_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_STAKEHOLDER_SHEET_NAME', 'responses'),
+  SPREADSHEET_ID: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SPREADSHEET_ID,
+  MASTER_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.MASTER_SHEET_NAME,
+  ROUTE_SHEETS: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.ROUTE_SHEETS,
 
-  RATE_LIMIT_SECONDS: Number(portalV2ReadProp_('PORTAL_V2_RATE_LIMIT_SECONDS', '30')),
-  RATE_LIMIT_GLOBAL_MAX: Number(portalV2ReadProp_('PORTAL_V2_RATE_LIMIT_GLOBAL_MAX', '6')),
-  RATE_LIMIT_GLOBAL_WINDOW_SECONDS: PORTAL_V2_RATE_LIMIT_GLOBAL_WINDOW_SECONDS_DEFAULT,
-  RATE_LIMIT_TRACK_MAX: Number(portalV2ReadProp_('PORTAL_V2_RATE_LIMIT_TRACK_MAX', '3')),
-  RATE_LIMIT_TRACK_WINDOW_SECONDS: PORTAL_V2_RATE_LIMIT_TRACK_WINDOW_SECONDS_DEFAULT,
-  DEDUPE_SECONDS: Number(portalV2ReadProp_('PORTAL_V2_DEDUPE_SECONDS', '3600')),
-  BURST_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_BURST_SHEET_NAME', 'portal_v2_burst_state'),
-  MESSAGE_MAX_LENGTH: Number(portalV2ReadProp_('PORTAL_V2_MESSAGE_MAX_LENGTH', '1400')),
-  FILE_UPLOAD_MAX_BYTES: Number(portalV2ReadProp_('PORTAL_V2_FILE_UPLOAD_MAX_BYTES', '8388608')),
+  INVESTMENT_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.ROUTE_SHEETS.investment,
+  PRESS_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.ROUTE_SHEETS.press,
+  EMPLOYMENT_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.ROUTE_SHEETS.employment,
+  INTERNSHIP_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.ROUTE_SHEETS.internship,
+  STAKEHOLDER_MASTER_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.MASTER_SHEET_NAME,
 
-  INVESTMENT_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_INVESTMENT_UPLOAD_FOLDER_ID', ''),
-  PRESS_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_PRESS_UPLOAD_FOLDER_ID', ''),
-  EMPLOYMENT_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_EMPLOYMENT_UPLOAD_FOLDER_ID', ''),
-  INTERNSHIP_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_INTERNSHIP_UPLOAD_FOLDER_ID', ''),
-  PORTAL_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_PORTAL_UPLOAD_FOLDER_ID', ''),
-  STAKEHOLDER_UPLOAD_FOLDER_ID: portalV2ReadProp_('PORTAL_V2_STAKEHOLDER_UPLOAD_FOLDER_ID', ''),
+  TEMPLATE_SHEET_ID: PORTAL_V2_RUNTIME_DEFAULTS.TEMPLATE_SOURCE.SPREADSHEET_ID,
+  TEMPLATE_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.TEMPLATE_SOURCE.SHEET_NAME,
 
-  HONEYPOT_KEY: portalV2ReadProp_('PORTAL_V2_HONEYPOT_KEY', 'website'),
-  HONEYPOT_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_HONEYPOT_SHEET_NAME', 'portal_v2_honeypot'),
-  INTERNAL_USERNAME_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_INTERNAL_USERNAME_SHEET_NAME', 'portal_v2_internal_username'),
-  INTERNAL_EMAIL_DOMAINS_CSV: portalV2ReadProp_('PORTAL_V2_INTERNAL_EMAIL_DOMAINS_CSV', 'texasskillsinitiative.org,texasskillsinitiative.com'),
-  SOURCE: portalV2ReadProp_('PORTAL_V2_SOURCE', 'tsi-portal-v2'),
-  ADMIN_NOTIFY_EMAIL: portalV2ReadProp_('PORTAL_V2_ADMIN_NOTIFY_EMAIL', portalV2ReadProp_('PORTAL_V2_ADMIN_EMAIL', '')),
+  RATE_LIMIT_SECONDS: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.RATE_LIMIT_SECONDS,
+  RATE_LIMIT_GLOBAL_MAX: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.RATE_LIMIT_GLOBAL_MAX,
+  RATE_LIMIT_GLOBAL_WINDOW_SECONDS: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.RATE_LIMIT_GLOBAL_WINDOW_SECONDS,
+  RATE_LIMIT_TRACK_MAX: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.RATE_LIMIT_TRACK_MAX,
+  RATE_LIMIT_TRACK_WINDOW_SECONDS: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.RATE_LIMIT_TRACK_WINDOW_SECONDS,
+  DEDUPE_SECONDS: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.DEDUPE_SECONDS,
+  BURST_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.BURST,
+  MESSAGE_MAX_LENGTH: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.MESSAGE_MAX_LENGTH,
+  FILE_UPLOAD_MAX_BYTES: PORTAL_V2_RUNTIME_DEFAULTS.LIMITS.FILE_UPLOAD_MAX_BYTES,
+
+  INVESTMENT_UPLOAD_FOLDER_ID: '',
+  PRESS_UPLOAD_FOLDER_ID: '',
+  EMPLOYMENT_UPLOAD_FOLDER_ID: '',
+  INTERNSHIP_UPLOAD_FOLDER_ID: '',
+  PORTAL_UPLOAD_FOLDER_ID: '',
+  STAKEHOLDER_UPLOAD_FOLDER_ID: '',
+
+  HONEYPOT_KEY: PORTAL_V2_RUNTIME_DEFAULTS.BEHAVIOR.HONEYPOT_KEY,
+  HONEYPOT_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.ABUSE,
+  INTERNAL_USERNAME_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.INTERNAL_USERNAME,
+  INTERNAL_EMAIL_DOMAINS_CSV: PORTAL_V2_RUNTIME_DEFAULTS.BEHAVIOR.INTERNAL_EMAIL_DOMAINS_CSV,
+  SOURCE: PORTAL_V2_RUNTIME_DEFAULTS.BEHAVIOR.SOURCE,
+  WRITE_ISSUES_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.WRITE_ISSUES,
+  DASHBOARD_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.DASHBOARD,
+  WRITE_ISSUE_ALERT_ENABLED: !!PORTAL_V2_RUNTIME_DEFAULTS.BEHAVIOR.WRITE_ISSUE_ALERT_ENABLED,
+
+  ADMIN_NOTIFY_EMAIL: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ADMIN_NOTIFY_EMAIL,
   ZEPTO_TOKEN: portalV2ReadProp_('PORTAL_V2_ZEPTO_TOKEN', ''),
-  ZEPTO_AGENT_ALIAS: portalV2ReadProp_('PORTAL_V2_ZEPTO_AGENT_ALIAS', ''),
-  ZEPTO_API_BASE: portalV2ReadProp_('PORTAL_V2_ZEPTO_API_BASE', 'https://api.zeptomail.com'),
-  // Supports legacy key alias if only PORTAL_V2_ZEPTO_FROM is defined.
-  ZEPTO_FROM_DEFAULT: portalV2ReadProp_(
-    'PORTAL_V2_ZEPTO_FROM_DEFAULT',
-    portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM', 'hello@texasskillsinitiative.org')
-  ),
-  ZEPTO_FROM_STAKEHOLDER: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_STAKEHOLDER', ''),
-  ZEPTO_FROM_INVESTMENT: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_INVESTMENT', ''),
-  ZEPTO_FROM_PRESS: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_PRESS', ''),
-  ZEPTO_FROM_EMPLOYMENT: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_EMPLOYMENT', ''),
-  ZEPTO_FROM_INTERNSHIP: portalV2ReadProp_('PORTAL_V2_ZEPTO_FROM_INTERNSHIP', ''),
-  ZEPTO_REPLY_TO_DEFAULT: portalV2ReadProp_('PORTAL_V2_ZEPTO_REPLY_TO_DEFAULT', ''),
-  MAIL_LOG_SHEET_NAME: portalV2ReadProp_('PORTAL_V2_MAIL_LOG_SHEET_NAME', 'portal_v2_mail_log'),
-  MAIL_FALLBACK_ENABLED: String(portalV2ReadProp_('PORTAL_V2_MAIL_FALLBACK_ENABLED', 'true')).toLowerCase() === 'true',
+  ZEPTO_API_BASE: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ZEPTO_API_BASE,
+  ZEPTO_USE_ROUTE_FROM: !!PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ZEPTO_USE_ROUTE_FROM,
+  ZEPTO_FROM_DEFAULT: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ZEPTO_FROM_DEFAULT,
+  ZEPTO_FROM_ROUTE_OVERRIDES: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ZEPTO_FROM_ROUTE_OVERRIDES,
+  ZEPTO_REPLY_TO_DEFAULT: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.ZEPTO_REPLY_TO_DEFAULT,
+  MAIL_LOG_SHEET_NAME: PORTAL_V2_RUNTIME_DEFAULTS.STORAGE.SUPPORT_SHEETS.MAIL_LOG,
+  MAIL_FALLBACK_ENABLED: !!PORTAL_V2_RUNTIME_DEFAULTS.MAIL.MAIL_FALLBACK_ENABLED,
 
-  AUTO_REPLY_ENABLED: String(portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_ENABLED', 'false')).toLowerCase() === 'true',
-  AUTO_REPLY_STAKEHOLDER_ENABLED: String(
-    portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_STAKEHOLDER_ENABLED', 'false')
-  ).toLowerCase() === 'true',
-  AUTO_REPLY_PORTAL_INVESTMENT_ENABLED: String(portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_PORTAL_INVESTMENT_ENABLED', 'false')).toLowerCase() === 'true',
-  AUTO_REPLY_PORTAL_PRESS_ENABLED: String(portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_PORTAL_PRESS_ENABLED', 'false')).toLowerCase() === 'true',
-  AUTO_REPLY_PORTAL_EMPLOYMENT_ENABLED: String(portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_PORTAL_EMPLOYMENT_ENABLED', 'false')).toLowerCase() === 'true',
-  AUTO_REPLY_PORTAL_INTERNSHIP_ENABLED: String(portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_PORTAL_INTERNSHIP_ENABLED', 'false')).toLowerCase() === 'true',
-  AUTO_REPLY_SUBJECT_PREFIX: portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_SUBJECT_PREFIX', 'TSI Intake Confirmation'),
-  AUTO_REPLY_SIGNATURE: portalV2ReadProp_('PORTAL_V2_AUTO_REPLY_SIGNATURE', 'TSI Intake Team')
+  AUTO_REPLY_ENABLED: !!PORTAL_V2_RUNTIME_DEFAULTS.MAIL.AUTO_REPLY_ENABLED,
+  AUTO_REPLY_ROUTE_OVERRIDES: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.AUTO_REPLY_ROUTE_OVERRIDES,
+  AUTO_REPLY_SUBJECT_PREFIX: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.AUTO_REPLY_SUBJECT_PREFIX,
+  AUTO_REPLY_SIGNATURE: PORTAL_V2_RUNTIME_DEFAULTS.MAIL.AUTO_REPLY_SIGNATURE
 };
 
 var PORTAL_V2_COLUMNS = [
-  'timestamp_utc', 'timestamp_local', 'submission_type', 'concierge_track', 'handler_tier',
+  'received_utc', 'client_tz', 'client_utc_offset_minutes', 'rout',
   'name', 'email', 'org', 'role', 'loc_city', 'loc_state', 'loc_country',
   'focus',
-  'investment_stage', 'investment_check_range', 'investment_geography', 'investment_focus', 'investment_timeline',
-  'press_outlet', 'press_role', 'press_deadline', 'press_topic', 'press_format',
-  'employment_role_interest', 'employment_timeline', 'employment_location_pref',
-  'intern_school', 'intern_program', 'intern_grad_date', 'intern_track', 'intern_mode',
-  'intern_hours_per_week', 'intern_start_date', 'intern_portfolio_url',
+  'pinv_stage', 'pinv_check_range', 'pinv_geography', 'pinv_focus', 'pinv_timeline', 'pinv_investor_type', 'pinv_investor_type_other',
+  'pprs_outlet', 'pprs_role', 'pprs_deadline', 'pprs_topic', 'pprs_format',
+  'pemp_role_interest', 'pemp_timeline', 'pemp_location_pref',
+  'pint_school', 'pint_program', 'pint_grad_date', 'pint_track', 'pint_mode',
+  'pint_hours_per_week', 'pint_start_date', 'pint_portfolio_url',
   'message', 'attachment_name', 'attachment_type', 'attachment_size', 'attachment_url', 'attachment_status',
   'source', 'page_path', 'referrer', 'submission_id'
 ];
