@@ -1,4 +1,4 @@
-// TSI intake backend version marker: v3 (legacy file name retained intentionally).
+// TSI intake backend version marker: v3 Build 0018
 var PORTAL_V2_INTERNAL_EVENT_TSI_USERNAME_CAPTURE = 'tsi_username_capture';
 
 var PORTAL_V2_ROUTES = {
@@ -91,7 +91,14 @@ var PORTAL_V2_NOT_VISIBLE = 'field_not_visible';
 var PORTAL_V2_NO_RESPONSE = 'user_no_response';
 
 function doOptions(e) { return portalV2Json_({ ok: true }); }
-function doGet(e) { return portalV2Json_({ ok: true }); }
+function doGet(e) {
+  return portalV2Json_({
+    ok: true,
+    health: true,
+    version: String(PORTAL_V2_CONFIG.VERSION || ''),
+    build: String(PORTAL_V2_CONFIG.BUILD || '')
+  });
+}
 
 function doPost(e) {
   try {
@@ -108,9 +115,10 @@ function doPost(e) {
     var isStakeholderRoute = portalV2IsStakeholderRoute_(route);
     var submissionId = portalV2Esc_(payload.submission_id || '') || Utilities.getUuid();
     var receivedUtc = portalV2Now_();
+    payload.submission_id = submissionId;
 
     if (payload[PORTAL_V2_CONFIG.HONEYPOT_KEY]) {
-      portalV2WriteHoneypot_(route, payload);
+      portalV2WriteHoneypot_(route, payload, submissionId);
       return portalV2Json_({ ok: true });
     }
 
@@ -149,25 +157,33 @@ function doPost(e) {
       return portalV2Json_({ ok: false, error: emailGate.error });
     }
 
+    var lock = LockService.getScriptLock();
+    try {
+      lock.waitLock(10000);
+    } catch (lockErr) {
+      portalV2LogFailure_(route, payload, 'operational_failure', 'append_lock_timeout', { submission_id: submissionId }, submissionId);
+      return portalV2Json_({ ok: false, error: 'temporarily_unavailable' });
+    }
     var visibility = portalV2RouteVisibility_(route);
     var attachmentVisible = visibility.attachment || Boolean(payload.attachment_data);
     var attachment = attachmentVisible
       ? portalV2Attachment_(payload, route, submissionId)
       : portalV2NotVisibleAttachment_();
-    if (attachment.error) return portalV2Json_({ ok: false, error: attachment.error });
+    if (attachment.error) {
+      try { lock.releaseLock(); } catch (ignoreLock) {}
+      return portalV2Json_({ ok: false, error: attachment.error });
+    }
 
     var row = portalV2PortalRow_(payload, route, receivedUtc, email, city, country, message, attachment, submissionId, visibility);
 
     var appendMeta;
-    var lock = LockService.getScriptLock();
     try {
-      lock.waitLock(10000);
-    } catch (lockErr) {
-      portalV2LogAbuse_(route, payload, 'append_lock_timeout', { submission_id: submissionId });
-      return portalV2Json_({ ok: false, error: 'temporarily_unavailable' });
-    }
-    try {
-      appendMeta = portalV2Append_(route, row, submissionId, payload);
+      try {
+        appendMeta = portalV2Append_(route, row, submissionId, payload);
+      } catch (appendErr) {
+        portalV2LogFailure_(route, payload, 'operational_failure', 'append_failed', { submission_id: submissionId, error: String(appendErr || '') }, submissionId);
+        return portalV2Json_({ ok: false, error: 'temporarily_unavailable' });
+      }
     } finally {
       try { lock.releaseLock(); } catch (ignore) {}
     }
@@ -332,42 +348,54 @@ function portalV2PortalRow_(payload, route, receivedUtc, email, city, country, m
   ];
 }
 
-function portalV2WriteHoneypot_(route, payload) {
+function portalV2WriteHoneypot_(route, payload, submissionId) {
   try {
     var honeyKey = PORTAL_V2_CONFIG.HONEYPOT_KEY;
     var honeyVal = payload ? payload[honeyKey] : '';
     var nextPayload = payload ? JSON.parse(JSON.stringify(payload)) : {};
+    var failAttachment = portalV2FailAttachment_(nextPayload, route, submissionId || nextPayload.submission_id || '');
     nextPayload._honeypot_reason = 'honeypot_field_populated';
     nextPayload._honeypot_field = honeyKey;
     nextPayload._honeypot_value = String(honeyVal || '');
     nextPayload._honeypot_summary = "Honeypot field '" + String(honeyKey || '') + "' was populated.";
-    portalV2AppendHoneypot_(route, nextPayload, {
+    portalV2AppendFail_(route, nextPayload, {
+      category: 'abuse',
       triggerType: 'honeypot',
       reason: 'honeypot_field_populated',
       reasonDetails: '',
       honeypotField: honeyKey,
-      honeypotValue: String(honeyVal || '')
+      honeypotValue: String(honeyVal || ''),
+      attachmentCapture: failAttachment
     });
+    portalV2NotifyFail_(route, nextPayload, submissionId, failAttachment, 'abuse', 'honeypot_field_populated', '');
     portalV2RefreshDashboardSafe_();
   } catch (e2) {
-    console.error('portal v2 honeypot write failed: ' + e2);
+    console.error('portal v2 fail honeypot write failed: ' + e2);
   }
 }
 
-function portalV2LogAbuse_(route, payload, reason, details) {
+function portalV2LogFailure_(route, payload, category, reason, details, submissionId) {
   try {
     var nextPayload = payload ? JSON.parse(JSON.stringify(payload)) : {};
-    nextPayload._abuse_reason = String(reason || 'unknown');
+    var failAttachment = portalV2FailAttachment_(nextPayload, route, submissionId || nextPayload.submission_id || '');
+    nextPayload._fail_category = String(category || 'operational_failure');
+    nextPayload._fail_reason = String(reason || 'unknown');
+    if (String(category || '') === 'abuse' || String(category || '') === 'policy_block') {
+      nextPayload._abuse_reason = String(reason || 'unknown');
+    }
     if (details !== undefined) nextPayload._abuse_details = details;
-    portalV2AppendHoneypot_(route, nextPayload, {
-      triggerType: 'abuse',
+    portalV2AppendFail_(route, nextPayload, {
+      category: String(category || 'operational_failure'),
+      triggerType: String(category || 'operational_failure'),
       reason: String(reason || 'unknown'),
       reasonDetails: details,
-      honeypotField: 'abuse_reason',
-      honeypotValue: String(reason || 'unknown')
+      honeypotField: 'fail_reason',
+      honeypotValue: String(reason || 'unknown'),
+      attachmentCapture: failAttachment
     });
+    portalV2NotifyFail_(route, nextPayload, submissionId || nextPayload.submission_id || '', failAttachment, category, reason, details);
   } catch (err) {
-    console.error('portal v2 abuse log failed: ' + err);
+    console.error('portal v2 fail log failed: ' + err);
   }
 }
 
@@ -377,7 +405,8 @@ function portalV2LogBurstDebug_(route, payload, submissionId) {
     var nextPayload = payload ? JSON.parse(JSON.stringify(payload)) : {};
     nextPayload.submission_id = submissionId || nextPayload.submission_id || Utilities.getUuid();
     nextPayload._debug_burst = '1';
-    portalV2AppendHoneypot_(route, nextPayload, {
+    portalV2AppendFail_(route, nextPayload, {
+      category: 'operational_failure',
       triggerType: 'debug_burst',
       reason: 'burst_state',
       reasonDetails: snapshot,
@@ -450,8 +479,8 @@ function portalV2BurstSnapshot_(route) {
   };
 }
 
-function portalV2AppendHoneypot_(route, payload, meta) {
-  var header = portalV2HoneypotHeader_();
+function portalV2AppendFail_(route, payload, meta) {
+  var header = portalV2FailHeader_();
   var safePayload = payload || {};
   var submissionId = portalV2Esc_(safePayload.submission_id || Utilities.getUuid());
   var email = String(safePayload.email || '').trim();
@@ -462,6 +491,7 @@ function portalV2AppendHoneypot_(route, payload, meta) {
   var attachmentType = portalV2Esc_(safePayload.attachment_type || '');
   var attachmentSize = portalV2Esc_(safePayload.attachment_size || '');
   var attachmentPresent = attachmentName || attachmentType || attachmentSize ? 'true' : 'false';
+  var capture = portalV2FailAttachmentMeta_(meta && meta.attachmentCapture);
   var payloadJson = JSON.stringify(safePayload);
   var payloadBytes = String(payloadJson.length || 0);
   var row = [
@@ -470,6 +500,7 @@ function portalV2AppendHoneypot_(route, payload, meta) {
     portalV2Esc_(safePayload.client_utc_offset_minutes || ''),
     portalV2RoutFromRoute_(route),
     submissionId,
+    String(meta && meta.category || ''),
     String(meta && meta.triggerType || ''),
     portalV2Esc_(meta && meta.reason || ''),
     portalV2Esc_(meta && meta.reasonDetails !== undefined ? JSON.stringify(meta.reasonDetails) : ''),
@@ -487,20 +518,27 @@ function portalV2AppendHoneypot_(route, payload, meta) {
     attachmentName,
     attachmentType,
     attachmentSize,
+    String(capture.status || ''),
+    String(capture.name || ''),
+    String(capture.type || ''),
+    String(capture.size || ''),
+    String(capture.url || ''),
+    String(capture.error || ''),
     PORTAL_V2_CONFIG.SOURCE,
     payloadBytes,
     portalV2Esc_(payloadJson)
   ];
-  portalV2AppendNamed_(route, PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, header, row);
+  portalV2AppendFailRow_(route, header, row);
 }
 
-function portalV2HoneypotHeader_() {
+function portalV2FailHeader_() {
   return [
     'received_utc',
     'client_tz',
     'client_utc_offset_minutes',
     'rout',
     'submission_id',
+    'fail_category',
     'trigger_type',
     'trigger_reason',
     'trigger_details',
@@ -518,6 +556,12 @@ function portalV2HoneypotHeader_() {
     'attachment_name',
     'attachment_type',
     'attachment_size',
+    'attachment_capture_status',
+    'attachment_capture_name',
+    'attachment_capture_type',
+    'attachment_capture_size',
+    'attachment_capture_url',
+    'attachment_capture_error',
     'source',
     'payload_bytes',
     'payload'
@@ -541,7 +585,7 @@ function portalV2DedupeOk_(route, payload, submissionId) {
   var key = 'portal_v2_sub_' + sid;
   var existing = cache.get(key);
   if (existing) {
-    portalV2LogAbuse_(route, payload, 'duplicate_submission', { submission_id: sid });
+    portalV2LogFailure_(route, payload, 'policy_block', 'duplicate_submission', { submission_id: sid }, sid);
     return { ok: false, error: 'already_received' };
   }
   cache.put(key, '1', ttl);
@@ -565,7 +609,7 @@ function portalV2BurstGate_(route, payload) {
     lock.waitLock(2000);
     hasLock = true;
   } catch (err) {
-    portalV2LogAbuse_(route, payload, 'rate_limit_lock', { error: 'lock_failed' });
+    portalV2LogFailure_(route, payload, 'operational_failure', 'rate_limit_lock', { error: 'lock_failed' }, payload && payload.submission_id);
     return { ok: false, error: 'temporarily_unavailable' };
   }
 
@@ -616,9 +660,9 @@ function portalV2BurstGate_(route, payload) {
       }
     } else {
       if (blockedReason === 'rate_limit_global') {
-        portalV2LogAbuse_(route, payload, blockedReason, { window_start_ms: globalStart, max: globalMax, window_seconds: globalWindow });
+        portalV2LogFailure_(route, payload, 'policy_block', blockedReason, { window_start_ms: globalStart, max: globalMax, window_seconds: globalWindow }, payload && payload.submission_id);
       } else {
-        portalV2LogAbuse_(route, payload, blockedReason, { window_start_ms: trackStart, max: trackMax, window_seconds: trackWindow, route: routeKey });
+        portalV2LogFailure_(route, payload, 'policy_block', blockedReason, { window_start_ms: trackStart, max: trackMax, window_seconds: trackWindow, route: routeKey }, payload && payload.submission_id);
       }
     }
 
@@ -649,9 +693,9 @@ function portalV2RateLimit_(email, route, payload, submissionId) {
   var cache = CacheService.getScriptCache();
   var existing = cache.get(key);
   if (existing) {
-    portalV2LogAbuse_(route, payload, 'rate_limit_email', { email: String(email || ''), submission_id: submissionId });
-    return { ok: false, error: 'retry_later' };
-  }
+      portalV2LogFailure_(route, payload, 'policy_block', 'rate_limit_email', { email: String(email || ''), submission_id: submissionId }, submissionId);
+      return { ok: false, error: 'retry_later' };
+    }
   cache.put(key, '1', ttl);
   return { ok: true, error: '' };
 }
@@ -690,6 +734,60 @@ function portalV2Attachment_(payload, route, submissionId) {
   return { status: 'saved', name: file.getName(), type: mime, size: String(size), url: file.getUrl() };
 }
 
+function portalV2FailAttachment_(payload, route, submissionId) {
+  var safePayload = payload || {};
+  var b64 = String(safePayload.attachment_data || '').trim();
+  if (!b64) return { status: 'none', name: '', type: '', size: '', url: '', error: '' };
+
+  var folderId = String(PORTAL_V2_CONFIG.FAIL_UPLOAD_FOLDER_ID || '').trim();
+  if (!folderId) {
+    return { status: 'failed', name: '', type: '', size: '', url: '', error: 'missing_fail_upload_folder' };
+  }
+
+  var nameRaw = String(safePayload.attachment_name || '').trim();
+  var typeRaw = String(safePayload.attachment_type || '').trim();
+  var normalized = b64.replace(/^data:[^;]+;base64,/, '').replace(/\s+/g, '');
+  if (!normalized) return { status: 'failed', name: '', type: '', size: '', url: '', error: 'invalid_attachment' };
+
+  var safeName = portalV2SafeFileName_(nameRaw || 'attachment.bin');
+  var ext = portalV2Ext_(safeName);
+  if (!PORTAL_V2_ALLOWED_EXTENSIONS[ext]) {
+    return { status: 'failed', name: safeName, type: typeRaw, size: String(safePayload.attachment_size || ''), url: '', error: 'invalid_attachment_type' };
+  }
+
+  var bytes;
+  try { bytes = Utilities.base64Decode(normalized); } catch (err) {
+    return { status: 'failed', name: safeName, type: typeRaw, size: '', url: '', error: 'invalid_attachment' };
+  }
+  var size = bytes && bytes.length ? bytes.length : 0;
+  if (!size) return { status: 'failed', name: safeName, type: typeRaw, size: '0', url: '', error: 'invalid_attachment' };
+  if (size > PORTAL_V2_CONFIG.FILE_UPLOAD_MAX_BYTES) {
+    return { status: 'failed', name: safeName, type: typeRaw, size: String(size), url: '', error: 'file_too_large' };
+  }
+
+  var mime = typeRaw || portalV2Mime_(ext);
+  var blob = Utilities.newBlob(bytes, mime || 'application/octet-stream', 'fail_' + String(route || 'unknown') + '_' + String(submissionId || Utilities.getUuid()) + '_' + safeName);
+  try {
+    var folder = DriveApp.getFolderById(folderId);
+    var file = folder.createFile(blob);
+    return { status: 'saved', name: file.getName(), type: mime, size: String(size), url: file.getUrl(), error: '' };
+  } catch (driveErr) {
+    return { status: 'failed', name: safeName, type: mime, size: String(size), url: '', error: 'fail_upload_error:' + String(driveErr || '') };
+  }
+}
+
+function portalV2FailAttachmentMeta_(capture) {
+  var meta = capture || {};
+  return {
+    status: String(meta.status || 'none'),
+    name: String(meta.name || ''),
+    type: String(meta.type || ''),
+    size: String(meta.size || ''),
+    url: String(meta.url || ''),
+    error: String(meta.error || '')
+  };
+}
+
 function portalV2Append_(route, row, submissionId, payload) {
   var masterTarget = portalV2MasterSheetTarget_();
   var routeTarget = portalV2SheetTarget_(route);
@@ -721,6 +819,46 @@ function portalV2AppendNamed_(route, name, header, row) {
     spreadsheetId: sid,
     sheetName: String(name || '').trim()
   }, header, row);
+}
+
+function portalV2AppendFailRow_(route, header, row) {
+  var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
+  if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
+  var sheetName = String(PORTAL_V2_CONFIG.FAIL_SHEET_NAME || '').trim();
+  if (!sheetName) throw new Error('Missing fail sheet name');
+
+  var ss = SpreadsheetApp.openById(sid);
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.getRange(1, 1, 1, header.length).setValues([header]);
+  } else {
+    var currentHeader = [];
+    if (sheet.getLastRow() > 0) {
+      currentHeader = sheet.getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1)).getValues()[0];
+      while (currentHeader.length && String(currentHeader[currentHeader.length - 1] || '') === '') {
+        currentHeader.pop();
+      }
+    }
+    var currentLength = currentHeader.length;
+    var canExtend = currentLength > 0 && currentLength < header.length;
+    if (canExtend) {
+      for (var i = 0; i < currentLength; i += 1) {
+        if (String(currentHeader[i] || '') !== String(header[i] || '')) {
+          canExtend = false;
+          break;
+        }
+      }
+    }
+    if (sheet.getLastRow() === 0) {
+      sheet.getRange(1, 1, 1, header.length).setValues([header]);
+    } else if (canExtend) {
+      sheet.getRange(1, currentLength + 1, 1, header.length - currentLength).setValues([header.slice(currentLength)]);
+    } else if (!portalV2HeaderMatches_(sheet, header)) {
+      throw new Error('fail_sheet_header_mismatch');
+    }
+  }
+  sheet.appendRow(row);
 }
 
 function portalV2AppendTargetRow_(target, header, row) {
@@ -869,15 +1007,32 @@ function portalV2TemplateRender_(text, data) {
   });
 }
 
-function portalV2TemplateData_(route, payload, submissionId, email, receivedUtc) {
+function portalV2TemplateData_(route, payload, submissionId, email, receivedUtc, fallbackReasons, failMeta) {
   var safePayload = payload || {};
   var routeName = portalV2RouteName_(route);
   var submittedFieldsBlock = portalV2SubmittedFieldsBlock_(route, safePayload, routeName);
+  var abuseReason = portalV2AbuseReason_(safePayload);
+  var normalizedFallbackReasons = portalV2NormalizeFallbackReasons_(fallbackReasons);
+  var nextFailMeta = failMeta || {};
   return {
     name: String(safePayload.name || '').trim() || 'there',
     rout: portalV2RoutFromRoute_(route),
     route: String(route || ''),
     route_name: routeName,
+    subject_tag: portalV2SubjectTag_(safePayload, normalizedFallbackReasons),
+    abuse_flag: abuseReason ? 'ABUSE' : 'none',
+    abuse_reason: abuseReason || 'n/a',
+    fail_category: String(nextFailMeta.category || safePayload._fail_category || 'n/a'),
+    fail_reason: String(nextFailMeta.reason || safePayload._fail_reason || 'n/a'),
+    fail_details: nextFailMeta.details !== undefined ? String(nextFailMeta.details) : (safePayload._abuse_details !== undefined ? String(typeof safePayload._abuse_details === 'string' ? safePayload._abuse_details : JSON.stringify(safePayload._abuse_details)) : 'n/a'),
+    fail_attachment_capture_status: String(nextFailMeta.attachmentStatus || 'none'),
+    fail_attachment_capture_name: String(nextFailMeta.attachmentName || 'n/a'),
+    fail_attachment_capture_type: String(nextFailMeta.attachmentType || 'n/a'),
+    fail_attachment_capture_size: String(nextFailMeta.attachmentSize || 'n/a'),
+    fail_attachment_capture_url: String(nextFailMeta.attachmentUrl || 'n/a'),
+    fail_attachment_capture_error: String(nextFailMeta.attachmentError || 'n/a'),
+    fallback_flag: normalizedFallbackReasons.length ? 'FALLBACK' : 'none',
+    fallback_reasons: normalizedFallbackReasons.length ? normalizedFallbackReasons.join(' | ') : 'n/a',
     submission_id: String(submissionId || ''),
     received_utc: String(receivedUtc || ''),
     client_tz: String(safePayload.client_tz || ''),
@@ -1090,13 +1245,147 @@ function portalV2TemplateDebug(route, type) {
   return portalV2TemplateDebug_(route, type);
 }
 
+function portalV2DefaultAdminNotifyTemplate_() {
+  return {
+    subject: '[{{subject_tag}}][{{rout}}][{{submission_id}}] {{name}}',
+    body: [
+      'Form Submitted: {{route_name}}',
+      'Route Code: {{rout}} | {{route}}',
+      'Submission ID: {{submission_id}}',
+      '',
+      '##Error Status##',
+      'Fallback Status: {{fallback_flag}} | {{fallback_reasons}}',
+      '',
+      '##User Data##',
+      'Name: {{name}}',
+      'Email: {{email}}',
+      'Organization: {{org}}',
+      'Role: {{role}}',
+      'City: {{loc_city}}',
+      'State/Region: {{loc_state}}',
+      'Country: {{loc_country}}',
+      '',
+      '##Time Received##',
+      'Local: {{received_local}}',
+      'Texas: {{received_texas}}',
+      'UTC: {{received_utc}}',
+      '',
+      '##Site Info##',
+      'Page Path: {{page_path}}',
+      'Referrer: {{referrer}}',
+      '',
+      '##Full Submit Content##',
+      '{{submitted_fields_block}}'
+    ].join('\n')
+  };
+}
+
+function portalV2DefaultFailNotifyTemplate_() {
+  return {
+    subject: '[{{subject_tag}}][{{rout}}][{{submission_id}}] {{name}}',
+    body: [
+      'Form Submitted: {{route_name}}',
+      'Route Code: {{rout}} | {{route}}',
+      'Submission ID: {{submission_id}}',
+      '',
+      '##Error Status##',
+      'Fallback Flag: {{fallback_flag}}',
+      'Fallback Reasons: {{fallback_reasons}}',
+      '------------------------------',
+      'Fail Category: {{fail_category}}',
+      'Fail Reason: {{fail_reason}}',
+      'Fail Details: {{fail_details}}',
+      '------------------------------',
+      'Abuse Flag: {{abuse_flag}}',
+      'Abuse Reason: {{abuse_reason}}',
+      '',
+      '##Time Received##',
+      'Local: {{received_local}}',
+      'Texas: {{received_texas}}',
+      'UTC: {{received_utc}}',
+      '',
+      '##Site Info##',
+      'Page Path: {{page_path}}',
+      'Referrer: {{referrer}}',
+      '',
+      '##Full Submit Content##',
+      '{{submitted_fields_block}}'
+    ].join('\n')
+  };
+}
+
+function portalV2AbuseTagDebug() {
+  var route = PORTAL_V2_ROUTES.GOVERNMENT;
+  var receivedUtc = portalV2Now_();
+  var normalPayload = {
+    name: 'Normal Example',
+    email: 'normal@example.com',
+    loc_city: 'Austin',
+    loc_state: 'Texas',
+    loc_country: 'United States',
+    message: 'Normal template token check.'
+  };
+  var abusePayload = {
+    name: 'Abuse Example',
+    email: 'abuse@example.com',
+    loc_city: 'Austin',
+    loc_state: 'Texas',
+    loc_country: 'United States',
+    message: 'Abuse template token check.',
+    _abuse_reason: 'duplicate_submission'
+  };
+  var normalData = portalV2TemplateData_(route, normalPayload, 'debug-normal', String(normalPayload.email || ''), receivedUtc, []);
+  var abuseData = portalV2TemplateData_(route, abusePayload, 'debug-abuse', String(abusePayload.email || ''), receivedUtc, []);
+  var fallbackData = portalV2TemplateData_(route, normalPayload, 'debug-fallback', String(normalPayload.email || ''), receivedUtc, ['provider_fallback:zeptomail_send_failed']);
+  var failData = portalV2TemplateData_(route, abusePayload, 'debug-fail', String(abusePayload.email || ''), receivedUtc, [], {
+    category: 'policy_block',
+    reason: 'duplicate_submission',
+    details: '{"submission_id":"debug-fail"}',
+    attachmentStatus: 'saved',
+    attachmentName: 'debug.txt',
+    attachmentType: 'text/plain',
+    attachmentSize: '5',
+    attachmentUrl: 'https://example.com/debug.txt',
+    attachmentError: 'n/a'
+  });
+  return {
+    ok: true,
+    token_example: '{{subject_tag}}',
+    reason_example: '{{abuse_reason}}',
+    normal: {
+      subject_tag: normalData.subject_tag,
+      abuse_flag: normalData.abuse_flag,
+      abuse_reason: normalData.abuse_reason,
+      rendered: portalV2TemplateRender_('Tag={{subject_tag}}|Abuse={{abuse_flag}}|Reason={{abuse_reason}}|Fallback={{fallback_flag}}', normalData)
+    },
+    abuse: {
+      subject_tag: abuseData.subject_tag,
+      abuse_flag: abuseData.abuse_flag,
+      abuse_reason: abuseData.abuse_reason,
+      rendered: portalV2TemplateRender_('Tag={{subject_tag}}|Abuse={{abuse_flag}}|Reason={{abuse_reason}}|Fallback={{fallback_flag}}', abuseData)
+    },
+    fallback: {
+      subject_tag: fallbackData.subject_tag,
+      fallback_flag: fallbackData.fallback_flag,
+      fallback_reasons: fallbackData.fallback_reasons,
+      rendered: portalV2TemplateRender_('Tag={{subject_tag}}|Abuse={{abuse_flag}}|Reason={{abuse_reason}}|Fallback={{fallback_flag}}|FallbackReasons={{fallback_reasons}}', fallbackData)
+    },
+    fail: {
+      subject_tag: failData.subject_tag,
+      fail_category: failData.fail_category,
+      fail_reason: failData.fail_reason,
+      rendered: portalV2TemplateRender_('Tag={{subject_tag}}|FailCategory={{fail_category}}|FailReason={{fail_reason}}|FailDetails={{fail_details}}', failData)
+    }
+  };
+}
+
 function portalV2TryAutoReply_(route, payload, email, submissionId, receivedUtc) {
   try {
     if (!PORTAL_V2_CONFIG.AUTO_REPLY_ENABLED) return;
     if (!portalV2AutoReplyEnabledForRoute_(route)) return;
     if (!portalV2EmailOk_(email)) return;
 
-    var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
+    var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc, []);
     var tmpl = portalV2TemplatePick_(route, 'auto_reply', payload);
     if (tmpl && tmpl.enabled === false) return;
 
@@ -1143,42 +1432,88 @@ function portalV2AutoReplyEnabledForRoute_(route) {
 function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload, receivedUtc) {
   var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
   if (!admin) return;
-  var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
   var tmpl = portalV2TemplatePick_(route, 'admin_notify', payload);
   if (tmpl && tmpl.enabled === false) return;
 
-  var subject;
-  var body;
   var fallbackReasons = [];
+  var subjectTemplate;
+  var bodyTemplate;
   if (tmpl && tmpl.subject && tmpl.body) {
-    subject = portalV2TemplateRender_(tmpl.subject, data);
-    body = portalV2TemplateRender_(tmpl.body, data);
+    subjectTemplate = tmpl.subject;
+    bodyTemplate = tmpl.body;
   } else {
     fallbackReasons.push('template_fallback:admin_notify_template_missing_or_incomplete');
-    subject = '[TSI][' + data.rout + '][' + submissionId + '] ' + email;
-    body = [
-      'Form Submitted: ' + data.route_name,
-      'Route Code: ' + data.rout,
-      'Route Key: ' + route,
-      'Submission ID: ' + submissionId,
-      '',
-      'Name: ' + data.name,
-      'Email: ' + data.email,
-      'Organization: ' + data.org,
-      'Role: ' + data.role,
-      'City: ' + data.loc_city,
-      'State/Region: ' + data.loc_state,
-      'Country: ' + data.loc_country,
-      '',
-      'Received: ' + data.received_local + ' (Local) | ' + data.received_texas + ' (Texas) | ' + receivedUtc + ' (UTC)',
-      'Page Path: ' + data.page_path,
-      'Referrer: ' + data.referrer,
-      'Attachment Status: ' + (attachment && attachment.status || 'none'),
-      '',
-      data.submitted_fields_block
-    ].join('\n');
+    var defaultAdminTemplate = portalV2DefaultAdminNotifyTemplate_();
+    subjectTemplate = defaultAdminTemplate.subject;
+    bodyTemplate = defaultAdminTemplate.body;
   }
-  portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId, fallbackReasons);
+  var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc, fallbackReasons);
+  var subject = portalV2TemplateRender_(subjectTemplate, data);
+  var body = portalV2TemplateRender_(bodyTemplate, data);
+  portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId, fallbackReasons, {
+    route: route,
+    payload: payload,
+    submissionId: submissionId,
+    email: email,
+    receivedUtc: receivedUtc,
+    subjectTemplate: subjectTemplate,
+    bodyTemplate: bodyTemplate
+  });
+}
+
+function portalV2NotifyFail_(route, payload, submissionId, attachmentCapture, category, reason, details) {
+  try {
+    if (!PORTAL_V2_CONFIG.FAIL_NOTIFY_ENABLED) return;
+    var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
+    if (!admin) return;
+    if (!portalV2IsInternalEmailAddress_(admin)) return;
+
+    var attachmentMeta = portalV2FailAttachmentMeta_(attachmentCapture);
+    var detailsText = details === undefined ? 'n/a' : (typeof details === 'string' ? details : JSON.stringify(details));
+    var email = String(payload && payload.email || '').trim();
+    var receivedUtc = portalV2Now_();
+    var failMeta = {
+      category: String(category || 'operational_failure'),
+      reason: String(reason || 'unknown'),
+      details: String(detailsText || 'n/a'),
+      attachmentStatus: attachmentMeta.status || 'none',
+      attachmentName: attachmentMeta.name || 'n/a',
+      attachmentType: attachmentMeta.type || 'n/a',
+      attachmentSize: attachmentMeta.size || 'n/a',
+      attachmentUrl: attachmentMeta.url || 'n/a',
+      attachmentError: attachmentMeta.error || 'n/a'
+    };
+    var tmpl = portalV2TemplatePick_(route, 'fail_notify', payload);
+    if (tmpl && tmpl.enabled === false) return;
+
+    var fallbackReasons = [];
+    var subjectTemplate;
+    var bodyTemplate;
+    if (tmpl && tmpl.subject && tmpl.body) {
+      subjectTemplate = tmpl.subject;
+      bodyTemplate = tmpl.body;
+    } else {
+      fallbackReasons.push('template_fallback:fail_notify_template_missing_or_incomplete');
+      var defaultFailTemplate = portalV2DefaultFailNotifyTemplate_();
+      subjectTemplate = defaultFailTemplate.subject;
+      bodyTemplate = defaultFailTemplate.body;
+    }
+    var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc, fallbackReasons, failMeta);
+    var subject = portalV2TemplateRender_(subjectTemplate, data);
+    var body = portalV2TemplateRender_(bodyTemplate, data);
+    portalV2SendMail_(route, 'fail_notify', admin, subject, body, submissionId, fallbackReasons, {
+      route: route,
+      payload: payload,
+      submissionId: submissionId,
+      email: email,
+      receivedUtc: receivedUtc,
+      subjectTemplate: subjectTemplate,
+      bodyTemplate: bodyTemplate,
+      failMeta: failMeta
+    });
+  } catch (err) {
+    console.error('portal v2 fail-notify failed: ' + err);
+  }
 }
 
 function portalV2NormalizeFallbackReasons_(reasons) {
@@ -1205,14 +1540,37 @@ function portalV2AppendFallbackReason_(reasons, reason) {
   return next;
 }
 
-function portalV2AnnotateFallbackMessage_(subject, body, reasons) {
+function portalV2AbuseReason_(payload) {
+  var safePayload = payload || {};
+  return String(safePayload._abuse_reason || safePayload._honeypot_reason || '').trim();
+}
+
+function portalV2SubjectTag_(payload, fallbackReasons) {
+  var failCategory = String(payload && payload._fail_category || '').trim().toLowerCase();
+  var normalizedFallbackReasons = portalV2NormalizeFallbackReasons_(fallbackReasons);
+  if (normalizedFallbackReasons.length) return 'FALLBACK';
+  if (failCategory && failCategory !== 'n/a' && failCategory !== 'none') return 'FAIL';
+  return 'TSI';
+}
+
+function portalV2ApplySubjectTag_(subject, tag) {
+  var rawSubject = String(subject || '').trim();
+  var nextTag = String(tag || '').trim();
+  if (!nextTag) return rawSubject;
+  if (/^\[[^\]]+\]/.test(rawSubject)) {
+    return rawSubject.replace(/^\[[^\]]+\]/, '[' + nextTag + ']');
+  }
+  return '[' + nextTag + '] ' + rawSubject;
+}
+
+function portalV2AnnotateFallbackMessage_(subject, body, reasons, annotateForRecipient) {
   var normalized = portalV2NormalizeFallbackReasons_(reasons);
   var rawSubject = String(subject || '').trim();
   var rawBody = String(body || '');
   if (!normalized.length) return { subject: rawSubject, body: rawBody, reasons: [] };
+  if (!annotateForRecipient) return { subject: rawSubject, body: rawBody, reasons: normalized };
 
-  var taggedSubject = rawSubject;
-  if (!/^\[fallback\]\s/i.test(taggedSubject)) taggedSubject = '[Fallback] ' + taggedSubject;
+  var taggedSubject = portalV2ApplySubjectTag_(rawSubject, 'FALLBACK');
 
   var note = [
     '',
@@ -1224,7 +1582,7 @@ function portalV2AnnotateFallbackMessage_(subject, body, reasons) {
 
 function portalV2IsInternalMailType_(mailType) {
   var kind = String(mailType || '').trim().toLowerCase();
-  return kind === 'admin_notify' || kind === 'fallback_notice';
+  return kind === 'admin_notify' || kind === 'fallback_notice' || kind === 'fail_notify';
 }
 
 function portalV2InternalDomains_() {
@@ -1267,14 +1625,15 @@ function portalV2ZeptoFromContext_(route) {
   return { from: '', reason: 'sender_fallback:no sender configured' };
 }
 
-function portalV2SendMail_(route, mailType, toAddress, subject, body, submissionId, fallbackReasons) {
+function portalV2SendMail_(route, mailType, toAddress, subject, body, submissionId, fallbackReasons, renderContext) {
   var to = String(toAddress || '').trim();
   if (!to) return false;
+  var internalOnly = portalV2IsInternalMailType_(mailType) && portalV2IsInternalEmailAddress_(to);
   var reasons = portalV2NormalizeFallbackReasons_(fallbackReasons);
   var fromCtx = portalV2ZeptoFromContext_(route);
   var from = String(fromCtx.from || '').trim();
   if (fromCtx.reason) reasons = portalV2AppendFallbackReason_(reasons, fromCtx.reason);
-  var primaryMail = portalV2AnnotateFallbackMessage_(subject, body, reasons);
+  var primaryMail = portalV2AnnotateFallbackMessage_(subject, body, reasons, internalOnly);
   var replyTo = String(PORTAL_V2_CONFIG.ZEPTO_REPLY_TO_DEFAULT || '').trim();
   var result = portalV2ZeptoSendEmail_({
     route: route,
@@ -1294,7 +1653,28 @@ function portalV2SendMail_(route, mailType, toAddress, subject, body, submission
       var detail = String(result.error || '').replace(/\s+/g, ' ').trim();
       if (detail) providerReasons = portalV2AppendFallbackReason_(providerReasons, 'provider_error:' + detail);
     }
-    var fallbackMail = portalV2AnnotateFallbackMessage_(subject, body, providerReasons);
+    var fallbackMail;
+    if (renderContext && renderContext.subjectTemplate && renderContext.bodyTemplate) {
+      var renderedData = portalV2TemplateData_(
+        renderContext.route,
+        renderContext.payload || {},
+        renderContext.submissionId || submissionId,
+        renderContext.email || to,
+        renderContext.receivedUtc || portalV2Now_(),
+        providerReasons,
+        renderContext.failMeta || null
+      );
+      fallbackMail = {
+        subject: portalV2TemplateRender_(renderContext.subjectTemplate, renderedData),
+        body: portalV2TemplateRender_(renderContext.bodyTemplate, renderedData),
+        reasons: providerReasons
+      };
+      if (internalOnly) {
+        fallbackMail = portalV2AnnotateFallbackMessage_(fallbackMail.subject, fallbackMail.body, providerReasons, true);
+      }
+    } else {
+      fallbackMail = portalV2AnnotateFallbackMessage_(subject, body, providerReasons, internalOnly);
+    }
     try {
       MailApp.sendEmail(to, fallbackMail.subject, fallbackMail.body);
       portalV2MailLog_({
@@ -1329,7 +1709,6 @@ function portalV2SendMail_(route, mailType, toAddress, subject, body, submission
 }
 
 function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult, originalSubject, reasons) {
-  if (!portalV2IsInternalMailType_(mailType)) return;
   var admin = String(PORTAL_V2_CONFIG.ADMIN_NOTIFY_EMAIL || '').trim();
   if (!admin) return;
   if (!portalV2IsInternalEmailAddress_(admin)) {
@@ -1346,7 +1725,7 @@ function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult,
     });
     return;
   }
-  var subject = '[Fallback] ' + String(originalSubject || 'MailApp fallback used');
+  var subject = portalV2ApplySubjectTag_(String(originalSubject || 'MailApp fallback used'), 'FALLBACK');
   var errDetail = zeptoResult && zeptoResult.error ? String(zeptoResult.error) : '';
   var normalizedReasons = portalV2NormalizeFallbackReasons_(reasons);
   var body = [
@@ -1497,18 +1876,22 @@ function portalV2DashboardHeader_() {
 }
 
 function portalV2RefreshDashboardSafe_() {
+  if (!PORTAL_V2_CONFIG.DASHBOARD_ENABLED) return { ok: true, skipped: 'dashboard_disabled' };
   try {
-    portalV2RefreshDashboard_();
+    return portalV2RefreshDashboard_();
   } catch (err) {
     console.error('portal v2 dashboard refresh failed: ' + err);
+    return { ok: false, error: String(err || '') };
   }
 }
 
 function portalV2RefreshDashboard() {
+  if (!PORTAL_V2_CONFIG.DASHBOARD_ENABLED) return { ok: true, skipped: 'dashboard_disabled' };
   return portalV2RefreshDashboard_();
 }
 
 function portalV2RefreshDashboard_() {
+  if (!PORTAL_V2_CONFIG.DASHBOARD_ENABLED) return { ok: true, skipped: 'dashboard_disabled' };
   var sid = String(PORTAL_V2_CONFIG.SPREADSHEET_ID || '').trim();
   if (!sid) throw new Error('Missing PORTAL_V2_DATABASE_ID');
   var ss = SpreadsheetApp.openById(sid);
@@ -1533,7 +1916,7 @@ function portalV2RefreshDashboard_() {
     rows.push(['route', 'latest_timestamp_utc', route, portalV2SheetLastTimestamp_(routeSheet), now]);
   }
 
-  rows.push(['support', 'abuse_rows', PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME)), now]);
+  rows.push(['support', 'fail_rows', PORTAL_V2_CONFIG.FAIL_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.FAIL_SHEET_NAME)), now]);
   rows.push(['support', 'mail_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
   rows.push(['support', 'mail_error_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2MailErrorCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
   rows.push(['support', 'write_issue_rows', PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME)), now]);
@@ -1940,7 +2323,7 @@ function portalV2ManagedSheetSpecs_() {
   for (var i = 0; i < routes.length; i += 1) {
     add(portalV2SheetTarget_(routes[i]).sheetName, PORTAL_V2_COLUMNS);
   }
-  add(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2HoneypotHeader_());
+  add(PORTAL_V2_CONFIG.FAIL_SHEET_NAME, portalV2FailHeader_());
   add(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, [
     'timestamp_utc',
     'rout',
@@ -1956,7 +2339,9 @@ function portalV2ManagedSheetSpecs_() {
   add(PORTAL_V2_CONFIG.BURST_SHEET_NAME, portalV2BurstHeader_());
   add(PORTAL_V2_CONFIG.INTERNAL_USERNAME_SHEET_NAME, portalV2InternalUsernameHeader_());
   add(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_());
-  add(PORTAL_V2_CONFIG.DASHBOARD_SHEET_NAME, portalV2DashboardHeader_());
+  if (PORTAL_V2_CONFIG.DASHBOARD_ENABLED) {
+    add(PORTAL_V2_CONFIG.DASHBOARD_SHEET_NAME, portalV2DashboardHeader_());
+  }
   return specs;
 }
 
