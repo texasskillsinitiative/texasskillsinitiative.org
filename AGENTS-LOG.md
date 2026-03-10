@@ -2934,3 +2934,11 @@
 - Actions taken: Recorded a follow-up clean-close handoff after confirming the latest repo state with `git status --short` and `git log --oneline -n 3`.
 - Troubleshooting suggestions: Start the next session with a live homepage rubric smoke test, focusing on phase-to-phase sequencing, the Phase 4 extension delay, and responsive behavior before any further rubric or performance changes.
 - Resolutions/outcomes: Next-session first task is explicitly set to browser-based rubric validation. No additional in-scope code changes were made in this closeout.
+### 2026-03-10 10:16:42 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refreshed the engagement persona cards in `index.html` and `css/main.css` by removing the emoji treatment, adding tinted thumbnail bands sourced from the existing engagement asset, then tightening the card copy area and reducing helper text to a right-aligned arrow. Ran clean-close repo checks with `git status --short` and `git log --oneline -n 3`.
+- Troubleshooting suggestions: The next validation should be a browser pass on the engagement section at desktop, `900px`, and `600px` widths to confirm the thumbnail crop positions and tightened text spacing feel balanced. Avoid mixing that check with the active rubric styling packet in shared files unless you deliberately take ownership of the overlap.
+- Resolutions/outcomes: Engagement cards now read as image-led selectors instead of emoji tiles, with unchanged click behavior. No commit was created in this closeout because `STATUS.md` item states were not changed in this session.
+### 2026-03-10 12:48:01 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Prepared a governance-only checkpoint and recorded the user's note that `AGENTS.md` was updated outside this commit; intentionally kept the commit scope limited to `AGENTS-LOG.md` because `AGENTS.md` itself had no current working-tree diff and the repo contains unrelated in-progress site changes.
+- Troubleshooting suggestions: If the `AGENTS.md` update should be included in a future commit, make sure the file has an actual working-tree diff at commit time and keep that commit isolated from unrelated runtime/content changes.
+- Resolutions/outcomes: This checkpoint preserves the requested note without bundling unrelated files from the current working tree.
