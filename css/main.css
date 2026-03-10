@@ -3126,38 +3126,630 @@
             gap: 16px;
         }
 
-        .rubric-protocol-toggle {
+        .rubric-protocol-body {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: minmax(0, 1fr);
+            gap: 16px;
+            align-items: start;
+        }
+
+        .rubric-protocol {
+            --rubric-phase-count: 4;
+            --rubric-active-index: 0;
+            --rubric-top-marker-radius: 13px;
+            --rubric-track-lead: 28px;
+            --rubric-track-fill-lead: 0px;
+            --rubric-dot-cadence: 1.18s;
+        }
+
+        .rubric-protocol[data-active-protocol-index="0"] {
+            --rubric-active-index: 0;
+            --rubric-track-fill-lead: 0px;
+        }
+
+        .rubric-protocol[data-active-protocol-index="1"] {
+            --rubric-active-index: 1;
+            --rubric-track-fill-lead: var(--rubric-track-lead);
+        }
+
+        .rubric-protocol[data-active-protocol-index="2"] {
+            --rubric-active-index: 2;
+            --rubric-track-fill-lead: var(--rubric-track-lead);
+        }
+
+        .rubric-protocol[data-active-protocol-index="3"] {
+            --rubric-active-index: 3;
+            --rubric-track-fill-lead: var(--rubric-track-lead);
+        }
+
+        .rubric-protocol[data-active-protocol-index="4"] {
+            --rubric-active-index: 4;
+            --rubric-track-fill-lead: var(--rubric-track-lead);
+        }
+
+        .rubric-protocol:not(.is-progress-primed) .rubric-protocol-track::after,
+        .rubric-protocol:not(.is-progress-primed) .rubric-phase-rail__inner::after {
+            transition: none;
+        }
+
+        .rubric-protocol-toggle {
+            position: relative;
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: center;
+            gap: 2px;
+            padding: 10px 10px 10px 6px;
             border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
             background: color-mix(in srgb, var(--card-bg) 90%, transparent);
+            overflow: visible;
+        }
+
+        .rubric-protocol-track {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            align-items: center;
+            gap: 0;
+            isolation: isolate;
+            overflow: visible;
+        }
+
+        .rubric-protocol-track::before,
+        .rubric-protocol-track::after {
+            content: "";
+            position: absolute;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .rubric-protocol-track::before {
+            left: calc(var(--rubric-track-lead) * -1);
+            right: var(--rubric-top-marker-radius);
+            top: calc(50% - 0.5px);
+            height: 1px;
+            background: linear-gradient(90deg,
+                    color-mix(in srgb, var(--frame-border) 52%, transparent),
+                    color-mix(in srgb, var(--frame-border) 88%, transparent),
+                    color-mix(in srgb, var(--frame-border) 52%, transparent));
+            opacity: 0.7;
+        }
+
+        .rubric-protocol-track::after {
+            display: none;
+        }
+
+        .rubric-protocol-dot {
+            --rubric-segment-progress: 0;
+            --rubric-segment-length: 100%;
+            --rubric-pulse-fill: radial-gradient(circle,
+                    color-mix(in srgb, #9fe7ff 94%, #ffffff 6%) 0%,
+                    color-mix(in srgb, #3bb8ff 78%, transparent) 56%,
+                    transparent 100%);
+            --rubric-pulse-stack: none;
+            position: absolute;
+            top: calc(50% - 0.5px);
+            height: 1px;
+            background: linear-gradient(90deg,
+                    color-mix(in srgb, var(--accent) 68%, transparent),
+                    color-mix(in srgb, var(--accent) 96%, #ffffff 8%),
+                    color-mix(in srgb, var(--accent) 74%, transparent));
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
+            transform-origin: left center;
+            transform: scaleX(var(--rubric-segment-progress));
+            opacity: var(--rubric-segment-progress);
+            transition: transform 0.42s ease, opacity 0.2s ease, box-shadow 0.24s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .rubric-protocol-dot__orb {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--rubric-pulse-fill);
+            box-shadow: var(--rubric-pulse-stack);
+            filter: drop-shadow(0 0 14px color-mix(in srgb, #58c8ff 48%, transparent));
+            transform: translate3d(0, -50%, 0) scale(0.3);
+            opacity: 0;
+            pointer-events: none;
+            will-change: left, opacity, transform;
+        }
+
+        .rubric-protocol-dot--phase-1 {
+            --rubric-segment-length: calc(((100% - var(--rubric-top-marker-radius)) / 4) + var(--rubric-track-lead));
+            left: calc(var(--rubric-track-lead) * -1);
+            width: var(--rubric-segment-length);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 30%, transparent);
+        }
+
+        .rubric-protocol-dot--phase-2 {
+            --rubric-segment-length: calc((100% - var(--rubric-top-marker-radius)) / 4);
+            left: calc((100% - var(--rubric-top-marker-radius)) / 4);
+            width: var(--rubric-segment-length);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 32%, transparent);
+        }
+
+        .rubric-protocol-dot--phase-3 {
+            --rubric-segment-length: calc((100% - var(--rubric-top-marker-radius)) / 4);
+            left: calc((100% - var(--rubric-top-marker-radius)) / 2);
+            width: var(--rubric-segment-length);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 28%, transparent);
+        }
+
+        .rubric-protocol-dot--phase-4 {
+            --rubric-segment-length: calc((100% - var(--rubric-top-marker-radius)) / 4);
+            left: calc(((100% - var(--rubric-top-marker-radius)) * 3) / 4);
+            width: var(--rubric-segment-length);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 26%, transparent);
+        }
+
+        .rubric-protocol-dot--phase-4-extension {
+            --rubric-segment-length: var(--rubric-phase-4-extension-length, 0px);
+            left: calc(100% - var(--rubric-top-marker-radius));
+            width: var(--rubric-segment-length);
+        }
+
+        .rubric-protocol[data-active-protocol-index="1"] .rubric-protocol-dot--phase-1,
+        .rubric-protocol[data-active-protocol-index="2"] .rubric-protocol-dot--phase-1,
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-1,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-1 {
+            --rubric-segment-progress: 1;
+        }
+
+        .rubric-protocol[data-active-protocol-index="2"] .rubric-protocol-dot--phase-2,
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-2,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-2 {
+            --rubric-segment-progress: 1;
+        }
+
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-3,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-3 {
+            --rubric-segment-progress: 1;
+        }
+
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-4 {
+            --rubric-segment-progress: 1;
+        }
+
+.rubric-protocol[data-active-protocol-index="4"][data-post-phase-ready="true"] .rubric-protocol-dot--phase-4-extension {
+            --rubric-segment-progress: 1;
+        }
+
+        .rubric-protocol[data-active-protocol-index="1"] .rubric-protocol-dot--phase-1 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="2"] .rubric-protocol-dot--phase-1 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-1 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-1 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="2"] .rubric-protocol-dot--phase-2 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-2 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-2 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="3"] .rubric-protocol-dot--phase-3 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-3 .rubric-protocol-dot__orb,
+        .rubric-protocol[data-active-protocol-index="4"] .rubric-protocol-dot--phase-4 .rubric-protocol-dot__orb,
+.rubric-protocol[data-active-protocol-index="4"][data-post-phase-ready="true"] .rubric-protocol-dot--phase-4-extension .rubric-protocol-dot__orb {
+            animation: rubricSegmentPulseStream var(--rubric-orb-duration-ms, 1280ms) linear infinite;
+            animation-delay: var(--rubric-orb-delay-ms, 0ms);
+        }
+
+        .rubric-protocol-toggle-label {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: color-mix(in srgb, var(--accent) 84%, var(--page-text-main));
+            white-space: nowrap;
+            line-height: 1;
+            transform: translateY(1px);
+            padding: 7px 14px 7px 12px;
+            background: linear-gradient(90deg,
+                    color-mix(in srgb, var(--accent) 16%, var(--card-bg)),
+                    color-mix(in srgb, var(--accent) 8%, transparent));
+            clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+            isolation: isolate;
+            z-index: 3;
+        }
+
+        .rubric-protocol-toggle-label::before {
+            content: "";
+            position: absolute;
+            inset: -10px -14px -10px -12px;
+            background: color-mix(in srgb, var(--card-bg) 98%, var(--page-bg));
+            clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%);
+            z-index: -1;
         }
 
         .rubric-protocol-segment {
             appearance: none;
             border: 0;
-            border-bottom: 2px solid transparent;
             background: transparent;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
             color: color-mix(in srgb, var(--page-text-main) 72%, var(--page-text-dim));
             min-height: 52px;
-            padding: 0 12px;
+            padding: 0;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.66rem;
             letter-spacing: 0.9px;
             text-transform: uppercase;
             cursor: pointer;
+            text-align: right;
             transition: border-color 0.24s ease, color 0.24s ease, text-shadow 0.24s ease, background 0.24s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rubric-protocol-segment.is-complete {
+            color: color-mix(in srgb, var(--accent) 80%, var(--page-text-main));
         }
 
         .rubric-protocol-segment:hover {
             color: color-mix(in srgb, var(--accent) 76%, var(--page-text-main));
-            background: color-mix(in srgb, var(--accent) 5%, transparent);
         }
 
         .rubric-protocol-segment.is-active {
-            border-bottom-color: var(--accent);
+            color: color-mix(in srgb, var(--accent) 62%, var(--page-text-main));
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-shadow: none;
+        }
+
+        .rubric-protocol-segment.is-active.is-energized {
             color: color-mix(in srgb, var(--accent) 86%, var(--page-text-main));
             text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 38%, transparent);
+            animation: rubricActiveTextPulse 1.7s ease-in-out infinite;
+        }
+
+        .rubric-protocol-segment__num {
+            position: relative;
+            display: inline-grid;
+            place-items: center;
+            width: 26px;
+            height: 26px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--card-bg) 96%, var(--page-bg));
+            font-size: 0.68rem;
+            line-height: 1;
+            transition: border-color 0.24s ease, background 0.24s ease, color 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+            z-index: 1;
+        }
+
+        .rubric-protocol-segment__num::after {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--accent) 54%, transparent);
+            box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 18%, transparent);
+            opacity: 0;
+            transform: scale(0.72);
+            pointer-events: none;
+        }
+
+        .rubric-protocol-segment__label {
+            display: none;
+        }
+
+        .rubric-protocol-segment.is-active .rubric-protocol-segment__num {
+            border-color: color-mix(in srgb, var(--accent) 44%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 86%, var(--page-text-main));
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 8%, transparent);
+            color: color-mix(in srgb, var(--page-bg) 86%, #05070a);
+            transform: scale(1.02);
+        }
+
+        .rubric-protocol-segment.is-active.is-energized .rubric-protocol-segment__num {
+            border-color: color-mix(in srgb, var(--accent) 80%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 96%, #ffffff 6%);
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+            color: color-mix(in srgb, var(--page-bg) 92%, #040608);
+            transform: scale(1.05);
+            animation: rubricActiveMarkerPulse 1.7s ease-in-out infinite;
+        }
+
+        .rubric-protocol-segment.is-complete .rubric-protocol-segment__num {
+            border-color: color-mix(in srgb, var(--accent) 68%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 10%, var(--page-bg));
+            color: color-mix(in srgb, var(--accent) 82%, var(--page-text-main));
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 8%, transparent);
+        }
+
+        .rubric-protocol-segment__num.is-pass-live::after {
+            border-color: color-mix(in srgb, var(--map-texas-color-1) 62%, transparent);
+            box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-texas-color-1) 20%, transparent);
+            animation: rubricPhasePassPulsePhase4 var(--rubric-dot-pass-ms, 460ms) linear 1 both;
+        }
+
+        .rubric-protocol-segment__num.is-pass-live-phase4::after {
+            border-color: color-mix(in srgb, var(--map-texas-color-1) 62%, transparent);
+            box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-texas-color-1) 20%, transparent);
+            animation: rubricPhasePassPulsePhase4 var(--rubric-dot-pass-ms, 460ms) linear 1 both;
+        }
+
+        .rubric-protocol-segment__num.is-pass-boost::after {
+            opacity: 1;
+            transform: scale(1.04);
+            border-color: color-mix(in srgb, var(--map-texas-color-1) 76%, transparent);
+            box-shadow: 0 0 0 6px color-mix(in srgb, var(--map-texas-color-1) 16%, transparent);
+        }
+
+        .rubric-phase-rail {
+            display: none;
+        }
+
+        .rubric-phase-rail__inner {
+            position: sticky;
+            top: calc(var(--nav-current-height, 95px) + 20px);
+            display: grid;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
+            background: color-mix(in srgb, var(--card-bg) 94%, transparent);
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .rubric-phase-rail__inner::before,
+        .rubric-phase-rail__inner::after {
+            content: "";
+            position: absolute;
+            left: 32px;
+            width: 1px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .rubric-phase-rail__inner::before {
+            top: 30px;
+            bottom: 30px;
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--frame-border) 52%, transparent),
+                    color-mix(in srgb, var(--frame-border) 88%, transparent),
+                    color-mix(in srgb, var(--frame-border) 52%, transparent));
+            opacity: 0.7;
+        }
+
+        .rubric-phase-rail__inner::after {
+            top: 30px;
+            height: calc((100% - 60px) * var(--rubric-active-index) / var(--rubric-phase-count));
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent) 68%, transparent),
+                    color-mix(in srgb, var(--accent) 96%, #ffffff 8%),
+                    color-mix(in srgb, var(--accent) 74%, transparent));
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 34%, transparent);
+            transition: height 0.42s ease;
+        }
+
+        .rubric-phase-rail__button {
+            appearance: none;
+            display: grid;
+            grid-template-columns: 40px minmax(0, 1fr);
+            gap: 10px;
+            align-items: start;
+            width: 100%;
+            padding: 10px 10px 11px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 86%, transparent);
+            background: color-mix(in srgb, var(--page-bg) 24%, transparent);
+            color: color-mix(in srgb, var(--page-text-main) 82%, var(--page-text-dim));
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.24s ease, background 0.24s ease, color 0.24s ease, transform 0.24s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .rubric-phase-rail__button:hover {
+            border-color: color-mix(in srgb, var(--accent) 46%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 6%, transparent);
+            color: var(--page-text-main);
+            transform: translateX(2px);
+        }
+
+        .rubric-phase-rail__button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .rubric-phase-rail__button.is-active {
+            border-color: color-mix(in srgb, var(--accent) 58%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 6%, transparent);
+            color: var(--page-text-main);
+            box-shadow: inset 2px 0 0 color-mix(in srgb, var(--accent) 44%, transparent);
+        }
+
+        .rubric-phase-rail__button.is-active.is-energized {
+            border-color: color-mix(in srgb, var(--accent) 78%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
+            color: var(--page-text-main);
+            box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 86%, transparent);
+            animation: rubricActiveCardPulse 1.7s ease-in-out infinite;
+        }
+
+        .rubric-phase-rail__button.is-complete {
+            border-color: color-mix(in srgb, var(--accent) 48%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 7%, transparent);
+            color: color-mix(in srgb, var(--accent) 82%, var(--page-text-main));
+            box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 58%, transparent);
+        }
+
+        .rubric-phase-rail__num {
+            position: relative;
+            display: inline-grid;
+            place-items: center;
+            align-self: end;
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
+            background: color-mix(in srgb, var(--card-bg) 96%, var(--page-bg));
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.76rem;
+            line-height: 1;
+            color: color-mix(in srgb, var(--accent) 88%, var(--page-text-main));
+            z-index: 1;
+            transition: border-color 0.24s ease, background 0.24s ease, box-shadow 0.24s ease, transform 0.24s ease;
+        }
+
+        .rubric-phase-rail__button.is-active .rubric-phase-rail__num {
+            border-color: color-mix(in srgb, var(--accent) 44%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 6%, var(--page-bg));
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 8%, transparent);
+            transform: scale(1.02);
+        }
+
+        .rubric-phase-rail__button.is-active.is-energized .rubric-phase-rail__num {
+            border-color: color-mix(in srgb, var(--accent) 80%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 14%, var(--page-bg));
+            box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+            transform: scale(1.06);
+            animation: rubricActiveMarkerPulse 1.7s ease-in-out infinite;
+        }
+
+        .rubric-phase-rail__button.is-complete .rubric-phase-rail__num {
+            border-color: color-mix(in srgb, var(--accent) 68%, var(--frame-border));
+            background: color-mix(in srgb, var(--accent) 10%, var(--page-bg));
+            color: color-mix(in srgb, var(--accent) 82%, var(--page-text-main));
+            box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 8%, transparent);
+        }
+
+        .rubric-phase-rail__copy {
+            display: grid;
+            gap: 4px;
+        }
+
+        .rubric-phase-rail__title {
+            font-size: 0.74rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .rubric-phase-rail__meta {
+            font-size: 0.72rem;
+            line-height: 1.4;
+            color: color-mix(in srgb, var(--page-text-main) 70%, var(--page-text-dim));
+        }
+
+        .rubric-phase-rail__button.is-complete .rubric-phase-rail__meta {
+            color: color-mix(in srgb, var(--accent) 60%, var(--page-text-main));
+        }
+
+        @keyframes rubricActiveTextPulse {
+            0%, 100% {
+                opacity: 0.86;
+                text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 28%, transparent);
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 42%, transparent);
+            }
+        }
+
+        @keyframes rubricActiveMarkerPulse {
+            0%, 100% {
+                transform: scale(1.03);
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 16%, transparent);
+            }
+        }
+
+        @keyframes rubricActiveCardPulse {
+            0%, 100% {
+                background: color-mix(in srgb, var(--accent) 8%, transparent);
+                border-color: color-mix(in srgb, var(--accent) 72%, var(--frame-border));
+            }
+            50% {
+                background: color-mix(in srgb, var(--accent) 12%, transparent);
+                border-color: color-mix(in srgb, var(--accent) 82%, var(--frame-border));
+            }
+        }
+
+        @keyframes rubricSegmentPulseStream {
+            0% {
+                opacity: 0;
+                left: 0;
+                transform: translate3d(-9px, -50%, 0) scale(0.18);
+            }
+            10% {
+                opacity: var(--rubric-orb-opacity, 0.78);
+                left: 0;
+                transform: translate3d(0, -50%, 0) scale(0.9);
+            }
+            84% {
+                opacity: var(--rubric-orb-opacity, 0.78);
+                left: calc(100% - 9px);
+                transform: translate3d(0, -50%, 0) scale(0.76);
+            }
+            100% {
+                opacity: 0;
+                left: 100%;
+                transform: translate3d(-9px, -50%, 0) scale(0.2);
+            }
+        }
+
+
+        @keyframes rubricPhasePassPulse {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.66);
+                box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
+            }
+            22% {
+                opacity: 0;
+                transform: scale(0.72);
+            }
+            44% {
+                opacity: 1;
+                transform: scale(1);
+                box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+            }
+            68% {
+                opacity: 0;
+                transform: scale(1.16);
+                box-shadow: 0 0 0 9px color-mix(in srgb, var(--accent) 0%, transparent);
+            }
+        }
+
+        @keyframes rubricPhasePassPulsePhase4 {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.66);
+                box-shadow: 0 0 0 0 color-mix(in srgb, var(--map-texas-color-1) 0%, transparent);
+            }
+            22% {
+                opacity: 0;
+                transform: scale(0.72);
+            }
+            44% {
+                opacity: 1;
+                transform: scale(1.02);
+                box-shadow: 0 0 0 4px color-mix(in srgb, var(--map-texas-color-1) 18%, transparent);
+            }
+            68% {
+                opacity: 0;
+                transform: scale(1.18);
+                box-shadow: 0 0 0 9px color-mix(in srgb, var(--map-texas-color-1) 0%, transparent);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rubric-protocol-segment.is-active.is-energized,
+            .rubric-protocol-segment.is-active.is-energized .rubric-protocol-segment__num,
+            .rubric-phase-rail__button.is-active.is-energized,
+            .rubric-phase-rail__button.is-active.is-energized .rubric-phase-rail__num,
+            .rubric-protocol-dot__orb,
+            .rubric-protocol-segment__num::after {
+                animation: none;
+            }
         }
 
         .rubric-protocol-stage {
@@ -6410,6 +7002,66 @@
             z-index: 2;
         }
 
+        @media (min-width: 1025px) {
+            .header-index .nav-num {
+                opacity: 0.34;
+                font-size: 0.56rem;
+                left: 9px;
+            }
+
+            .header-index .nav-label {
+                margin-left: 14px;
+                letter-spacing: 1.35px;
+            }
+
+            .header-index a.is-active .nav-num,
+            .header-index a[aria-current="page"] .nav-num,
+            body[data-active-tab="overview"] .header-index a[href="#overview"] .nav-num,
+            body[data-active-tab="mandate"] .header-index a[href="#mandate"] .nav-num,
+            body[data-active-tab="rubric"] .header-index a[href="#rubric"] .nav-num,
+            body[data-active-tab="pipeline"] .header-index a[href="#pipeline"] .nav-num,
+            body[data-active-tab="engagement"] .header-index a[href="#engagement"] .nav-num,
+            body[data-active-tab="team"] .header-index a[href="#team"] .nav-num {
+                left: 9px;
+                top: 50%;
+                font-size: 0.6rem;
+                opacity: 0.46;
+                transform: translateY(-50%);
+            }
+
+            .header-index a[href="#overview"] .nav-num,
+            .header-index a.is-active[href="#overview"] .nav-num,
+            .header-index a[aria-current="page"][href="#overview"] .nav-num,
+            body[data-active-tab="overview"] .header-index a[href="#overview"] .nav-num {
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .header-index a.is-active,
+            .header-index a[aria-current="page"],
+            body[data-active-tab="overview"] .header-index a[href="#overview"],
+            body[data-active-tab="mandate"] .header-index a[href="#mandate"],
+            body[data-active-tab="rubric"] .header-index a[href="#rubric"],
+            body[data-active-tab="pipeline"] .header-index a[href="#pipeline"],
+            body[data-active-tab="engagement"] .header-index a[href="#engagement"],
+            body[data-active-tab="team"] .header-index a[href="#team"] {
+                min-width: 152px;
+            }
+
+            .header-index a.is-active .nav-label,
+            .header-index a[aria-current="page"] .nav-label,
+            body[data-active-tab="overview"] .header-index a[href="#overview"] .nav-label,
+            body[data-active-tab="mandate"] .header-index a[href="#mandate"] .nav-label,
+            body[data-active-tab="rubric"] .header-index a[href="#rubric"] .nav-label,
+            body[data-active-tab="pipeline"] .header-index a[href="#pipeline"] .nav-label,
+            body[data-active-tab="engagement"] .header-index a[href="#engagement"] .nav-label,
+            body[data-active-tab="team"] .header-index a[href="#team"] .nav-label {
+                font-size: 0.68rem;
+                letter-spacing: 1.5px;
+                transform: scale(1.06);
+            }
+        }
+
         .header-index a.is-active[href="#overview"] .nav-num,
         .header-index a[aria-current="page"][href="#overview"] .nav-num,
         body[data-active-tab="overview"] .header-index a[href="#overview"] .nav-num {
@@ -6669,11 +7321,44 @@
             }
 
             .rubric-protocol-toggle {
+                --rubric-top-marker-radius: 12px;
+                --rubric-track-lead: 24px;
+                position: sticky;
+                top: var(--nav-current-height, 95px);
+                z-index: 5;
+                margin-left: -20px;
+                margin-right: -10px;
+                border-left: 0;
+                border-right: 0;
+                border-top: 0;
+                background: color-mix(in srgb, var(--page-bg) 94%, var(--card-bg));
+                backdrop-filter: blur(10px);
+            }
+
+            .rubric-protocol-body {
                 grid-template-columns: 1fr;
             }
 
+            .rubric-phase-rail {
+                display: none;
+            }
+
             .rubric-protocol-segment {
-                min-height: 48px;
+                min-height: 40px;
+                padding: 0;
+                border: 0;
+                font-size: 0.58rem;
+                letter-spacing: 0.6px;
+            }
+
+            .rubric-protocol-segment.is-active {
+                border-bottom-color: transparent;
+            }
+
+            .rubric-protocol-segment__num {
+                width: 24px;
+                height: 24px;
+                font-size: 0.64rem;
             }
 
             .rubric-protocol-stage {

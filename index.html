@@ -8,6 +8,13 @@
     <script>
         document.documentElement.classList.remove('no-js');
     </script>
+    <style>
+        html[data-theme="dark"],
+        html[data-theme="dark"] body {
+            background-color: #050b16;
+            color-scheme: dark;
+        }
+    </style>
     <link rel="icon" href="assets/global/icon/tsi-logo-tn-icon-favicon.svg" type="image/svg+xml">
     <link rel="icon" type="image/png" sizes="32x32" href="assets/global/icon/tsi-logo-tn-icon-favicon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/global/icon/tsi-logo-tn-icon-android.png">
@@ -220,7 +227,7 @@
             <img src="assets/global/logo/tsi-logo-tn-star.svg" class="modal-logo logo logo-light" alt="TSI">
             <button type="button" class="close-modal" id="accessModalClose" data-modal-close="accessModal"
                 aria-label="Close access modal">×</button>
-            <h3 id="accessModalTitle">AN INVITATION TO COLLABORATE</h3>
+            <h3 id="accessModalTitle">Your perspective matters.</h3>
 
             <div id="accessModalBody" class="access-modal-body">
                 <form id="stakeholderForm" class="stakeholder-form" method="post">
@@ -440,32 +447,88 @@
         <!-- Mandate Section End -->
         <!-- Rubric Section Start -->
         <section class="section-wrap" id="rubric" role="tabpanel" aria-labelledby="tab-rubric" tabindex="-1">
-            <div class="rubric-protocol" data-rubric-protocol>
-                <div class="rubric-protocol-toggle" role="tablist" aria-label="Rubric protocol phases">
-                    <button type="button" class="rubric-protocol-segment is-active" id="rubric-protocol-tab-phase-01"
-                        data-protocol-toggle="phase-01" role="tab" aria-selected="true"
-                        aria-controls="rubric-view-phase-01">
-                        Phase 01
-                    </button>
-                    <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-02"
-                        data-protocol-toggle="phase-02" role="tab" aria-selected="false"
-                        aria-controls="rubric-view-phase-02">
-                        Phase 02
-                    </button>
-                    <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-03"
-                        data-protocol-toggle="phase-03" role="tab" aria-selected="false"
-                        aria-controls="rubric-view-phase-03">
-                        Phase 03
-                    </button>
-                    <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-04"
-                        data-protocol-toggle="phase-04" role="tab" aria-selected="false"
-                        aria-controls="rubric-view-phase-04">
-                        Phase 04
-                    </button>
+            <div class="rubric-protocol" data-rubric-protocol data-active-protocol-index="0">
+                <div class="rubric-protocol-toggle">
+                    <span class="rubric-protocol-toggle-label" aria-hidden="true">Phase:</span>
+                    <div class="rubric-protocol-track" role="tablist" aria-label="Rubric protocol phases"
+                        data-protocol-toggle-group="top">
+                        <button type="button" class="rubric-protocol-segment is-active" id="rubric-protocol-tab-phase-01"
+                            data-protocol-toggle="phase-01" data-protocol-index="1" role="tab" aria-selected="true"
+                            aria-controls="rubric-view-phase-01">
+                            <span class="rubric-protocol-segment__num" aria-hidden="true">01</span>
+                            <span class="rubric-protocol-segment__label">Phase 01</span>
+                        </button>
+                        <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-02"
+                            data-protocol-toggle="phase-02" data-protocol-index="2" role="tab" aria-selected="false"
+                            aria-controls="rubric-view-phase-02">
+                            <span class="rubric-protocol-segment__num" aria-hidden="true">02</span>
+                            <span class="rubric-protocol-segment__label">Phase 02</span>
+                        </button>
+                        <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-03"
+                            data-protocol-toggle="phase-03" data-protocol-index="3" role="tab" aria-selected="false"
+                            aria-controls="rubric-view-phase-03">
+                            <span class="rubric-protocol-segment__num" aria-hidden="true">03</span>
+                            <span class="rubric-protocol-segment__label">Phase 03</span>
+                        </button>
+                        <button type="button" class="rubric-protocol-segment" id="rubric-protocol-tab-phase-04"
+                            data-protocol-toggle="phase-04" data-protocol-index="4" role="tab" aria-selected="false"
+                            aria-controls="rubric-view-phase-04">
+                            <span class="rubric-protocol-segment__num" aria-hidden="true">04</span>
+                            <span class="rubric-protocol-segment__label">Phase 04</span>
+                        </button>
+                        <span class="rubric-protocol-dot rubric-protocol-dot--phase-1" aria-hidden="true"></span>
+                        <span class="rubric-protocol-dot rubric-protocol-dot--phase-2" aria-hidden="true"></span>
+                        <span class="rubric-protocol-dot rubric-protocol-dot--phase-3" aria-hidden="true"></span>
+                        <span class="rubric-protocol-dot rubric-protocol-dot--phase-4" aria-hidden="true"></span>
+                        <span class="rubric-protocol-dot rubric-protocol-dot--phase-4-extension" aria-hidden="true"></span>
+                    </div>
                 </div>
 
-                <div class="rubric-protocol-stage" data-rubric-stage>
-                    <article class="rubric-protocol-view is-active" data-protocol-view="phase-01"
+                <div class="rubric-protocol-body">
+                    <aside class="rubric-phase-rail" aria-label="Rubric phase navigation">
+                        <div class="rubric-phase-rail__inner" role="tablist" aria-label="Rubric phase rail"
+                            data-protocol-toggle-group="rail">
+                            <button type="button" class="rubric-phase-rail__button is-active"
+                                data-protocol-toggle="phase-01" data-protocol-index="1" role="tab" aria-selected="true"
+                                aria-controls="rubric-view-phase-01">
+                                <span class="rubric-phase-rail__num">01</span>
+                                <span class="rubric-phase-rail__copy">
+                                    <span class="rubric-phase-rail__title">Foundation</span>
+                                    <span class="rubric-phase-rail__meta">Initial evaluation and baseline risk mapping</span>
+                                </span>
+                            </button>
+                            <button type="button" class="rubric-phase-rail__button"
+                                data-protocol-toggle="phase-02" data-protocol-index="2" role="tab" aria-selected="false"
+                                aria-controls="rubric-view-phase-02">
+                                <span class="rubric-phase-rail__num">02</span>
+                                <span class="rubric-phase-rail__copy">
+                                    <span class="rubric-phase-rail__title">Discovery</span>
+                                    <span class="rubric-phase-rail__meta">Collaborative review and operating alignment</span>
+                                </span>
+                            </button>
+                            <button type="button" class="rubric-phase-rail__button"
+                                data-protocol-toggle="phase-03" data-protocol-index="3" role="tab" aria-selected="false"
+                                aria-controls="rubric-view-phase-03">
+                                <span class="rubric-phase-rail__num">03</span>
+                                <span class="rubric-phase-rail__copy">
+                                    <span class="rubric-phase-rail__title">Training</span>
+                                    <span class="rubric-phase-rail__meta">Pathways, onboarding, and hands-on delivery</span>
+                                </span>
+                            </button>
+                            <button type="button" class="rubric-phase-rail__button"
+                                data-protocol-toggle="phase-04" data-protocol-index="4" role="tab" aria-selected="false"
+                                aria-controls="rubric-view-phase-04">
+                                <span class="rubric-phase-rail__num">04</span>
+                                <span class="rubric-phase-rail__copy">
+                                    <span class="rubric-phase-rail__title">Refinement</span>
+                                    <span class="rubric-phase-rail__meta">Bottlenecks, control, and refined deployment</span>
+                                </span>
+                            </button>
+                        </div>
+                    </aside>
+
+                    <div class="rubric-protocol-stage" data-rubric-stage>
+                        <article class="rubric-protocol-view is-active" data-protocol-view="phase-01"
                         id="rubric-view-phase-01" role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-01"
                         aria-hidden="false" tabindex="0">
                         <p class="rubric-protocol-tone">Focus: <span class="text-main-strong"><strong>Building the
@@ -502,8 +565,8 @@
                                     02.</p>
                             </section>
                         </div>
-                    </article>
-                    <article class="rubric-protocol-view" data-protocol-view="phase-02" id="rubric-view-phase-02"
+                        </article>
+                        <article class="rubric-protocol-view" data-protocol-view="phase-02" id="rubric-view-phase-02"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-02" aria-hidden="true" tabindex="0"
                         hidden>
                         <p class="rubric-protocol-tone">Focus: <span class="text-main-strong"><strong>Building the
@@ -555,8 +618,8 @@
                                     priorities and a signed operating model for deployment.</p>
                             </section>
                         </div>
-                    </article>
-                    <article class="rubric-protocol-view" data-protocol-view="phase-03" id="rubric-view-phase-03"
+                        </article>
+                        <article class="rubric-protocol-view" data-protocol-view="phase-03" id="rubric-view-phase-03"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-03" aria-hidden="true" tabindex="0"
                         hidden>
                         <p class="rubric-protocol-tone">Focus: Streamlining systems and empowering the local workforce.
@@ -620,29 +683,14 @@
                                     <strong>Outputs:</strong> A coordinated launch posture ready for execution.</p>
                             </section>
                         </div>
-                    </article>
-                    <article class="rubric-protocol-view" data-protocol-view="phase-04" id="rubric-view-phase-04"
+                        </article>
+                        <article class="rubric-protocol-view" data-protocol-view="phase-04" id="rubric-view-phase-04"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-04" aria-hidden="true" tabindex="0"
                         hidden>
                         <p class="rubric-protocol-tone">Focus: Streamlining systems and empowering the local workforce.
                             These stages represent the "Action Pathways" where vetting is transformed into streamlined,
                             operational reality.</p>
                         <div class="rubric-phase-grid">
-                            <section class="rubric-deploy-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Refined Deployment</p>
-                                <div class="asset-image rubric-deploy-asset">
-                                    <img src="assets/pages/rubric/rubric-04a.png"
-                                        alt="Refined Deployment visual for scaled delivery systems" loading="lazy"
-                                        decoding="async" width="1536" height="1024">
-                                </div>
-                                <h4 class="rubric-phase-title">Refined Deployment</h4>
-                                <p class="rubric-phase-copy"><strong>Purpose:</strong> Stabilize delivery systems at
-                                    scale. <strong>Inputs:</strong> Live operations and onboarding metrics.
-                                    <strong>Actions:</strong> Align field execution against proven operating targets.
-                                    <strong>Outputs:</strong> Reliable cross-functional deployment rhythm.
-                                    <strong>Actions:</strong> Institutionalize feedback loops and replication logic.
-                                    <strong>Outputs:</strong> Durable model ready for long-term stewardship.</p>
-                            </section>
                             <section class="rubric-deploy-card rubric-phase-panel">
                                 <p class="rubric-phase-label">Bottleneck Removal</p>
                                 <div class="asset-image rubric-deploy-asset">
@@ -669,8 +717,24 @@
                                     <strong>Actions:</strong> Lock in ownership, controls, and review loops.
                                     <strong>Gate:</strong> Sustained KPI stability across cycles.</p>
                             </section>
+                            <section class="rubric-deploy-card rubric-phase-panel">
+                                <p class="rubric-phase-label">Refined Deployment</p>
+                                <div class="asset-image rubric-deploy-asset">
+                                    <img src="assets/pages/rubric/rubric-04a.png"
+                                        alt="Refined Deployment visual for scaled delivery systems" loading="lazy"
+                                        decoding="async" width="1536" height="1024">
+                                </div>
+                                <h4 class="rubric-phase-title">Refined Deployment</h4>
+                                <p class="rubric-phase-copy"><strong>Purpose:</strong> Stabilize delivery systems at
+                                    scale. <strong>Inputs:</strong> Live operations and onboarding metrics.
+                                    <strong>Actions:</strong> Align field execution against proven operating targets.
+                                    <strong>Outputs:</strong> Reliable cross-functional deployment rhythm.
+                                    <strong>Actions:</strong> Institutionalize feedback loops and replication logic.
+                                    <strong>Outputs:</strong> Durable model ready for long-term stewardship.</p>
+                            </section>
                         </div>
-                    </article>
+                        </article>
+                    </div>
                 </div>
             </div>
             <div class="section-next-wrap">

@@ -1,4 +1,4 @@
-const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1/exec';
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXeBfOxrud6Auh-UrHMGKbE_ud9dE8ppsjjK792q2CF_UlRnnpkaC2_g22Dju6oUWH/exec';
 const SUBMIT_MIN_MS = 3000;
 const SUCCESS_GRACE_MS = 2000;
 const SUBMIT_MAX_MS = 30000;
@@ -2349,6 +2349,9 @@ function setActiveTabFromHash(options = {}) {
     });
 
     document.body.dataset.activeTab = resolvedId;
+    window.dispatchEvent(new CustomEvent('tsi:active-tab-changed', {
+        detail: { activeTab: resolvedId }
+    }));
 
     document.querySelectorAll('.header-index a').forEach(link => {
         const isActive = link.getAttribute('href') === `#${resolvedId}`;
@@ -2593,8 +2596,234 @@ function initRubricActions() {
     const initialToggle = toggles.find((toggle) => toggle.classList.contains('is-active')) || toggles[0];
     let activeKey = initialToggle ? String(initialToggle.getAttribute('data-protocol-toggle') || '').trim() : '';
     let isAnimating = false;
+    let hasPrimedInitialProgress = false;
+    let energizeTimerId = 0;
+    let pulseSequenceTimerId = 0;
+    let pulseSequenceToken = 0;
+    let progressAnimationTimerIds = [];
+    let postPhaseReadyTimerId = 0;
 
     const viewByKey = new Map(views.map(view => [view.getAttribute('data-protocol-view'), view]));
+    const pulseMarkers = new Map();
+    const pulseTrack = root.querySelector('.rubric-protocol-track');
+    const postPhaseDot = root.querySelector('.rubric-protocol-dot--phase-4-extension');
+    const markerPulseState = new WeakMap();
+    const pulseDots = Array.from(root.querySelectorAll('.rubric-protocol-dot'));
+    pulseDots.forEach((dot, dotIndex) => {
+        if (dot.querySelector('.rubric-protocol-dot__orb')) return;
+        for (let orbIndex = 0; orbIndex < 3; orbIndex += 1) {
+            const orb = document.createElement('span');
+            const durationMs = 1280 + Math.round(Math.random() * 760) + (dotIndex * 60) + (orbIndex * 90);
+            const delayMs = Math.round(Math.random() * 900) + (orbIndex * 180);
+            const opacity = (0.62 + (Math.random() * 0.24)).toFixed(3);
+            orb.className = 'rubric-protocol-dot__orb';
+            orb.setAttribute('aria-hidden', 'true');
+            orb.style.setProperty('--rubric-orb-duration-ms', `${durationMs}ms`);
+            orb.style.setProperty('--rubric-orb-delay-ms', `${delayMs}ms`);
+            orb.style.setProperty('--rubric-orb-opacity', opacity);
+            dot.appendChild(orb);
+        }
+    });
+    toggles.forEach((toggle) => {
+        const key = toggle.getAttribute('data-protocol-toggle');
+        const marker = toggle.querySelector('.rubric-protocol-segment__num');
+        if (key && marker) {
+            pulseMarkers.set(String(key), marker);
+        }
+    });
+    const getProtocolIndex = (key) => {
+        const match = String(key || '').match(/phase-(\d+)/i);
+        if (!match) return 1;
+        const parsed = Number.parseInt(match[1], 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+    };
+    const getDisplayedProgressIndex = () => {
+        const parsed = Number.parseInt(root.dataset.activeProtocolIndex || '0', 10);
+        return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    };
+    const clearPulseSequenceTimer = () => {
+        if (pulseSequenceTimerId) {
+            window.clearTimeout(pulseSequenceTimerId);
+            pulseSequenceTimerId = 0;
+        }
+    };
+    const clearPostPhaseReadyTimer = () => {
+        if (postPhaseReadyTimerId) {
+            window.clearTimeout(postPhaseReadyTimerId);
+            postPhaseReadyTimerId = 0;
+        }
+    };
+    const clearProgressAnimationTimers = () => {
+        progressAnimationTimerIds.forEach((timerId) => {
+            window.clearTimeout(timerId);
+        });
+        progressAnimationTimerIds = [];
+    };
+    const setPostPhaseReady = (isReady) => {
+        root.dataset.postPhaseReady = isReady ? 'true' : 'false';
+    };
+    const syncPostPhaseReadyState = (activeIndex) => {
+        clearPostPhaseReadyTimer();
+        if (activeIndex !== 4) {
+            setPostPhaseReady(false);
+            return;
+        }
+        setPostPhaseReady(false);
+        postPhaseReadyTimerId = window.setTimeout(() => {
+            if (getDisplayedProgressIndex() !== 4) return;
+            if ((document.body.dataset.activeTab || 'overview') !== 'rubric') return;
+            setPostPhaseReady(true);
+        }, 1280);
+    };
+    const clearPulseClasses = () => {
+        clearPulseSequenceTimer();
+        pulseMarkers.forEach((marker) => {
+            const state = markerPulseState.get(marker);
+            if (state?.clearTimerId) window.clearTimeout(state.clearTimerId);
+            if (state?.boostTimerId) window.clearTimeout(state.boostTimerId);
+            markerPulseState.delete(marker);
+            marker.classList.remove('is-pass-live', 'is-pass-live-phase4', 'is-pass-boost');
+        });
+    };
+    const syncPostPhaseLength = () => {
+        if (!(pulseTrack instanceof HTMLElement) || !(postPhaseDot instanceof HTMLElement)) return;
+        const markerRadiusPx = Number.parseFloat(getComputedStyle(root).getPropertyValue('--rubric-top-marker-radius')) || 0;
+        const trackRect = pulseTrack.getBoundingClientRect();
+        const phase4Endpoint = trackRect.right - markerRadiusPx;
+        const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0;
+        const extensionLength = Math.max(0, viewportWidth - phase4Endpoint);
+        root.style.setProperty('--rubric-phase-4-extension-length', `${extensionLength}px`);
+    };
+    const parseDurationMs = (value, fallbackMs) => {
+        const raw = String(value || '').trim();
+        if (!raw) return fallbackMs;
+        if (raw.endsWith('ms')) {
+            const parsed = Number.parseFloat(raw.slice(0, -2));
+            return Number.isFinite(parsed) ? parsed : fallbackMs;
+        }
+        if (raw.endsWith('s')) {
+            const parsed = Number.parseFloat(raw.slice(0, -1));
+            return Number.isFinite(parsed) ? parsed * 1000 : fallbackMs;
+        }
+        const parsed = Number.parseFloat(raw);
+        return Number.isFinite(parsed) ? parsed : fallbackMs;
+    };
+    const triggerMarkerHalo = (marker, isPhase4 = false, passMs = 460) => {
+        if (!(marker instanceof HTMLElement)) return;
+        const activeClass = isPhase4 ? 'is-pass-live-phase4' : 'is-pass-live';
+        const currentlyActive = marker.classList.contains('is-pass-live') || marker.classList.contains('is-pass-live-phase4');
+        if (!currentlyActive) {
+            marker.classList.remove('is-pass-live', 'is-pass-live-phase4', 'is-pass-boost');
+            void marker.offsetWidth;
+            marker.classList.add(activeClass);
+        } else {
+            marker.classList.add(activeClass);
+        }
+        marker.classList.add('is-pass-boost');
+        const existingState = markerPulseState.get(marker) || {};
+        if (existingState.clearTimerId) window.clearTimeout(existingState.clearTimerId);
+        if (existingState.boostTimerId) window.clearTimeout(existingState.boostTimerId);
+        const boostTimerId = window.setTimeout(() => {
+            marker.classList.remove('is-pass-boost');
+        }, Math.max(220, Math.round(passMs * 0.38)));
+        const clearTimerId = window.setTimeout(() => {
+            marker.classList.remove('is-pass-live', 'is-pass-live-phase4', 'is-pass-boost');
+            markerPulseState.delete(marker);
+        }, Math.max(passMs + 260, Math.round(passMs * 1.5)));
+        markerPulseState.set(marker, { boostTimerId, clearTimerId });
+    };
+    const restartPulseSequence = () => {
+        clearPulseClasses();
+        pulseSequenceToken += 1;
+        if (prefersReducedMotion) return;
+        if ((document.body.dataset.activeTab || 'overview') !== 'rubric') return;
+        syncPostPhaseLength();
+        const activeIndex = Math.max(1, getDisplayedProgressIndex());
+        const travelMs = 1280;
+        const passMs = 560;
+        root.style.setProperty('--rubric-dot-travel-ms', `${travelMs}ms`);
+        root.style.setProperty('--rubric-dot-pass-ms', `${passMs}ms`);
+        const loopDelayMs = activeIndex === 4 && postPhaseDot
+            ? travelMs * (activeIndex + 1)
+            : travelMs * activeIndex;
+        const runStep = (segmentIndex, token) => {
+            if (token !== pulseSequenceToken) return;
+            if ((document.body.dataset.activeTab || 'overview') !== 'rubric') return;
+            const marker = pulseMarkers.get(`phase-${String(segmentIndex).padStart(2, '0')}`);
+            if (marker) {
+                triggerMarkerHalo(marker, segmentIndex === 4, passMs);
+            }
+            if (segmentIndex < activeIndex) {
+                pulseSequenceTimerId = window.setTimeout(() => {
+                    runStep(segmentIndex + 1, token);
+                }, travelMs);
+                return;
+            }
+            pulseSequenceTimerId = window.setTimeout(() => {
+                if (token !== pulseSequenceToken) return;
+                runStep(1, token);
+            }, Math.max(240, loopDelayMs - (travelMs * activeIndex)));
+        };
+        runStep(1, pulseSequenceToken);
+    };
+    syncPostPhaseLength();
+    window.addEventListener('resize', () => {
+        syncPostPhaseLength();
+    });
+    const setDisplayedProgressIndex = (nextIndex, options = {}) => {
+        const { restartSequence = true } = options;
+        root.dataset.activeProtocolIndex = String(nextIndex);
+        syncPostPhaseReadyState(nextIndex);
+        if (restartSequence && !prefersReducedMotion && (document.body.dataset.activeTab || 'overview') === 'rubric') {
+            restartPulseSequence();
+        }
+    };
+    const syncProgressState = (nextKey, options = {}) => {
+        const { animate = false } = options;
+        const targetIndex = getProtocolIndex(nextKey);
+        const currentIndex = getDisplayedProgressIndex();
+        clearProgressAnimationTimers();
+        if (prefersReducedMotion || !animate || currentIndex === targetIndex) {
+            setDisplayedProgressIndex(targetIndex);
+            return;
+        }
+        const direction = targetIndex > currentIndex ? 1 : -1;
+        const stepDelayMs = 430;
+        for (let stepIndex = currentIndex + direction, order = 0;
+            direction > 0 ? stepIndex <= targetIndex : stepIndex >= targetIndex;
+            stepIndex += direction, order += 1) {
+            const timerId = window.setTimeout(() => {
+                setDisplayedProgressIndex(stepIndex);
+            }, order * stepDelayMs);
+            progressAnimationTimerIds.push(timerId);
+        }
+    };
+    const clearEnergizeTimer = () => {
+        if (energizeTimerId) {
+            window.clearTimeout(energizeTimerId);
+            energizeTimerId = 0;
+        }
+    };
+    const setEnergizedState = (nextKey, energized) => {
+        toggles.forEach((toggle) => {
+            const selected = toggle.getAttribute('data-protocol-toggle') === nextKey;
+            toggle.classList.toggle('is-energized', selected && energized);
+        });
+    };
+    const queueActiveEnergize = (nextKey, delayMs = transitionMs - 72) => {
+        clearEnergizeTimer();
+        if (prefersReducedMotion) {
+            setEnergizedState(nextKey, true);
+            return;
+        }
+        setEnergizedState(nextKey, false);
+        energizeTimerId = window.setTimeout(() => {
+            const selectedToggle = toggles.find((toggle) => toggle.getAttribute('data-protocol-toggle') === nextKey);
+            if (selectedToggle && selectedToggle.classList.contains('is-active')) {
+                setEnergizedState(nextKey, true);
+            }
+        }, Math.max(120, delayMs));
+    };
     const setStageHeightFor = (view) => {
         if (!(view instanceof HTMLElement) || !(stage instanceof HTMLElement)) return;
         const targetHeight = view.scrollHeight;
@@ -2602,15 +2831,48 @@ function initRubricActions() {
             stage.style.height = `${targetHeight}px`;
         }
     };
-    const syncToggleState = (nextKey) => {
+    const syncToggleState = (nextKey, options = {}) => {
+        const { syncProgress = true, energizeActive = true } = options;
+        const nextIndex = getProtocolIndex(nextKey);
         toggles.forEach((toggle) => {
+            const toggleIndex = getProtocolIndex(toggle.getAttribute('data-protocol-toggle'));
             const selected = toggle.getAttribute('data-protocol-toggle') === nextKey;
             toggle.classList.toggle('is-active', selected);
+            toggle.classList.toggle('is-complete', toggleIndex < nextIndex);
+            toggle.classList.toggle('is-energized', selected && energizeActive);
             toggle.setAttribute('aria-selected', selected ? 'true' : 'false');
         });
+        if (syncProgress) {
+            syncProgressState(nextKey);
+        }
     };
     const clearMotionClasses = (view) => {
         view.classList.remove('is-enter-from-right', 'is-enter-from-left', 'is-exit-to-left', 'is-exit-to-right');
+    };
+    const animateProgressFromZero = () => {
+        if (prefersReducedMotion) {
+            root.classList.add('is-progress-primed');
+            syncProgressState(activeKey);
+            setEnergizedState(activeKey, true);
+            return;
+        }
+        clearEnergizeTimer();
+        setEnergizedState(activeKey, false);
+        root.classList.remove('is-progress-primed');
+        root.dataset.activeProtocolIndex = '0';
+        setPostPhaseReady(false);
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                root.classList.add('is-progress-primed');
+                syncProgressState(activeKey, { animate: true });
+                queueActiveEnergize(activeKey);
+            });
+        });
+    };
+    const primeInitialProgressIfNeeded = () => {
+        if (hasPrimedInitialProgress) return;
+        hasPrimedInitialProgress = true;
+        animateProgressFromZero();
     };
     const finalizeView = (nextKey, currentView, nextView) => {
         views.forEach((view) => {
@@ -2621,9 +2883,10 @@ function initRubricActions() {
             clearMotionClasses(view);
         });
         activeKey = nextKey;
-        syncToggleState(nextKey);
+        syncToggleState(nextKey, { syncProgress: false, energizeActive: true });
         setStageHeightFor(nextView);
         isAnimating = false;
+        restartPulseSequence();
     };
     const switchProtocol = (nextKey) => {
         if (isAnimating || !nextKey || nextKey === activeKey) return;
@@ -2638,6 +2901,9 @@ function initRubricActions() {
             return;
         }
         isAnimating = true;
+        syncToggleState(nextKey, { syncProgress: false, energizeActive: false });
+        syncProgressState(nextKey, { animate: true });
+        queueActiveEnergize(nextKey);
         nextView.hidden = false;
         nextView.setAttribute('aria-hidden', 'false');
         clearMotionClasses(currentView);
@@ -2654,23 +2920,32 @@ function initRubricActions() {
         }, transitionMs + 24);
     };
 
+    syncToggleState(activeKey, { syncProgress: false, energizeActive: false });
+
     const handleToggleKeyDown = (event) => {
+        const currentToggle = event.currentTarget;
+        const groupNode = currentToggle instanceof HTMLElement
+            ? currentToggle.closest('[data-protocol-toggle-group]')
+            : null;
+        const groupToggles = groupNode
+            ? toggles.filter((toggle) => groupNode.contains(toggle))
+            : toggles;
         const key = event.key;
         if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(key)) return;
         event.preventDefault();
-        const currentIdx = toggles.indexOf(event.currentTarget);
+        const currentIdx = groupToggles.indexOf(currentToggle);
         if (currentIdx === -1) return;
         let nextIdx = currentIdx;
         if (key === 'ArrowRight') {
-            nextIdx = (currentIdx + 1) % toggles.length;
+            nextIdx = (currentIdx + 1) % groupToggles.length;
         } else if (key === 'ArrowLeft') {
-            nextIdx = (currentIdx - 1 + toggles.length) % toggles.length;
+            nextIdx = (currentIdx - 1 + groupToggles.length) % groupToggles.length;
         } else if (key === 'Home') {
             nextIdx = 0;
         } else if (key === 'End') {
-            nextIdx = toggles.length - 1;
+            nextIdx = groupToggles.length - 1;
         }
-        const nextToggle = toggles[nextIdx];
+        const nextToggle = groupToggles[nextIdx];
         if (!nextToggle) return;
         const nextKey = nextToggle.getAttribute('data-protocol-toggle');
         nextToggle.focus();
@@ -2694,7 +2969,34 @@ function initRubricActions() {
         clearMotionClasses(view);
     });
     activeKey = initialView.getAttribute('data-protocol-view') || activeKey || (views[0] ? views[0].getAttribute('data-protocol-view') : '');
-    syncToggleState(activeKey);
+    syncToggleState(activeKey, { syncProgress: false });
+    restartPulseSequence();
+    const initialActiveTab = document.body.dataset.activeTab || 'overview';
+    if (initialActiveTab === 'rubric') {
+        primeInitialProgressIfNeeded();
+    } else if (prefersReducedMotion) {
+        root.classList.add('is-progress-primed');
+    }
+
+    window.addEventListener('tsi:active-tab-changed', (event) => {
+        const nextTab = event instanceof CustomEvent && event.detail ? event.detail.activeTab : '';
+        if (nextTab === 'rubric') {
+            restartPulseSequence();
+            if (!hasPrimedInitialProgress) {
+                primeInitialProgressIfNeeded();
+                return;
+            }
+            if (activeKey === 'phase-01') {
+                animateProgressFromZero();
+            }
+            return;
+        }
+        clearPostPhaseReadyTimer();
+        setPostPhaseReady(false);
+        clearProgressAnimationTimers();
+        clearPulseSequenceTimer();
+        clearPulseClasses();
+    });
 
     // Initial height calculation
     const calcInitialHeight = () => {

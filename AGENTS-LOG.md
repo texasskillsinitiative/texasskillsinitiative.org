@@ -2538,3 +2538,392 @@
 - Actions taken: Swapped the Phase 03 image assignments between `Hands-On Training` and `Operating Alignment`, keeping the current titles and copy in place.
 - Troubleshooting suggestions: If further Phase 03 tuning continues, update both `src` and `alt` together whenever images move so accessibility text stays synchronized with the visual.
 - Resolutions/outcomes: `Hands-On Training` and `Operating Alignment` now display each other's former images without any text or structural changes.
+### 2026-03-08 14:55:08 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reordered the Phase 04 card sequence on the homepage so `Refined Deployment` now renders after `Bottleneck Removal` and `Control and Ownership`, with no content changes inside the card.
+- Troubleshooting suggestions: If a later Phase 04 review changes order again, keep using explicit section moves rather than filename order assumptions because this layout is now intentionally custom.
+- Resolutions/outcomes: Phase 04 now ends with `Refined Deployment` as requested.
+### 2026-03-08 15:03:30 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented the desktop rubric navigation clarification packet by adding a sticky rubric-only side rail inside the rubric section, connecting it to the existing phase-toggle state in `js/main.js`, and reducing the visual dominance of the desktop global section numbers in `css/main.css`.
+- Troubleshooting suggestions: Validate desktop behavior specifically while scrolled mid-rubric to ensure the rail remains visible and synchronized with the top tabs; if keyboard navigation feels odd later, check `data-protocol-toggle-group` scoping first because both top and side controls now share one phase state.
+- Resolutions/outcomes: Desktop rubric navigation now has a persistent in-section phase control, reducing the chance that users leave rubric via the global or cross-section navigation when they intended to move between rubric phases.
+### 2026-03-08 15:07:54 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated the mobile rubric top navigation into a sticky horizontal phase bar under the main nav by adding a visible `Phase:` label and converting the existing mobile phase controls from a stacked layout to a compact single-row treatment in `index.html` and `css/main.css`.
+- Troubleshooting suggestions: Validate on a real narrow viewport that the four mobile phase buttons do not wrap unexpectedly; if they do, reduce label text or button padding before changing the overall bar structure.
+- Resolutions/outcomes: Mobile rubric navigation now reads as an in-section phase bar instead of a vertical button stack, with desktop side-rail behavior unaffected.
+### 2026-03-08 15:24:10 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a minimal rubric phase-position slider to the existing homepage rubric controls by assigning phase indices in `index.html`, drawing integrated track/fill treatments in `css/main.css`, and syncing the active phase index from `initRubricActions()` in `js/main.js`.
+- Troubleshooting suggestions: Validate the rail and mobile bar in-browser at desktop and sub-`900px` widths, because the indicator sizing depends on the current sticky bar geometry and may need small spacing tweaks rather than logic changes if alignment is off.
+- Resolutions/outcomes: Rubric navigation now shows a lightweight numbered progress cue on both desktop and mobile without adding a new interaction model or changing the underlying phase-toggle behavior.
+### 2026-03-08 15:31:18 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Split rubric progress syncing from toggle-finalization in `js/main.js` so the slider fill updates at transition start and moves in parallel with the panel animation instead of snapping after the content finishes switching.
+- Troubleshooting suggestions: If the slider ever appears to get ahead of the visible content on slower devices, keep the current timing change and tune CSS transition duration first before re-coupling it to panel finalization.
+- Resolutions/outcomes: The rubric progress line now advances concurrently with the phase content motion, improving perceived synchronization between navigation state and panel movement.
+### 2026-03-08 15:37:42 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the rubric slider geometry in `css/main.css` so progress stops resolve at the trailing edge of each phase section, and shifted the visible phase markers toward those stop points for closer visual alignment.
+- Troubleshooting suggestions: If the stop alignment still feels slightly off in-browser, tune only the track insets and marker self-alignment; the fill math is now based on section endpoints rather than midpoint spacing.
+- Resolutions/outcomes: The rubric progress fill now ends near each phase marker at the end of its section instead of stopping at the midpoint between sections.
+### 2026-03-08 15:43:11 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Set the rubric slider to initialize from progress `0` in `index.html` and updated `js/main.js` to defer the first progress sync by animation frame so initial entry visibly fills from zero to the end of Phase 1.
+- Troubleshooting suggestions: If the first-fill animation still appears skipped in a specific browser, check whether the browser is collapsing the two-frame defer during initial paint; the next adjustment should be CSS transition timing, not a change back to pre-filled initialization.
+- Resolutions/outcomes: First-time entry into the homepage rubric now presents a visible `0 -> Phase 1` fill animation instead of starting with Phase 1 already populated.
+### 2026-03-08 15:47:02 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed the rubric slider zero-state in `css/main.css` by changing the default active index to `0` and explicitly mapping `data-active-protocol-index="0"` so the initial load state no longer falls through to Phase 1.
+- Troubleshooting suggestions: If the first-load fill still feels too subtle after this fix, adjust only the track/fill contrast or transition duration; the zero-state logic is now wired correctly.
+- Resolutions/outcomes: The rubric slider can now truly render empty on first paint, allowing the deferred `0 -> Phase 1` fill animation to appear instead of starting pre-populated.
+### 2026-03-08 15:52:08 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a rubric progress priming gate so the progress-line transitions are disabled until after the empty zero-state is painted, then re-enabled immediately before the initial Phase 1 fill is triggered in `js/main.js`.
+- Troubleshooting suggestions: If first-load behavior is still inconsistent after this, the next likely cause is another script forcing an early section render; in that case inspect load-time class/attribute mutations on the rubric root rather than further tweaking transition math.
+- Resolutions/outcomes: The initial rubric fill no longer depends on paint timing alone and should consistently animate from empty to Phase 1 instead of appearing partially or fully pre-filled.
+### 2026-03-08 15:59:26 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Traced the remaining issue to top-level section visibility, then updated `setActiveTabFromHash()` to emit the active-section change and moved rubric’s first-fill trigger in `initRubricActions()` to the rubric section’s first real activation instead of page load.
+- Troubleshooting suggestions: If any inconsistency remains after this change, inspect whether another script or manual hash mutation is switching directly into `#rubric` before `setActiveTabFromHash()` settles, because the rubric animation path itself is now aligned with section visibility.
+- Resolutions/outcomes: The initial rubric fill should now be tied to the moment users first enter the rubric section, which removes the hidden-panel race that made the earlier page-load animation effectively invisible.
+### 2026-03-08 16:05:14 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased the rubric line-fill transition duration in `css/main.css` and updated `initRubricActions()` so entering the rubric section replays the `0 -> 1` fill whenever Phase 1 is still the active rubric state, not just on first entry.
+- Troubleshooting suggestions: If the replay still feels inconsistent, the next check should be whether navigation back into rubric sometimes preserves a non-Phase-1 active state unexpectedly; that would be a state-retention issue rather than a progress-animation issue.
+- Resolutions/outcomes: The initial fill now reads more deliberately and returning to rubric while still on Phase 1 should replay the same empty-to-Phase-1 line population instead of leaving the line already full.
+### 2026-03-08 16:09:41 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned the rubric progress-line styling in `css/main.css` to feel more active by increasing line weight slightly and adding a restrained accent gradient plus soft glow on the active fill for both horizontal and vertical variants.
+- Troubleshooting suggestions: If this reads too hot in-browser, reduce the glow strength before reducing line thickness; the stronger cue is mostly coming from the fill treatment rather than the extra pixel of track weight.
+- Resolutions/outcomes: The rubric slider line should now feel more energized and visible while preserving the same geometry and interaction behavior.
+### 2026-03-08 16:13:46 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the active bottom border treatment from `.rubric-protocol-segment` in `css/main.css` so the rubric progress line is the only underline-style indicator beneath the phase controls.
+- Troubleshooting suggestions: If any residual underline still appears in-browser, the next place to inspect is browser default button focus/active styling rather than rubric-specific CSS, because the custom active border cue is now removed.
+- Resolutions/outcomes: The extra tab-like indicator below the phase buttons is gone, leaving the animated progress line as the single bottom-edge signal.
+### 2026-03-08 16:18:52 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Extended rubric state syncing in `js/main.js` to mark earlier phases as completed and updated `css/main.css` so completed phases retain a gold treatment while the active phase uses a restrained pulse/fade emphasis on text, marker, and desktop rail card.
+- Troubleshooting suggestions: If the active phase reads too busy in-browser, reduce the pulse amplitude before removing the completed-state gold carryover; the carryover is the structurally useful part and the pulse is the tunable layer.
+- Resolutions/outcomes: Moving past Phase 1 now leaves previous phases visibly gold, while the current phase reads as the live step through a gentle animated emphasis instead of a static highlight.
+### 2026-03-08 16:24:19 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Simplified the top rubric toggle bar in `css/main.css` so the `Phase` label is visible at the left across sizes, the per-button text labels are suppressed in favor of number-only markers, and the horizontal progress line is aligned to the marker lane so fills terminate under the visible numbers.
+- Troubleshooting suggestions: If the line still appears slightly off-center under a given marker in-browser, the next adjustment should be small left/right inset tuning on `.rubric-protocol-toggle::before` and `::after` rather than any JS state change.
+- Resolutions/outcomes: The top rubric bar now reads as `Phase` plus numeric markers only, with the progress line ending directly under each marker instead of under hidden label space.
+### 2026-03-08 16:28:31 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Tuned the top rubric line geometry in `css/main.css` by introducing explicit left/right inset variables for the marker lane, so the fill width now resolves against the number-marker centers rather than the full segment edge width.
+- Troubleshooting suggestions: If the line still needs pixel-level adjustment after this, only the top-bar inset variables should need tuning; the fill math is now isolated from the rest of the rubric layout.
+- Resolutions/outcomes: The horizontal rubric fill should now terminate much closer to the actual center of each visible top-bar number marker.
+### 2026-03-08 17:43:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the top rubric phase bar structure in `index.html` to introduce a dedicated `rubric-protocol-track` around the phase buttons, and updated `css/main.css` so the horizontal progress line and its priming selector are attached to that inner track instead of the padded outer toggle container.
+- Troubleshooting suggestions: If any remaining offset is still visible after this, it should now be a small marker-radius adjustment on `--rubric-top-marker-radius` rather than another broad layout rewrite, because the line and markers now share the same layout box.
+- Resolutions/outcomes: The top progress line is now measured from the same box that contains the visible number markers, removing the outer-container spacing mismatch that kept the endpoint out of alignment.
+### 2026-03-08 18:00:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a delayed rubric `is-energized` state in `js/main.js` and `css/main.css` so active phase markers/cards first enter in a muted lit state and only take on the stronger accent pulse near the end of the line-fill transition.
+- Troubleshooting suggestions: If the effect needs finer tuning in-browser, adjust the `queueActiveEnergize()` delay in `js/main.js` before changing the CSS styling levels; the core source-effect timing now lives there.
+- Resolutions/outcomes: The phase circle coloring should now read as if it is being fed by the advancing line instead of appearing fully energized at the same instant the transition begins.
+### 2026-03-08 18:43:53 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `css/main.css` so the top rubric track and desktop rail use isolated stacking contexts with their line pseudo-elements pinned at `z-index: 0`, and raised the phase buttons above them to keep the progress line visually behind the marker circles.
+- Troubleshooting suggestions: If any line still appears to cut through a marker in-browser, the next check is marker chip background opacity rather than timing or geometry, because the paint order is now explicit.
+- Resolutions/outcomes: The rubric progress line should now pass behind the circles instead of visually running through them on both the top bar and the desktop side rail.
+### 2026-03-08 18:52:12 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the hover background fill from `.rubric-protocol-segment:hover` in `css/main.css`, leaving only the text/marker response so the top rubric bar no longer paints gold across the empty space between markers.
+- Troubleshooting suggestions: If any residual hover artifact remains, inspect box-shadow on the marker chip itself next; the full-width segment hover background is no longer contributing to it.
+- Resolutions/outcomes: Hovering the gaps between the top rubric numbers should no longer produce the broken-looking gold shading band.
+### 2026-03-08 19:02:22 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `index.html` and `css/main.css` to add a dedicated top-bar tail element for Phase 4, hid the desktop rubric side rail from the visible layout by restoring the rubric body to a single main column, made the marker chips fully opaque, raised and centered the line on the chip centerline, enlarged the `Phase:` label, and shifted the sticky top bar slightly left with tighter spacing.
+- Troubleshooting suggestions: If the Phase 4 tail needs refinement in-browser, tune `.rubric-protocol-tail` angle/length/transition timing before revisiting the main line math; it is intentionally isolated from the normal fill geometry.
+- Resolutions/outcomes: The rubric now uses the top bar as the sole visible phase navigation surface, the marker circles no longer show line bleed, and Phase 4 adds a slower east-northeast continuation beyond the final marker.
+### 2026-03-08 19:07:21 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restored the top rubric segment alignment in `css/main.css` from centered markers back to the prior right-anchored geometry so the visible circle positions and each phase’s line stop endpoint remain where they were before the last layout tweak.
+- Troubleshooting suggestions: If the top bar still needs horizontal tuning after this, adjust only the outer bar shift/padding and avoid changing `.rubric-protocol-segment` alignment again, because that alignment directly controls the stop geometry.
+- Resolutions/outcomes: The rubric keeps the newer cleanup changes, but the marker positions and line endpoints are back on their established stop layout.
+### 2026-03-08 19:09:48 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a delayed pulse animation to the Phase 4 top-bar tail in `css/main.css`, using a restrained glow/brightness cycle that starts after the tail extension completes and respects reduced-motion settings.
+- Troubleshooting suggestions: If the tail reads too active in-browser, lower the `rubricPhaseTailPulse` box-shadow strength before shortening the duration; the motion character is mostly coming from glow amplitude rather than timing.
+- Resolutions/outcomes: The post-Phase-4 northeast tail now continues to feel alive after extending, instead of stopping as a static line.
+### 2026-03-08 19:11:37 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed the rubric top-marker dark-mode regression in `css/main.css` by restoring a theme-blended chip background instead of raw `var(--page-bg)`, and updated the Phase 4 tail pulse to use the same 1.7s cadence and similar scale/glow behavior as the circle marker pulse.
+- Troubleshooting suggestions: If the tail still feels slightly out of sync in-browser, only the tail animation delay should need tuning now; the pulse rhythm itself matches the active marker cycle.
+- Resolutions/outcomes: Dark mode should no longer show bright white rubric marker chips, and the Phase 4 tail pulse should now read as part of the same motion system as the phase circles.
+### 2026-03-08 19:14:16 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a minimal inline style guard in the `index.html` head to set the homepage first-paint background for `html[data-theme="dark"]` and `body` before the main stylesheet loads on hard refresh.
+- Troubleshooting suggestions: If any residual flash remains after this, the next likely source is font or ambient-layer first paint rather than theme state; in that case inspect the earliest body/background-dependent rules in `css/main.css`.
+- Resolutions/outcomes: Hard reloads should no longer start with a bright white flash before settling into the default dark theme.
+### 2026-03-08 19:17:10 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased the Phase 4 tail length and set `.rubric-protocol-toggle` to `overflow: visible` in `css/main.css` so the angled line can project beyond the rubric bar and pass upward beneath the fixed nav layer.
+- Troubleshooting suggestions: If the tail overshoots too far in-browser, reduce `--rubric-phase4-tail-length` before changing the angle, because the start point and motion timing are already aligned to the existing phase endpoint.
+- Resolutions/outcomes: The Phase 4 angled continuation should now visibly leave the bar and travel behind the nav instead of terminating at the top-bar box boundary.
+### 2026-03-08 19:19:27 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refined `.rubric-protocol-toggle-label` in `css/main.css` by increasing its emphasis slightly and adding a short connector rule so `Phase:` visually introduces the bar instead of sitting as an unrelated label.
+- Troubleshooting suggestions: If it still feels detached in-browser, the next adjustment should be reducing the gap between the label and track rather than increasing font styling further.
+- Resolutions/outcomes: `Phase:` should now read more clearly as the title/lead-in for the progress line.
+### 2026-03-08 19:28:14 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the added connector rule from `.rubric-protocol-toggle-label` and increased the `Phase:` label size in `css/main.css` after the connector read as a stray thin line.
+- Troubleshooting suggestions: If `Phase:` still feels visually disconnected after this, the next adjustment should be spacing/alignment only; avoid reintroducing extra decorative strokes beside the label.
+- Resolutions/outcomes: The top rubric title is now larger and cleaner, without the unwanted thin line after the colon.
+### 2026-03-08 19:29:21 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Restyled `.rubric-protocol-toggle-label` in `css/main.css` into a right-pointing wedge using a clipped background shape, with the left body width driven by the `Phase:` text block and the point aimed into the progress line.
+- Troubleshooting suggestions: If the wedge reads too heavy in-browser, reduce the fill intensity before shrinking the shape; the directional read comes from the silhouette more than the color strength.
+- Resolutions/outcomes: `Phase:` should now read as a deliberate source marker pointing into the rubric line rather than plain text beside it.
+### 2026-03-08 19:34:06 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated the Phase 4 tail styling in `css/main.css` to use `--map-texas-color-1` for its gradient and glow, matching the Texas outline color used by the overview globe animation.
+- Troubleshooting suggestions: If the tail feels too cool against the gold phase bar in-browser, the next step should be blending a small amount of accent into the tail glow rather than reverting the base hue; the requested source color match is now exact.
+- Resolutions/outcomes: The line segment to the right of circle 4 now uses the same Texas-outline color family as the overview animation instead of the standard rubric accent.
+### 2026-03-08 19:40:31 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the fixed Phase 4 tail length in `css/main.css` with a viewport-based value so the angled blue continuation can travel to the visible screen edge rather than stopping shortly past the rubric bar.
+- Troubleshooting suggestions: If the line now overshoots visually on some breakpoints, cap `--rubric-phase4-tail-length` with a `min()` or `clamp()` rather than returning to a small fixed pixel length.
+- Resolutions/outcomes: The Phase 4 blue tail should now extend across the viewport instead of terminating near the end of the top bar.
+### 2026-03-08 19:49:29 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a `::after` emitter and `rubricPhaseTailTravel` animation to the Phase 4 tail in `css/main.css`, creating a small blue pulse that starts behind circle 4 and travels along the angled continuation path.
+- Troubleshooting suggestions: If the traveling pulse feels too prominent in-browser, reduce the emitter size or opacity before shortening the travel distance; the path behavior itself is now isolated cleanly on the tail pseudo-element.
+- Resolutions/outcomes: Phase 4 now has a moving pulse that emanates from the final circle and runs up the blue tail instead of leaving the continuation fully static.
+### 2026-03-08 19:50:58 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased the `rubricPhaseTailTravel` cycle duration in `css/main.css` from `2.4s` to `2.9s` to slow the blue traveling pulse along the Phase 4 tail.
+- Troubleshooting suggestions: If it still feels too fast in-browser, keep adjusting duration first rather than easing; linear motion is helping the pulse read as a consistent travel event rather than a hover effect.
+- Resolutions/outcomes: The blue emitter now moves more deliberately up the Phase 4 line path.
+### 2026-03-08 19:52:49 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased the Phase 4 tail-travel duration in `css/main.css` again, from `2.9s` to `3.4s`, to further reduce the emitter’s travel speed.
+- Troubleshooting suggestions: If you want it slower still after this, continue increasing duration in small steps rather than changing the emitter size or opacity; the visual character is already stable.
+- Resolutions/outcomes: The blue emitter now travels more slowly along the angled continuation path.
+### 2026-03-08 19:53:59 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Shifted the Phase 4 blue-tail origin left in `css/main.css` by introducing a dedicated tail-start offset, so the angled continuation and its traveling pulse now originate under the `Phase:` section rather than from the area beside circle 4.
+- Troubleshooting suggestions: If the new start point feels too far left in-browser, tune only `--rubric-phase4-tail-start`; the tail length and pulse travel timing can stay as-is.
+- Resolutions/outcomes: The blue line and its moving pulse now begin under the `Phase:` lead-in area instead of starting at the far-right end of the marker row.
+### 2026-03-08 19:58:37 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reverted the blue-tail origin change in `css/main.css`, extended the main top line slightly left behind the `Phase:` wedge so the bar start is tucked in, added a separate main-line sweep emitter, and layered timed marker pass-ring effects so phases react as the sweep crosses them, with Phase 4 using a blue variant.
+- Troubleshooting suggestions: If the phase-hit timing needs tuning in-browser, adjust the main sweep duration/delays before changing the visual ring styles; the new pass behavior is synchronized by those delay values.
+- Resolutions/outcomes: The hard start at the left side of the main phase bar is softened behind `Phase:`, and the numbered phases now react briefly when the main sweep pulse passes, while the blue tail continues to originate from circle 4.
+### 2026-03-08 20:01:03 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retuned the main-line sweep emitter and pass-ring delays in `css/main.css` by shortening the sweep cycle, making the emitter more persistent, and moving the Phase 1 hit trigger earlier so the sweep actually reaches the first marker before fading.
+- Troubleshooting suggestions: If the sweep still feels slightly late at a specific phase in-browser, only the per-phase delay values should need adjustment now; the emitter visibility and travel duration are no longer the primary issue.
+- Resolutions/outcomes: The main sweep should now be visible across more of the bar and properly register at Phase 1 instead of fading before it gets there.
+### 2026-03-08 20:03:45 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Strengthened the `Phase:` wedge masking in `css/main.css` by adding an opaque backing pseudo-element and raising the wedge above the line/sweep stack, so the bar start and traveling pulse stay concealed behind the label area.
+- Troubleshooting suggestions: If any bleed still appears at the wedge edge in-browser, the next step should be widening the backing pseudo-element inset slightly rather than changing sweep opacity again.
+- Resolutions/outcomes: The line and sweep should no longer be visible behind the `Phase:` background, and the pulse should remain hidden until it clears that masked area.
+### 2026-03-08 20:05:27 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retimed the `rubricMainLineSweep` keyframes in `css/main.css` so the sweep remains invisible longer while it is under the `Phase:` mask and ramps to full opacity only after moving farther out from the wedge.
+- Troubleshooting suggestions: If the emergence still feels soft after this, the next adjustment should be increasing the post-mask scale/opacity at the `18%` keyframe rather than reducing the mask itself.
+- Resolutions/outcomes: The main sweep should now feel stronger after it exits the `Phase:` area instead of looking like it is already fading there.
+### 2026-03-08 20:08:39 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the single shared main-sweep timing with phase-aware duration and hit-delay variables in `css/main.css`, so each active rubric state now has its own travel length/timing and the pass-ring triggers line up with only the currently reachable phases.
+- Troubleshooting suggestions: If one phase still feels slightly mistimed in-browser, adjust only that phase’s hit-delay variable for its active-state block; the main structure no longer assumes one global timing model.
+- Resolutions/outcomes: The sweep should now stop at the current active phase and only pass into later phase circles when those phases are actually active.
+### 2026-03-08 20:16:44 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the top rubric gold-line animation from one shared sweep into four dedicated segment-dot elements in `index.html`/`css/main.css`, then retimed the phase halos to fire off those segment endpoints and updated reduced-motion handling to target the new per-segment dots.
+- Troubleshooting suggestions: If a specific segment’s handoff feels off in-browser, tune only that segment’s delay tier or the shared `--rubric-dot-cadence`; the dot-path geometry is now isolated per segment instead of coupled through one global traveler.
+- Resolutions/outcomes: Each active gold segment now behaves like its own small path with its own traveling dot, which is the same structural model used for the blue tail and should make the phase-to-phase handoff read more cleanly.
+### 2026-03-08 21:04:40 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a new `rubric-protocol-tail--phase-3` element in `index.html` and styled it in `css/main.css` as a structural copy of the blue Phase 4 tail, but anchored to circle 3 with a dedicated purple color token and enabled from Phase 3 onward.
+- Troubleshooting suggestions: If the purple tail needs visual separation from the blue tail when Phase 4 is active, adjust only the purple hue or glow strength before changing its geometry; it is already using the same path mechanics as the blue version.
+- Resolutions/outcomes: Circle 3 now emits its own continuation line and pulse that behave like the blue tail, but in purple.
+### 2026-03-08 21:18:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the remaining shared gold active-fill layer in `css/main.css` and converted the straight rubric segments into visible gold path elements with their own line bodies and on-path traveling emitters, matching the tail-engine structure instead of mixing one global fill with local dots.
+- Troubleshooting suggestions: If any one gold segment still feels misaligned in-browser after this, tune that segment element’s `left`/`width` only; the motion system is now isolated per segment the same way the purple and blue tails are.
+- Resolutions/outcomes: The straight rubric line is now built from the same line-plus-traveler model as the tails, which should make the gold segments read as coherent paths rather than detached pulses over a separate fill.
+### 2026-03-08 21:27:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a second continuation tail from circle 3 by cloning the existing purple `rubric-protocol-tail--phase-3` element in `index.html`, then styling a new green east-facing variant in `css/main.css` with the same origin, travel timing, and pulse behavior but a horizontal rotation.
+- Troubleshooting suggestions: If the green tail needs separation from the purple one in-browser, tune only its color token or z-order before changing geometry; it is intentionally sharing the same origin and motion cadence.
+- Resolutions/outcomes: Circle 3 now emits both the original purple angled continuation and a green straight-east continuation without altering the existing blue Phase 4 tail.
+### 2026-03-08 21:35:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refactored the shared rubric tail engine in `css/main.css` so each tail now owns its own direction and glow through CSS variables, replaced the green-only pulse keyframe with the shared tail pulse animation, and stacked the purple circle-3 tail above the green east-facing copy to keep both visible from the same origin.
+- Troubleshooting suggestions: If the shared-origin tails still feel too merged in-browser, adjust only the two circle-3 tail `z-index` values or color/glow strength first; the orientation bug is now isolated from the pulse animation.
+- Resolutions/outcomes: The green tail should remain horizontal through its full animation cycle, and the original purple angled tail should remain visible instead of being visually swallowed.
+### 2026-03-08 21:42:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a new `rubric-protocol-tail--phase-1-east` element in `index.html` and styled it in `css/main.css` as a red horizontal continuation from circle 1, reusing the same shared tail engine, pulse animation, and travel timing as the existing east-facing green circle-3 tail.
+- Troubleshooting suggestions: If the red Phase 1 tail feels too dominant against the gold phase line in-browser, reduce only the red glow intensity before changing its path or cadence; its geometry intentionally mirrors the green east-facing tail pattern.
+- Resolutions/outcomes: Phase 1 now emits its own straight-east red continuation without changing the behavior of the existing circle-3 or Phase 4 tails.
+### 2026-03-08 21:47:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Shortened the red `rubric-protocol-tail--phase-1-east` path in `css/main.css` to a single marker span and removed its Phase 1 activation selectors so the red continuation now begins on Phase 2 and terminates at circle 2’s midpoint.
+- Troubleshooting suggestions: If the red line still appears to overshoot or undershoot in-browser, adjust only its explicit `width`; its left origin is still tied to circle 1’s midpoint and does not need to move.
+- Resolutions/outcomes: The red continuation no longer appears during Phase 1 and now visually resolves at the center of circle 2 instead of extending across the full header.
+### 2026-03-08 21:53:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected the continuation-tail state model in `css/main.css` by introducing separate progress variables for the red Phase 1 east tail and the Phase 3 tail family, then wiring the shared tail engine and pulse keyframes to those per-tail progress values instead of the old Phase 4-only progress flag.
+- Troubleshooting suggestions: If any tail still seems to activate on the wrong phase after this, inspect only its `--rubric-tail-progress` source variable and the matching `data-active-protocol-index` assignments; the selector gating and the scale/opacity gating are now separate and both must agree.
+- Resolutions/outcomes: The red tail can now truly populate on Phase 2, while the Phase 3 tails and blue Phase 4 tail keep their own independent activation timing.
+### 2026-03-08 21:58:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Refactored the shared continuation-travel keyframes in `css/main.css` to use a per-tail `--rubric-tail-length` variable, then assigned the red Phase 2 tail its own one-span length so the moving pulse follows the visible red line instead of the full blue-tail distance.
+- Troubleshooting suggestions: If another tail later needs a custom stop point, set only that tail’s `--rubric-tail-length`; the travel engine now supports independent path lengths without another keyframe fork.
+- Resolutions/outcomes: The red traveler’s start/stop now matches the shortened red line segment rather than overshooting as if it were on the long continuation path.
+### 2026-03-08 22:09:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Rolled back the shared per-tail travel-length change in `css/main.css` so `rubricPhaseTailTravel` once again uses the original long continuation distance, while leaving the newer per-tail phase-progress wiring intact.
+- Troubleshooting suggestions: If pulse motion is stable again after this, the remaining stop-point problem should be solved inside the gold segment engine rather than by reusing the continuation-tail traveler unchanged for shorter debug lines.
+- Resolutions/outcomes: The continuation pulses are back on the older stable motion path, which removes the regression introduced by coupling traveler distance to per-tail line length.
+### 2026-03-08 22:16:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Converted the production gold phase segments in `css/main.css` to the same self-owned path model as the tails by giving each segment its own progress-driven line body and by retuning `rubricSegmentDotTravel` to use the segment’s actual path length with a vertically centered traveler.
+- Troubleshooting suggestions: If a specific gold phase still feels off after this, tune only that segment’s `left`/`width`; the traveler and line body now both resolve against the same segment box, so timing changes should not be necessary first.
+- Resolutions/outcomes: The gold section pulses now follow their own segment widths cleanly and should stop where each gold line stops, which is the production behavior the colored debug tails were meant to help diagnose.
+### 2026-03-08 22:21:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Fixed the remaining gold-traveler distance bug in `css/main.css` by assigning each `.rubric-protocol-dot--phase-*` element its concrete width formula through `--rubric-segment-length`, then binding both the segment width and traveler distance to that same value.
+- Troubleshooting suggestions: If a gold pulse still appears off after this, inspect only the specific segment’s geometry expression; the traveler is no longer using the placeholder `100%` value that previously resolved incorrectly for transform distance.
+- Resolutions/outcomes: The gold pulses now have real segment-length travel distances and should visibly move instead of appearing stuck at the start of the line.
+### 2026-03-08 22:28:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the red and gold pulse travel animations in `css/main.css` with element-local `left`-based motion, using `rubricSegmentDotTravelLocal` for the gold segments and `rubricTailTravelLocal` for the red tail so both now travel within their own line boxes rather than through inherited transform-distance math.
+- Troubleshooting suggestions: If either pulse still needs endpoint tuning after this, adjust only the final `left` stop expression (`calc(100% - dotSize)`); the line box is now the pulse’s only source of truth.
+- Resolutions/outcomes: The red tail and the gold phase travelers should now both begin at their own line starts and stop at their own line ends.
+### 2026-03-08 22:34:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Hid the red and purple/green debug continuation tails in `css/main.css` with `display: none` while leaving the Texas-colored Phase 4 tail intact, and increased `--rubric-dot-cadence` from `1.14s` to `1.58s` to slow the gold segment pulses.
+- Troubleshooting suggestions: If the gold motion now feels too slow in-browser, tune only `--rubric-dot-cadence`; the debug tails are hidden non-destructively and can be restored later without markup changes.
+- Resolutions/outcomes: Only the production gold segments and Texas-colored tail remain visible, and the gold travelers now read with a slower, calmer cadence.
+### 2026-03-08 22:40:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retimed the numbered marker pass-ring animations in `css/main.css` so their delays line up with the end of each gold traveler path, and tightened the pass-pulse keyframes so the glow reads like an incoming charge entering the circle rather than a detached late bloom.
+- Troubleshooting suggestions: If the effect still feels slightly ahead or behind in-browser, tune only the delay multipliers (`0.46`, `1.46`, `2.46`, `3.46`) before changing traveler speed; the gold traveler timing itself is now the reference.
+- Resolutions/outcomes: The numbered circles should now appear to light up from the traveler entering them, including the Texas-colored Phase 4 marker.
+### 2026-03-08 22:52:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the remaining CSS-staggered gold pulse timing with a JS-driven sequential pulse chain in `js/main.js`, using one-shot `is-pulse-live` and `is-pass-live` / `is-pass-live-phase4` classes in `css/main.css` so each segment traveler runs, then its circle halo completes, and only then does the next segment begin.
+- Troubleshooting suggestions: If the sequence timing still needs tuning in-browser, adjust only the JS travel/pass ratio and overlap lead inside `restartPulseSequence()` before changing the CSS animations; the dependency model now lives in the JS chain rather than staggered infinite delays.
+- Resolutions/outcomes: The rubric pulse progression is now actually dependent on the prior pulse/halo completion instead of approximated by overlapping CSS delays.
+### 2026-03-08 23:01:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased the visual definition of the active top-bar phase in `css/main.css` by adding a clearer active surface, stronger type emphasis, and a slight lift without altering the halo classes, then updated `js/main.js` and `css/main.css` so the Texas-colored tail uses a one-shot `is-tail-live` class and starts only after the Phase 4 marker pass completes.
+- Troubleshooting suggestions: If the active phase now feels too strong in-browser, reduce the active-segment background/box-shadow before weakening the number chip itself; if the Texas tail starts a touch too late or early, tune only the post-Phase-4 wait inside `restartPulseSequence()`.
+- Resolutions/outcomes: The selected phase should read more decisively even before the halo engages, and the Texas line now follows the same sequenced pulse-start logic as the rest of the rubric progression instead of running on its own loop.
+### 2026-03-09 00:07:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the added active-segment box treatment in `css/main.css` and moved the stronger selected-state emphasis into the active number chip itself by inverting its interior background/text colors, while leaving the halo classes and timing untouched.
+- Troubleshooting suggestions: If the active chip now reads too high-contrast in-browser, tune only the active chip background/text mixes before changing the circle border or halo behavior.
+- Resolutions/outcomes: The active phase is now defined through the circle interior instead of an outer box effect, matching the requested visual direction.
+### 2026-03-09 00:11:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Doubled the rubric pulse generation frequency in `css/main.css` by reducing `--rubric-dot-cadence` from `1.58s` to `0.79s`, which also accelerates the JS-driven traveler/halo chain because `restartPulseSequence()` reads that same cadence token.
+- Troubleshooting suggestions: If the faster sequence now feels too compressed in-browser, the next adjustment should be a modest increase to `--rubric-dot-cadence` rather than changing the JS travel/pass ratios independently.
+- Resolutions/outcomes: Gold travelers, circle pass glows, and the Texas-tail handoff now all generate at roughly twice the previous rate while remaining on the same timing model.
+### 2026-03-09 00:16:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Recolored the visible Phase 4 continuation in `css/main.css` from the Texas-outline blue family to the rubric gold accent family by swapping the base tail line and traveler glow from `--map-texas-color-1` to `--accent`, without changing its angle or one-shot sequence hook.
+- Troubleshooting suggestions: If the Phase 4 continuation now blends too closely with the main gold line in-browser, adjust only its gold intensity/glow mix before changing geometry or sequencing.
+- Resolutions/outcomes: The former Texas-colored continuation is no longer visibly blue; the active continuation now appears as a gold line on the same path.
+### 2026-03-09 10:18:30 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Implemented V3 abuse-attachment quarantine in `form-backend/portal_v2_apps_script_webapp.js` and `form-backend/portal_v2_config.js`, hardcoded the normal upload folder to `1KGLpDjlj9kZ-XpGlY856RKV4ZK6AeZUx`, hardcoded the abuse-only quarantine folder to `18E7iwb-bB8rOUj6BNSZo1JLcAb8TF2Sl`, extended `ABUS` rows/header with attachment-capture metadata, added a dedicated `portalV2AppendAbuseRow_()` path to avoid header-resetting old abuse logs, updated backend build markers to `0011`, verified syntax with `node --check`, ran `clasp push --force`, and reran `form-backend/check-clasp-sync.ps1`.
+- Troubleshooting suggestions: The quarantine path is HEAD-only right now because deployment remains on build `0010`; after owner-controlled redeploy, confirm an abuse-triggered attachment lands only in the quarantine folder and that an inaccessible/mistyped abuse folder causes logged capture failure rather than saving anywhere else.
+- Resolutions/outcomes: Apps Script HEAD is now on build `0011` with the quarantine logic present, local/head digests match, and deployed runtime remains unchanged pending manual redeploy.
+### 2026-03-09 10:28:06 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Exercised the new abuse-attachment behavior against the live V3 endpoint with six controlled requests using tiny text attachments: honeypot valid attachment (`abuse-hpot-valid-20260309-1b`), honeypot invalid attachment type (`abuse-hpot-invalidtype-20260309-1b`), duplicate accepted/rejected pair (`abuse-dup-20260309-1b`), and rate-limit accepted/rejected pair (`abuse-rl-20260309-1b`, `abuse-rl-20260309-2b`). Confirmed `/dev` and `/exec` both report build `0011` before testing.
+- Troubleshooting suggestions: API behavior is correct, but folder placement still needs owner-side verification in Drive/`ABUS`: the two abuse cases should show attachment capture rows, the invalid-type honeypot should log `failed` with `invalid_attachment_type`, and the duplicate/rate-limit blocked cases should show quarantine capture without any file appearing in the normal upload folder.
+- Resolutions/outcomes: Live responses matched the intended abuse flow: honeypot returned `{ok:true}`, duplicate returned accepted then `already_received`, and rate-limit returned accepted then `retry_later`, all without tripping unrelated burst/global abuse rules.
+### 2026-03-09 10:33:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Hardened `portalV2AppendAbuseRow_()` to trim trailing empty header cells before schema comparison/extension, bumped the backend to build `0012`, pushed HEAD-only with `clasp push --force`, and reran two focused abuse cases: `abuse-hpot-valid-20260309-2a` and duplicate pair `abuse-dup-20260309-2a`.
+- Troubleshooting suggestions: If `ABUS` is still empty after these reruns, the next step is to inspect the existing `ABUS` header row for non-empty mismatched legacy columns rather than trailing blanks; that would mean the append path is still rejecting the sheet as incompatible.
+- Resolutions/outcomes: The likely silent-drop cause was a compatible-but-padded legacy `ABUS` header. Build `0012` keeps the quarantine behavior and should now extend the older header in place instead of rejecting it.
+### 2026-03-09 00:24:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the separate Phase 4 tail-traveler behavior by changing the angled continuation in `css/main.css` to use the same local line/traveler model as the gold segments and updating `js/main.js` so the continuation is triggered with the shared `is-pulse-live` class instead of the old tail-only live class.
+- Troubleshooting suggestions: If the angled continuation still feels slightly different in-browser, the next tuning should be only traveler size or travel duration; its class trigger and traveler engine now match the gold segment system.
+- Resolutions/outcomes: The visible angled continuation no longer uses a separate colored-line engine; it now follows the same underlying pulse logic as the gold lines while keeping its angled geometry.
+### 2026-03-09 00:29:00 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the last visible continuation line by hiding `.rubric-protocol-tail` in `css/main.css` and deleting the remaining Phase 4 continuation trigger branch from `restartPulseSequence()` in `js/main.js`.
+- Troubleshooting suggestions: If a continuation is needed again later, it should be reintroduced as a deliberate gold-segment extension rather than by reviving the old hidden tail/debug system.
+- Resolutions/outcomes: The rubric now shows only the core gold phase-line sequence, with no extra visible continuation leaving Phase 4.
+### 2026-03-09 10:52:09 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a new `.rubric-protocol-dot--phase-4-extension` element in `index.html`, styled it in `css/main.css` with the same gold segment/traveler model as the existing rubric segments, and updated `restartPulseSequence()` in `js/main.js` so the extension pulse runs after the Phase 4 halo finishes. Added `syncPostPhaseLength()` to compute the extension width from the live Phase 4 endpoint to the right viewport edge and refresh it on restart and resize.
+- Troubleshooting suggestions: If the viewport-edge endpoint needs pixel tuning in-browser, adjust only the Phase 4 endpoint math inside `syncPostPhaseLength()`; the traveler itself is already local-box based and should not be retuned first.
+- Resolutions/outcomes: Phase 4 now ends with one additional gold continuation segment that uses the same pulse engine as the rest of the gold line, extends to the visible viewport edge, and restarts as part of the normal sequence rather than via the hidden tail system.
+### 2026-03-09 13:30:07 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reduced the visible gold traveler size in `css/main.css` from `12px` to `9px` and updated `rubricSegmentDotTravelLocal` so the traveler’s segment-end and fade-out offsets now use the same smaller diameter.
+- Troubleshooting suggestions: If the smaller pulse feels too subtle in-browser, increase only its glow strength before increasing the dot size again; the stop-point math is now matched to the `9px` diameter.
+- Resolutions/outcomes: The gold pulse now reads smaller without breaking the local start/stop alignment on any rubric segment, including the new post-Phase-4 extension.
+### 2026-03-09 13:33:07 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the V3 submission failure path to use a single `FAIL` sheet instead of the old active `ABUS` sink, changed the failure attachment path to `FAIL_UPLOAD_FOLDER_ID`, added category-tagged failure rows (`abuse`, `policy_block`, `operational_failure`), moved the main submit lock ahead of normal attachment save to avoid duplicating operational-failure files into both normal and quarantine storage, updated build markers to `0016`, verified syntax with `node --check`, pushed HEAD-only with `clasp push --force`, and reran `form-backend/check-clasp-sync.ps1`.
+- Troubleshooting suggestions: After owner-controlled redeploy to `0016`, verify one honeypot row, one duplicate-block row, and one operational failure row land in `FAIL`; the old `ABUS` tab is no longer the active sink. Validation rejects should remain absent from `FAIL`.
+- Resolutions/outcomes: Apps Script HEAD is now on build `0016`, local/head are aligned, and the live deployment remains on build `0015` until manually redeployed. The inconsistent operational-failure-as-abuse path has been removed from the active backend logic.
+### 2026-03-09 13:34:52 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the old rubric tail-test markup from `index.html` and deleted the corresponding dead tail CSS from `css/main.css`, including tail color/progress variables, hidden tail selectors, tail-only keyframes, and reduced-motion suppression rules that no longer applied.
+- Troubleshooting suggestions: If any continuation styling looks missing after this cleanup, inspect only the five `.rubric-protocol-dot` segments first; the colored tail system has been fully removed and should no longer be considered part of the rubric runtime.
+- Resolutions/outcomes: The rubric track now contains only the five gold line segments in production, with no leftover red/green/purple/Texas test-line markup or live CSS support.
+### 2026-03-09 13:48:56 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `restartPulseSequence()` in `js/main.js` so the marker glow now fires at pulse arrival and cleans itself up on its own timeout, while the next active segment is queued immediately instead of waiting through the full `passMs` delay.
+- Troubleshooting suggestions: If the circle still feels late in-browser, tune only the arrival timeout (`travelMs - overlapLeadMs`) before touching the halo keyframes; the sequencing bottleneck was in JS, not the CSS pulse art.
+- Resolutions/outcomes: The traveler now appears to energize each phase circle as it passes while maintaining continuous forward speed across active gold segments and into the post-4 extension.
+### 2026-03-09 13:51:43 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Retinted the `.rubric-protocol-dot::after` traveler in `css/main.css` from gold-accent glow to a cool blue radial/glow treatment so the moving pulse is visually distinct from the gold bar.
+- Troubleshooting suggestions: If the blue pulse feels too detached from the gold system in-browser, reduce only the blue saturation before changing size or timing; the circle behavior was intentionally left untouched.
+- Resolutions/outcomes: The moving pulse now contrasts with the line itself, while the existing phase-circle halo timing and appearance remain unchanged.
+### 2026-03-09 13:53:24 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `.rubric-protocol-segment__num.is-pass-live::after` in `css/main.css` to use the same Texas-blue border/glow and `rubricPhasePassPulsePhase4` animation that Phase 4 was already using.
+- Troubleshooting suggestions: If the non-Phase-4 circles now feel too cold compared to the gold line in-browser, adjust only the Texas-blue opacity mix before splitting the halo system again; all circles are now intentionally unified on one pass treatment.
+- Resolutions/outcomes: Every rubric phase circle now gets the same blue halo effect that previously belonged only to Phase 4, and that halo is based on the existing Texas-outline color token.
+### 2026-03-09 14:01:56 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Duplicated the rubric track line in `css/main.css` by adding matched upper/lower line clones to both the inactive baseline and the active gold segments, keeping the original center line in place so the full three-line stack remains centered on the circle row.
+- Troubleshooting suggestions: If the stacked lines feel too dense in-browser, tune only the vertical clone offset before changing line thickness; the centering is preserved by keeping the original line on the middle axis.
+- Resolutions/outcomes: The rubric bar now reads as a stacked line set instead of a single stroke, without changing traveler timing, traveler color, or circle halo behavior.
+### 2026-03-09 14:03:39 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reduced the stacked rubric line thickness in `css/main.css` from `2px` to `1px` and expanded the symmetric clone offsets so the centered line group now reads as five thinner strokes instead of three heavier ones.
+- Troubleshooting suggestions: If the added line density starts to compete with the circles in-browser, reduce only the outer clone opacity before removing lines; the central alignment is still anchored by the original middle stroke.
+- Resolutions/outcomes: The rubric bar now has a lighter, more layered multi-line appearance while preserving the same traveler animation and circle behavior.
+### 2026-03-09 14:07:37 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added four auxiliary stacked-line traveler elements per rubric segment via `js/main.js`, styled them in `css/main.css` with `rubricSegmentDotTravelStack`, and randomized their delay/duration per pass within a bounded range. The center traveler remains the existing main pulse and is still the source timing event.
+- Troubleshooting suggestions: If the stacked travelers feel too noisy in-browser, narrow only the delay range in `randomizeAuxPulseTiming()` before changing the number of auxiliary pulses; the release-order constraint already keeps them behind the center pulse.
+- Resolutions/outcomes: Each visible line in the five-line rubric stack now gets its own pulse, with the middle line still behaving normally and the other lines following it with controlled, non-uniform stagger instead of synchronized release.
+### 2026-03-09 14:15:06 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Increased `--rubric-dot-cadence` in `css/main.css` from `0.79s` to `1.18s` and widened the auxiliary pulse timing window in `js/main.js` by raising the base delay, random delay range, and auxiliary travel duration scale.
+- Troubleshooting suggestions: If the motion is still too busy in-browser, the next reduction should be a smaller random-delay range rather than slowing the center pulse much further; that will preserve legibility while calming the stack.
+- Resolutions/outcomes: The stacked-line travelers now feel slower and more separated, with more breathing room between releases and a gentler overall rhythm.
+### 2026-03-09 14:27:10 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the auxiliary traveler duration logic in `js/main.js` so each stacked line now gets a speed floor based on its distance from the center line, with only a small random spread added afterward.
+- Troubleshooting suggestions: If the outer lines now lag too far behind in-browser, reduce the per-index duration step before touching the center pulse cadence; the center should remain the fixed fastest reference.
+- Resolutions/outcomes: The rubric stack now has intentionally different line speeds, with the middle pulse always fastest and the surrounding lines progressively slower rather than all varying around the same band.
+### 2026-03-09 14:50:07 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Moved auxiliary pulse randomization in `js/main.js` from per-segment regeneration to a sequence-scoped `auxPulseProfile`, then reused that same delay/speed profile for every segment and the post-4 extension during the run.
+- Troubleshooting suggestions: If the stack still looks like it resets too hard in-browser, the next thing to inspect is the segment restart timing rather than the auxiliary speeds; the relative pulse profile is now stable across circle handoffs.
+- Resolutions/outcomes: The stacked pulses now preserve their speed and spacing relationship through the whole rubric sequence instead of appearing to reshuffle at every phase circle.
+### 2026-03-09 14:54:40 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the non-center per-segment pulse elements with track-level `.rubric-protocol-track-pulse` travelers in `css/main.css` and `js/main.js`, added `syncActiveTrackLength()` to compute the live continuous path length, and now start the auxiliary stack once per sequence restart instead of once per segment.
+- Troubleshooting suggestions: If the continuous stack still appears to jump in-browser, inspect active-track-length changes during phase switches; within a stable active phase, the auxiliary travelers are no longer segment-bound.
+- Resolutions/outcomes: After the initial center-led release, the surrounding travelers now behave like pulses on one continuous track and maintain independent motion through the circle handoffs instead of re-triggering at each marker.
+### 2026-03-09 15:03:40 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Corrected the forced rubric pulse timing in `js/main.js` by changing both `travelMs` and `passMs` from `280` to `1280`, leaving the continuous-track architecture and shared auxiliary timing intact.
+- Troubleshooting suggestions: This is still a fixed demonstration speed; if you want to return to adaptive timing later, restore the cadence-derived calculation rather than tuning the hard-coded `1280` values piecemeal.
+- Resolutions/outcomes: The full pulse system now runs at the intended `1280ms` timing instead of the accidentally requested `280ms` high-speed setting.
+### 2026-03-09 15:05:45 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the shared root-level aux-pulse restart trigger with per-track-pulse `is-pulse-live` toggles in `css/main.css` and `js/main.js`, and now explicitly remove/re-add that class on each full sequence restart after a reflow.
+- Troubleshooting suggestions: If an aux traveler still fails to restart in-browser, inspect only the full-cycle restart timing path; the per-circle regeneration path is still intentionally disabled.
+- Resolutions/outcomes: The auxiliary track pulses now regenerate on full-cycle restart without reverting to the old per-circle restart behavior.
+### 2026-03-09 15:31:56 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed the track-level auxiliary pulse animation in `css/main.css` from one-shot to `infinite`, updated `syncActiveTrackLength()` in `js/main.js` to return the live path length, and now derive auxiliary travel durations from the full active-track distance instead of the single-segment center duration.
+- Troubleshooting suggestions: If the aux stack now feels too slow at lower phases, tune only the full-track duration scaling; the center pulse and circle logic are still intentionally left on the fixed `1280ms` segment timing.
+- Resolutions/outcomes: The auxiliary travelers no longer fire only once, and their speed now matches the length of the continuous active path instead of racing across it on the center pulse’s segment timing.
+### 2026-03-09 15:34:34 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the remaining center-led auxiliary delay floor in `js/main.js` by replacing the old fixed base-delay model with an independent rolling delay profile for the non-center travelers.
+- Troubleshooting suggestions: If the aux stack now feels too simultaneous in-browser, increase only the rolling delay step/gap; the center pulse is no longer acting as the explicit release trigger for the others.
+- Resolutions/outcomes: The non-center travelers now stagger on their own per-cycle offsets rather than being implicitly delayed off the middle pulse’s start event.
+### 2026-03-09 15:37:35 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the stacked-line clone styling and auxiliary track-pulse runtime from `css/main.css` and `js/main.js`, restoring the rubric bar to a single center line with only the original center traveler and marker logic.
+- Troubleshooting suggestions: If you want to revisit multi-line behavior later, reintroduce it from a clean branch rather than layering it back onto this reset state; the auxiliary system is now fully stripped out.
+- Resolutions/outcomes: The rubric track is reset to the center line only, with the previous stacked/auxiliary pulse experiments removed.
+### 2026-03-09 15:40:02 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added cosmetic upper/lower line clones in `css/main.css` by using box-shadow copies on the existing inactive track and active gold segment, while leaving the single center traveler and marker logic unchanged.
+- Troubleshooting suggestions: If the cloned lines feel too heavy in-browser, tune only the shadow offsets/opacities; there is no separate runtime attached to them now.
+- Resolutions/outcomes: The rubric bar has a multi-line appearance again, but all motion and state still come from the single center line only.
+### 2026-03-09 15:41:33 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Expanded the cosmetic line-clone shadows in `css/main.css` from one upper/lower pair to two upper/lower pairs, giving the rubric bar a five-line appearance while preserving the single-line runtime.
+- Troubleshooting suggestions: If the outer two lines feel too visible in-browser, reduce only their opacity mix rather than removing them; the visual structure is still purely cosmetic.
+- Resolutions/outcomes: The rubric line now reads as five stacked lines, with only the center stroke carrying behavior.
+### 2026-03-09 15:54:17 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added four real auxiliary traveler elements per active rubric segment in `js/main.js`, styled them in `css/main.css` to ride the existing outer-line offsets, and introduced a shared `triggerMarkerHalo()` controller with `is-pass-boost` handling so any lane can light a marker without hard-reset flicker. Kept the center pulse at `1280ms` and made the auxiliary lanes slower than that ceiling.
+- Troubleshooting suggestions: If the outer-lane field feels too busy in-browser, reduce only the auxiliary repeat density or widen the lane-speed steps before touching the center lane; the phase and halo ownership now lives in the shared marker controller.
+- Resolutions/outcomes: The rubric now has independently timed outer-lane pulses that can all trigger the same circle halo, while the center lane remains the fastest reference and repeated lane hits extend/intensify the halo instead of restarting it from zero.
+### 2026-03-09 15:57:11 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Split center-lane clearing from full pulse-system clearing in `js/main.js`, so the center loop now uses `clearCenterPulseClasses()` while auxiliary timers/classes are preserved until an actual full system restart.
+- Troubleshooting suggestions: If any aux lane still feels missing in-browser, the next thing to inspect is its initial-delay/repeat-density balance rather than the restart path; the center loop is no longer canceling the aux field every cycle.
+- Resolutions/outcomes: Auxiliary pulses now persist across center-lane loop restarts instead of being interrupted, which should remove the “sometimes only center” and “starts then disappears” behavior.
+### 2026-03-09 16:52:33 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Applied a performance-oriented real-lane taper in `js/main.js` by reordering the auxiliary lane priority, reducing active outer lanes per segment to a `5,4,3,2,1` total-lane pattern, and significantly increasing auxiliary travel/repeat timing so the outer field runs less often.
+- Troubleshooting suggestions: The current interpretation keeps the center lane present on every segment and tapers only the outer lanes. If you want the visible line count itself to change rather than just the animated-lane count, that needs a separate rendering decision.
+- Resolutions/outcomes: Later segments now animate fewer outer travelers and those travelers cycle more slowly, which should reduce timer load and visual density without removing the current center-lane behavior.
+### 2026-03-09 16:57:30 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated `css/main.css` so the visible stroke count now tapers by segment as well, using phase-specific line rendering instead of showing five visible strokes on every segment.
+- Troubleshooting suggestions: Even-count segments (`4` and `2`) are rendered around the center axis with the center traveler still running on the underlying middle line, so minor visual asymmetry would need a different rendering model to remove completely.
+- Resolutions/outcomes: The rubric now visibly reduces from five lines to one as the path advances, instead of only reducing the number of animated lanes.
+### 2026-03-09 22:19:49 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Simplified the rubric pulse system in `js/main.js` and `css/main.css` by removing the old auxiliary pulse runtime and moving the visible motion to CSS-driven pulse streams on the active gold segments. Kept `syncPostPhaseLength()` and phase-depth gating so motion still stops at the active phase boundary, while `js/main.js` now only loops the circle halo sequence.
+- Troubleshooting suggestions: If the new field still feels too busy in-browser, the cheapest next tuning points are the per-segment `--rubric-pulse-delay` offsets and the `rubricSegmentPulseStream` duration, not more JS scheduling. If the halo feels too detached from the pulse field, reduce the `travelMs` / `passMs` gap rather than reintroducing lane-level travelers.
+- Resolutions/outcomes: The rubric now uses a much lighter pulse illusion with no auxiliary traveler lifecycle to tear down or restart. Phase-circle halos remain, and pulse population still cuts off when later phases are inactive.
+### 2026-03-09 22:19:49 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Replaced the single CSS pulse stream with a small orb field on each active rubric segment. `js/main.js` now seeds three same-size orb elements per segment with bounded random duration/delay/opacity values, and `css/main.css` animates those orbs left-to-right on the active gold path without adding new runtime sequencing.
+- Troubleshooting suggestions: If the orb field feels too noisy, reduce the orb count from `3` to `2` or narrow the randomized duration range before touching the halo loop. If the randomness feels too uneven between reloads, swap the one-time `Math.random()` seeding for a fixed deterministic set per segment.
+- Resolutions/outcomes: The rubric motion now reads as a looser field of orbs rather than a strict pulse stream, while still stopping at the current active phase boundary and keeping the existing halo behavior.
+### 2026-03-09 23:56:17 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Removed the remaining multi-stroke line stacks from the rubric path in `css/main.css`, leaving phases 1 through 4 on a single visible line each while keeping the current orb-field motion and halo logic unchanged.
+- Troubleshooting suggestions: If the orb field still looks uneven after this, the next likely source is the randomized orb opacity rather than the line geometry, since the segment stroke stacks are now uniform.
+- Resolutions/outcomes: All rubric segments now share the same one-line path treatment, so the orbs should render much more consistently from section to section.
+### 2026-03-09 23:59:44 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Reworked the rubric path vertical anchoring in `css/main.css` by removing the fixed `--rubric-top-line-y` offsets and pinning both the baseline track and active segment lines to `top: calc(50% - 0.5px)`.
+- Troubleshooting suggestions: If the line still feels off in-browser after this, the next thing to inspect is the phase button vertical padding rather than the line itself, because the line is now centered to the track box instead of to a hard-coded pixel offset.
+- Resolutions/outcomes: The line and circles now share the same track midpoint reference, which should vertically center the path through the phase markers.
+### 2026-03-10 00:08:05 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Changed `.rubric-protocol-segment` in `css/main.css` from a padded grid layout to a flex-centered layout with zero vertical padding, so the phase-circle chips sit on the same control midline the path now uses.
+- Troubleshooting suggestions: If there is still slight drift live after this, it will likely be subpixel anti-aliasing from the `1px` line, not the control layout. The next adjustment would then be a very small circle transform, not more structural layout changes.
+- Resolutions/outcomes: The circles are no longer being pushed off-center by the old button padding/gap stack, so they should align to the path midpoint much more closely.
+### 2026-03-10 00:31:41 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Updated rubric progress sequencing in `js/main.js` so displayed progress now steps through each prior phase when jumping ahead, and separated pulse-loop resets from progress-step timer clearing so those intermediate steps are not canceled during the halo/pulse restart.
+- Troubleshooting suggestions: This change is verified with `node --check` only. The next validation should be a live rubric pass where you jump directly from Phase 1 to Phase 4 and confirm the line visibly populates Phase 2, then 3, then 4 without any combined jump.
+- Resolutions/outcomes: The line should now preserve the “single path” effect on forward jumps because the visible progress depth no longer jumps to the final target in one update.
+### 2026-03-10 00:31:41 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Added a dedicated `data-post-phase-ready` gate for the post-Phase-4 extension in `js/main.js` and updated `css/main.css` so the extension segment and its orbs only turn on after that delayed ready state becomes true.
+- Troubleshooting suggestions: If the extension still feels a little early or late live, the only tuning point should be the `1280ms` ready delay in `syncPostPhaseReadyState()`; the CSS gate itself now prevents immediate activation on Phase 4 selection.
+- Resolutions/outcomes: The extension to the right of Phase 4 should now wait until the fourth segment has had time to complete before it begins populating, instead of starting the moment Phase 4 becomes active.
+[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE
