@@ -3,6 +3,8 @@
 .vscode/
 snapshot/
 .codex_index_patch.diff
+.tmp/local-ops/
+.archive/local-ops/
 
 # OS and local temp artifacts
 .DS_Store
@@ -10,6 +12,8 @@ Thumbs.db
 *.log
 *.tmp
 temp
+.tmp_portal_symbols.txt
+diff*.txt
 
 # Local editor/workspace files
 *.code-workspace
@@ -22,6 +26,14 @@ PACKETS.md
 
 # Local-only Apps Script backend workspace
 form-backend/
+PRELAUNCH-*.md
+TEMP-*.md
+scripts/test_form_prelaunch_matrix.ps1
+PORTAL-V2-README.md
+PORTAL_V2_TEMPLATE_PROMOTION_SCRIPT.gs
 
 # Local-only debug activation file (do not commit)
 js/debug.local.js
+old*.html
+head_index.html
+temp_old_index.html
