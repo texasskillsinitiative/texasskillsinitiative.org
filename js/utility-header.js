@@ -11,6 +11,7 @@
     career_opportunities: { full: 'Career Opportunities', footer: 'Career', href: 'portal-hub.html' },
     job_listings: { full: 'Job Listings', href: 'portal-employment.html' },
     internship_application: { full: 'Internship Application', href: 'portal-internship.html' },
+    future_career_interest: { full: 'Future Career Interest', href: 'portal-career-interest.html' },
     investment_inquiry: { full: 'Investment Inquiry', footer: 'Investment', href: 'portal-investment.html' },
     public_relations_media_request: { full: 'Public Relations/Media Request', footer: 'PR', href: 'portal-press.html' },
     legal_desk: { full: 'Legal Desk', href: 'legal-hub.html' },
@@ -39,12 +40,12 @@
   ].map((key) => ({ key, href: getHref(key), label: getLabel(key) })).filter((entry) => entry.href && entry.label);
 
   const logoSubpagesByKey = {
-    career_opportunities: ['job_listings', 'internship_application'],
+    career_opportunities: ['job_listings', 'internship_application', 'future_career_interest'],
     legal_desk: ['privacy_policy', 'terms_of_use', 'accessibility_statement', 'security_statement']
   };
 
   const crumbSubpagesByHref = {
-    'portal-hub.html': ['job_listings', 'internship_application'],
+    'portal-hub.html': ['job_listings', 'internship_application', 'future_career_interest'],
     'legal-hub.html': ['privacy_policy', 'terms_of_use', 'accessibility_statement', 'security_statement']
   };
 
@@ -66,6 +67,45 @@
       const href = getHref(key);
       if (href) node.href = href;
     });
+  };
+
+  const initAmbientLayer = () => {
+    if (window.__tsiAmbientInit) return;
+    window.__tsiAmbientInit = true;
+
+    const rootEl = document.documentElement;
+    const bodyEl = document.body;
+    if (!bodyEl) return;
+
+    const storageKey = 'tsi-ambient-mode';
+    const params = new URLSearchParams(window.location.search);
+    const rawParam = String(params.get('ambient') || '').trim().toLowerCase();
+    const allowed = new Set(['off', 'a', 'b', 'c', 'd', 'e', 'f']);
+    let mode = '';
+
+    if (rawParam && allowed.has(rawParam)) {
+      mode = rawParam;
+      try { localStorage.setItem(storageKey, mode); } catch (ignore) {}
+    } else {
+      try { mode = String(localStorage.getItem(storageKey) || '').trim().toLowerCase(); } catch (ignore) {}
+      if (!allowed.has(mode)) mode = 'off';
+    }
+
+    if (!mode || mode === 'off') {
+      rootEl.classList.remove('has-ambient-layer', 'ambient-mode-a', 'ambient-mode-b', 'ambient-mode-c', 'ambient-mode-d', 'ambient-mode-e', 'ambient-mode-f');
+      return;
+    }
+
+    let layer = document.getElementById('tsiAmbientLayer');
+    if (!layer) {
+      layer = document.createElement('div');
+      layer.id = 'tsiAmbientLayer';
+      layer.className = 'tsi-ambient-layer';
+      layer.setAttribute('aria-hidden', 'true');
+      bodyEl.insertBefore(layer, bodyEl.firstChild);
+    }
+    layer.setAttribute('data-ambient-mode', mode);
+    rootEl.classList.add('has-ambient-layer', `ambient-mode-${mode}`);
   };
 
   const wireHoverPersistence = (wrap) => {
@@ -95,6 +135,7 @@
   };
 
   normalizeLabelNodes();
+  initAmbientLayer();
 
   homeLinks.forEach((link) => {
     if (!(link instanceof HTMLAnchorElement)) return;

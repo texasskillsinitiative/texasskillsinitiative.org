@@ -5094,27 +5094,28 @@
         .persona-card {
             background: var(--card-bg);
             border: 1px solid var(--frame-border);
-            padding: 24px;
+            padding: 16px 18px 14px;
             transition: all var(--motion-base) var(--motion-ease-standard);
             position: relative;
             overflow: hidden;
             cursor: pointer;
             display: flex;
             flex-direction: column;
+            gap: 0;
         }
 
         .persona-card-hint {
             margin-top: auto;
-            padding-top: 16px;
-            font-size: 0.65rem;
+            padding-top: 6px;
+            font-size: 0.82rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0;
             color: var(--accent);
             opacity: 0.6;
             transition: opacity 0.3s, transform 0.3s;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: flex-end;
             font-weight: 700;
         }
 
@@ -5164,15 +5165,72 @@
             background: color-mix(in srgb, var(--accent) 4%, var(--card-bg));
         }
 
+        .persona-card-media {
+            position: relative;
+            height: 84px;
+            margin: -16px -18px 10px;
+            overflow: hidden;
+            border-bottom: 1px solid color-mix(in srgb, var(--accent) 16%, var(--frame-border));
+            background:
+                linear-gradient(135deg, rgba(7, 11, 16, 0.18), rgba(7, 11, 16, 0.84)),
+                radial-gradient(circle at 18% 20%, rgba(0, 243, 255, 0.22), transparent 44%),
+                url('../assets/pages/engagement/engagement-personas.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .persona-card-media::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(6, 10, 14, 0.08) 0%, rgba(6, 10, 14, 0.58) 72%, rgba(6, 10, 14, 0.86) 100%),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent 32%, transparent 68%, rgba(255, 255, 255, 0.04));
+            mix-blend-mode: screen;
+            opacity: 0.72;
+        }
+
+        .persona-card-media::after {
+            content: '';
+            position: absolute;
+            inset: auto 18px 12px;
+            height: 1px;
+            background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent), color-mix(in srgb, var(--accent) 68%, transparent), color-mix(in srgb, var(--accent) 8%, transparent));
+            opacity: 0.8;
+        }
+
+        .persona-card[data-persona="government"] .persona-card-media {
+            background-position: 8% 18%;
+        }
+
+        .persona-card[data-persona="industry"] .persona-card-media {
+            background-position: 36% 34%;
+        }
+
+        .persona-card[data-persona="education"] .persona-card-media {
+            background-position: 67% 26%;
+        }
+
+        .persona-card[data-persona="community"] .persona-card-media {
+            background-position: 92% 58%;
+        }
+
         .persona-card-head {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
         }
 
-        .persona-card-icon {
-            font-size: 1.5rem;
+        .persona-card-title {
+            margin: 0;
+            line-height: 1.05;
+        }
+
+        .persona-card-copy {
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.42;
         }
 
         /* --- Team: Strategic Core & Pillars --- */

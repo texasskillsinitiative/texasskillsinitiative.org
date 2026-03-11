@@ -1,4 +1,4 @@
-const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzcwuRsOOrgoFlFvdQ_2vMSSNjoqh6gpLGayd4I4mW3Y2KnFQoOJ6-fnXdpM5YkQGf1/exec';
+const PORTAL_V2_ENDPOINT = 'https://script.google.com/macros/s/AKfycbyXeBfOxrud6Auh-UrHMGKbE_ud9dE8ppsjjK792q2CF_UlRnnpkaC2_g22Dju6oUWH/exec';
 const PORTAL_V2_MAX_BYTES = 8 * 1024 * 1024;
 const PORTAL_V2_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
 const PORTAL_V2_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

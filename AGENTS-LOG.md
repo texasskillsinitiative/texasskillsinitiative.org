@@ -2942,3 +2942,16 @@
 - Actions taken: Prepared a governance-only checkpoint and recorded the user's note that `AGENTS.md` was updated outside this commit; intentionally kept the commit scope limited to `AGENTS-LOG.md` because `AGENTS.md` itself had no current working-tree diff and the repo contains unrelated in-progress site changes.
 - Troubleshooting suggestions: If the `AGENTS.md` update should be included in a future commit, make sure the file has an actual working-tree diff at commit time and keep that commit isolated from unrelated runtime/content changes.
 - Resolutions/outcomes: This checkpoint preserves the requested note without bundling unrelated files from the current working tree.
+### 2026-03-10 12:49:04 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Performed requested session close checks with `git status --short` and `git log --oneline -n 3`, then closed the session without creating an additional commit per explicit user instruction.
+- Troubleshooting suggestions: Before the next commit or closeout, review the remaining in-progress site changes in `index.html`, `css/main.css`, `js/portal-intake-v2.js`, `js/site-labels.js`, `js/utility-header.js`, `portal-career-interest.html`, `privacy.html`, `terms.html`, and the untracked files so they can be packet-scoped cleanly.
+- Resolutions/outcomes: Session closed on request without a new commit. Latest commit remains `3afeb5a` (`docs: note AGENTS.md user update`); working tree is still dirty with unrelated runtime/content changes.
+### 2026-03-10 22:26:10 -05:00 | Agent: Codex | Version: GPT-5
+- Actions taken: Attempted required global startup resolution, confirmed the configured global-file paths were incorrect for this repo, answered the pathing clarification questions, then performed clean-close repo checks with `git status --short` and `git log --oneline -n 3`.
+- Troubleshooting suggestions: Update `AGENTS.md` to define `DevRoot` explicitly and point startup loading to `DevRoot\global-access\ai-share\GLOBAL-AGENT-RULES.md` and `DevRoot\global-access\ai-share\GLOBAL-AGENT-PM-STANDARDS.md`, then keep future work packet-scoped before the next commit because the current tree spans shared UI, portal, legal, and docs files.
+- Resolutions/outcomes: Session closed on request without a new commit. No `STATUS.md` item states were changed in this session. Latest commit remains `3afeb5a` (`docs: note AGENTS.md user update`); working tree remains dirty with mixed in-progress changes.
+### 2026-03-11 10:15:11 -05:00 | Agent: Codex | Session: Repository intake | Version: GPT-5
+- Actions taken: Completed required startup policy loading, validated the global active-session view with the user, registered this repo session as `Bailey-Anne` (`20260311-101438-0500-bailey-anne`), checked the current `AGENTS-LOG.md` tail, and read the top of `STATUS.md` for current milestone context.
+- Troubleshooting suggestions: The shell is starting in `C:\dev` rather than the repo root, so continue using explicit repo-absolute paths for all file operations unless the shell startup behavior is corrected.
+- Resolutions/outcomes: Session initialization is complete and no prior session marker was present in `AGENTS-LOG.md`. Repo work can proceed from the current Milestone 1.0 launch-gate state.
+[AGENTS-LOG-SESSION] 20260311-101438-0500-bailey-anne | Session: Repository intake | Status: Active

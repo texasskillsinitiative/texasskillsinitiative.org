@@ -2,15 +2,30 @@
 
 This file defines recommended autonomous behavior for this repository.
 
-`Active by default`: Enforce this policy for the session unless the user explicitly says to disable it.
+## Session-start required order:
 
-`Required execution mode for low-interruption autonomy`:
-- Launch Codex with `codex -a never -s danger-full-access` for this repository when you want direct execution without approval prompts.
-- If this mode is not used, approval prompts and sandbox limits may block requested actions.
+  1. Load `C:\dev\global-access\ai-read\GLOBAL-AGENT-RULES.md`.
+  2. Load `C:\dev\global-access\ai-read\GLOBAL-AGENT-PM-STANDARDS.md`.
+  3. Read `C:\dev\global-access\ai-write\ACTIVE-AGENTS.md`.
+  4. Complete any required active-agent registration workflow using `C:\dev\global-access\ai-write\active-agent-tools\Resolve-Active-Agent.ps1`.
+  5. Confirm any required user validation from the global rules.
+  6. Only then read repo tracking docs or answer task questions.
 
-`Global policy references (priority)`:
-- `C:\dev\global-access\ai-visible\GLOBAL-AGENT-RULES.md`
-- `C:\dev\global-access\ai-visible\GLOBAL-AGENT-PM-STANDARDS.md`
+## Global Access Rules
+- Repository root for this repo: `C:\dev\tsi\tsi-site-repo`
+- The repository root is the current project folder, not `C:\dev\` unless this repository itself is located there.
+- Use the explicit `C:\dev\...` paths in this file by default.
+- If those paths do not exist, stop and ask the user whether to search upward from the repository root for a valid `dev` root.
+- Only if the user approves, walk upward from the repository root and accept a candidate `dev` root only if it contains:
+  - `global-access\ai-read\GLOBAL-AGENT-RULES.md`
+  - `global-access\ai-read\GLOBAL-AGENT-PM-STANDARDS.md`
+  - `global-access\ai-write\ACTIVE-AGENTS.md`
+  - `global-access\ai-write\active-agent-tools\Resolve-Active-Agent.ps1`
+- If no matching `dev` root is found, remain blocked and report the missing global-access root.
+- If a fallback root is found, state the resolved root path before continuing.
+- `C:\dev\global-access\ai-read\` is the canonical read-only global policy and reference root.
+- `C:\dev\global-access\ai-write\` is the shared writable global state root and may be changed only when the active workflow explicitly requires it.
+- Do not write to `C:\dev\global-access\ai-read\` unless this repository explicitly grants that exception and the user has permitted the change.
 
 ## 1) Source Of Truth
 - `STATUS.md` is the primary roadmap and progress tracker for this repository.
@@ -96,6 +111,7 @@ This file defines recommended autonomous behavior for this repository.
 2. Each log entry must include:
    - time
    - agent name
+   - session name
    - agent version
    - actions taken
    - troubleshooting suggestions
@@ -104,10 +120,13 @@ This file defines recommended autonomous behavior for this repository.
    - do not delete prior entries
    - do not remove content from other agents
    - only revise your own current live entry while it is still in progress
-4. Use this required tail marker as the final line of the file while a session is active:
-   - `[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`
-5. Normal log edits must be written above the tail marker line.
-6. After a work packet completes, append a short final entry for that packet above the tail marker.
+4. Session headers should use the form:
+   - `### <YYYY-MM-DD HH:MM:SS TZ> | Agent: <tool/model> | Session: <human session name> | Version: <agent version>`
+5. Use session-scoped markers instead of a single repo-wide tail marker:
+   - active marker: `[AGENTS-LOG-SESSION] <SessionId> | Session: <Name> | Status: Active`
+   - closed marker: `[AGENTS-LOG-SESSION] <SessionId> | Session: <Name> | Status: Closed | ClosedAt: <YYYY-MM-DD HH:MM:SS TZ>`
+6. Normal log edits must be written above the current session marker line that the agent is updating.
+7. After a work packet completes, append a short final entry for that packet above the current session marker.
 
 ## 11) Session Close Protocol
 If the user requests to close/end the session, perform this sequence before exiting:
@@ -133,14 +152,14 @@ If the user requests to close/end the session, perform this sequence before exit
    - remaining work
    - risks/blockers
    - recommended next step
-7. Replace the active tail marker line with planned exit log entries and closure details (do not leave active marker at EOF after clean close).
+7. Replace the current session's active marker with its closed marker and closure details; do not remove or rewrite another session's marker.
 
 ## 12) Unexpected Exit Detection + Clean Restart
-1. On session start, check the last line of `AGENTS-LOG.md`.
-2. If the last line is:
-   - `[AGENTS-LOG-TAIL] ACTIVE_SESSION_UNTIL_CLEAN_CLOSE`
-   then treat prior session as unexpectedly closed.
-3. In that case, append a recovery note above the marker including:
+1. On session start, inspect unresolved session markers in `AGENTS-LOG.md`.
+2. If the current session is being resumed and its previous marker is still:
+   - `[AGENTS-LOG-SESSION] <SessionId> | Session: <Name> | Status: Active`
+   then treat that prior session as unexpectedly closed.
+3. In that case, append a recovery note above the current session marker including:
    - detection time
    - agent name
    - agent version
@@ -149,4 +168,4 @@ If the user requests to close/end the session, perform this sequence before exit
    - Option 1: Continue from current working tree and resume from latest `STATUS.md` item.
    - Option 2: Review `git status` + recent commits first, then resume.
    - Option 3: Reset to a known-good commit and restart the packet.
-5. Keep exactly one active tail marker line at EOF during an active session.
+5. Agents must only update their own session marker and must not rewrite another session's marker during recovery.

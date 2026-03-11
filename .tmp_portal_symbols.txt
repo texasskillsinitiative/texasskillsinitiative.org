@@ -1,0 +1,357 @@
+.\form-backend\portal_v2_config.js:2:function portalV2ReadProp_(key, fallbackValue) {
+.\form-backend\portal_v2_config.js:150:  ZEPTO_TOKEN: portalV2ReadProp_('PORTAL_V2_ZEPTO_TOKEN', ''),
+.\form-backend\portal_v2_apps_script_webapp.js:93:function doOptions(e) { return portalV2Json_({ ok: true }); }
+.\form-backend\portal_v2_apps_script_webapp.js:95:  return portalV2Json_({
+.\form-backend\portal_v2_apps_script_webapp.js:105:    var payload = portalV2Parse_(e);
+.\form-backend\portal_v2_apps_script_webapp.js:106:    if (!payload) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:108:    if (portalV2IsInternalUsernamePayload_(payload)) {
+.\form-backend\portal_v2_apps_script_webapp.js:109:      portalV2LogInternalUsername_(payload);
+.\form-backend\portal_v2_apps_script_webapp.js:110:      return portalV2Json_({ ok: true });
+.\form-backend\portal_v2_apps_script_webapp.js:113:    var route = portalV2ResolveRoute_(payload);
+.\form-backend\portal_v2_apps_script_webapp.js:114:    if (!route) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:115:    var isStakeholderRoute = portalV2IsStakeholderRoute_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:116:    var submissionId = portalV2Esc_(payload.submission_id || '') || Utilities.getUuid();
+.\form-backend\portal_v2_apps_script_webapp.js:117:    var receivedUtc = portalV2Now_();
+.\form-backend\portal_v2_apps_script_webapp.js:120:      portalV2WriteHoneypot_(route, payload);
+.\form-backend\portal_v2_apps_script_webapp.js:121:      return portalV2Json_({ ok: true });
+.\form-backend\portal_v2_apps_script_webapp.js:125:      portalV2LogBurstDebug_(route, payload, submissionId);
+.\form-backend\portal_v2_apps_script_webapp.js:126:      return portalV2Json_({ ok: true, debug_burst: true });
+.\form-backend\portal_v2_apps_script_webapp.js:129:    var abuse = portalV2AbuseGate_(route, payload, submissionId);
+.\form-backend\portal_v2_apps_script_webapp.js:131:      return portalV2Json_({ ok: false, error: abuse.error });
+.\form-backend\portal_v2_apps_script_webapp.js:134:    var email = portalV2Esc_(payload.email || '').trim();
+.\form-backend\portal_v2_apps_script_webapp.js:135:    if (!portalV2EmailOk_(email)) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:140:    if (!name || !country || !message) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:144:    if (!isStakeholderRoute && !city) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:145:    if (isStakeholderRoute && !city && !stateOrRegion) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:151:      if (!pressDeadline && !hasNoDeadlineFlag) return portalV2Json_({ ok: false, error: 'invalid_input' });
+.\form-backend\portal_v2_apps_script_webapp.js:154:    var emailGate = portalV2RateLimit_(email, route, payload, submissionId);
+.\form-backend\portal_v2_apps_script_webapp.js:156:      return portalV2Json_({ ok: false, error: emailGate.error });
+.\form-backend\portal_v2_apps_script_webapp.js:159:    var visibility = portalV2RouteVisibility_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:162:      ? portalV2Attachment_(payload, route, submissionId)
+.\form-backend\portal_v2_apps_script_webapp.js:163:      : portalV2NotVisibleAttachment_();
+.\form-backend\portal_v2_apps_script_webapp.js:164:    if (attachment.error) return portalV2Json_({ ok: false, error: attachment.error });
+.\form-backend\portal_v2_apps_script_webapp.js:166:    var row = portalV2PortalRow_(payload, route, receivedUtc, email, city, country, message, attachment, submissionId, visibility);
+.\form-backend\portal_v2_apps_script_webapp.js:173:      portalV2LogAbuse_(route, payload, 'append_lock_timeout', { submission_id: submissionId });
+.\form-backend\portal_v2_apps_script_webapp.js:174:      return portalV2Json_({ ok: false, error: 'temporarily_unavailable' });
+.\form-backend\portal_v2_apps_script_webapp.js:177:      appendMeta = portalV2Append_(route, row, submissionId, payload);
+.\form-backend\portal_v2_apps_script_webapp.js:182:    portalV2NotifyAdmin_(route, email, submissionId, attachment, payload, receivedUtc);
+.\form-backend\portal_v2_apps_script_webapp.js:183:    portalV2TryAutoReply_(route, payload, email, submissionId, receivedUtc);
+.\form-backend\portal_v2_apps_script_webapp.js:184:    portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:186:    return portalV2Json_({
+.\form-backend\portal_v2_apps_script_webapp.js:192:    return portalV2Json_({ ok: false, error: 'server_error' });
+.\form-backend\portal_v2_apps_script_webapp.js:196:function portalV2Parse_(e) {
+.\form-backend\portal_v2_apps_script_webapp.js:207:function portalV2ResolveRoute_(payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:215:function portalV2IsStakeholderRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:220:function portalV2IsCanonicalRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:224:function portalV2IsInternalUsernamePayload_(payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:233:function portalV2NotVisibleAttachment_() {
+.\form-backend\portal_v2_apps_script_webapp.js:243:function portalV2ValueOrNotVisible_(value, visible, maxLen) {
+.\form-backend\portal_v2_apps_script_webapp.js:245:  var next = portalV2Field_(value, maxLen);
+.\form-backend\portal_v2_apps_script_webapp.js:249:function portalV2EscOrNotVisible_(value, visible) {
+.\form-backend\portal_v2_apps_script_webapp.js:251:  var next = portalV2Esc_(value || '');
+.\form-backend\portal_v2_apps_script_webapp.js:255:function portalV2AttachmentField_(value, visible) {
+.\form-backend\portal_v2_apps_script_webapp.js:257:  var next = portalV2Esc_(value || '');
+.\form-backend\portal_v2_apps_script_webapp.js:261:function portalV2RouteVisibility_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:262:  var isStakeholder = portalV2IsStakeholderRoute_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:287:function portalV2PortalRow_(payload, route, receivedUtc, email, city, country, message, attachment, submissionId, visibility) {
+.\form-backend\portal_v2_apps_script_webapp.js:289:    String(receivedUtc || portalV2Now_()),
+.\form-backend\portal_v2_apps_script_webapp.js:290:    portalV2Esc_(payload.client_tz || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:291:    portalV2Esc_(payload.client_utc_offset_minutes || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:292:    portalV2RoutFromRoute_(route),
+.\form-backend\portal_v2_apps_script_webapp.js:293:    portalV2Esc_(String(payload.name || '').trim()),
+.\form-backend\portal_v2_apps_script_webapp.js:294:    portalV2Esc_(email),
+.\form-backend\portal_v2_apps_script_webapp.js:295:    portalV2ValueOrNotVisible_(payload.org || '', visibility.org),
+.\form-backend\portal_v2_apps_script_webapp.js:296:    portalV2ValueOrNotVisible_(payload.role || '', visibility.role),
+.\form-backend\portal_v2_apps_script_webapp.js:297:    portalV2Esc_(city),
+.\form-backend\portal_v2_apps_script_webapp.js:298:    portalV2EscOrNotVisible_(payload.loc_state || '', visibility.locState),
+.\form-backend\portal_v2_apps_script_webapp.js:299:    portalV2Esc_(country),
+.\form-backend\portal_v2_apps_script_webapp.js:300:    portalV2ValueOrNotVisible_(payload.focus || '', visibility.focus),
+.\form-backend\portal_v2_apps_script_webapp.js:302:    portalV2ValueOrNotVisible_(payload.pinv_stage || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:303:    portalV2ValueOrNotVisible_(payload.pinv_check_range || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:304:    portalV2ValueOrNotVisible_(payload.pinv_geography || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:305:    portalV2ValueOrNotVisible_(payload.pinv_focus || '', visibility.investment, PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH),
+.\form-backend\portal_v2_apps_script_webapp.js:306:    portalV2ValueOrNotVisible_(payload.pinv_timeline || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:307:    portalV2ValueOrNotVisible_(payload.pinv_investor_type || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:308:    portalV2ValueOrNotVisible_(payload.pinv_investor_type_other || '', visibility.investment),
+.\form-backend\portal_v2_apps_script_webapp.js:310:    portalV2ValueOrNotVisible_(payload.pprs_outlet || '', visibility.press),
+.\form-backend\portal_v2_apps_script_webapp.js:311:    portalV2ValueOrNotVisible_(payload.pprs_role || '', visibility.press),
+.\form-backend\portal_v2_apps_script_webapp.js:312:    portalV2ValueOrNotVisible_(payload.pprs_deadline || '', visibility.press),
+.\form-backend\portal_v2_apps_script_webapp.js:313:    portalV2ValueOrNotVisible_(payload.pprs_topic || '', visibility.press),
+.\form-backend\portal_v2_apps_script_webapp.js:314:    portalV2ValueOrNotVisible_(payload.pprs_format || '', visibility.press),
+.\form-backend\portal_v2_apps_script_webapp.js:316:    portalV2ValueOrNotVisible_(payload.pemp_role_interest || '', visibility.employment),
+.\form-backend\portal_v2_apps_script_webapp.js:317:    portalV2ValueOrNotVisible_(payload.pemp_timeline || '', visibility.employment),
+.\form-backend\portal_v2_apps_script_webapp.js:318:    portalV2ValueOrNotVisible_(payload.pemp_location_pref || '', visibility.employment),
+.\form-backend\portal_v2_apps_script_webapp.js:320:    portalV2ValueOrNotVisible_(payload.pint_school || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:321:    portalV2ValueOrNotVisible_(payload.pint_program || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:322:    portalV2ValueOrNotVisible_(payload.pint_grad_date || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:323:    portalV2ValueOrNotVisible_(payload.pint_track || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:324:    portalV2ValueOrNotVisible_(payload.pint_mode || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:325:    portalV2ValueOrNotVisible_(payload.pint_hours_per_week || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:326:    portalV2ValueOrNotVisible_(payload.pint_start_date || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:327:    portalV2ValueOrNotVisible_(payload.pint_portfolio_url || '', visibility.internship),
+.\form-backend\portal_v2_apps_script_webapp.js:329:    portalV2Esc_(message, PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH),
+.\form-backend\portal_v2_apps_script_webapp.js:330:    portalV2AttachmentField_(attachment.name || '', visibility.attachment),
+.\form-backend\portal_v2_apps_script_webapp.js:331:    portalV2AttachmentField_(attachment.type || '', visibility.attachment),
+.\form-backend\portal_v2_apps_script_webapp.js:332:    portalV2AttachmentField_(attachment.size || '', visibility.attachment),
+.\form-backend\portal_v2_apps_script_webapp.js:333:    portalV2AttachmentField_(attachment.url || '', visibility.attachment),
+.\form-backend\portal_v2_apps_script_webapp.js:334:    portalV2AttachmentField_(attachment.status || '', visibility.attachment),
+.\form-backend\portal_v2_apps_script_webapp.js:336:    portalV2Esc_(payload.page_path || '/'),
+.\form-backend\portal_v2_apps_script_webapp.js:337:    portalV2Esc_(payload.referrer || 'direct'),
+.\form-backend\portal_v2_apps_script_webapp.js:338:    portalV2Esc_(submissionId)
+.\form-backend\portal_v2_apps_script_webapp.js:342:function portalV2WriteHoneypot_(route, payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:351:    portalV2AppendHoneypot_(route, nextPayload, {
+.\form-backend\portal_v2_apps_script_webapp.js:358:    portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:364:function portalV2LogAbuse_(route, payload, reason, details) {
+.\form-backend\portal_v2_apps_script_webapp.js:369:    portalV2AppendHoneypot_(route, nextPayload, {
+.\form-backend\portal_v2_apps_script_webapp.js:381:function portalV2LogBurstDebug_(route, payload, submissionId) {
+.\form-backend\portal_v2_apps_script_webapp.js:383:    var snapshot = portalV2BurstSnapshot_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:387:    portalV2AppendHoneypot_(route, nextPayload, {
+.\form-backend\portal_v2_apps_script_webapp.js:399:function portalV2BurstSnapshot_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:407:  var state = portalV2BurstRead_(portalV2BurstSheet_());
+.\form-backend\portal_v2_apps_script_webapp.js:460:function portalV2AppendHoneypot_(route, payload, meta) {
+.\form-backend\portal_v2_apps_script_webapp.js:461:  var header = portalV2HoneypotHeader_();
+.\form-backend\portal_v2_apps_script_webapp.js:463:  var submissionId = portalV2Esc_(safePayload.submission_id || Utilities.getUuid());
+.\form-backend\portal_v2_apps_script_webapp.js:468:  var attachmentName = portalV2Esc_(safePayload.attachment_name || '');
+.\form-backend\portal_v2_apps_script_webapp.js:469:  var attachmentType = portalV2Esc_(safePayload.attachment_type || '');
+.\form-backend\portal_v2_apps_script_webapp.js:470:  var attachmentSize = portalV2Esc_(safePayload.attachment_size || '');
+.\form-backend\portal_v2_apps_script_webapp.js:475:    portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:476:    portalV2Esc_(safePayload.client_tz || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:477:    portalV2Esc_(safePayload.client_utc_offset_minutes || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:478:    portalV2RoutFromRoute_(route),
+.\form-backend\portal_v2_apps_script_webapp.js:481:    portalV2Esc_(meta && meta.reason || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:482:    portalV2Esc_(meta && meta.reasonDetails !== undefined ? JSON.stringify(meta.reasonDetails) : ''),
+.\form-backend\portal_v2_apps_script_webapp.js:483:    portalV2Esc_(meta && meta.honeypotField || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:484:    portalV2Esc_(meta && meta.honeypotValue || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:485:    portalV2Esc_(safePayload.name || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:486:    portalV2Esc_(email),
+.\form-backend\portal_v2_apps_script_webapp.js:487:    portalV2Esc_(emailDomain),
+.\form-backend\portal_v2_apps_script_webapp.js:488:    portalV2Esc_(safePayload.loc_country || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:489:    portalV2Esc_(safePayload.loc_state || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:490:    portalV2Esc_(safePayload.loc_city || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:491:    portalV2Esc_(safePayload.page_path || '/'),
+.\form-backend\portal_v2_apps_script_webapp.js:492:    portalV2Esc_(safePayload.referrer || 'direct'),
+.\form-backend\portal_v2_apps_script_webapp.js:499:    portalV2Esc_(payloadJson)
+.\form-backend\portal_v2_apps_script_webapp.js:501:  portalV2AppendNamed_(route, PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, header, row);
+.\form-backend\portal_v2_apps_script_webapp.js:504:function portalV2HoneypotHeader_() {
+.\form-backend\portal_v2_apps_script_webapp.js:534:function portalV2AbuseGate_(route, payload, submissionId) {
+.\form-backend\portal_v2_apps_script_webapp.js:535:  var dedupe = portalV2DedupeOk_(route, payload, submissionId);
+.\form-backend\portal_v2_apps_script_webapp.js:537:  var burst = portalV2BurstGate_(route, payload);
+.\form-backend\portal_v2_apps_script_webapp.js:542:function portalV2DedupeOk_(route, payload, submissionId) {
+.\form-backend\portal_v2_apps_script_webapp.js:551:    portalV2LogAbuse_(route, payload, 'duplicate_submission', { submission_id: sid });
+.\form-backend\portal_v2_apps_script_webapp.js:558:function portalV2BurstGate_(route, payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:575:    portalV2LogAbuse_(route, payload, 'rate_limit_lock', { error: 'lock_failed' });
+.\form-backend\portal_v2_apps_script_webapp.js:580:    var sheet = portalV2BurstSheet_();
+.\form-backend\portal_v2_apps_script_webapp.js:581:    var state = portalV2BurstRead_(sheet);
+.\form-backend\portal_v2_apps_script_webapp.js:626:        portalV2LogAbuse_(route, payload, blockedReason, { window_start_ms: globalStart, max: globalMax, window_seconds: globalWindow });
+.\form-backend\portal_v2_apps_script_webapp.js:628:        portalV2LogAbuse_(route, payload, blockedReason, { window_start_ms: trackStart, max: trackMax, window_seconds: trackWindow, route: routeKey });
+.\form-backend\portal_v2_apps_script_webapp.js:632:    portalV2BurstWrite_(sheet, {
+.\form-backend\portal_v2_apps_script_webapp.js:650:function portalV2RateLimit_(email, route, payload, submissionId) {
+.\form-backend\portal_v2_apps_script_webapp.js:659:    portalV2LogAbuse_(route, payload, 'rate_limit_email', { email: String(email || ''), submission_id: submissionId });
+.\form-backend\portal_v2_apps_script_webapp.js:666:function portalV2Attachment_(payload, route, submissionId) {
+.\form-backend\portal_v2_apps_script_webapp.js:675:  var safeName = portalV2SafeFileName_(nameRaw || 'attachment.bin');
+.\form-backend\portal_v2_apps_script_webapp.js:676:  var ext = portalV2Ext_(safeName);
+.\form-backend\portal_v2_apps_script_webapp.js:685:  var mime = typeRaw || portalV2Mime_(ext);
+.\form-backend\portal_v2_apps_script_webapp.js:688:  var folderId = portalV2UploadFolderByRoute_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:700:function portalV2Append_(route, row, submissionId, payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:701:  var masterTarget = portalV2MasterSheetTarget_();
+.\form-backend\portal_v2_apps_script_webapp.js:702:  var routeTarget = portalV2SheetTarget_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:703:  var masterMeta = portalV2AppendTargetRow_(masterTarget, portalV2ColumnsForRoute_(route), row);
+.\form-backend\portal_v2_apps_script_webapp.js:709:    routeMeta = portalV2AppendTargetRow_(routeTarget, portalV2ColumnsForRoute_(route), row);
+.\form-backend\portal_v2_apps_script_webapp.js:713:    portalV2LogWriteIssue_(route, submissionId, payload, masterTarget, routeTarget, mirrorError);
+.\form-backend\portal_v2_apps_script_webapp.js:724:function portalV2AppendNamed_(route, name, header, row) {
+.\form-backend\portal_v2_apps_script_webapp.js:727:  return portalV2AppendTargetRow_({
+.\form-backend\portal_v2_apps_script_webapp.js:733:function portalV2AppendTargetRow_(target, header, row) {
+.\form-backend\portal_v2_apps_script_webapp.js:739:  } else if (header && header.length && !portalV2HeaderMatches_(sheet, header)) {
+.\form-backend\portal_v2_apps_script_webapp.js:751:function portalV2BurstSheet_() {
+.\form-backend\portal_v2_apps_script_webapp.js:758:  var header = portalV2BurstHeader_();
+.\form-backend\portal_v2_apps_script_webapp.js:759:  if (!portalV2HeaderMatches_(sheet, header)) {
+.\form-backend\portal_v2_apps_script_webapp.js:762:    sheet.getRange(2, 1, 1, header.length).setValues([portalV2BurstRowDefaults_()]);
+.\form-backend\portal_v2_apps_script_webapp.js:764:    sheet.getRange(2, 1, 1, header.length).setValues([portalV2BurstRowDefaults_()]);
+.\form-backend\portal_v2_apps_script_webapp.js:769:function portalV2BurstHeader_() {
+.\form-backend\portal_v2_apps_script_webapp.js:781:function portalV2BurstRowDefaults_() {
+.\form-backend\portal_v2_apps_script_webapp.js:782:  return [portalV2Now_(), 0, 0, 0, 0, 0, '{}'];
+.\form-backend\portal_v2_apps_script_webapp.js:785:function portalV2BurstRead_(sheet) {
+.\form-backend\portal_v2_apps_script_webapp.js:786:  var header = portalV2BurstHeader_();
+.\form-backend\portal_v2_apps_script_webapp.js:803:function portalV2BurstWrite_(sheet, state) {
+.\form-backend\portal_v2_apps_script_webapp.js:804:  var header = portalV2BurstHeader_();
+.\form-backend\portal_v2_apps_script_webapp.js:808:    portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:818:function portalV2ColumnsForRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:822:function portalV2MasterSheetTarget_() {
+.\form-backend\portal_v2_apps_script_webapp.js:831:function portalV2SheetTarget_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:842:function portalV2UploadFolderByRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:848:  if (portalV2IsStakeholderRoute_(route)) return String(PORTAL_V2_CONFIG.STAKEHOLDER_UPLOAD_FOLDER_ID || portalFallback || '').trim();
+.\form-backend\portal_v2_apps_script_webapp.js:852:function portalV2TemplateBaseline_() {
+.\form-backend\portal_v2_apps_script_webapp.js:854:    return portalV2TemplateBaselineFromProps_();
+.\form-backend\portal_v2_apps_script_webapp.js:859:function portalV2TemplatePick_(route, type, payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:860:  var baseline = portalV2TemplateBaseline_();
+.\form-backend\portal_v2_apps_script_webapp.js:862:  var templateKey = portalV2TemplateKey_(route, payload);
+.\form-backend\portal_v2_apps_script_webapp.js:870:function portalV2TemplateRender_(text, data) {
+.\form-backend\portal_v2_apps_script_webapp.js:879:function portalV2TemplateData_(route, payload, submissionId, email, receivedUtc) {
+.\form-backend\portal_v2_apps_script_webapp.js:881:  var routeName = portalV2RouteName_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:882:  var submittedFieldsBlock = portalV2SubmittedFieldsBlock_(route, safePayload, routeName);
+.\form-backend\portal_v2_apps_script_webapp.js:885:    rout: portalV2RoutFromRoute_(route),
+.\form-backend\portal_v2_apps_script_webapp.js:892:    received_local: portalV2ReceivedLocal_(safePayload, receivedUtc),
+.\form-backend\portal_v2_apps_script_webapp.js:893:    received_texas: portalV2FormatInTimeZone_(receivedUtc, 'America/Chicago'),
+.\form-backend\portal_v2_apps_script_webapp.js:937:function portalV2ReceivedLocal_(payload, receivedUtc) {
+.\form-backend\portal_v2_apps_script_webapp.js:941:    var formattedInClientTz = portalV2FormatInTimeZone_(receivedUtc, clientTz);
+.\form-backend\portal_v2_apps_script_webapp.js:945:  if (rawOffset) return portalV2FormatWithUtcOffset_(receivedUtc, rawOffset);
+.\form-backend\portal_v2_apps_script_webapp.js:949:function portalV2FormatInTimeZone_(isoOrDate, timeZoneId) {
+.\form-backend\portal_v2_apps_script_webapp.js:960:function portalV2FormatWithUtcOffset_(isoOrDate, offsetMinutesRaw) {
+.\form-backend\portal_v2_apps_script_webapp.js:981:function portalV2RoutFromRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:985:function portalV2RouteFromRout_(rout) {
+.\form-backend\portal_v2_apps_script_webapp.js:989:function portalV2RouteName_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:994:function portalV2TemplateFieldValue_(value) {
+.\form-backend\portal_v2_apps_script_webapp.js:1004:function portalV2SubmittedFieldsBlock_(route, payload, routeName) {
+.\form-backend\portal_v2_apps_script_webapp.js:1006:  var visibility = portalV2RouteVisibility_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:1009:    var next = portalV2TemplateFieldValue_(value);
+.\form-backend\portal_v2_apps_script_webapp.js:1015:  add('Route Code', portalV2RoutFromRoute_(route));
+.\form-backend\portal_v2_apps_script_webapp.js:1072:function portalV2TemplateKey_(route, payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:1076:function portalV2TemplateDebug_(route, type) {
+.\form-backend\portal_v2_apps_script_webapp.js:1079:  var baseline = portalV2TemplateBaseline_();
+.\form-backend\portal_v2_apps_script_webapp.js:1080:  var tmpl = portalV2TemplatePick_(safeRoute, safeType);
+.\form-backend\portal_v2_apps_script_webapp.js:1096:function portalV2TemplateDebug(route, type) {
+.\form-backend\portal_v2_apps_script_webapp.js:1097:  return portalV2TemplateDebug_(route, type);
+.\form-backend\portal_v2_apps_script_webapp.js:1100:function portalV2TryAutoReply_(route, payload, email, submissionId, receivedUtc) {
+.\form-backend\portal_v2_apps_script_webapp.js:1103:    if (!portalV2AutoReplyEnabledForRoute_(route)) return;
+.\form-backend\portal_v2_apps_script_webapp.js:1104:    if (!portalV2EmailOk_(email)) return;
+.\form-backend\portal_v2_apps_script_webapp.js:1106:    var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
+.\form-backend\portal_v2_apps_script_webapp.js:1107:    var tmpl = portalV2TemplatePick_(route, 'auto_reply', payload);
+.\form-backend\portal_v2_apps_script_webapp.js:1114:      subject = portalV2TemplateRender_(tmpl.subject, data);
+.\form-backend\portal_v2_apps_script_webapp.js:1115:      body = portalV2TemplateRender_(tmpl.body, data);
+.\form-backend\portal_v2_apps_script_webapp.js:1134:    portalV2SendMail_(route, 'auto_reply', email, subject, body, submissionId, fallbackReasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1140:function portalV2AutoReplyEnabledForRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:1150:function portalV2NotifyAdmin_(route, email, submissionId, attachment, payload, receivedUtc) {
+.\form-backend\portal_v2_apps_script_webapp.js:1153:  var data = portalV2TemplateData_(route, payload, submissionId, email, receivedUtc);
+.\form-backend\portal_v2_apps_script_webapp.js:1154:  var tmpl = portalV2TemplatePick_(route, 'admin_notify', payload);
+.\form-backend\portal_v2_apps_script_webapp.js:1161:    subject = portalV2TemplateRender_(tmpl.subject, data);
+.\form-backend\portal_v2_apps_script_webapp.js:1162:    body = portalV2TemplateRender_(tmpl.body, data);
+.\form-backend\portal_v2_apps_script_webapp.js:1188:  portalV2SendMail_(route, 'admin_notify', admin, subject, body, submissionId, fallbackReasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1191:function portalV2NormalizeFallbackReasons_(reasons) {
+.\form-backend\portal_v2_apps_script_webapp.js:1204:function portalV2AppendFallbackReason_(reasons, reason) {
+.\form-backend\portal_v2_apps_script_webapp.js:1205:  var next = portalV2NormalizeFallbackReasons_(reasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1215:function portalV2AnnotateFallbackMessage_(subject, body, reasons) {
+.\form-backend\portal_v2_apps_script_webapp.js:1216:  var normalized = portalV2NormalizeFallbackReasons_(reasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1232:function portalV2IsInternalMailType_(mailType) {
+.\form-backend\portal_v2_apps_script_webapp.js:1237:function portalV2InternalDomains_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1251:function portalV2IsInternalEmailAddress_(email) {
+.\form-backend\portal_v2_apps_script_webapp.js:1256:  var domains = portalV2InternalDomains_();
+.\form-backend\portal_v2_apps_script_webapp.js:1263:function portalV2ZeptoFromContext_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:1277:function portalV2SendMail_(route, mailType, toAddress, subject, body, submissionId, fallbackReasons) {
+.\form-backend\portal_v2_apps_script_webapp.js:1280:  var reasons = portalV2NormalizeFallbackReasons_(fallbackReasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1281:  var fromCtx = portalV2ZeptoFromContext_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:1283:  if (fromCtx.reason) reasons = portalV2AppendFallbackReason_(reasons, fromCtx.reason);
+.\form-backend\portal_v2_apps_script_webapp.js:1284:  var primaryMail = portalV2AnnotateFallbackMessage_(subject, body, reasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1286:  var result = portalV2ZeptoSendEmail_({
+.\form-backend\portal_v2_apps_script_webapp.js:1299:    var providerReasons = portalV2AppendFallbackReason_(reasons, 'provider_fallback:zeptomail_send_failed');
+.\form-backend\portal_v2_apps_script_webapp.js:1302:      if (detail) providerReasons = portalV2AppendFallbackReason_(providerReasons, 'provider_error:' + detail);
+.\form-backend\portal_v2_apps_script_webapp.js:1304:    var fallbackMail = portalV2AnnotateFallbackMessage_(subject, body, providerReasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1307:      portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1318:      portalV2NotifyFallback_(route, mailType, to, submissionId, result, subject, fallbackMail.reasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1321:      portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1338:function portalV2NotifyFallback_(route, mailType, to, submissionId, zeptoResult, originalSubject, reasons) {
+.\form-backend\portal_v2_apps_script_webapp.js:1339:  if (!portalV2IsInternalMailType_(mailType)) return;
+.\form-backend\portal_v2_apps_script_webapp.js:1342:  if (!portalV2IsInternalEmailAddress_(admin)) {
+.\form-backend\portal_v2_apps_script_webapp.js:1343:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1358:  var normalizedReasons = portalV2NormalizeFallbackReasons_(reasons);
+.\form-backend\portal_v2_apps_script_webapp.js:1375:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1387:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1401:function portalV2InternalUsernameHeader_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1413:function portalV2LogInternalUsername_(payload) {
+.\form-backend\portal_v2_apps_script_webapp.js:1423:      portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1435:      portalV2AppendNamed_(PORTAL_V2_ROUTES.GOVERNMENT, sheetName, portalV2InternalUsernameHeader_(), row);
+.\form-backend\portal_v2_apps_script_webapp.js:1439:    portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:1445:function portalV2WriteIssueHeader_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1461:function portalV2LogWriteIssue_(route, submissionId, payload, masterTarget, routeTarget, errorText) {
+.\form-backend\portal_v2_apps_script_webapp.js:1464:    portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1465:    portalV2RoutFromRoute_(route),
+.\form-backend\portal_v2_apps_script_webapp.js:1476:  portalV2AppendNamed_(route, PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_(), row);
+.\form-backend\portal_v2_apps_script_webapp.js:1477:  portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:1479:    portalV2NotifyWriteIssue_(route, submissionId, masterTarget, routeTarget, errorText);
+.\form-backend\portal_v2_apps_script_webapp.js:1483:function portalV2NotifyWriteIssue_(route, submissionId, masterTarget, routeTarget, errorText) {
+.\form-backend\portal_v2_apps_script_webapp.js:1485:  if (!admin || !portalV2IsInternalEmailAddress_(admin)) return;
+.\form-backend\portal_v2_apps_script_webapp.js:1486:  var subject = '[Mirror Issue][' + portalV2RoutFromRoute_(route) + '] ' + String(submissionId || '');
+.\form-backend\portal_v2_apps_script_webapp.js:1488:    'rout: ' + portalV2RoutFromRoute_(route),
+.\form-backend\portal_v2_apps_script_webapp.js:1502:function portalV2DashboardHeader_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1506:function portalV2RefreshDashboardSafe_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1509:    return portalV2RefreshDashboard_();
+.\form-backend\portal_v2_apps_script_webapp.js:1516:function portalV2RefreshDashboard() {
+.\form-backend\portal_v2_apps_script_webapp.js:1518:  return portalV2RefreshDashboard_();
+.\form-backend\portal_v2_apps_script_webapp.js:1521:function portalV2RefreshDashboard_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1532:  var rows = [portalV2DashboardHeader_()];
+.\form-backend\portal_v2_apps_script_webapp.js:1533:  var now = portalV2Now_();
+.\form-backend\portal_v2_apps_script_webapp.js:1535:  rows.push(['submissions', 'total_rows', PORTAL_V2_CONFIG.MASTER_SHEET_NAME, portalV2SheetDataRowCount_(masterSheet), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1536:  rows.push(['submissions', 'latest_timestamp_utc', PORTAL_V2_CONFIG.MASTER_SHEET_NAME, portalV2SheetLastTimestamp_(masterSheet), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1538:  var routes = portalV2RouteTypes_();
+.\form-backend\portal_v2_apps_script_webapp.js:1541:    var target = portalV2SheetTarget_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:1543:    rows.push(['route', 'row_count', route, portalV2SheetDataRowCount_(routeSheet), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1544:    rows.push(['route', 'latest_timestamp_utc', route, portalV2SheetLastTimestamp_(routeSheet), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1547:  rows.push(['support', 'abuse_rows', PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME)), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1548:  rows.push(['support', 'mail_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1549:  rows.push(['support', 'mail_error_rows', PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, portalV2MailErrorCount_(ss.getSheetByName(PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME)), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1550:  rows.push(['support', 'write_issue_rows', PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2SheetDataRowCount_(ss.getSheetByName(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME)), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1551:  rows.push(['support', 'latest_write_issue_utc', PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2SheetLastTimestamp_(ss.getSheetByName(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME)), now]);
+.\form-backend\portal_v2_apps_script_webapp.js:1558:function portalV2SheetDataRowCount_(sheet) {
+.\form-backend\portal_v2_apps_script_webapp.js:1563:function portalV2SheetLastTimestamp_(sheet) {
+.\form-backend\portal_v2_apps_script_webapp.js:1568:function portalV2MailErrorCount_(sheet) {
+.\form-backend\portal_v2_apps_script_webapp.js:1579:function portalV2ReconcileRouteMirrors() {
+.\form-backend\portal_v2_apps_script_webapp.js:1591:    var routIndex = portalV2ColumnIndex_('rout');
+.\form-backend\portal_v2_apps_script_webapp.js:1592:    var submissionIdIndex = portalV2ColumnIndex_('submission_id');
+.\form-backend\portal_v2_apps_script_webapp.js:1593:    var nameIndex = portalV2ColumnIndex_('name');
+.\form-backend\portal_v2_apps_script_webapp.js:1594:    var emailIndex = portalV2ColumnIndex_('email');
+.\form-backend\portal_v2_apps_script_webapp.js:1595:    var pagePathIndex = portalV2ColumnIndex_('page_path');
+.\form-backend\portal_v2_apps_script_webapp.js:1596:    var referrerIndex = portalV2ColumnIndex_('referrer');
+.\form-backend\portal_v2_apps_script_webapp.js:1600:    for (var i = 0; i < portalV2RouteTypes_().length; i += 1) {
+.\form-backend\portal_v2_apps_script_webapp.js:1601:      var route = portalV2RouteTypes_()[i];
+.\form-backend\portal_v2_apps_script_webapp.js:1602:      var target = portalV2SheetTarget_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:1619:        var rowRoute = portalV2RouteFromRout_(row[routIndex]);
+.\form-backend\portal_v2_apps_script_webapp.js:1622:        portalV2AppendTargetRow_(target, PORTAL_V2_COLUMNS, row);
+.\form-backend\portal_v2_apps_script_webapp.js:1626:        portalV2AppendNamed_(route, PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_(), [
+.\form-backend\portal_v2_apps_script_webapp.js:1627:          portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1643:    portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:1650:function portalV2ColumnIndex_(columnName) {
+.\form-backend\portal_v2_apps_script_webapp.js:1658:function portalV2ZeptoFromForRoute_(route) {
+.\form-backend\portal_v2_apps_script_webapp.js:1665:function portalV2ZeptoSendEmail_(opts) {
+.\form-backend\portal_v2_apps_script_webapp.js:1677:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1721:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1734:    portalV2MailLog_({
+.\form-backend\portal_v2_apps_script_webapp.js:1749:function portalV2MailLog_(entry) {
+.\form-backend\portal_v2_apps_script_webapp.js:1763:    portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1764:    portalV2RoutFromRoute_(entry.route || ''),
+.\form-backend\portal_v2_apps_script_webapp.js:1774:  portalV2AppendNamed_(String(entry.route || PORTAL_V2_ROUTES.GOVERNMENT), PORTAL_V2_CONFIG.MAIL_LOG_SHEET_NAME, header, row);
+.\form-backend\portal_v2_apps_script_webapp.js:1778:function portalV2ZeptoDebugSend() {
+.\form-backend\portal_v2_apps_script_webapp.js:1780:  var from = portalV2ZeptoFromForRoute_(PORTAL_V2_ROUTES.GOVERNMENT);
+.\form-backend\portal_v2_apps_script_webapp.js:1783:  var body = 'Zepto debug send ' + portalV2Now_();
+.\form-backend\portal_v2_apps_script_webapp.js:1784:  return portalV2ZeptoSendEmail_({
+.\form-backend\portal_v2_apps_script_webapp.js:1796:function portalV2SenderDebug() {
+.\form-backend\portal_v2_apps_script_webapp.js:1797:  var routes = portalV2RouteTypes_();
+.\form-backend\portal_v2_apps_script_webapp.js:1801:    var ctx = portalV2ZeptoFromContext_(route);
+.\form-backend\portal_v2_apps_script_webapp.js:1810:    timestamp_utc: portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1824:function portalV2RuntimeConfigDebug() {
+.\form-backend\portal_v2_apps_script_webapp.js:1827:    timestamp_utc: portalV2Now_(),
+.\form-backend\portal_v2_apps_script_webapp.js:1850:    managed_sheet_names: portalV2ManagedSheetSpecs_()
+.\form-backend\portal_v2_apps_script_webapp.js:1856:function portalV2InitializeSheets() {
+.\form-backend\portal_v2_apps_script_webapp.js:1860:  var specs = portalV2ManagedSheetSpecs_();
+.\form-backend\portal_v2_apps_script_webapp.js:1869:  portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:1873:function portalV2ResetSheets() {
+.\form-backend\portal_v2_apps_script_webapp.js:1877:  var specs = portalV2ManagedSheetSpecs_();
+.\form-backend\portal_v2_apps_script_webapp.js:1883:    ['archived_at_utc', portalV2Now_()],
+.\form-backend\portal_v2_apps_script_webapp.js:1915:  portalV2RefreshDashboardSafe_();
+.\form-backend\portal_v2_apps_script_webapp.js:1924:function portalV2RouteTypes_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1939:function portalV2ManagedSheetSpecs_() {
+.\form-backend\portal_v2_apps_script_webapp.js:1950:  var routes = portalV2RouteTypes_();
+.\form-backend\portal_v2_apps_script_webapp.js:1952:    add(portalV2SheetTarget_(routes[i]).sheetName, PORTAL_V2_COLUMNS);
+.\form-backend\portal_v2_apps_script_webapp.js:1954:  add(PORTAL_V2_CONFIG.HONEYPOT_SHEET_NAME, portalV2HoneypotHeader_());
+.\form-backend\portal_v2_apps_script_webapp.js:1967:  add(PORTAL_V2_CONFIG.BURST_SHEET_NAME, portalV2BurstHeader_());
+.\form-backend\portal_v2_apps_script_webapp.js:1968:  add(PORTAL_V2_CONFIG.INTERNAL_USERNAME_SHEET_NAME, portalV2InternalUsernameHeader_());
+.\form-backend\portal_v2_apps_script_webapp.js:1969:  add(PORTAL_V2_CONFIG.WRITE_ISSUES_SHEET_NAME, portalV2WriteIssueHeader_());
+.\form-backend\portal_v2_apps_script_webapp.js:1971:    add(PORTAL_V2_CONFIG.DASHBOARD_SHEET_NAME, portalV2DashboardHeader_());
+.\form-backend\portal_v2_apps_script_webapp.js:1976:function portalV2HeaderMatches_(sheet, expectedHeader) {
+.\form-backend\portal_v2_apps_script_webapp.js:1986:function portalV2Field_(value, maxLen) {
+.\form-backend\portal_v2_apps_script_webapp.js:1988:  return v ? portalV2Esc_(v, maxLen || PORTAL_V2_CONFIG.MESSAGE_MAX_LENGTH) : '';
+.\form-backend\portal_v2_apps_script_webapp.js:1991:function portalV2EmailOk_(email) {
+.\form-backend\portal_v2_apps_script_webapp.js:1995:function portalV2Now_() { return new Date().toISOString(); }
+.\form-backend\portal_v2_apps_script_webapp.js:1997:function portalV2Json_(obj) {
+.\form-backend\portal_v2_apps_script_webapp.js:2008:function portalV2Esc_(v, maxLen) {
+.\form-backend\portal_v2_apps_script_webapp.js:2016:function portalV2SafeFileName_(name) {
+.\form-backend\portal_v2_apps_script_webapp.js:2023:function portalV2Ext_(name) {
+.\form-backend\portal_v2_apps_script_webapp.js:2029:function portalV2Mime_(ext) {

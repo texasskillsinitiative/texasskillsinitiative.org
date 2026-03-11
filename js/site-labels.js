@@ -13,6 +13,10 @@
       full: 'Internship Application',
       href: 'portal-internship.html'
     },
+    future_career_interest: {
+      full: 'Future Career Interest',
+      href: 'portal-career-interest.html'
+    },
     investment_inquiry: {
       full: 'Investment Inquiry',
       footer: 'Investment',
