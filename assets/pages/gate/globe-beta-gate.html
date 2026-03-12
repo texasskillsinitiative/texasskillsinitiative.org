@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TSI Beta Gate Globe</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --gate-bg: #030812;
+      --gate-bg-deep: #071220;
+      --gate-sphere: #081425;
+      --gate-sphere-core: rgba(24, 60, 106, 0.34);
+      --gate-line: rgba(198, 236, 255, 0.96);
+      --gate-line-soft: rgba(110, 203, 255, 0.34);
+      --gate-line-glow: rgba(82, 181, 255, 0.22);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 44%, rgba(42, 110, 176, 0.28), transparent 24%),
+        radial-gradient(circle at 50% 58%, rgba(9, 21, 38, 0.82), transparent 48%),
+        linear-gradient(180deg, var(--gate-bg-deep), var(--gate-bg));
+    }
+
+    body {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .stage {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    #globeCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: blur(0.15px);
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" aria-hidden="true">
+    <canvas id="globeCanvas"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      var canvas = document.getElementById('globeCanvas');
+      var ctx = canvas.getContext('2d');
+      var stageWidth = 0;
+      var stageHeight = 0;
+      var deviceScale = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+      var countries = null;
+      var rotation = [-18, -10, 0];
+      var lastFrame = 0;
+      var animationId = 0;
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      var projection = d3.geoOrthographic();
+      var path = d3.geoPath(projection, ctx);
+
+      var COLORS = {
+        sphereOuter: '#030812',
+        sphereCore: '#030812',
+        rim: 'rgba(176, 224, 255, 0.06)',
+        glow: 'rgba(82, 181, 255, 0.22)',
+        lineSoft: 'rgba(110, 203, 255, 0.34)',
+        lineMain: 'rgba(198, 236, 255, 0.96)'
+      };
+
+      function resize() {
+        stageWidth = Math.max(1, window.innerWidth || 1);
+        stageHeight = Math.max(1, window.innerHeight || 1);
+        canvas.width = Math.round(stageWidth * deviceScale);
+        canvas.height = Math.round(stageHeight * deviceScale);
+        canvas.style.width = stageWidth + 'px';
+        canvas.style.height = stageHeight + 'px';
+        ctx.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
+
+        var radius = Math.min(stageWidth, stageHeight) * 0.52;
+        projection
+          .translate([stageWidth / 2, stageHeight / 2])
+          .scale(radius)
+          .clipAngle(90)
+          .precision(0.5)
+          .rotate(rotation);
+
+        drawFrame();
+      }
+
+      function drawSphere(radius) {
+        var centerX = stageWidth / 2;
+        var centerY = stageHeight / 2;
+        ctx.beginPath();
+        path({ type: 'Sphere' });
+        ctx.fillStyle = COLORS.sphereOuter;
+        ctx.fill();
+
+        ctx.beginPath();
+        path({ type: 'Sphere' });
+        ctx.lineWidth = 1.2;
+        ctx.strokeStyle = COLORS.rim;
+        ctx.stroke();
+      }
+
+      function drawCountries() {
+        if (!countries) return;
+
+        ctx.save();
+        ctx.beginPath();
+        path({ type: 'Sphere' });
+        ctx.clip();
+
+        ctx.beginPath();
+        path(countries);
+        ctx.lineJoin = 'round';
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = COLORS.glow;
+        ctx.lineWidth = 6.6;
+        ctx.globalAlpha = 0.9;
+        ctx.stroke();
+
+        ctx.beginPath();
+        path(countries);
+        ctx.strokeStyle = COLORS.lineSoft;
+        ctx.lineWidth = 3.4;
+        ctx.globalAlpha = 0.9;
+        ctx.stroke();
+
+        ctx.beginPath();
+        path(countries);
+        ctx.strokeStyle = COLORS.lineMain;
+        ctx.lineWidth = 1.7;
+        ctx.globalAlpha = 1;
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      function drawFrame() {
+        ctx.clearRect(0, 0, stageWidth, stageHeight);
+
+        var radius = projection.scale();
+        drawSphere(radius);
+        drawCountries();
+      }
+
+      function animate(timestamp) {
+        if (!lastFrame) {
+          lastFrame = timestamp;
+        }
+        var delta = Math.min(32, timestamp - lastFrame);
+        lastFrame = timestamp;
+
+        if (!reducedMotion) {
+          rotation[0] += delta * 0.006;
+          rotation[1] = -10 + Math.sin(timestamp * 0.00012) * 2.6;
+          projection.rotate(rotation);
+        }
+
+        drawFrame();
+        animationId = window.requestAnimationFrame(animate);
+      }
+
+      function start() {
+        Promise.all([
+          d3.json('../overview/data/countries-110m.json')
+        ]).then(function (results) {
+          var countriesAtlas = results[0];
+          countries = topojson.feature(countriesAtlas, countriesAtlas.objects.countries);
+          resize();
+          animationId = window.requestAnimationFrame(animate);
+        }).catch(function (error) {
+          console.warn('[gate-globe] Failed to load overview globe data.', error);
+          resize();
+          animationId = window.requestAnimationFrame(animate);
+        });
+      }
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('beforeunload', function () {
+        if (animationId) {
+          window.cancelAnimationFrame(animationId);
+        }
+      });
+
+      start();
+    })();
+  </script>
+</body>
+</html>

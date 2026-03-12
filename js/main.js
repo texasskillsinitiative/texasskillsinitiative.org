@@ -2300,9 +2300,10 @@ const maybeApplyOverviewReplayLaunch = () => {
         return;
     }
     const launch = String(url.searchParams.get('home') || '').trim().toLowerCase();
-    if (launch !== '00') return;
-    forceFullOverviewOnActivate = false;
-    quickOverviewReplayOnActivate = true;
+    if (launch !== '00' && launch !== 'full') return;
+    forceFullOverviewOnActivate = launch === 'full';
+    quickOverviewReplayOnActivate = launch === '00';
+    resetOverviewSequenceCycleOnActivate = launch === 'full';
     resetOverviewGlobeOnActivate = true;
     if (!window.location.hash) {
         window.location.hash = '#overview';

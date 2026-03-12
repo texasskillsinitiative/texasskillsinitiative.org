@@ -6,7 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Texas Skills Initiative | Global Hub Strategy</title>
     <script>
-        document.documentElement.classList.remove('no-js');
+        (function () {
+            document.documentElement.classList.remove('no-js');
+            var gateOpen = false;
+            try {
+                gateOpen = localStorage.getItem('tsi_beta_gate_v1') === 'granted';
+            } catch (error) {
+                gateOpen = false;
+            }
+            document.documentElement.setAttribute('data-beta-gate', gateOpen ? 'open' : 'locked');
+            window.__TSI_BETA_GATE_OPEN__ = gateOpen;
+        })();
     </script>
     <style>
         html[data-theme="dark"],
@@ -948,7 +958,7 @@
         <section class="section-wrap overview-hero" id="overview" role="tabpanel" aria-labelledby="tab-overview"
             tabindex="-1">
             <div class="overview-animation" aria-hidden="true">
-                <iframe src="assets/pages/overview/globe-overview-v4.1.html?mode=desktop&v=20260302d" title="Rotating globe background"
+                <iframe data-beta-src="assets/pages/overview/globe-overview-v4.1.html?mode=desktop&v=20260302d" title="Rotating globe background"
                     loading="lazy" frameborder="0" aria-hidden="true"></iframe>
             </div>
             <div class="overview-content">
@@ -1197,8 +1207,39 @@
             <figcaption id="imageLightboxCaption"></figcaption>
         </figure>
     </div>
-    <script src="js/site-labels.js" defer></script>
-    <script src="js/main.js?v=20260220-mobilefix" defer></script>
+    <script src="js/gate.js" defer></script>
+    <script>
+        (function () {
+            if (window.__TSI_BETA_GATE_OPEN__ !== true) {
+                return;
+            }
+
+            var overviewIframe = document.querySelector('.overview-animation iframe[data-beta-src]');
+            if (overviewIframe && !overviewIframe.getAttribute('src')) {
+                overviewIframe.setAttribute('src', overviewIframe.getAttribute('data-beta-src'));
+            }
+
+            function loadScript(src) {
+                return new Promise(function (resolve, reject) {
+                    var script = document.createElement('script');
+                    script.src = src;
+                    script.defer = true;
+                    script.async = false;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.body.appendChild(script);
+                });
+            }
+
+            loadScript('js/site-labels.js')
+                .then(function () {
+                    return loadScript('js/main.js?v=20260220-mobilefix');
+                })
+                .catch(function (error) {
+                    console.error('[beta-gate] Failed to load site runtime after access grant.', error);
+                });
+        })();
+    </script>
 </body>
 
 </html>
