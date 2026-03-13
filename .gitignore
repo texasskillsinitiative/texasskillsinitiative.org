@@ -2,6 +2,8 @@
 .archive/
 .vscode/
 snapshot/
+.tmp/local-ops/snapshot/
+.tmp/local-ops/snapshot-workflow.md
 .codex_index_patch.diff
 .tmp/local-ops/
 .archive/local-ops/
@@ -37,3 +39,5 @@ js/debug.local.js
 old*.html
 head_index.html
 temp_old_index.html
+
+.local/
