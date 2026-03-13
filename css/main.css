@@ -3765,6 +3765,7 @@
             min-height: 520px;
             border: 1px solid color-mix(in srgb, var(--frame-border) 88%, transparent);
             background: color-mix(in srgb, var(--card-bg) 94%, transparent);
+            touch-action: pan-y;
             transition: border-color var(--motion-base) var(--motion-ease-standard),
                 background var(--motion-base) var(--motion-ease-standard);
         }
@@ -3774,6 +3775,31 @@
             background: color-mix(in srgb, var(--accent) 2%, var(--card-bg));
         }
 
+        .rubric-protocol + .section-next-wrap {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            max-height: 0;
+            overflow: hidden;
+            margin-top: 0;
+            transition: opacity var(--motion-base) var(--motion-ease-standard),
+                visibility 0s linear var(--motion-base),
+                max-height var(--motion-base) var(--motion-ease-standard),
+                margin-top var(--motion-base) var(--motion-ease-standard);
+        }
+
+        .rubric-protocol[data-active-protocol-index="4"][data-post-phase-ready="true"] + .section-next-wrap {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            max-height: 160px;
+            margin-top: 22px;
+            transition: opacity var(--motion-base) var(--motion-ease-standard),
+                visibility 0s linear 0s,
+                max-height var(--motion-base) var(--motion-ease-standard),
+                margin-top var(--motion-base) var(--motion-ease-standard);
+        }
+
         .rubric-protocol-view {
             position: absolute;
             top: 0;
@@ -3781,6 +3807,7 @@
             width: 100%;
             height: auto;
             padding: 18px;
+            box-sizing: border-box;
             opacity: 0;
             transform: translateX(0);
             pointer-events: none;
@@ -3843,6 +3870,13 @@
             gap: 8px;
         }
 
+        .rubric-phase-frame {
+            position: relative;
+            width: calc(100% + 36px);
+            max-width: none;
+            margin: 0 -18px;
+        }
+
         .rubric-phase-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3859,14 +3893,14 @@
         .rubric-diagnostic-asset,
         .rubric-deploy-asset {
             border-color: color-mix(in srgb, var(--accent) 20%, var(--frame-border));
-            min-height: 140px;
-            aspect-ratio: 4 / 3;
+            min-height: 0;
+            aspect-ratio: auto;
         }
 
         .rubric-diagnostic-asset img,
         .rubric-deploy-asset img {
             width: 100%;
-            height: 100%;
+            height: auto;
             object-fit: cover;
             opacity: 1;
         }
@@ -3891,6 +3925,99 @@
             font-size: 0.84rem;
             line-height: 1.46;
             color: color-mix(in srgb, var(--page-text-main) 86%, var(--page-text-dim));
+        }
+
+        .rubric-phase-jump {
+            position: absolute;
+            top: 25%;
+            bottom: 25%;
+            right: 0;
+            width: 28px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 0;
+            border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--frame-border));
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent) 18%, var(--card-bg)),
+                    color-mix(in srgb, var(--accent) 10%, var(--card-bg)));
+            color: color-mix(in srgb, var(--accent) 84%, var(--page-text-main));
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            z-index: 4;
+            animation: rubricPhaseJumpPulse 2.4s ease-in-out infinite;
+            border-radius: 0;
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 8%, transparent);
+            transition: border-color var(--motion-base) var(--motion-ease-standard),
+                background var(--motion-base) var(--motion-ease-standard),
+                color var(--motion-base) var(--motion-ease-standard),
+                transform var(--motion-base) var(--motion-ease-standard);
+        }
+
+        .rubric-phase-jump span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        .rubric-phase-jump__arrow {
+            writing-mode: initial;
+            text-orientation: initial;
+            font-size: 0.74rem;
+            line-height: 1;
+        }
+
+        .rubric-phase-jump--left {
+            left: 0;
+            right: auto;
+            animation: none;
+        }
+
+        .rubric-phase-jump--left span:not(.rubric-phase-jump__arrow) {
+            writing-mode: vertical-lr;
+        }
+
+        .rubric-phase-jump:hover {
+            border-color: color-mix(in srgb, var(--accent) 70%, var(--frame-border));
+            background: linear-gradient(180deg,
+                    color-mix(in srgb, var(--accent) 26%, var(--card-bg)),
+                    color-mix(in srgb, var(--accent) 16%, var(--card-bg)));
+            color: var(--page-text-main);
+            transform: translateX(2px);
+        }
+
+        .rubric-phase-jump--left:hover {
+            transform: translateX(-2px);
+        }
+
+        .rubric-phase-jump:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        @keyframes rubricPhaseJumpPulse {
+            0%, 100% {
+                background: linear-gradient(180deg,
+                        color-mix(in srgb, var(--accent) 18%, var(--card-bg)),
+                        color-mix(in srgb, var(--accent) 10%, var(--card-bg)));
+                border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
+                box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 8%, transparent),
+                    0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
+                transform: scale(1);
+            }
+
+            50% {
+                background: linear-gradient(180deg,
+                        color-mix(in srgb, var(--accent) 18%, var(--card-bg)),
+                        color-mix(in srgb, var(--accent) 10%, var(--card-bg)));
+                border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
+                box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 12%, transparent),
+                    0 0 16px color-mix(in srgb, var(--accent) 18%, transparent);
+                transform: scale(1.035);
+            }
         }
 
         .rubric-deployment-grid {
@@ -4654,9 +4781,16 @@
             margin: 40px auto 0 auto;
         }
 
-        .mandate-asset {
+        .mandate-media-column {
             width: 440px;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .mandate-asset {
+            width: 100%;
         }
 
         .mandate-column {
@@ -4683,8 +4817,9 @@
         .mandate-rhythm-strip {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: -12px;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 0;
         }
 
         .mandate-rhythm-item {
@@ -4819,13 +4954,19 @@
             text-align: center;
         }
 
+        .engagement-intro {
+            max-width: 980px;
+            margin: 0 auto 18px;
+            text-align: left;
+        }
+
         .engagement-framing {
             max-width: 980px;
             margin: 0 auto 18px;
             text-align: left;
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
+            gap: 22px;
             align-items: stretch;
         }
 
@@ -4834,14 +4975,72 @@
             margin: 0 auto 18px;
             text-align: left;
             display: grid;
-            grid-template-columns: minmax(320px, 1fr) auto;
+            grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1fr);
             gap: 16px 20px;
-            align-items: center;
+            align-items: stretch;
+        }
+
+        .engagement-serve-copy {
+            display: grid;
+            align-content: center;
+            gap: 18px;
+            justify-items: start;
         }
 
         .engagement-serve-head {
             display: grid;
             gap: 8px;
+        }
+
+        .engagement-serve-media {
+            margin: 0;
+            border: 1px solid var(--frame-border);
+            overflow: hidden;
+            min-height: 220px;
+            background: color-mix(in srgb, var(--card-bg) 92%, transparent);
+            align-self: stretch;
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+        .engagement-serve-media img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.52) saturate(0.88);
+        }
+
+        .engagement-serve-media::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(5, 10, 18, 0.18), rgba(5, 10, 18, 0.34));
+            pointer-events: none;
+        }
+
+        .engagement-auxiliary {
+            max-width: 980px;
+            margin: 0 auto 18px;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 16px 20px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .engagement-auxiliary-head {
+            display: grid;
+            gap: 8px;
+        }
+
+        .engagement-auxiliary-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
+            justify-content: flex-end;
         }
 
         .engagement-visual-grid {
@@ -4882,12 +5081,14 @@
             gap: 8px;
         }
 
-        .engagement-kicker {
+        .engagement-kicker,
+        .persona-section-title,
+        .staff-gateway-label-021026 {
             margin: 0;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 0.66rem;
-            letter-spacing: 1.2px;
+            font-size: 0.75rem;
             text-transform: uppercase;
+            letter-spacing: 2px;
             color: var(--accent);
         }
 
@@ -4908,10 +5109,29 @@
         }
 
         .btn-cta--inline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             height: 56px;
             padding: 0 26px;
             font-size: 0.75rem;
             letter-spacing: 1.4px;
+            text-align: center;
+        }
+
+        .engagement-serve .btn-cta--inline {
+            position: absolute;
+            z-index: 1;
+            justify-self: center;
+            align-self: center;
+            background: linear-gradient(135deg, rgba(197, 160, 89, 1), rgba(197, 160, 89, 0.92));
+            opacity: 1;
+        }
+
+        .engagement-auxiliary .btn-cta--inline {
+            position: static;
+            justify-self: start;
+            align-self: auto;
         }
 
         .engagement-signals {
@@ -4928,6 +5148,18 @@
             }
             .engagement-serve {
                 grid-template-columns: 1fr;
+            }
+            .engagement-serve-media {
+                min-height: 200px;
+            }
+            .engagement-auxiliary-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .engagement-auxiliary {
+                grid-template-columns: 1fr;
+                align-items: stretch;
             }
         }
 
@@ -5090,20 +5322,17 @@
         .persona-section--compact {
             padding: 8px 0 2px;
             border-top: 0;
+            display: grid;
+            gap: 22px;
         }
 
         .persona-section--compact .persona-section-title {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             text-align: left;
         }
 
-        .persona-section-title {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--accent);
-            margin-bottom: 30px;
-            text-align: center;
+        .engagement-framing-head .persona-section-title {
+            margin: 0 0 12px 0;
         }
 
         .persona-grid {
@@ -5769,6 +5998,7 @@
             .pillar-manager-card {
                 width: min(216px, 100%);
                 max-width: min(216px, 100%);
+                margin-inline: auto;
             }
 
             .pillar-gallery {
@@ -5822,13 +6052,9 @@
             align-items: start;
         }
 
+        .engagement-kicker,
         .staff-gateway-label-021026 {
-            margin: 0 0 12px 0;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--accent);
+            margin-bottom: 12px;
         }
 
         .staff-gateway-copy-021026 {
@@ -7599,10 +7825,15 @@
                 margin-top: 24px;
             }
 
+            .mandate-media-column,
             .mandate-asset,
             .mandate-column {
                 width: 100%;
                 max-width: 100%;
+            }
+
+            .mandate-media-column {
+                gap: 16px;
             }
 
             .mandate-column {
@@ -7633,20 +7864,25 @@
             .rubric-protocol-toggle {
                 --rubric-top-marker-radius: 12px;
                 --rubric-track-lead: 24px;
-                position: sticky;
+                position: fixed;
                 top: var(--nav-current-height, 95px);
-                z-index: 5;
-                margin-left: -20px;
-                margin-right: -10px;
+                left: 20px;
+                right: 20px;
+                z-index: 20;
+                margin-left: 0;
+                margin-right: 0;
                 border-left: 0;
                 border-right: 0;
                 border-top: 0;
                 background: color-mix(in srgb, var(--page-bg) 94%, var(--card-bg));
                 backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                box-shadow: 0 10px 18px color-mix(in srgb, var(--page-bg) 58%, transparent);
             }
 
             .rubric-protocol-body {
                 grid-template-columns: 1fr;
+                padding-top: 70px;
             }
 
             .rubric-phase-rail {
@@ -7673,6 +7909,7 @@
 
             .rubric-protocol-stage {
                 min-height: 760px;
+                z-index: 1;
             }
 
             .rubric-diagnostic-grid,
@@ -8007,6 +8244,26 @@
 
             .overview-content {
                 width: min(100%, 620px);
+            }
+
+            .rubric-phase-frame {
+                width: calc(100% + 24px);
+                margin: 0 -12px;
+            }
+
+            .rubric-phase-grid {
+                max-width: calc(100% - 24px);
+            }
+
+            .rubric-phase-jump {
+                width: 10px;
+                gap: 6px;
+                font-size: 0.5rem;
+                opacity: 0.88;
+            }
+
+            .rubric-phase-jump__arrow {
+                font-size: 0.52rem;
             }
 
             @media (max-width: 420px) {

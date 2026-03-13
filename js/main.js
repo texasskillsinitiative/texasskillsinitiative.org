@@ -2590,6 +2590,7 @@ function initRubricActions() {
     if (!root) return;
     const stage = root.querySelector('[data-rubric-stage]');
     const toggles = Array.from(root.querySelectorAll('[data-protocol-toggle]'));
+    const jumpButtons = Array.from(root.querySelectorAll('[data-rubric-jump]'));
     const views = Array.from(root.querySelectorAll('[data-protocol-view]'));
     if (!stage || toggles.length < 2 || views.length < 2) return;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2603,6 +2604,10 @@ function initRubricActions() {
     let pulseSequenceToken = 0;
     let progressAnimationTimerIds = [];
     let postPhaseReadyTimerId = 0;
+    let stageResizeObserver = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchActive = false;
 
     const viewByKey = new Map(views.map(view => [view.getAttribute('data-protocol-view'), view]));
     const pulseMarkers = new Map();
@@ -2832,6 +2837,17 @@ function initRubricActions() {
             stage.style.height = `${targetHeight}px`;
         }
     };
+    const observeStageHeightFor = (view) => {
+        if (!(view instanceof HTMLElement) || typeof ResizeObserver === 'undefined') return;
+        if (stageResizeObserver) {
+            stageResizeObserver.disconnect();
+        }
+        stageResizeObserver = new ResizeObserver(() => {
+            if (!view.classList.contains('is-active')) return;
+            setStageHeightFor(view);
+        });
+        stageResizeObserver.observe(view);
+    };
     const syncToggleState = (nextKey, options = {}) => {
         const { syncProgress = true, energizeActive = true } = options;
         const nextIndex = getProtocolIndex(nextKey);
@@ -2886,6 +2902,7 @@ function initRubricActions() {
         activeKey = nextKey;
         syncToggleState(nextKey, { syncProgress: false, energizeActive: true });
         setStageHeightFor(nextView);
+        observeStageHeightFor(nextView);
         isAnimating = false;
         restartPulseSequence();
     };
@@ -2961,6 +2978,49 @@ function initRubricActions() {
         toggle.addEventListener('keydown', handleToggleKeyDown);
     });
 
+    jumpButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const nextKey = button.getAttribute('data-rubric-jump');
+            switchProtocol(nextKey);
+        });
+    });
+
+    const handleTouchStart = (event) => {
+        if (!(window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768)) return;
+        const touch = event.touches && event.touches[0];
+        if (!touch) return;
+        touchStartX = touch.clientX;
+        touchStartY = touch.clientY;
+        touchActive = true;
+    };
+
+    const handleTouchEnd = (event) => {
+        if (!touchActive) return;
+        touchActive = false;
+        if (isAnimating) return;
+        const touch = event.changedTouches && event.changedTouches[0];
+        if (!touch) return;
+        const deltaX = touch.clientX - touchStartX;
+        const deltaY = touch.clientY - touchStartY;
+        const absX = Math.abs(deltaX);
+        const absY = Math.abs(deltaY);
+        if (absX < 48 || absX <= absY * 1.2) return;
+        const currentIdx = toggles.findIndex((toggle) => toggle.getAttribute('data-protocol-toggle') === activeKey);
+        if (currentIdx === -1) return;
+        const nextIdx = deltaX < 0
+            ? Math.min(toggles.length - 1, currentIdx + 1)
+            : Math.max(0, currentIdx - 1);
+        if (nextIdx === currentIdx) return;
+        const nextKey = toggles[nextIdx]?.getAttribute('data-protocol-toggle');
+        switchProtocol(nextKey);
+    };
+
+    stage.addEventListener('touchstart', handleTouchStart, { passive: true });
+    stage.addEventListener('touchend', handleTouchEnd, { passive: true });
+    stage.addEventListener('touchcancel', () => {
+        touchActive = false;
+    }, { passive: true });
+
     const initialView = viewByKey.get(activeKey) || views[0];
     views.forEach((view) => {
         const isActive = view === initialView;
@@ -2971,6 +3031,7 @@ function initRubricActions() {
     });
     activeKey = initialView.getAttribute('data-protocol-view') || activeKey || (views[0] ? views[0].getAttribute('data-protocol-view') : '');
     syncToggleState(activeKey, { syncProgress: false });
+    observeStageHeightFor(initialView);
     restartPulseSequence();
     const initialActiveTab = document.body.dataset.activeTab || 'overview';
     if (initialActiveTab === 'rubric') {

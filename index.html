@@ -381,21 +381,22 @@
         <!-- Mandate Section Start -->
         <section class="section-wrap" id="mandate" role="tabpanel" aria-labelledby="tab-mandate" tabindex="-1">
             <div class="mandate-layout">
-                <div class="asset-image mandate-asset"><img src="assets/pages/mandate/mandate-01.png"
-                        alt="Regional industrial corridor illustration" width="755" height="914"
-                        decoding="async"></div>
+                <div class="mandate-media-column">
+                    <div class="mandate-rhythm-strip" aria-label="Mandate focus sequence">
+                        <span class="mandate-rhythm-item">Signal Audit</span>
+                        <span class="mandate-rhythm-item">Local Co-Design</span>
+                        <span class="mandate-rhythm-item">Deployment Readiness</span>
+                    </div>
+                    <div class="asset-image mandate-asset"><img src="assets/pages/mandate/mandate-01.png"
+                            alt="Regional industrial corridor illustration" width="755" height="914"
+                            decoding="async"></div>
+                </div>
                 <div class="mandate-column">
                     <div class="instruction-box instruction-box--compact">
                         <p class="mandate-intro-text">
                             Identifying high-potential economic regions and aligning workforce systems.
                         </p>
                     </div>
-                    <div class="mandate-rhythm-strip" aria-label="Mandate focus sequence">
-                        <span class="mandate-rhythm-item">Signal Audit</span>
-                        <span class="mandate-rhythm-item">Local Co-Design</span>
-                        <span class="mandate-rhythm-item">Deployment Readiness</span>
-                    </div>
-
                     <div class="mandate-card">
 
                         <p class="mandate-card-lead">
@@ -541,14 +542,14 @@
                         <article class="rubric-protocol-view is-active" data-protocol-view="phase-01"
                         id="rubric-view-phase-01" role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-01"
                         aria-hidden="false" tabindex="0">
-                        <p class="rubric-protocol-tone">Focus: <span class="text-main-strong"><strong>Building the
-                                    Foundation.</strong></span> We pair independent research with collaborative
-                            discovery to ensure your corridor <span class="text-main-strong"><strong>defines the
-                                    standard</strong></span> for global industrial benchmarks. This stage distills raw
-                            regional data into actionable strategic criteria.</p>
+                        <p class="rubric-protocol-tone"><span class="text-main-strong"><strong>Establishing the
+                                    baseline</strong></span>
+                            Independent research establishes an initial understanding of the region. Economic data,
+                            infrastructure capacity, and institutional signals are gathered to form the objective
+                            baseline for corridor evaluation.</p>
+                        <div class="rubric-phase-frame">
                         <div class="rubric-phase-grid">
                             <section class="rubric-diagnostic-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Phase 01A - Initial Evaluation</p>
                                 <div class="asset-image rubric-diagnostic-asset">
                                     <img src="assets/pages/rubric/rubric-01a.png"
                                         alt="Initial Evaluation visual for regional baseline review" loading="lazy"
@@ -561,7 +562,6 @@
                                     <strong>Outputs:</strong> Initial opportunity profile for corridor assessment.</p>
                             </section>
                             <section class="rubric-diagnostic-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Phase 01B - Baseline Risk Mapping</p>
                                 <div class="asset-image rubric-diagnostic-asset">
                                     <img src="assets/pages/rubric/rubric-01b.png"
                                         alt="Baseline Risk Mapping visual for corridor constraints" loading="lazy"
@@ -575,18 +575,25 @@
                                     02.</p>
                             </section>
                         </div>
+                        <button type="button" class="rubric-phase-jump" data-rubric-jump="phase-02"
+                            aria-label="Go to Phase 02">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                            <span aria-hidden="true">02</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                        </button>
+                        </div>
                         </article>
                         <article class="rubric-protocol-view" data-protocol-view="phase-02" id="rubric-view-phase-02"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-02" aria-hidden="true" tabindex="0"
                         hidden>
-                        <p class="rubric-protocol-tone">Focus: <span class="text-main-strong"><strong>Building the
-                                    Foundation.</strong></span> We pair independent research with collaborative
-                            discovery to ensure your corridor <span class="text-main-strong"><strong>defines the
-                                    standard</strong></span> for global industrial benchmarks. This stage distills raw
-                            regional data into actionable strategic criteria.</p>
+                        <p class="rubric-protocol-tone"><span class="text-main-strong"><strong>Working with local
+                                    partners</strong></span>
+                            Local leaders, institutions, and industry partners help refine the picture. Through
+                            structured collaboration, regional insight is combined with independent analysis to shape
+                            clear strategic criteria and shared priorities.</p>
+                        <div class="rubric-phase-frame">
                         <div class="rubric-phase-grid">
                             <section class="rubric-diagnostic-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Phase 02A - Collaborative Discovery</p>
                                 <div class="asset-image rubric-diagnostic-asset">
                                     <img src="assets/pages/rubric/rubric-02a.png"
                                         alt="Collaborative Discovery visual for corridor review workshops"
@@ -599,7 +606,6 @@
                                     discovery. <strong>Outputs:</strong> Shared fact pattern for deeper review.</p>
                             </section>
                             <section class="rubric-diagnostic-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Phase 02C - Infrastructure and Legal Stress Check</p>
                                 <div class="asset-image rubric-diagnostic-asset">
                                     <img src="assets/pages/rubric/rubric-02b.png"
                                         alt="Stakeholder Validation visual for local priority alignment"
@@ -613,7 +619,6 @@
                                     <strong>Outputs:</strong> Practical guardrails for execution.</p>
                             </section>
                             <section class="rubric-diagnostic-card rubric-phase-panel">
-                                <p class="rubric-phase-label">Phase 02B - Stakeholder Validation</p>
                                 <div class="asset-image rubric-diagnostic-asset">
                                     <img src="assets/pages/rubric/rubric-02c.png"
                                         alt="Infrastructure and legal stress check visual for deployment readiness"
@@ -628,13 +633,29 @@
                                     priorities and a signed operating model for deployment.</p>
                             </section>
                         </div>
+                        <button type="button" class="rubric-phase-jump rubric-phase-jump--left"
+                            data-rubric-jump="phase-01" aria-label="Go to Phase 01">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                            <span aria-hidden="true">01</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                        </button>
+                        <button type="button" class="rubric-phase-jump" data-rubric-jump="phase-03"
+                            aria-label="Go to Phase 03">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                            <span aria-hidden="true">03</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                        </button>
+                        </div>
                         </article>
                         <article class="rubric-protocol-view" data-protocol-view="phase-03" id="rubric-view-phase-03"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-03" aria-hidden="true" tabindex="0"
                         hidden>
-                        <p class="rubric-protocol-tone">Focus: Streamlining systems and empowering the local workforce.
-                            These stages represent the "Action Pathways" where vetting is transformed into streamlined,
-                            operational reality.</p>
+                        <p class="rubric-protocol-tone"><span class="text-main-strong"><strong>Streamlining
+                                    systems</strong></span>
+                            Regional systems are aligned to support implementation. Infrastructure, institutions, and
+                            operating processes are organized to remove friction and support coordinated corridor
+                            development.</p>
+                        <div class="rubric-phase-frame">
                         <div class="rubric-phase-grid">
                             <section class="rubric-deploy-card rubric-phase-panel">
                                 <p class="rubric-phase-label">Vocational Literacy</p>
@@ -693,13 +714,28 @@
                                     <strong>Outputs:</strong> A coordinated launch posture ready for execution.</p>
                             </section>
                         </div>
+                        <button type="button" class="rubric-phase-jump rubric-phase-jump--left"
+                            data-rubric-jump="phase-02" aria-label="Go to Phase 02">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                            <span aria-hidden="true">02</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                        </button>
+                        <button type="button" class="rubric-phase-jump" data-rubric-jump="phase-04"
+                            aria-label="Go to Phase 04">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                            <span aria-hidden="true">04</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↑</span>
+                        </button>
+                        </div>
                         </article>
                         <article class="rubric-protocol-view" data-protocol-view="phase-04" id="rubric-view-phase-04"
                         role="tabpanel" aria-labelledby="rubric-protocol-tab-phase-04" aria-hidden="true" tabindex="0"
                         hidden>
-                        <p class="rubric-protocol-tone">Focus: Streamlining systems and empowering the local workforce.
-                            These stages represent the "Action Pathways" where vetting is transformed into streamlined,
-                            operational reality.</p>
+                        <p class="rubric-protocol-tone"><span class="text-main-strong"><strong>Empowering the
+                                    workforce</strong></span>
+                            Plans move into action. Workforce programs, industry partnerships, and operational systems
+                            activate so the corridor produces measurable economic and industrial outcomes.</p>
+                        <div class="rubric-phase-frame">
                         <div class="rubric-phase-grid">
                             <section class="rubric-deploy-card rubric-phase-panel">
                                 <p class="rubric-phase-label">Bottleneck Removal</p>
@@ -743,6 +779,13 @@
                                     <strong>Outputs:</strong> Durable model ready for long-term stewardship.</p>
                             </section>
                         </div>
+                        <button type="button" class="rubric-phase-jump rubric-phase-jump--left"
+                            data-rubric-jump="phase-03" aria-label="Go to Phase 03">
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                            <span aria-hidden="true">03</span>
+                            <span class="rubric-phase-jump__arrow" aria-hidden="true">↓</span>
+                        </button>
+                        </div>
                         </article>
                     </div>
                 </div>
@@ -777,13 +820,18 @@
         <!-- Engagement Section Start -->
         <section class="section-wrap section-wrap--no-border" id="engagement" role="tabpanel"
             aria-labelledby="tab-engagement" tabindex="-1">
-            <div class="instruction-box engagement-framing">
+            <div class="instruction-box engagement-intro">
                 <div class="engagement-framing-head">
-                    <p class="engagement-kicker">Secure Your Region's Place</p>
-                    <p class="engagement-framing-title">Engineering parity into the 2026 pipeline.</p>
+                    <p class="engagement-kicker">Take the Initiative</p>
+                    <p class="engagement-framing-title">Start the conversation, start your journey.</p>
                 </div>
+            </div>
+            <div class="instruction-box engagement-framing">
                 <div class="persona-section persona-section--compact">
-                    <p class="persona-section-title">Whom we serve</p>
+                    <div class="engagement-framing-head">
+                        <p class="persona-section-title">Whom we serve</p>
+                        <p class="engagement-framing-title">Select the perspective that best matches your purpose.</p>
+                    </div>
                     <div class="persona-grid">
                         <article class="persona-card" data-persona="government">
                             <div class="persona-card-media" aria-hidden="true"></div>
@@ -825,33 +873,28 @@
                 </div>
             </div>
             <div class="instruction-box engagement-serve">
-                <div class="engagement-serve-head">
-                    <p class="engagement-kicker">Serve With Us</p>
-                    <p class="engagement-framing-title">Activate your route in the TSI delivery queue.</p>
+                <div class="engagement-serve-copy">
+                    <div class="engagement-serve-head">
+                        <p class="engagement-kicker">Serve With Us</p>
+                        <p class="engagement-framing-title">Activate your route in the TSI delivery queue.</p>
+                    </div>
                 </div>
-                <p class="engagement-framing-copy">
-                    High-fidelity corridor engineering requires massive local alignment. We operate at a deliberate
-                    pace to ensure every regional asset <span class="text-main-strong"><strong>sets the
-                            standard</strong></span>.
-                    Sharing your context now secures your priority in our active development queue.
-                </p>
-                <a class="btn-cta btn-cta--inline" href="portal-hub.html">Visit career opportunities</a>
-            </div>
-            <div class="engagement-visual-grid">
-                <figure class="engagement-visual">
-                    <img src="assets/pages/engagement/engagement-hero-connection.png"
-                        alt="Abstract connectivity animation reference" loading="lazy" decoding="async" width="900"
-                        height="400">
-                    <figcaption>Global signals weaving bespoke corridor stories.</figcaption>
-                </figure>
-                <figure class="engagement-visual">
-                    <img src="assets/pages/rubric/rubric-04d.png"
-                        alt="Refined systems visual for long-horizon engagement" loading="lazy" decoding="async"
-                        width="1536" height="1024">
-                    <figcaption>Refined systems informing long-horizon engagement.</figcaption>
+                <figure class="engagement-serve-media">
+                    <img src="assets/pages/engagement/engagement-team.png"
+                        alt="TSI team engagement session" loading="lazy" decoding="async" width="1536" height="1024">
+                    <a class="btn-cta btn-cta--inline" href="portal-hub.html">Visit career opportunities</a>
                 </figure>
             </div>
-
+            <div class="instruction-box engagement-auxiliary">
+                <div class="engagement-auxiliary-head">
+                    <p class="engagement-kicker">Additional Paths</p>
+                    <p class="engagement-framing-title">Choose the contact route that fits your purpose.</p>
+                </div>
+                <div class="engagement-auxiliary-actions">
+                    <a class="btn-cta btn-cta--inline" href="portal-investment.html">Investment</a>
+                    <a class="btn-cta btn-cta--inline" href="portal-press.html">PR / Media</a>
+                </div>
+            </div>
             <div class="engagement-footer">
                 <p class="engagement-boundary">Submission initiates evaluation; it does not create partnership
                     obligations.</p>
