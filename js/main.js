@@ -1183,21 +1183,24 @@ if (overview) {
         initial: {
             fadeMs: null,
             fadeEase: null,
+            copyBackdropDelaySeconds: 0,
             startDelaySeconds: 0.2,
             stepMs: 700,
             sequenceScale: 1
         },
         quickReplay: {
             fadeMs: 1200,
-            fadeEase: 'ease'
+            fadeEase: 'ease',
+            copyBackdropDelaySeconds: 5
         },
         syncedRevisit: {
             fadeMs: 1000,
-            fadeEase: 'ease'
+            fadeEase: 'ease',
+            copyBackdropDelaySeconds: 0
         }
     };
 
-    const applyOverviewFadePreset = ({ fadeMs, fadeEase }) => {
+    const applyOverviewFadePreset = ({ fadeMs, fadeEase, copyBackdropDelaySeconds }) => {
         if (Number.isFinite(fadeMs)) {
             overview.style.setProperty('--overview-fade-ms', `${fadeMs}ms`);
         } else {
@@ -1208,6 +1211,13 @@ if (overview) {
             overview.style.setProperty('--overview-fade-ease', fadeEase);
         } else {
             overview.style.removeProperty('--overview-fade-ease');
+        }
+
+        const backdropDelay = Number(copyBackdropDelaySeconds);
+        if (Number.isFinite(backdropDelay) && backdropDelay > 0) {
+            overview.style.setProperty('--overview-copy-backdrop-delay', `${backdropDelay}s`);
+        } else {
+            overview.style.removeProperty('--overview-copy-backdrop-delay');
         }
     };
 
@@ -6826,60 +6836,6 @@ function initPersonaInteractions() {
     });
 }
 
-function initTeamImageLightbox() {
-    const lightbox = document.getElementById('imageLightbox');
-    const imgNode = document.getElementById('imageLightboxImg');
-    const captionNode = document.getElementById('imageLightboxCaption');
-    const closeBtn = document.getElementById('imageLightboxClose');
-    const thumbs = Array.from(document.querySelectorAll('.pillar-gallery .pillar-thumb img'));
-    if (!lightbox || !imgNode || !captionNode || !closeBtn || !thumbs.length) return;
-
-    let activeTrigger = null;
-    const open = (trigger, src, alt, caption) => {
-        activeTrigger = trigger;
-        imgNode.src = src;
-        imgNode.alt = alt || 'Expanded image';
-        captionNode.textContent = caption || alt || '';
-        lightbox.hidden = false;
-        lightbox.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('image-lightbox-open');
-        closeBtn.focus();
-    };
-    const close = () => {
-        if (lightbox.hidden) return;
-        lightbox.hidden = true;
-        lightbox.setAttribute('aria-hidden', 'true');
-        imgNode.removeAttribute('src');
-        captionNode.textContent = '';
-        document.body.classList.remove('image-lightbox-open');
-        if (activeTrigger && typeof activeTrigger.focus === 'function') activeTrigger.focus();
-        activeTrigger = null;
-    };
-
-    thumbs.forEach((img) => {
-        const fig = img.closest('figure');
-        const figCaptionNode = fig ? fig.querySelector('figcaption') : null;
-        const caption = figCaptionNode ? String(figCaptionNode.textContent || '').trim() : '';
-        img.setAttribute('role', 'button');
-        img.setAttribute('tabindex', '0');
-        img.setAttribute('aria-label', `Expand image: ${caption || img.alt || 'Team image'}`);
-        img.addEventListener('click', () => open(img, img.getAttribute('src') || '', img.getAttribute('alt') || '', caption));
-        img.addEventListener('keydown', (event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            event.preventDefault();
-            open(img, img.getAttribute('src') || '', img.getAttribute('alt') || '', caption);
-        });
-    });
-
-    closeBtn.addEventListener('click', close);
-    lightbox.addEventListener('click', (event) => {
-        if (event.target === lightbox) close();
-    });
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') close();
-    });
-}
-
 function initPillarSlideshows() {
     const galleries = Array.from(document.querySelectorAll('.pillar-gallery[data-pillar-slideshow]'));
     if (!galleries.length) return;
@@ -6971,12 +6927,6 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initPersonaInteractions);
 } else {
     initPersonaInteractions();
-}
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTeamImageLightbox);
-} else {
-    initTeamImageLightbox();
 }
 
 if (document.readyState === 'loading') {
