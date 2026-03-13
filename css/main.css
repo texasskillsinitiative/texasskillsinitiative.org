@@ -1136,10 +1136,25 @@
             height: 100%;
             background: rgba(11, 18, 32, 0.95);
             z-index: 2000;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
+        }
+
+        .modal-overlay.is-open,
+        .modal-overlay.is-closing {
+            visibility: visible;
+            transition-delay: 0s;
+        }
+
+        .modal-overlay.is-open {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .no-js .modal-overlay {
@@ -1148,6 +1163,10 @@
             background: transparent;
             height: auto;
             backdrop-filter: none;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transition: none;
         }
 
         .no-js #portalModal {
@@ -1186,6 +1205,19 @@
             padding: 40px;
             position: relative;
             text-align: center;
+            opacity: 0;
+            transform: translateY(14px) scale(0.985);
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .modal-overlay.is-open .modal-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-overlay.is-closing .modal-content {
+            opacity: 0;
+            transform: translateY(10px) scale(0.99);
         }
 
         .modal-logo {
@@ -1365,328 +1397,6 @@
             font-size: 0.65rem;
             color: var(--page-text-dim);
             text-align: left;
-        }
-
-        .portal-debug-menu {
-            text-align: left;
-        }
-
-        .portal-debug-helper {
-            margin: 14px 0 14px 0;
-            font-size: 0.78rem;
-            color: var(--page-text-dim);
-            text-align: left;
-        }
-
-        .portal-debug-controls {
-            display: grid;
-            gap: 8px;
-        }
-
-        .portal-debug-controls .option-btn {
-            padding: 12px 14px;
-            min-height: 40px;
-            font-size: 0.68rem;
-        }
-
-        .portal-debug-group {
-            margin-top: 12px;
-            border: 1px solid var(--frame-border);
-            background: var(--page-bg);
-            padding: 10px;
-            display: grid;
-            gap: 8px;
-        }
-
-        .portal-debug-group-title {
-            margin: 0;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.64rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--page-text-dim);
-        }
-
-        .portal-debug-row {
-            display: grid;
-            grid-template-columns: 112px minmax(0, 1fr) 28px;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .portal-debug-label {
-            font-size: 0.66rem;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            color: var(--page-text-dim);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .portal-debug-select {
-            width: 100%;
-            min-height: 34px;
-            border: 1px solid var(--frame-border);
-            background: var(--card-bg);
-            color: var(--page-text-main);
-            padding: 6px 8px;
-            font-size: 0.72rem;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .portal-debug-number {
-            width: 100%;
-            min-height: 34px;
-            border: 1px solid var(--frame-border);
-            background: var(--card-bg);
-            color: var(--page-text-main);
-            padding: 6px 8px;
-            font-size: 0.72rem;
-            font-family: 'JetBrains Mono', monospace;
-            box-sizing: border-box;
-        }
-
-        .portal-debug-color {
-            width: 100%;
-            min-height: 34px;
-            border: 1px solid var(--frame-border);
-            background: var(--card-bg);
-            padding: 2px;
-            box-sizing: border-box;
-            cursor: pointer;
-        }
-
-        .portal-debug-select:focus-visible {
-            outline: 1px solid var(--accent);
-            outline-offset: 1px;
-        }
-
-        .portal-debug-number:focus-visible,
-        .portal-debug-color:focus-visible {
-            outline: 1px solid var(--accent);
-            outline-offset: 1px;
-        }
-
-        .portal-debug-row .option-btn {
-            min-height: 34px;
-            padding: 8px 10px;
-            width: 100%;
-            font-size: 0.66rem;
-            letter-spacing: 0.6px;
-        }
-
-        .portal-debug-reset {
-            width: 28px;
-            min-height: 28px;
-            border: 1px solid var(--frame-border);
-            background: var(--page-bg);
-            color: var(--page-text-dim);
-            cursor: pointer;
-            font-size: 0.85rem;
-            line-height: 1;
-            padding: 0;
-        }
-
-        .portal-debug-reset:hover {
-            color: var(--accent);
-            border-color: var(--accent);
-        }
-
-        .portal-debug-jump {
-            width: 28px;
-            min-height: 28px;
-            border: 1px solid var(--accent);
-            background: transparent;
-            color: var(--accent);
-            cursor: pointer;
-            font-size: 0.58rem;
-            font-family: 'JetBrains Mono', monospace;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-            padding: 0;
-        }
-
-        .portal-debug-jump:hover {
-            background: var(--accent);
-            color: var(--bg-dark);
-        }
-
-        .portal-debug-areas {
-            margin-top: 12px;
-            border: 1px solid var(--frame-border);
-            background: var(--page-bg);
-            padding: 12px;
-        }
-
-        .portal-debug-areas-title {
-            margin: 0 0 8px 0;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.64rem;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            color: var(--page-text-dim);
-        }
-
-        .portal-debug-areas-list {
-            margin: 0;
-            padding-left: 18px;
-            display: grid;
-            gap: 6px;
-        }
-
-        .portal-debug-areas-list li {
-            font-size: 0.72rem;
-            color: var(--page-text-main);
-            line-height: 1.35;
-        }
-
-        .portal-debug-areas-list .portal-debug-area-hidden {
-            color: var(--page-text-dim);
-        }
-
-        .portal-debug-value {
-            min-height: 34px;
-            border: 1px dashed var(--frame-border);
-            color: var(--page-text-main);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 8px;
-            box-sizing: border-box;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .section-debug-panel {
-            margin-top: 12px;
-            border: 1px solid var(--frame-border);
-            background: color-mix(in srgb, var(--page-bg) 90%, #0b1220);
-            padding: 10px;
-            display: grid;
-            gap: 8px;
-        }
-
-        .section-debug-panel[hidden] {
-            display: none !important;
-        }
-
-        .section-debug-panel--pipeline {
-            margin-bottom: 10px;
-        }
-
-        .section-debug-panel--overview {
-            max-width: min(760px, 100%);
-            margin: 16px auto 0;
-            text-align: left;
-        }
-
-        .site-debug-dock {
-            position: fixed;
-            right: 14px;
-            bottom: 14px;
-            width: min(360px, calc(100vw - 28px));
-            z-index: 2400;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-        }
-
-        .site-debug-dock[hidden] {
-            display: none !important;
-        }
-
-        @media (max-width: 768px) {
-            .section-debug-panel .portal-debug-row {
-                grid-template-columns: 96px minmax(0, 1fr) 28px;
-            }
-
-            .site-debug-dock {
-                right: 8px;
-                bottom: 8px;
-                width: min(360px, calc(100vw - 16px));
-            }
-        }
-
-        .debug-area-highlight {
-            outline: 1px dashed color-mix(in srgb, var(--accent) 78%, transparent);
-            outline-offset: 3px;
-            box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 28%, transparent);
-        }
-
-        .overview-hero .reveal-word.debug-overview-color-active,
-        .overview-copy .overview-phrase.debug-overview-color-active.is-phrase-visible {
-            color: var(--tsi-debug-color) !important;
-        }
-
-        .overview-hero .debug-overview-selected {
-            outline: 1px dashed color-mix(in srgb, var(--accent) 88%, transparent);
-            outline-offset: 2px;
-        }
-
-        html.debug-mode-active .overview-hero .reveal-word,
-        html.debug-mode-active .overview-hero .overview-phrase {
-            cursor: crosshair;
-        }
-
-        :root {
-            --debug-text-scale: 1;
-        }
-
-        html {
-            font-size: calc(16px * var(--debug-text-scale));
-        }
-
-        :root {
-            --debug-overview-title-scale: 1;
-            --debug-overview-copy-scale: 1;
-            --debug-overview-fade-ms: 1100ms;
-            --debug-overview-fade-ease: ease;
-            --debug-overview-accent: var(--accent);
-        }
-
-        html[data-debug-color-preset="cool"] {
-            --accent: #6bd9ff;
-            --logo-gold-primary: #76d8ff;
-            --logo-gold-secondary: #3f8fb5;
-            --map-accent: #4fc6ff;
-        }
-
-        html[data-debug-color-preset="warm"] {
-            --accent: #e5a15d;
-            --logo-gold-primary: #e5a15d;
-            --logo-gold-secondary: #b56f34;
-            --map-accent: #f28f4a;
-        }
-
-        html[data-debug-color-preset="mono"] {
-            --accent: #aeb9c8;
-            --logo-gold-primary: #aeb9c8;
-            --logo-gold-secondary: #7e8896;
-            --map-accent: #9fabbc;
-        }
-
-        html.debug-layout-compact .section-wrap {
-            padding-top: 76px;
-            padding-bottom: 76px;
-        }
-
-        html.debug-layout-compact nav {
-            height: 86px;
-        }
-
-        html.debug-layout-compact .pipeline-map-controls[data-map-controls="md"] {
-            gap: 6px 10px;
-        }
-
-        html.debug-motion-reduced * {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-            scroll-behavior: auto !important;
-        }
-
-        html.debug-overview-accent-active .overview-hero .text-accent,
-        html.debug-overview-accent-active .overview-copy .overview-phrase.text-accent.is-phrase-visible {
-            color: var(--debug-overview-accent) !important;
         }
 
         /* --- SECTIONS --- */

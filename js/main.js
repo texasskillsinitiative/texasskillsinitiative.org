@@ -46,6 +46,8 @@ const STAKEHOLDER_ROUTE_TO_ROUT = {
 const FORM_ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024;
 const FORM_ATTACHMENT_ALLOWED_EXTENSIONS = new Set(['pdf', 'doc', 'docx', 'ppt', 'pptx', 'txt', 'png', 'jpg', 'jpeg']);
 const FORM_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const MODAL_TRANSITION_MS = 220;
+const MODAL_OPEN_GUARD_MS = 260;
 const MODAL_FOCUS_SELECTOR = [
     'a[href]',
     'button:not([disabled])',
@@ -55,6 +57,8 @@ const MODAL_FOCUS_SELECTOR = [
     '[tabindex]:not([tabindex="-1"])'
 ].join(',');
 const _modalFocusRestore = new Map();
+const _modalCloseTimers = new Map();
+const _modalOpenedAt = new Map();
 
 function initFooterLabels() {
     const footerLinks = document.querySelectorAll('[data-tsi-footer-key]');
@@ -177,10 +181,7 @@ function readFileAsBase64(file) {
 }
 
 function getOpenModals() {
-    return Array.from(document.querySelectorAll('[data-modal-overlay]')).filter((overlay) => {
-        const style = window.getComputedStyle(overlay);
-        return style.display !== 'none' && style.visibility !== 'hidden';
-    });
+    return Array.from(document.querySelectorAll('[data-modal-overlay].is-open'));
 }
 
 function getTopOpenModal() {
@@ -191,8 +192,7 @@ function getTopOpenModal() {
 function isPortalModalOpen() {
     const modal = document.getElementById('portalModal');
     if (!modal) return false;
-    if (modal.style.display === 'flex' || modal.style.display === 'block') return true;
-    return window.getComputedStyle(modal).display !== 'none';
+    return modal.classList.contains('is-open');
 }
 
 function getFocusableInModal(modal) {
@@ -391,20 +391,28 @@ function generateSubmissionId() {
 function toggleModal(modalId, show) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
+    const pendingCloseTimer = _modalCloseTimers.get(modalId);
+    if (pendingCloseTimer) {
+        clearTimeout(pendingCloseTimer);
+        _modalCloseTimers.delete(modalId);
+    }
 
     if (show) {
         if (document.activeElement instanceof HTMLElement) {
             _modalFocusRestore.set(modalId, document.activeElement);
         }
-        modal.style.display = 'flex'; // or 'block' depending on your CSS
+        modal.classList.remove('is-closing');
+        modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
+        _modalOpenedAt.set(modalId, Date.now());
         document.body.style.overflow = 'hidden'; // Prevents background scrolling
         if (modalId === 'accessModal' && !window._formOpenTime) {
             window._formOpenTime = Date.now();
         }
         window.requestAnimationFrame(() => focusFirstModalElement(modal));
     } else {
-        modal.style.display = 'none';
+        modal.classList.remove('is-open');
+        modal.classList.add('is-closing');
         modal.setAttribute('aria-hidden', 'true');
         if (!getOpenModals().length) {
             document.body.style.overflow = '';
@@ -419,9 +427,14 @@ function toggleModal(modalId, show) {
         }
 
         const restoreTarget = _modalFocusRestore.get(modalId);
-        if (restoreTarget && typeof restoreTarget.focus === 'function') {
-            restoreTarget.focus();
-        }
+        const closeTimer = window.setTimeout(() => {
+            modal.classList.remove('is-closing');
+            if (restoreTarget && typeof restoreTarget.focus === 'function') {
+                restoreTarget.focus();
+            }
+            _modalCloseTimers.delete(modalId);
+        }, MODAL_TRANSITION_MS);
+        _modalCloseTimers.set(modalId, closeTimer);
         _modalFocusRestore.delete(modalId);
     }
     modal.dispatchEvent(new CustomEvent('tsi:modal-visibility', {
@@ -431,6 +444,10 @@ function toggleModal(modalId, show) {
 
 function handleOutsideClick(event, modalId) {
     if (event.target.id === modalId) {
+        const openedAt = _modalOpenedAt.get(modalId) || 0;
+        if ((Date.now() - openedAt) < MODAL_OPEN_GUARD_MS) {
+            return;
+        }
         if (modalId === 'accessModal') {
             requestCloseAccessModal();
             return;
