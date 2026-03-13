@@ -2837,6 +2837,20 @@ function initRubricActions() {
             stage.style.height = `${targetHeight}px`;
         }
     };
+    const realignActiveViewIfNeeded = () => {
+        const coarsePointer = window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768;
+        if (!coarsePointer || !(stage instanceof HTMLElement)) return;
+        const navHeightRaw = getComputedStyle(document.documentElement).getPropertyValue('--nav-current-height').trim();
+        const navHeight = Number.parseFloat(navHeightRaw) || 95;
+        const toggleHeight = root.querySelector('.rubric-protocol-toggle') instanceof HTMLElement
+            ? Math.ceil(root.querySelector('.rubric-protocol-toggle').getBoundingClientRect().height)
+            : 0;
+        const anchorNode = root.querySelector('.rubric-protocol-body') || root;
+        if (!(anchorNode instanceof HTMLElement)) return;
+        const anchorTop = anchorNode.getBoundingClientRect().top + window.scrollY;
+        const targetTop = Math.max(0, anchorTop - navHeight - toggleHeight - 12);
+        window.scrollTo({ top: targetTop, behavior: 'auto' });
+    };
     const observeStageHeightFor = (view) => {
         if (!(view instanceof HTMLElement) || typeof ResizeObserver === 'undefined') return;
         if (stageResizeObserver) {
@@ -2905,6 +2919,7 @@ function initRubricActions() {
         observeStageHeightFor(nextView);
         isAnimating = false;
         restartPulseSequence();
+        realignActiveViewIfNeeded();
     };
     const switchProtocol = (nextKey) => {
         if (isAnimating || !nextKey || nextKey === activeKey) return;

@@ -3186,6 +3186,21 @@
                 background var(--motion-base) var(--motion-ease-standard);
         }
 
+        @media (min-width: 901px) {
+            body[data-active-tab="rubric"] .rubric-protocol {
+                position: relative;
+                padding-top: 74px;
+            }
+
+            body[data-active-tab="rubric"] .rubric-protocol-toggle {
+                position: fixed;
+                top: calc(var(--nav-current-height, 95px) + 12px);
+                left: max(50px, calc((100vw - 1200px) / 2 + 50px));
+                right: max(50px, calc((100vw - 1200px) / 2 + 50px));
+                z-index: 20;
+            }
+        }
+
         .rubric-protocol-toggle:hover {
             border-color: color-mix(in srgb, var(--accent) 40%, var(--frame-border));
             background: color-mix(in srgb, var(--accent) 2%, var(--card-bg));
@@ -3949,7 +3964,7 @@
             letter-spacing: 1px;
             cursor: pointer;
             z-index: 4;
-            animation: rubricPhaseJumpPulse 2.4s ease-in-out infinite;
+            animation: none;
             border-radius: 0;
             box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 8%, transparent);
             transition: border-color var(--motion-base) var(--motion-ease-standard),
@@ -3996,28 +4011,6 @@
         .rubric-phase-jump:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 2px;
-        }
-
-        @keyframes rubricPhaseJumpPulse {
-            0%, 100% {
-                background: linear-gradient(180deg,
-                        color-mix(in srgb, var(--accent) 18%, var(--card-bg)),
-                        color-mix(in srgb, var(--accent) 10%, var(--card-bg)));
-                border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
-                box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 8%, transparent),
-                    0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
-                transform: scale(1);
-            }
-
-            50% {
-                background: linear-gradient(180deg,
-                        color-mix(in srgb, var(--accent) 18%, var(--card-bg)),
-                        color-mix(in srgb, var(--accent) 10%, var(--card-bg)));
-                border-color: color-mix(in srgb, var(--accent) 42%, var(--frame-border));
-                box-shadow: inset 0 0 0 1px color-mix(in srgb, #ffffff 12%, transparent),
-                    0 0 16px color-mix(in srgb, var(--accent) 18%, transparent);
-                transform: scale(1.035);
-            }
         }
 
         .rubric-deployment-grid {
@@ -8247,23 +8240,61 @@
             }
 
             .rubric-phase-frame {
-                width: calc(100% + 24px);
-                margin: 0 -12px;
+                width: 100%;
+                margin: 0;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                align-items: stretch;
             }
 
             .rubric-phase-grid {
-                max-width: calc(100% - 24px);
+                grid-column: 1 / -1;
+                max-width: 100%;
             }
 
             .rubric-phase-jump {
-                width: 10px;
-                gap: 6px;
-                font-size: 0.5rem;
-                opacity: 0.88;
+                position: static;
+                top: auto;
+                bottom: auto;
+                width: 100%;
+                min-height: 44px;
+                gap: 8px;
+                padding: 0 12px;
+                flex-direction: row;
+                justify-content: center;
+                justify-self: stretch;
+                font-size: 0.62rem;
+                opacity: 0.96;
+                transform: none;
+            }
+
+            .rubric-phase-jump:not(.rubric-phase-jump--left) {
+                grid-column: 2;
+            }
+
+            .rubric-phase-jump--left {
+                grid-column: 1;
+            }
+
+            .rubric-phase-jump span,
+            .rubric-phase-jump__arrow {
+                writing-mode: initial;
+                text-orientation: initial;
+                font-size: 0.52rem;
             }
 
             .rubric-phase-jump__arrow {
-                font-size: 0.52rem;
+                display: inline-flex;
+                transform: rotate(90deg);
+                transform-origin: center;
+            }
+
+            .rubric-phase-jump span:not(.rubric-phase-jump__arrow) {
+                font-size: 0.62rem;
+                letter-spacing: 0.8px;
+                writing-mode: horizontal-tb;
+                text-orientation: mixed;
             }
 
             @media (max-width: 420px) {
