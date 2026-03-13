@@ -1008,10 +1008,6 @@ function initPortalOptions() {
     });
 }
 
-function initGlobalDebugMenu() {
-    return;
-}
-
 initModalTriggers();
 initMobileNav();
 _021026_initConciergeForm();
@@ -1019,7 +1015,6 @@ initPortalOptions();
 initHoldToClear();
 initRubricActions();
 initTeamTabs();
-initGlobalDebugMenu();
 let pipelineMapInitialized = false;
 const ensurePipelineMapInitialized = () => {
     if (pipelineMapInitialized) return;
@@ -1184,6 +1179,38 @@ if (overview) {
         overviewTimers.push(timer);
     };
 
+    const OVERVIEW_SEQUENCE_PRESETS = {
+        initial: {
+            fadeMs: null,
+            fadeEase: null,
+            startDelaySeconds: 0.2,
+            stepMs: 700,
+            sequenceScale: 1
+        },
+        quickReplay: {
+            fadeMs: 1200,
+            fadeEase: 'ease'
+        },
+        syncedRevisit: {
+            fadeMs: 1000,
+            fadeEase: 'ease'
+        }
+    };
+
+    const applyOverviewFadePreset = ({ fadeMs, fadeEase }) => {
+        if (Number.isFinite(fadeMs)) {
+            overview.style.setProperty('--overview-fade-ms', `${fadeMs}ms`);
+        } else {
+            overview.style.removeProperty('--overview-fade-ms');
+        }
+
+        if (fadeEase) {
+            overview.style.setProperty('--overview-fade-ease', fadeEase);
+        } else {
+            overview.style.removeProperty('--overview-fade-ease');
+        }
+    };
+
     let overviewHasPlayedOnce = false;
     const runOverviewSequence = (options = {}) => {
         const OVERVIEW_COPY_MIN_DELAY_S = 6.1;
@@ -1211,8 +1238,7 @@ if (overview) {
         void overview.offsetWidth;
         const showSyncedRevisit = !quickReplay && overviewHasPlayedOnce && !forceFull;
         if (quickReplay) {
-            overview.style.setProperty('--tsi-debug-fade-ms', '1200ms');
-            overview.style.setProperty('--tsi-debug-fade-ease', 'ease');
+            applyOverviewFadePreset(OVERVIEW_SEQUENCE_PRESETS.quickReplay);
             revealItems.forEach((item, idx) => {
                 item.style.setProperty('--reveal-delay', `${Math.max(0, idx) * 0.09}s`);
             });
@@ -1239,8 +1265,7 @@ if (overview) {
         }
         if (showSyncedRevisit) {
             // Revisit behavior: synchronized, gentle 1s fade for overview content.
-            overview.style.setProperty('--tsi-debug-fade-ms', '1000ms');
-            overview.style.setProperty('--tsi-debug-fade-ease', 'ease');
+            applyOverviewFadePreset(OVERVIEW_SEQUENCE_PRESETS.syncedRevisit);
             revealItems.forEach(item => item.style.setProperty('--reveal-delay', '0s'));
             requestAnimationFrame(() => {
                 revealItems.forEach(item => item.classList.add('reveal-active'));
@@ -1250,24 +1275,16 @@ if (overview) {
             });
             return;
         }
-        overview.style.removeProperty('--tsi-debug-fade-ms');
-        overview.style.removeProperty('--tsi-debug-fade-ease');
+        applyOverviewFadePreset(OVERVIEW_SEQUENCE_PRESETS.initial);
 
-        const rawStartMs = Number(window.__tsiOverviewDebugStartMs);
-        const startDelaySeconds = Number.isFinite(rawStartMs)
-            ? Math.min(4, Math.max(0, rawStartMs / 1000))
-            : 0.2;
-        const rawStepMs = Number(window.__tsiOverviewDebugStepMs);
-        const stepMs = Number.isFinite(rawStepMs)
-            ? Math.min(2000, Math.max(40, rawStepMs))
-            : 700;
-        const orderMode = window.__tsiOverviewDebugOrder === 'reverse' ? 'reverse' : 'normal';
+        const {
+            startDelaySeconds,
+            stepMs,
+            sequenceScale
+        } = OVERVIEW_SEQUENCE_PRESETS.initial;
+        const orderMode = 'normal';
         let delay = startDelaySeconds;
         let maxWordDelay = 0;
-        const rawSequenceScale = Number(window.__tsiOverviewDebugSequenceScale);
-        const sequenceScale = Number.isFinite(rawSequenceScale)
-            ? Math.min(2, Math.max(0.5, rawSequenceScale))
-            : 1;
         const lineGap = ((stepMs / 1000) * (baseLineGap / baseWordGap)) * sequenceScale;
         const wordGap = (stepMs / 1000) * sequenceScale;
         const phraseGap = ((stepMs / 1000) * (basePhraseGap / baseWordGap)) * sequenceScale;
@@ -3772,7 +3789,7 @@ function initPipelineMap() {
         const frame = map.closest('.pipeline-map-frame');
         if (frame) {
             frame.classList.add('map-settings-pending');
-            // Main map defaults are applied first to avoid transient debug/test-style flashes.
+            // Main map defaults are applied first to avoid transient test-style flashes.
             ensureFrameTuningDefaults(frame);
             applyFlashPresetToFrame(frame, mapFlashPresetDefaults.presetId);
             frame.dataset.mapFlashCompactGlow = mapFlashVisualDefaults.compactGlow ? 'true' : 'false';
