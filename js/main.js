@@ -1027,7 +1027,6 @@ const ensurePipelineMapInitialized = () => {
     // Defer slightly to allow tab transition to start smoothly
     setTimeout(() => {
         initPipelineMap();
-        window.dispatchEvent(new CustomEvent('tsi:local-test-areas-changed'));
     }, 250);
 };
 
@@ -6657,46 +6656,6 @@ function initPipelineMap() {
             renderFromImage(map, mapSrc, mapSrc);
         }
     });
-    const scanLocalAreas = () => {
-        const candidates = Array.from(document.querySelectorAll('[data-local-debug-area], .pipeline-map'));
-        const areas = [];
-        const seen = new Set();
-        candidates.forEach((node) => {
-            if (!(node instanceof HTMLElement)) return;
-            const areaNode = node.closest('[data-local-debug-area], .pipeline-map, .section-wrap') || node;
-            if (!(areaNode instanceof HTMLElement)) return;
-            if (seen.has(areaNode)) return;
-            seen.add(areaNode);
-            const areaStyle = window.getComputedStyle(areaNode);
-            const section = areaNode.closest('.section-wrap');
-            const sectionId = section ? section.id : '';
-            let label = areaNode.getAttribute('data-debug-label') || areaNode.getAttribute('aria-label') || '';
-            if (!label) {
-                if (areaNode.matches('.pipeline-map')) {
-                    label = 'Pipeline map test dock';
-                } else if (areaNode.matches('.section-wrap') && sectionId) {
-                    label = `Section ${sectionId}`;
-                } else {
-                    label = 'Local test area';
-                }
-            }
-            areas.push({
-                label,
-                sectionId,
-                hidden: Boolean(
-                    areaNode.hidden
-                    || areaStyle.display === 'none'
-                    || areaStyle.visibility === 'hidden'
-                ),
-                element: areaNode
-            });
-        });
-        return areas;
-    };
-
-    const debugBridge = window.__tsiDebugBridge || {};
-    debugBridge.scanLocalAreas = scanLocalAreas;
-    window.__tsiDebugBridge = debugBridge;
 }
 
 function initHoldToClear() {
