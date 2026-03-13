@@ -4628,6 +4628,63 @@ function initPipelineMap() {
             })
             .join('  |  ');
     };
+    const getPipelinePhaseNarrative = (buttonLabel) => {
+        const label = typeof buttonLabel === 'string' ? buttonLabel.trim() : '';
+        const phaseMatch = label.match(/^(\d{1,2})\s*phase/i);
+        const phaseNumber = phaseMatch ? phaseMatch[1].padStart(2, '0') : '';
+        switch (phaseNumber) {
+            case '01':
+                return {
+                    paneTitle: ':: ESTABLISHING THE BASELINE',
+                    lead: 'Independent research establishes an initial understanding of the region. Economic data, infrastructure capacity, and institutional signals are gathered to form the objective baseline for corridor evaluation.'
+                };
+            case '02':
+                return {
+                    paneTitle: ':: WORKING WITH LOCAL PARTNERS',
+                    lead: 'Local leaders, institutions, and industry partners help refine the picture. Through structured collaboration, regional insight is combined with independent analysis to shape clear strategic criteria and shared priorities.'
+                };
+            case '03':
+                return {
+                    paneTitle: ':: STREAMLINING SYSTEMS',
+                    lead: 'Regional systems are aligned to support implementation. Infrastructure, institutions, and operating processes are organized to remove friction and support coordinated corridor development.'
+                };
+            case '04':
+                return {
+                    paneTitle: ':: EMPOWERING THE WORKFORCE',
+                    lead: 'Plans move into action. Workforce programs, industry partnerships, and operational systems activate so the corridor produces measurable economic and industrial outcomes.'
+                };
+            default:
+                return null;
+        }
+    };
+    const getPipelinePhaseNumber = (buttonLabel) => {
+        const label = typeof buttonLabel === 'string' ? buttonLabel.trim() : '';
+        const phaseMatch = label.match(/^(\d{1,2})\s*phase/i);
+        return phaseMatch ? phaseMatch[1].padStart(2, '0') : '';
+    };
+    const splitPipelineMarkerLabel = (rawLabel) => {
+        const normalized = normalizeLocationLabel(rawLabel);
+        if (!normalized) {
+            return {
+                city: '',
+                region: '',
+                normalized: ''
+            };
+        }
+        const parts = normalized.split(',').map(part => part.trim()).filter(Boolean);
+        if (parts.length < 2) {
+            return {
+                city: normalized,
+                region: '',
+                normalized
+            };
+        }
+        return {
+            city: parts.slice(0, -1).join(', '),
+            region: parts[parts.length - 1],
+            normalized
+        };
+    };
     const applyMdToggleData = (toggleGroups, map, controls) => {
         if (!map || !controls) return;
         controls.innerHTML = '';
@@ -4653,10 +4710,10 @@ function initPipelineMap() {
                     mapShell.appendChild(helper);
                 }
             }
-            helper.textContent = 'Select a phase to display map markers and details.';
+            helper.textContent = 'Activate a phase and tap to display map locations.';
         }
         let desktopTitleBox = null;
-        const helperHeadline = 'Select a phase to display map markers and details.';
+        const helperHeadline = 'Activate a phase and tap to display map locations.';
         let mapTopHelper = null;
         const ensureMapTopHelper = () => {
             if (!frame) return null;
@@ -4907,6 +4964,7 @@ function initPipelineMap() {
                 ? group.description.trim()
                 : (locationSummaryByTarget.get(group.targetClass) || '')
         }));
+        const toggleGroupByTarget = new Map(toggleGroups.map(group => [group.targetClass, group]));
         const areaAssignments = assignAreasForPopups(popupRequests);
         const areaPlacementByTargetClass = new Map(
             areaAssignments.map(entry => [popupRequests[entry.requestIdx].targetClass, { area: entry.area, slotIndex: entry.slotIndex }])
@@ -4914,8 +4972,26 @@ function initPipelineMap() {
         const appendOverlayMarker = (overlayNode, marker, sizeScale = 1) => {
             const markerGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             markerGroup.setAttribute('class', 'map-marker');
+            if (marker.markerId) markerGroup.setAttribute('data-marker-id', marker.markerId);
+            if (marker.targetClass) markerGroup.setAttribute('data-map-target', marker.targetClass);
+            const normalizedLabel = normalizeLocationLabel(marker.label) || marker.label;
+            if (normalizedLabel) {
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                title.textContent = normalizedLabel;
+                markerGroup.appendChild(title);
+                markerGroup.setAttribute('aria-label', normalizedLabel);
+            }
             const scaledSize = marker.size * sizeScale;
             if (marker.shape === 'square') {
+                const pulseRing = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                pulseRing.setAttribute('class', 'map-marker-pulse-ring');
+                pulseRing.setAttribute('x', marker.x - (scaledSize * 2.4));
+                pulseRing.setAttribute('y', marker.y - (scaledSize * 2.4));
+                pulseRing.setAttribute('width', scaledSize * 4.8);
+                pulseRing.setAttribute('height', scaledSize * 4.8);
+                pulseRing.setAttribute('rx', Math.max(2, scaledSize * 0.8));
+                pulseRing.style.setProperty('--map-marker-target-fill', marker.color);
+                markerGroup.appendChild(pulseRing);
                 const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                 rect.setAttribute('x', marker.x - scaledSize);
                 rect.setAttribute('y', marker.y - scaledSize);
@@ -4926,6 +5002,13 @@ function initPipelineMap() {
                 rect.style.fill = marker.color;
                 markerGroup.appendChild(rect);
             } else {
+                const pulseRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                pulseRing.setAttribute('class', 'map-marker-pulse-ring');
+                pulseRing.setAttribute('cx', marker.x);
+                pulseRing.setAttribute('cy', marker.y);
+                pulseRing.setAttribute('r', scaledSize * 2.5);
+                pulseRing.style.setProperty('--map-marker-target-fill', marker.color);
+                markerGroup.appendChild(pulseRing);
                 const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 circle.setAttribute('cx', marker.x);
                 circle.setAttribute('cy', marker.y);
@@ -4934,15 +5017,573 @@ function initPipelineMap() {
                 circle.style.fill = marker.color;
                 markerGroup.appendChild(circle);
             }
-
-            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            label.setAttribute('x', marker.x + (scaledSize * 2));
-            label.setAttribute('y', marker.y + (scaledSize * 1.8));
-            label.textContent = normalizeLocationLabel(marker.label) || marker.label;
-            markerGroup.appendChild(label);
             overlayNode.appendChild(markerGroup);
         };
+        const isMobileClusterViewport = () => window.matchMedia('(max-width: 768px)').matches;
+        let mobileMapLayer = null;
+        let mobileMapSquare = null;
+        let mobileMapOutput = null;
+        let mobileMapReset = null;
+        let selectedTabKey = '__map__';
+        let mobileViewportTransform = { scale: 1, x: 0, y: 0 };
+        let mobileGestureState = null;
+        let desktopSelectionLayer = null;
+        let desktopSelectionBox = null;
+        let desktopSelectionCard = null;
+        let desktopSelectionCardInner = null;
+        let desktopSelectionPointerId = null;
+        let desktopSelectionState = null;
+        const isDesktopViewport = () => !window.matchMedia('(max-width: 768px)').matches;
+        const isPhaseMapActiveForViewport = (tabKey) => {
+            if (!tabKey || tabKey === '__map__') return false;
+            const targetClass = isDesktopViewport() ? `${tabKey}--desktop` : tabKey;
+            const overlay = Array.from(map.querySelectorAll('.map-overlay'))
+                .find(node => node.classList.contains(targetClass));
+            return Boolean(overlay && overlay.classList.contains('is-active'));
+        };
+        const clearMobileMarkerSelection = () => {
+            map.querySelectorAll('.map-marker.is-mobile-selected').forEach((markerNode) => {
+                markerNode.classList.remove('is-mobile-selected');
+            });
+        };
+        const clearMobileMapOutput = () => {
+            if (!mobileMapOutput) return;
+            mobileMapOutput.textContent = '';
+            mobileMapOutput.classList.remove('is-active');
+            mobileMapOutput.classList.remove('is-multi-column');
+        };
+        const updateMobileMapOutput = (items = []) => {
+            clearMobileMapOutput();
+            if (!mobileMapOutput) return;
+            const normalizedItems = Array.isArray(items)
+                ? items.map(item => (typeof item === 'string' ? item.trim() : '')).filter(Boolean)
+                : [];
+            if (!normalizedItems.length) return;
+            mobileMapOutput.textContent = normalizedItems.join('\n');
+            mobileMapOutput.classList.toggle('is-multi-column', normalizedItems.length >= 5);
+            mobileMapOutput.classList.add('is-active');
+        };
+        const getMapSvgPoint = (clientX, clientY) => {
+            if (!map || typeof map.createSVGPoint !== 'function') return null;
+            const ctm = typeof map.getScreenCTM === 'function' ? map.getScreenCTM() : null;
+            if (!ctm || typeof ctm.inverse !== 'function') return null;
+            const point = map.createSVGPoint();
+            point.x = clientX;
+            point.y = clientY;
+            return point.matrixTransform(ctm.inverse());
+        };
+        const clearDesktopMarkerSelection = () => {
+            map.querySelectorAll('.map-marker.is-desktop-selected').forEach((markerNode) => {
+                markerNode.classList.remove('is-desktop-selected');
+            });
+        };
+        const clearDesktopMarkerHover = () => {
+            map.querySelectorAll('.map-marker.is-desktop-hovered').forEach((markerNode) => {
+                markerNode.classList.remove('is-desktop-hovered');
+            });
+        };
+        const clampMobileViewportTransform = (nextTransform) => {
+            if (!frame) return nextTransform;
+            const frameRect = frame.getBoundingClientRect();
+            const scale = Math.max(1, Math.min(4, Number(nextTransform.scale) || 1));
+            const minX = Math.min(0, frameRect.width - (frameRect.width * scale));
+            const minY = Math.min(0, frameRect.height - (frameRect.height * scale));
+            return {
+                scale,
+                x: Math.min(0, Math.max(minX, Number(nextTransform.x) || 0)),
+                y: Math.min(0, Math.max(minY, Number(nextTransform.y) || 0))
+            };
+        };
+        const applyMobileViewportTransform = () => {
+            if (!map) return;
+            const nextTransform = isMobileClusterViewport()
+                ? mobileViewportTransform
+                : { scale: 1, x: 0, y: 0 };
+            map.style.transformOrigin = '0 0';
+            map.style.transform = `translate(${nextTransform.x}px, ${nextTransform.y}px) scale(${nextTransform.scale})`;
+            if (mobileMapReset) {
+                const showReset = isMobileClusterViewport() && (
+                    Math.abs(nextTransform.scale - 1) > 0.01
+                    || Math.abs(nextTransform.x) > 0.5
+                    || Math.abs(nextTransform.y) > 0.5
+                );
+                mobileMapReset.classList.toggle('is-visible', showReset);
+            }
+        };
+        const resetMobileViewportTransform = () => {
+            mobileViewportTransform = { scale: 1, x: 0, y: 0 };
+            applyMobileViewportTransform();
+        };
+        const ensureMobileMapLayer = () => {
+            if (!frame) return null;
+            if (mobileMapLayer && mobileMapSquare && mobileMapOutput && mobileMapReset) return mobileMapLayer;
+            mobileMapLayer = frame.querySelector('.pipeline-map-mobile-layer');
+            if (!mobileMapLayer) {
+                mobileMapLayer = document.createElement('div');
+                mobileMapLayer.className = 'pipeline-map-mobile-layer';
+                mobileMapSquare = document.createElement('div');
+                mobileMapSquare.className = 'pipeline-map-mobile-square';
+                mobileMapOutput = document.createElement('div');
+                mobileMapOutput.className = 'pipeline-map-mobile-output';
+                mobileMapReset = document.createElement('button');
+                mobileMapReset.type = 'button';
+                mobileMapReset.className = 'pipeline-map-mobile-reset';
+                mobileMapReset.textContent = 'Reset View';
+                mobileMapLayer.appendChild(mobileMapSquare);
+                mobileMapLayer.appendChild(mobileMapOutput);
+                mobileMapLayer.appendChild(mobileMapReset);
+                frame.appendChild(mobileMapLayer);
+            } else {
+                mobileMapSquare = mobileMapLayer.querySelector('.pipeline-map-mobile-square');
+                mobileMapOutput = mobileMapLayer.querySelector('.pipeline-map-mobile-output');
+                mobileMapReset = mobileMapLayer.querySelector('.pipeline-map-mobile-reset');
+            }
+            if (mobileMapReset && !mobileMapReset.dataset.boundReset) {
+                mobileMapReset.dataset.boundReset = 'true';
+                mobileMapReset.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    resetMobileViewportTransform();
+                });
+            }
+            applyMobileViewportTransform();
+            return mobileMapLayer;
+        };
+        const ensureDesktopSelectionLayer = () => {
+            if (!frame) return null;
+            if (desktopSelectionLayer && desktopSelectionBox && desktopSelectionCard && desktopSelectionCardInner) {
+                return desktopSelectionLayer;
+            }
+            desktopSelectionLayer = frame.querySelector('.pipeline-map-desktop-selection-layer');
+            if (!desktopSelectionLayer) {
+                desktopSelectionLayer = document.createElement('div');
+                desktopSelectionLayer.className = 'pipeline-map-desktop-selection-layer';
+                desktopSelectionBox = document.createElement('div');
+                desktopSelectionBox.className = 'pipeline-map-desktop-selection-box';
+                desktopSelectionCard = document.createElement('div');
+                desktopSelectionCard.className = 'pipeline-map-desktop-selection-card';
+                desktopSelectionCardInner = document.createElement('div');
+                desktopSelectionCardInner.className = 'pipeline-map-desktop-selection-card-inner';
+                desktopSelectionCard.appendChild(desktopSelectionCardInner);
+                desktopSelectionLayer.appendChild(desktopSelectionBox);
+                desktopSelectionLayer.appendChild(desktopSelectionCard);
+                frame.appendChild(desktopSelectionLayer);
+            } else {
+                desktopSelectionBox = desktopSelectionLayer.querySelector('.pipeline-map-desktop-selection-box');
+                desktopSelectionCard = desktopSelectionLayer.querySelector('.pipeline-map-desktop-selection-card');
+                desktopSelectionCardInner = desktopSelectionLayer.querySelector('.pipeline-map-desktop-selection-card-inner');
+            }
+            return desktopSelectionLayer;
+        };
+        const closeMobileMapUi = () => {
+            if (mobileMapLayer) {
+                mobileMapLayer.classList.remove('is-active');
+            }
+            clearMobileMarkerSelection();
+            clearMobileMapOutput();
+        };
+        const closeDesktopSelectionUi = ({ clearSelection = true } = {}) => {
+            if (desktopSelectionLayer) {
+                desktopSelectionLayer.classList.remove('is-active', 'is-dragging');
+            }
+            if (desktopSelectionCardInner) desktopSelectionCardInner.textContent = '';
+            if (desktopSelectionState) {
+                desktopSelectionState = null;
+            }
+            desktopSelectionPointerId = null;
+            if (clearSelection) {
+                clearDesktopMarkerSelection();
+            }
+        };
+        const setMobileSelectedMarkers = (targetClass, markerIds) => {
+            clearMobileMarkerSelection();
+            if (!Array.isArray(markerIds) || !markerIds.length) return;
+            markerIds.forEach((markerId) => {
+                const selectedMarkers = map.querySelectorAll(`.map-overlay.${targetClass} .map-marker[data-marker-id="${markerId}"]`);
+                selectedMarkers.forEach((markerNode) => {
+                    markerNode.classList.add('is-mobile-selected');
+                });
+            });
+        };
+        const setDesktopSelectedMarkers = (selectedEntries) => {
+            clearDesktopMarkerSelection();
+            selectedEntries.forEach((entry) => {
+                const selector = `.map-overlay.${entry.overlayClass} .map-marker[data-marker-id="${entry.marker.markerId}"]`;
+                map.querySelectorAll(selector).forEach((markerNode) => {
+                    markerNode.classList.add('is-desktop-selected');
+                });
+            });
+        };
+        const getMarkerViewportPoint = (marker) => {
+            if (!frame || !map || !marker) return null;
+            const frameRect = frame.getBoundingClientRect();
+            const mapRect = map.getBoundingClientRect();
+            if (!frameRect.width || !frameRect.height || !mapRect.width || !mapRect.height || !viewBox.width || !viewBox.height) return null;
+            return {
+                x: (mapRect.left - frameRect.left) + ((marker.x / viewBox.width) * mapRect.width),
+                y: (mapRect.top - frameRect.top) + ((marker.y / viewBox.height) * mapRect.height)
+            };
+        };
+        const positionMobileMapSquare = (anchorPoint, squareSize = 54, preferWideOutput = false) => {
+            if (!mobileMapLayer || !mobileMapSquare || !mobileMapOutput || !frame || !anchorPoint) return;
+            const rect = frame.getBoundingClientRect();
+            const half = squareSize / 2;
+            const left = Math.max(4, Math.min(rect.width - squareSize - 4, anchorPoint.x - half));
+            const top = Math.max(4, Math.min(rect.height - squareSize - 4, anchorPoint.y - half));
+            mobileMapSquare.style.left = `${left}px`;
+            mobileMapSquare.style.top = `${top}px`;
+            mobileMapSquare.style.width = `${squareSize}px`;
+            mobileMapSquare.style.height = `${squareSize}px`;
+            const centerX = rect.width / 2;
+            const panelGap = 6;
+            const edgeInset = 8;
+            const outputLeft = left < centerX
+                ? Math.max(edgeInset, Math.round(centerX + panelGap))
+                : edgeInset;
+            const outputRightInset = edgeInset;
+            const outputWidth = left < centerX
+                ? Math.max(118, Math.round(rect.width - outputLeft - outputRightInset))
+                : Math.max(118, Math.round(centerX - edgeInset - panelGap));
+            mobileMapOutput.style.left = `${outputLeft}px`;
+            mobileMapOutput.style.top = '8px';
+            mobileMapOutput.style.width = `${outputWidth}px`;
+            mobileMapOutput.style.maxHeight = `${Math.max(56, Math.round(rect.height - 16))}px`;
+        };
+        const handleMobileMarkerTapAtPoint = (clientX, clientY) => {
+            if (!isMobileClusterViewport()) return;
+            if (!frame || selectedTabKey === '__map__') {
+                closeMobileMapUi();
+                return;
+            }
+            const activeGroup = toggleGroupByTarget.get(selectedTabKey);
+            if (!activeGroup || !isPhaseMapActiveForViewport(selectedTabKey)) {
+                closeMobileMapUi();
+                return;
+            }
+            const frameRect = frame.getBoundingClientRect();
+            const mapRect = map.getBoundingClientRect();
+            if (!frameRect.width || !frameRect.height || !mapRect.width || !mapRect.height) return;
+            if (
+                clientX < mapRect.left
+                || clientX > mapRect.right
+                || clientY < mapRect.top
+                || clientY > mapRect.bottom
+            ) {
+                closeMobileMapUi();
+                return;
+            }
+            const localPoint = {
+                x: clientX - frameRect.left,
+                y: clientY - frameRect.top
+            };
+            const rawMarkers = Array.isArray(activeGroup.markers) ? activeGroup.markers : [];
+            if (!rawMarkers.length) {
+                closeMobileMapUi();
+                return;
+            }
+            const nearestMarker = rawMarkers
+                .map((marker) => {
+                    const point = getMarkerViewportPoint(marker);
+                    if (!point) return null;
+                    return {
+                        marker,
+                        point,
+                        distance: Math.hypot(point.x - localPoint.x, point.y - localPoint.y)
+                    };
+                })
+                .filter(Boolean)
+                .sort((left, right) => left.distance - right.distance)[0];
+            if (!nearestMarker || nearestMarker.distance > 22) {
+                closeMobileMapUi();
+                return;
+            }
+            const selectedLabel = splitPipelineMarkerLabel(nearestMarker.marker.label).normalized || 'Mapped location';
+            mobileMapLayer.classList.add('is-active');
+            setMobileSelectedMarkers(activeGroup.targetClass, [nearestMarker.marker.markerId]);
+            updateMobileMapOutput([selectedLabel]);
+            positionMobileMapSquare(nearestMarker.point, 42, false);
+        };
+        const handleMobileTouchStart = (event) => {
+            if (!isMobileClusterViewport() || !frame) return;
+            const touches = Array.from(event.touches || []);
+            if (!touches.length) return;
+            if (touches.length === 1) {
+                const touch = touches[0];
+                mobileGestureState = {
+                    mode: 'tap',
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startTransform: { ...mobileViewportTransform },
+                    moved: false
+                };
+                return;
+            }
+            if (touches.length >= 2) {
+                const first = touches[0];
+                const second = touches[1];
+                const dx = second.clientX - first.clientX;
+                const dy = second.clientY - first.clientY;
+                const centerX = (first.clientX + second.clientX) / 2;
+                const centerY = (first.clientY + second.clientY) / 2;
+                mobileGestureState = {
+                    mode: 'pinch',
+                    startDistance: Math.hypot(dx, dy),
+                    startScale: mobileViewportTransform.scale,
+                    startTransform: { ...mobileViewportTransform },
+                    centerX,
+                    centerY
+                };
+                event.preventDefault();
+            }
+        };
+        const handleMobileTouchMove = (event) => {
+            if (!isMobileClusterViewport() || !frame || !mobileGestureState) return;
+            const touches = Array.from(event.touches || []);
+            if (!touches.length) return;
+            if (touches.length >= 2) {
+                const first = touches[0];
+                const second = touches[1];
+                const dx = second.clientX - first.clientX;
+                const dy = second.clientY - first.clientY;
+                const distance = Math.hypot(dx, dy);
+                const frameRect = frame.getBoundingClientRect();
+                const centerX = ((first.clientX + second.clientX) / 2) - frameRect.left;
+                const centerY = ((first.clientY + second.clientY) / 2) - frameRect.top;
+                const startScale = mobileGestureState.startScale || 1;
+                const nextScale = Math.max(1, Math.min(4, startScale * (distance / Math.max(1, mobileGestureState.startDistance || 1))));
+                const scaleRatio = nextScale / startScale;
+                const nextTransform = clampMobileViewportTransform({
+                    scale: nextScale,
+                    x: centerX - ((centerX - mobileGestureState.startTransform.x) * scaleRatio),
+                    y: centerY - ((centerY - mobileGestureState.startTransform.y) * scaleRatio)
+                });
+                mobileViewportTransform = nextTransform;
+                applyMobileViewportTransform();
+                mobileGestureState.moved = true;
+                event.preventDefault();
+                return;
+            }
+            if (touches.length === 1) {
+                const touch = touches[0];
+                const dx = touch.clientX - mobileGestureState.startX;
+                const dy = touch.clientY - mobileGestureState.startY;
+                if (mobileViewportTransform.scale > 1.01) {
+                    mobileViewportTransform = clampMobileViewportTransform({
+                        scale: mobileViewportTransform.scale,
+                        x: mobileGestureState.startTransform.x + dx,
+                        y: mobileGestureState.startTransform.y + dy
+                    });
+                    applyMobileViewportTransform();
+                    if (Math.hypot(dx, dy) > 6) mobileGestureState.moved = true;
+                    event.preventDefault();
+                    return;
+                }
+                if (Math.hypot(dx, dy) > 8) {
+                    mobileGestureState.moved = true;
+                }
+            }
+        };
+        const handleMobileTouchEnd = (event) => {
+            if (!isMobileClusterViewport() || !mobileGestureState) return;
+            const remainingTouches = Array.from(event.touches || []);
+            if (remainingTouches.length >= 2) return;
+            if (remainingTouches.length === 1) {
+                const touch = remainingTouches[0];
+                mobileGestureState = {
+                    mode: 'tap',
+                    startX: touch.clientX,
+                    startY: touch.clientY,
+                    startTransform: { ...mobileViewportTransform },
+                    moved: false
+                };
+                return;
+            }
+            const changedTouch = Array.from(event.changedTouches || [])[0];
+            if (
+                changedTouch
+                && mobileGestureState.mode === 'tap'
+                && !mobileGestureState.moved
+            ) {
+                handleMobileMarkerTapAtPoint(changedTouch.clientX, changedTouch.clientY);
+            }
+            mobileGestureState = null;
+        };
+        const getActiveDesktopMarkerEntries = () => {
+            const entries = [];
+            toggleGroups.forEach((toggleGroup) => {
+                const overlayClass = `${toggleGroup.targetClass}--desktop`;
+                const overlay = map.querySelector(`.map-overlay.${overlayClass}`);
+                if (!overlay || !overlay.classList.contains('is-active')) return;
+                (toggleGroup.markers || []).forEach((marker) => {
+                    const point = getMarkerViewportPoint(marker);
+                    if (!point) return;
+                    entries.push({
+                        toggleGroup,
+                        overlayClass,
+                        marker,
+                        point
+                    });
+                });
+            });
+            return entries;
+        };
+        const renderDesktopSelectionResults = (selectionRect, selectedEntries) => {
+            if (!desktopSelectionLayer || !desktopSelectionCard || !desktopSelectionCardInner || !frame) return;
+            desktopSelectionCardInner.textContent = '';
+            const title = document.createElement('p');
+            title.className = 'pipeline-map-desktop-selection-title';
+            title.textContent = selectedEntries.length ? `${selectedEntries.length} locations selected` : 'No locations selected';
+            desktopSelectionCardInner.appendChild(title);
+            if (selectedEntries.length) {
+                const groupedSelections = new Map();
+                selectedEntries.forEach((entry) => {
+                    const groupKey = entry.toggleGroup.targetClass;
+                    if (!groupedSelections.has(groupKey)) {
+                        groupedSelections.set(groupKey, {
+                            color: entry.marker.color || 'var(--accent)',
+                            phaseNumber: getPipelinePhaseNumber(entry.toggleGroup.buttonLabel) || '--',
+                            items: []
+                        });
+                    }
+                    groupedSelections.get(groupKey).items.push(entry);
+                });
+                groupedSelections.forEach((groupData) => {
+                    const groupBlock = document.createElement('div');
+                    groupBlock.className = 'pipeline-map-desktop-selection-group';
+                    groupBlock.style.setProperty('--pipeline-selection-group-color', groupData.color);
+                    const groupTitle = document.createElement('p');
+                    groupTitle.className = 'pipeline-map-desktop-selection-group-title';
+                    groupTitle.textContent = `Phase ${groupData.phaseNumber}`;
+                    groupBlock.appendChild(groupTitle);
+                    const list = document.createElement('div');
+                    list.className = 'pipeline-map-desktop-selection-list';
+                    groupData.items
+                        .slice()
+                        .sort((left, right) => {
+                            const leftLabel = splitPipelineMarkerLabel(left.marker.label).normalized;
+                            const rightLabel = splitPipelineMarkerLabel(right.marker.label).normalized;
+                            return leftLabel.localeCompare(rightLabel);
+                        })
+                        .forEach((entry) => {
+                            const item = document.createElement('p');
+                            item.className = 'pipeline-map-desktop-selection-item';
+                            item.textContent = splitPipelineMarkerLabel(entry.marker.label).normalized || 'Mapped location';
+                            item.setAttribute('data-hover-overlay-class', entry.overlayClass);
+                            item.setAttribute('data-hover-marker-id', entry.marker.markerId);
+                            list.appendChild(item);
+                        });
+                    groupBlock.appendChild(list);
+                    desktopSelectionCardInner.appendChild(groupBlock);
+                });
+            }
+            const frameRect = frame.getBoundingClientRect();
+            const cardRect = desktopSelectionCard.getBoundingClientRect();
+            const margin = 12;
+            let left = selectionRect.right + 12;
+            let top = selectionRect.top;
+            if (left + cardRect.width > frameRect.width - margin) {
+                left = Math.max(margin, selectionRect.left - cardRect.width - 12);
+            }
+            if (left < margin) left = margin;
+            if (top + cardRect.height > frameRect.height - margin) {
+                top = Math.max(margin, frameRect.height - cardRect.height - margin);
+            }
+            desktopSelectionCard.style.left = `${left}px`;
+            desktopSelectionCard.style.top = `${Math.max(margin, top)}px`;
+        };
+        const finalizeDesktopSelection = () => {
+            if (!desktopSelectionState || !desktopSelectionLayer) return;
+            if (!desktopSelectionState.hasDragged) {
+                closeDesktopSelectionUi();
+                return;
+            }
+            const { left, top, right, bottom } = desktopSelectionState.rect;
+            const width = right - left;
+            const height = bottom - top;
+            if (width < 8 || height < 8) {
+                closeDesktopSelectionUi();
+                return;
+            }
+            const selectedEntries = getActiveDesktopMarkerEntries().filter((entry) => (
+                entry.point.x >= left
+                && entry.point.x <= right
+                && entry.point.y >= top
+                && entry.point.y <= bottom
+            ));
+            setDesktopSelectedMarkers(selectedEntries);
+            desktopSelectionLayer.classList.add('is-active');
+            desktopSelectionLayer.classList.remove('is-dragging');
+            renderDesktopSelectionResults(desktopSelectionState.rect, selectedEntries);
+            desktopSelectionState = null;
+            desktopSelectionPointerId = null;
+        };
+        const updateDesktopSelectionBox = (nextX, nextY) => {
+            if (!desktopSelectionState || !desktopSelectionBox) return;
+            const deltaX = nextX - desktopSelectionState.originX;
+            const deltaY = nextY - desktopSelectionState.originY;
+            if (!desktopSelectionState.hasDragged && Math.hypot(deltaX, deltaY) >= 5) {
+                desktopSelectionState.hasDragged = true;
+                if (desktopSelectionLayer) {
+                    desktopSelectionLayer.classList.add('is-active', 'is-dragging');
+                }
+            }
+            if (!desktopSelectionState.hasDragged) return;
+            const left = Math.min(desktopSelectionState.originX, nextX);
+            const top = Math.min(desktopSelectionState.originY, nextY);
+            const right = Math.max(desktopSelectionState.originX, nextX);
+            const bottom = Math.max(desktopSelectionState.originY, nextY);
+            desktopSelectionState.rect = { left, top, right, bottom };
+            desktopSelectionBox.style.left = `${left}px`;
+            desktopSelectionBox.style.top = `${top}px`;
+            desktopSelectionBox.style.width = `${right - left}px`;
+            desktopSelectionBox.style.height = `${bottom - top}px`;
+        };
+        const beginDesktopSelection = (event) => {
+            if (!isDesktopViewport() || !frame || event.button !== 0) return;
+            const target = event.target instanceof Element ? event.target : null;
+            if (target && (target.closest('.map-category-popup') || target.closest('.pipeline-map-desktop-selection-card'))) {
+                return;
+            }
+            ensureDesktopSelectionLayer();
+            if (!desktopSelectionLayer || !desktopSelectionBox) return;
+            const frameRect = frame.getBoundingClientRect();
+            const localX = event.clientX - frameRect.left;
+            const localY = event.clientY - frameRect.top;
+            closeDesktopSelectionUi();
+            desktopSelectionPointerId = event.pointerId;
+            desktopSelectionState = {
+                originX: localX,
+                originY: localY,
+                hasDragged: false,
+                rect: {
+                    left: localX,
+                    top: localY,
+                    right: localX,
+                    bottom: localY
+                }
+            };
+            updateDesktopSelectionBox(localX, localY);
+            frame.setPointerCapture(event.pointerId);
+        };
+        const moveDesktopSelection = (event) => {
+            if (!desktopSelectionState || !frame || desktopSelectionPointerId !== event.pointerId) return;
+            const frameRect = frame.getBoundingClientRect();
+            const localX = Math.max(0, Math.min(frameRect.width, event.clientX - frameRect.left));
+            const localY = Math.max(0, Math.min(frameRect.height, event.clientY - frameRect.top));
+            updateDesktopSelectionBox(localX, localY);
+        };
+        const endDesktopSelection = (event) => {
+            if (!desktopSelectionState || desktopSelectionPointerId !== event.pointerId) return;
+            if (frame && frame.hasPointerCapture(event.pointerId)) {
+                frame.releasePointerCapture(event.pointerId);
+            }
+            finalizeDesktopSelection();
+        };
         toggleGroups.forEach(toggleGroup => {
+            toggleGroup.markers = (toggleGroup.markers || []).map((marker, markerIndex) => ({
+                ...marker,
+                markerId: `${toggleGroup.targetClass}-${markerIndex}`
+            }));
             const representativeColor = (toggleGroup.markers[0] && toggleGroup.markers[0].color) || 'var(--map-accent)';
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -4982,7 +5623,7 @@ function initPipelineMap() {
             desktopGroup.setAttribute('class', `map-overlay ${toggleGroup.targetClass}--desktop`);
 
             toggleGroup.markers.forEach(marker => {
-                appendOverlayMarker(group, marker, 2);
+                appendOverlayMarker(group, marker, 1.45);
                 appendOverlayMarker(desktopGroup, marker, 1);
             });
             overlayFragment.appendChild(group);
@@ -5105,7 +5746,7 @@ function initPipelineMap() {
                 numSpan.textContent = phaseNumber;
                 const wordSpan = document.createElement('span');
                 wordSpan.className = 'pipeline-map-tab-word';
-                wordSpan.textContent = 'PHASE TAB';
+                wordSpan.textContent = 'PHASE';
                 buttonNode.appendChild(numSpan);
                 buttonNode.appendChild(wordSpan);
                 const rawSuffix = (phaseMatch[2] || '').trim();
@@ -5126,16 +5767,6 @@ function initPipelineMap() {
                     pane.classList.remove('is-locations-open');
                 });
             };
-            let selectedTabKey = '__map__';
-            const isDesktopViewport = () => !window.matchMedia('(max-width: 768px)').matches;
-            const isPhaseMapActiveForViewport = (tabKey) => {
-                if (!tabKey || tabKey === '__map__') return false;
-                const targetClass = isDesktopViewport() ? `${tabKey}--desktop` : tabKey;
-                const overlay = Array.from(map.querySelectorAll('.map-overlay'))
-                    .find(n => n.classList.contains(targetClass));
-                return Boolean(overlay && overlay.classList.contains('is-active'));
-            };
-
             // updateContentPane: show only the pane for `key` in right column
             const updateContentPane = (key) => {
                 selectedTabKey = key;
@@ -5145,6 +5776,7 @@ function initPipelineMap() {
                 });
                 mapPaneHelper.classList.toggle('is-hidden', key !== '__map__');
                 closeAllLocationOverlays();
+                closeMobileMapUi();
                 // Highlight which tab "owns" the right column (separate from map-active state)
                 [mapTab, ...allPhaseTabs].forEach(t => {
                     const tabKey = t.getAttribute('data-tab-key');
@@ -5193,6 +5825,7 @@ function initPipelineMap() {
                 phaseTab.setAttribute('data-map-target', toggleGroup.targetClass);
                 phaseTab.style.setProperty('--map-tab-color', representativeColor);
                 const labelParts = buildCompactPhaseLabel(phaseTab, toggleGroup.buttonLabel);
+                const phaseNarrative = getPipelinePhaseNarrative(toggleGroup.buttonLabel);
                 const fullLabel = labelParts.fullLabel;
                 phaseTab.setAttribute('aria-label', fullLabel);
                 tabCol.appendChild(phaseTab);
@@ -5208,49 +5841,18 @@ function initPipelineMap() {
                 const titleEl = document.createElement('p');
                 titleEl.className = 'pipeline-map-tab-pane-title';
                 titleEl.style.setProperty('--map-tab-color', representativeColor);
-                titleEl.textContent = labelParts.paneTitle;
+                titleEl.textContent = phaseNarrative ? phaseNarrative.paneTitle : labelParts.paneTitle;
                 phasePane.appendChild(titleEl);
 
-                if (descriptionText && descriptionText !== locationSummary) {
+                const paneLeadText = phaseNarrative
+                    ? phaseNarrative.lead
+                    : (descriptionText && descriptionText !== locationSummary ? descriptionText : '');
+                if (paneLeadText) {
                     const leadEl = document.createElement('p');
                     leadEl.className = 'pipeline-map-tab-pane-lead';
-                    leadEl.textContent = descriptionText;
+                    leadEl.textContent = paneLeadText;
                     phasePane.appendChild(leadEl);
                 }
-                const locationsInline = document.createElement('p');
-                locationsInline.className = 'pipeline-map-tab-pane-locations-inline';
-                locationsInline.textContent = `Locations: ${locationSummary.replace(/\s+\|\s+/g, '; ')}`;
-                phasePane.appendChild(locationsInline);
-                const locationsToggle = document.createElement('button');
-                locationsToggle.type = 'button';
-                locationsToggle.className = 'pipeline-map-tab-locations-toggle';
-                locationsToggle.textContent = 'View Locations';
-                phasePane.appendChild(locationsToggle);
-
-                const locationsOverlay = document.createElement('div');
-                locationsOverlay.className = 'pipeline-map-tab-locations-overlay';
-                const locationsCard = document.createElement('div');
-                locationsCard.className = 'pipeline-map-tab-locations-card';
-                const locationsText = document.createElement('p');
-                locationsText.className = 'pipeline-map-tab-locations-text';
-                locationsText.textContent = locationSummary.replace(/\s+\|\s+/g, '\n');
-                locationsCard.appendChild(locationsText);
-                locationsOverlay.appendChild(locationsCard);
-                locationsOverlay.addEventListener('click', (event) => {
-                    if (event.target !== locationsOverlay) return;
-                    closeAllLocationOverlays();
-                });
-                phasePane.appendChild(locationsOverlay);
-                locationsToggle.addEventListener('click', () => {
-                    if (isDesktopViewport()) {
-                        phasePane.classList.add('is-locations-inline-visible');
-                        return;
-                    }
-                    const nextOpen = !phasePane.classList.contains('is-locations-open');
-                    closeAllLocationOverlays();
-                    phasePane.classList.toggle('is-locations-open', nextOpen);
-                });
-
                 contentCol.appendChild(phasePane);
                 allPhasePanes.push(phasePane);
 
@@ -5345,8 +5947,43 @@ function initPipelineMap() {
 
             syncMobileTabPanelSizing();
             window.addEventListener('resize', syncMobileTabPanelSizing);
-            window.addEventListener('resize', () => updateContentPane(selectedTabKey));
+            window.addEventListener('resize', () => {
+                updateContentPane(selectedTabKey);
+                mobileViewportTransform = clampMobileViewportTransform(mobileViewportTransform);
+                applyMobileViewportTransform();
+            });
             window.requestAnimationFrame(syncMobileTabPanelSizing);
+            ensureMobileMapLayer();
+            ensureDesktopSelectionLayer();
+            if (desktopSelectionCard && !desktopSelectionCard.dataset.boundHover) {
+                desktopSelectionCard.dataset.boundHover = 'true';
+                desktopSelectionCard.addEventListener('pointerover', (event) => {
+                    const target = event.target instanceof Element
+                        ? event.target.closest('.pipeline-map-desktop-selection-item[data-hover-overlay-class][data-hover-marker-id]')
+                        : null;
+                    clearDesktopMarkerHover();
+                    if (!target) return;
+                    const overlayClass = target.getAttribute('data-hover-overlay-class');
+                    const markerId = target.getAttribute('data-hover-marker-id');
+                    if (!overlayClass || !markerId) return;
+                    map.querySelectorAll(`.map-overlay.${overlayClass} .map-marker[data-marker-id="${markerId}"]`).forEach((markerNode) => {
+                        markerNode.classList.add('is-desktop-hovered');
+                    });
+                });
+                desktopSelectionCard.addEventListener('pointerleave', () => {
+                    clearDesktopMarkerHover();
+                });
+            }
+            if (frame) {
+                frame.addEventListener('touchstart', handleMobileTouchStart, { passive: false });
+                frame.addEventListener('touchmove', handleMobileTouchMove, { passive: false });
+                frame.addEventListener('touchend', handleMobileTouchEnd, { passive: false });
+                frame.addEventListener('touchcancel', () => { mobileGestureState = null; });
+                frame.addEventListener('pointerdown', beginDesktopSelection);
+                frame.addEventListener('pointermove', moveDesktopSelection);
+                frame.addEventListener('pointerup', endDesktopSelection);
+                frame.addEventListener('pointercancel', () => closeDesktopSelectionUi());
+            }
             const mainContent = document.getElementById('mainContent');
             if (mainContent) {
                 mainContent.addEventListener('pointerdown', (event) => {
@@ -5355,6 +5992,12 @@ function initPipelineMap() {
                     if (target.closest('.pipeline-map-tab-locations-card')) return;
                     if (target.closest('.pipeline-map-tab-locations-toggle')) return;
                     closeAllLocationOverlays();
+                    if (!target.closest('.pipeline-map-mobile-layer') && !target.closest('.map-marker')) {
+                        closeMobileMapUi();
+                    }
+                    if (!target.closest('.pipeline-map-desktop-selection-card') && !target.closest('.pipeline-map-frame')) {
+                        closeDesktopSelectionUi();
+                    }
                 });
             }
         }
@@ -6124,7 +6767,7 @@ function initPipelineMap() {
                 return;
             }
             const hasActive = hasActiveOverlayForViewport();
-            helper.textContent = 'Select a category to display map markers and details.';
+            helper.textContent = 'Activate a phase and tap to display map locations.';
             helper.classList.toggle('is-empty', !hasActive);
         };
         let deferredOverrideRevealDone = false;
@@ -6215,6 +6858,10 @@ function initPipelineMap() {
             }
         };
         const setCategoryState = (targetClass, nextState, options = {}) => {
+            if (!nextState || targetClass !== selectedTabKey) {
+                closeMobileMapUi();
+            }
+            closeDesktopSelectionUi();
             overlays.forEach(overlay => {
                 if (overlay.classList.contains(targetClass)) {
                     overlay.classList.toggle('is-active', nextState);
@@ -6246,6 +6893,8 @@ function initPipelineMap() {
             updateHelperCopy();
         };
         const setDesktopCategoryState = (targetClass, nextState, options = {}) => {
+            closeMobileMapUi();
+            closeDesktopSelectionUi();
             const desktopTargetClass = `${targetClass}--desktop`;
             overlays.forEach(overlay => {
                 if (overlay.classList.contains(desktopTargetClass)) {
